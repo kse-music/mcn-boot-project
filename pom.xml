@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>cn.hiboot.mcn</groupId>
+    <artifactId>mcn-boot-project</artifactId>
+    <version>${mcn.version}</version>
+    <modules>
+        <module>mcn-boot-parent</module>
+        <module>mcn-boot-dependencies</module>
+        <module>mcn-boot-core</module>
+        <module>mcn-boot-autoconfigure</module>
+        <module>mcn-spring-boot-starter</module>
+        <module>crud-maven-plugin</module>
+        <module>jersey-swagger2-ui</module>
+        <module>mvc-swagger2</module>
+    </modules>
+    <packaging>pom</packaging>
+
+    <properties>
+        <mcn.version>2.2.6</mcn.version>
+    </properties>
+
+
+</project>

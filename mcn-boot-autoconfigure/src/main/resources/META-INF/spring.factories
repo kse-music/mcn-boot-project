@@ -1,0 +1,18 @@
+org.springframework.context.ApplicationContextInitializer=\
+  cn.hiboot.mcn.autoconfigure.context.McnContextInitializer
+
+org.springframework.context.ApplicationListener=\
+  cn.hiboot.mcn.autoconfigure.context.McnApplicationListener
+
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  cn.hiboot.mcn.autoconfigure.db.SingleDatasourceAutoConfiguration,\
+  cn.hiboot.mcn.autoconfigure.db.MultipleMybatisAutoConfiguration,\
+  cn.hiboot.mcn.autoconfigure.web.jersey.JerseySwaggerAutoConfiguration,\
+  cn.hiboot.mcn.autoconfigure.web.filter.FilterAutoConfiguration,\
+  cn.hiboot.mcn.autoconfigure.web.mvc.SpringMvcAutoConfiguration,\
+  cn.hiboot.mcn.autoconfigure.jwt.JwtTokenAutoConfiguration,\
+  cn.hiboot.mcn.autoconfigure.jwt.WebSecurityAutoConfiguration,\
+  cn.hiboot.mcn.autoconfigure.converter.VOConverterAutoConfiguration
+
+org.springframework.boot.env.EnvironmentPostProcessor=\
+  cn.hiboot.mcn.autoconfigure.context.McnPropertiesPostProcessor
