@@ -62,6 +62,7 @@
                         <manifestEntries>
                             <!--suppress UnresolvedMavenProperty -->
                             <Build-Timestamp>${timestamp}</Build-Timestamp>
+                            <Implementation-Version>${mcn.version}</Implementation-Version>
                         </manifestEntries>
                     </archive>
                 </configuration>
