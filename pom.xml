@@ -23,5 +23,14 @@
         <mcn.version>2.2.6</mcn.version>
     </properties>
 
-
+    <distributionManagement>
+        <repository>
+            <id>rdc-releases</id>
+            <url>https://repo.rdc.aliyun.com/repository/129514-release-UOoufs/</url>
+        </repository>
+        <snapshotRepository>
+            <id>rdc-snapshots</id>
+            <url>https://repo.rdc.aliyun.com/repository/129514-snapshot-emTtGy/</url>
+        </snapshotRepository>
+    </distributionManagement>
 </project>
