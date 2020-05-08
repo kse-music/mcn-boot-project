@@ -20,7 +20,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <mcn.version>2.2.6</mcn.version>
+        <mcn.version>2.2.7</mcn.version>
     </properties>
 
     <distributionManagement>
