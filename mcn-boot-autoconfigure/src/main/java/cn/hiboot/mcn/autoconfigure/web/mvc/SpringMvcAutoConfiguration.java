@@ -1,6 +1,8 @@
 package cn.hiboot.mcn.autoconfigure.web.mvc;
 
 import cn.hiboot.mcn.swagger.MvcSwagger2;
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
@@ -12,6 +14,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.servlet.DispatcherServlet;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
@@ -21,6 +24,9 @@ import springfox.documentation.service.Contact;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * spring mvc swagger2 config
@@ -61,10 +67,18 @@ public class SpringMvcAutoConfiguration {
 
         @Bean
         public Docket createRestApi() {
-            Docket docket =  new Docket(DocumentationType.SWAGGER_2)
+            List<String> packages = swagger2Properties.getPackages();
+
+            if(packages == null){
+                packages = new ArrayList<>();
+            }
+
+            packages.add(pkg + ".rest");
+
+            Docket docket = new Docket(DocumentationType.SWAGGER_2)
                     .apiInfo(apiInfo())
                     .select()
-                    .apis(RequestHandlerSelectors.basePackage(pkg + ".rest"))
+                    .apis(Predicates.or(packages.stream().map(RequestHandlerSelectors::basePackage).toArray(Predicate[]::new)))
                     .paths(PathSelectors.any())
                     .build().enable(swagger2Properties.isEnable());
             this.customizers.orderedStream().forEach((customizer) -> {
@@ -82,7 +96,6 @@ public class SpringMvcAutoConfiguration {
                     .version(swagger2Properties.getVersion())
                     .build();
         }
-
 
 //        @Configuration
 //        public static class Swagger2Mapping extends WebMvcConfigurationSupport {
