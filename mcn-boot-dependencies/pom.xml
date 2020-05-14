@@ -24,7 +24,7 @@
         <jwt.version>3.1.0</jwt.version>
         <commons-io.version>2.6</commons-io.version>
         <fastjson.version>1.2.68</fastjson.version>
-        <boot-admin.version>2.2.1</boot-admin.version>
+        <boot-admin.version>2.2.3</boot-admin.version>
         <jsoup.version>1.13.1</jsoup.version>
         <swagger2.version>2.7.0</swagger2.version>
         <dozer.version>5.5.1</dozer.version>
