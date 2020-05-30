@@ -7,7 +7,6 @@ import cn.hiboot.mcn.core.model.result.RestResp;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
-import org.springframework.validation.ObjectError;
 import org.springframework.web.HttpMediaTypeException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -19,11 +18,6 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 import javax.servlet.ServletException;
 import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServletRequest;
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
-import javax.validation.ValidationException;
-import java.util.Arrays;
-import java.util.List;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
@@ -89,72 +83,6 @@ public class GlobalExceptionHandler extends AbstractExceptionHandler {
         dealStackTraceElement(exception);
         logger.error("ErrorMsg = {}",errMsg,exception);
         return buildErrorMessage(errorCode,errMsg);
-    }
-
-    @ExceptionHandler(ValidationException.class)
-    public RestResp handleValidationException(HttpServletRequest request, ValidationException exception){
-        dealStackTraceElement(exception);
-        RestResp<List<ValidationErrorBean>> objectRestResp = buildErrorMessage(PARAM_PARSE_ERROR);
-        if (exception instanceof ConstraintViolationException) {
-            ConstraintViolationException cve = (ConstraintViolationException) exception;
-            objectRestResp.setData(cve.getConstraintViolations().stream().map(violation1 ->
-                new ValidationErrorBean(violation1.getMessage(), getViolationPath(violation1), getViolationInvalidValue(violation1.getInvalidValue()))
-            ).collect(Collectors.toList()));
-        }
-        logger.error("ErrorMsg = {}",objectRestResp.getErrorInfo(),exception);
-        return objectRestResp;
-    }
-
-    private String getViolationInvalidValue(Object invalidValue) {
-        if (invalidValue == null) {
-            return null;
-        } else {
-            if (invalidValue.getClass().isArray()) {
-                if (invalidValue instanceof Object[]) {
-                    return Arrays.toString((Object[])((Object[])invalidValue));
-                }
-
-                if (invalidValue instanceof boolean[]) {
-                    return Arrays.toString((boolean[])((boolean[])invalidValue));
-                }
-
-                if (invalidValue instanceof byte[]) {
-                    return Arrays.toString((byte[])((byte[])invalidValue));
-                }
-
-                if (invalidValue instanceof char[]) {
-                    return Arrays.toString((char[])((char[])invalidValue));
-                }
-
-                if (invalidValue instanceof double[]) {
-                    return Arrays.toString((double[])((double[])invalidValue));
-                }
-
-                if (invalidValue instanceof float[]) {
-                    return Arrays.toString((float[])((float[])invalidValue));
-                }
-
-                if (invalidValue instanceof int[]) {
-                    return Arrays.toString((int[])((int[])invalidValue));
-                }
-
-                if (invalidValue instanceof long[]) {
-                    return Arrays.toString((long[])((long[])invalidValue));
-                }
-
-                if (invalidValue instanceof short[]) {
-                    return Arrays.toString((short[])((short[])invalidValue));
-                }
-            }
-
-            return invalidValue.toString();
-        }
-    }
-
-    private String getViolationPath(ConstraintViolation violation) {
-        String rootBeanName = violation.getRootBean().getClass().getSimpleName();
-        String propertyPath = violation.getPropertyPath().toString();
-        return rootBeanName + (!"".equals(propertyPath) ? '.' + propertyPath : "");
     }
 
 }

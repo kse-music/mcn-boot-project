@@ -1,5 +1,8 @@
 package cn.hiboot.mcn.autoconfigure.web.mvc;
 
+import cn.hiboot.mcn.autoconfigure.web.exception.handler.AbstractExceptionHandler;
+import cn.hiboot.mcn.core.model.ValidationErrorBean;
+import cn.hiboot.mcn.core.model.result.RestResp;
 import cn.hiboot.mcn.swagger.MvcSwagger2;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
@@ -15,6 +18,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.DispatcherServlet;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
@@ -25,8 +30,14 @@ import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
+import javax.validation.ValidationException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * spring mvc swagger2 config
@@ -44,6 +55,79 @@ public class SpringMvcAutoConfiguration {
     @Configuration(proxyBeanMethods = false)
     @Import({GlobalExceptionHandler.class,ErrorPageController.class})
     static class SpringMvcExceptionHandler{
+
+    }
+
+    @Configuration(proxyBeanMethods = false)
+    @ConditionalOnClass(ValidationException.class)
+    @RestControllerAdvice
+    static class ValidationExceptionHandler extends AbstractExceptionHandler {
+
+        @ExceptionHandler(ValidationException.class)
+        public RestResp handleValidationException(ValidationException exception){
+            dealStackTraceElement(exception);
+            RestResp<List<ValidationErrorBean>> objectRestResp = buildErrorMessage(PARAM_PARSE_ERROR);
+            if (exception instanceof ConstraintViolationException) {
+                ConstraintViolationException cve = (ConstraintViolationException) exception;
+                objectRestResp.setData(cve.getConstraintViolations().stream().map(violation1 ->
+                        new ValidationErrorBean(violation1.getMessage(), getViolationPath(violation1), getViolationInvalidValue(violation1.getInvalidValue()))
+                ).collect(Collectors.toList()));
+            }
+            logger.error("ErrorMsg = {}",objectRestResp.getErrorInfo(),exception);
+            return objectRestResp;
+        }
+
+        private String getViolationInvalidValue(Object invalidValue) {
+            if (invalidValue == null) {
+                return null;
+            } else {
+                if (invalidValue.getClass().isArray()) {
+                    if (invalidValue instanceof Object[]) {
+                        return Arrays.toString((Object[])((Object[])invalidValue));
+                    }
+
+                    if (invalidValue instanceof boolean[]) {
+                        return Arrays.toString((boolean[])((boolean[])invalidValue));
+                    }
+
+                    if (invalidValue instanceof byte[]) {
+                        return Arrays.toString((byte[])((byte[])invalidValue));
+                    }
+
+                    if (invalidValue instanceof char[]) {
+                        return Arrays.toString((char[])((char[])invalidValue));
+                    }
+
+                    if (invalidValue instanceof double[]) {
+                        return Arrays.toString((double[])((double[])invalidValue));
+                    }
+
+                    if (invalidValue instanceof float[]) {
+                        return Arrays.toString((float[])((float[])invalidValue));
+                    }
+
+                    if (invalidValue instanceof int[]) {
+                        return Arrays.toString((int[])((int[])invalidValue));
+                    }
+
+                    if (invalidValue instanceof long[]) {
+                        return Arrays.toString((long[])((long[])invalidValue));
+                    }
+
+                    if (invalidValue instanceof short[]) {
+                        return Arrays.toString((short[])((short[])invalidValue));
+                    }
+                }
+
+                return invalidValue.toString();
+            }
+        }
+
+        private String getViolationPath(ConstraintViolation violation) {
+            String rootBeanName = violation.getRootBean().getClass().getSimpleName();
+            String propertyPath = violation.getPropertyPath().toString();
+            return rootBeanName + (!"".equals(propertyPath) ? '.' + propertyPath : "");
+        }
 
     }
 
