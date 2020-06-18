@@ -26,7 +26,8 @@
         <fastjson.version>1.2.68</fastjson.version>
         <boot-admin.version>2.2.3</boot-admin.version>
         <jsoup.version>1.13.1</jsoup.version>
-        <swagger2.version>2.7.0</swagger2.version>
+        <swagger2.version>2.9.2</swagger2.version>
+        <swagger-bootstrap-ui.version>1.9.6</swagger-bootstrap-ui.version>
         <dozer.version>5.5.1</dozer.version>
         <hutool.version>5.1.2</hutool.version>
         <orika.version>1.5.4</orika.version>
@@ -161,6 +162,11 @@
                 <groupId>io.springfox</groupId>
                 <artifactId>springfox-swagger-ui</artifactId>
                 <version>${swagger2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.xiaoymin</groupId>
+                <artifactId>swagger-bootstrap-ui</artifactId>
+                <version>${swagger-bootstrap-ui.version}</version>
             </dependency>
 
             <dependency>
