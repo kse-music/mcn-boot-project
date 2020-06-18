@@ -17,7 +17,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.DispatcherServlet;
@@ -30,7 +29,6 @@ import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.ValidationException;
@@ -181,19 +179,6 @@ public class SpringMvcAutoConfiguration {
                     .build();
         }
 
-//        @Configuration
-//        public static class Swagger2Mapping extends WebMvcConfigurationSupport {
-//            @Override
-//            protected void addResourceHandlers(ResourceHandlerRegistry registry) {
-//                registry.addResourceHandler("/swagger-ui.html")
-//                        .addResourceLocations("classpath:/META-INF/resources/","/static", "/public");
-//
-//                registry.addResourceHandler("/webjars/**")
-//                        .addResourceLocations("classpath:/META-INF/resources/webjars/");
-//
-//                super.addResourceHandlers(registry);
-//            }
-//        }
     }
 
 }

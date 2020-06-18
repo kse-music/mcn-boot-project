@@ -170,7 +170,7 @@ public class JerseySwaggerAutoConfiguration extends ResourceConfig {
             beanConfig.setScan();
             if(ClassUtils.isPresent("org.glassfish.jersey.server.mvc.freemarker.FreemarkerMvcFeature",null)){
                 config.property(FreemarkerMvcFeature.TEMPLATE_BASE_PATH, "META-INF/resources/Swagger")
-                        .property(FreemarkerMvcFeature.CACHE_TEMPLATES, new Boolean(false))
+                        .property(FreemarkerMvcFeature.CACHE_TEMPLATES, Boolean.FALSE)
                         .registerClasses(FreemarkerMvcFeature.class,SwaggerView.class);
             }
         }
