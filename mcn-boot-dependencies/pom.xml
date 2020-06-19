@@ -23,11 +23,11 @@
         <guava.version>29.0-jre</guava.version>
         <jwt.version>3.1.0</jwt.version>
         <commons-io.version>2.7</commons-io.version>
-        <fastjson.version>1.2.70</fastjson.version>
-        <boot-admin.version>2.2.1</boot-admin.version>
+        <fastjson.version>1.2.71</fastjson.version>
+        <boot-admin.version>2.2.3</boot-admin.version>
         <jsoup.version>1.13.1</jsoup.version>
         <springfox-swagger.version>2.9.2</springfox-swagger.version>
-        <swagger.version>1.5.21</swagger.version>
+        <swagger.version>1.6.1</swagger.version>
         <swagger-bootstrap-ui.version>1.9.6</swagger-bootstrap-ui.version>
         <dozer.version>5.5.1</dozer.version>
         <hutool.version>5.1.2</hutool.version>
