@@ -23,7 +23,7 @@
         <guava.version>29.0-jre</guava.version>
         <jwt.version>3.1.0</jwt.version>
         <commons-io.version>2.6</commons-io.version>
-        <fastjson.version>1.2.68</fastjson.version>
+        <fastjson.version>1.2.71</fastjson.version>
         <boot-admin.version>2.2.3</boot-admin.version>
         <jsoup.version>1.13.1</jsoup.version>
         <springfox-swagger.version>2.9.2</springfox-swagger.version>
