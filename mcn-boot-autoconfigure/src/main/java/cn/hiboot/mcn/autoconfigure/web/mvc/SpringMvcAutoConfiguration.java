@@ -81,7 +81,7 @@ public class SpringMvcAutoConfiguration {
                 packages = new ArrayList<>();
             }
 
-            packages.add(pkg + ".rest");
+            packages.add(pkg);
 
             Docket docket = new Docket(DocumentationType.SWAGGER_2)
                     .apiInfo(apiInfo())
