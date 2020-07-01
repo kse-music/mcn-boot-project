@@ -20,6 +20,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.DispatcherServlet;
 import springfox.documentation.builders.ApiInfoBuilder;
@@ -169,6 +170,7 @@ public class SpringMvcAutoConfiguration {
                     .apiInfo(apiInfo())
                     .select()
                     .apis(Predicates.or(packages.stream().map(RequestHandlerSelectors::basePackage).toArray(Predicate[]::new)))
+                    .apis(RequestHandlerSelectors.withClassAnnotation(RestController.class))
                     .paths(PathSelectors.any())
                     .build().enable(swagger2Properties.isEnable());
             this.customizers.orderedStream().forEach((customizer) -> {
