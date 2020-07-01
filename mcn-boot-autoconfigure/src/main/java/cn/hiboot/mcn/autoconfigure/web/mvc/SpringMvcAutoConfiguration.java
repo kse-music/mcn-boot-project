@@ -10,10 +10,12 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -51,8 +53,14 @@ public class SpringMvcAutoConfiguration {
 
 
     @Configuration(proxyBeanMethods = false)
-    @Import({GlobalExceptionHandler.class,ErrorPageController.class})
+    @Import(GlobalExceptionHandler.class)
     static class SpringMvcExceptionHandler{
+
+        @Bean
+        @ConditionalOnMissingBean(ErrorController.class)
+        public ErrorController errorController() {
+            return new ErrorPageController();
+        }
 
     }
 
