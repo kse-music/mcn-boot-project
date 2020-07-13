@@ -5,7 +5,7 @@
     <parent>
         <artifactId>mcn-boot-parent</artifactId>
         <groupId>cn.hiboot.mcn</groupId>
-        <version>${mcn.version}</version>
+        <version>${revision}</version>
         <relativePath>../mcn-boot-parent</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>

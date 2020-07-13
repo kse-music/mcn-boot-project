@@ -5,7 +5,7 @@
     <parent>
         <artifactId>mcn-boot-project</artifactId>
         <groupId>cn.hiboot.mcn</groupId>
-        <version>${mcn.version}</version>
+        <version>${revision}</version>
         <relativePath>../</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -100,27 +100,27 @@
             <dependency>
                 <groupId>cn.hiboot.mcn</groupId>
                 <artifactId>mcn-spring-boot-starter</artifactId>
-                <version>${mcn.version}</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>cn.hiboot.mcn</groupId>
                 <artifactId>mcn-boot-autoconfigure</artifactId>
-                <version>${mcn.version}</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>cn.hiboot.mcn</groupId>
                 <artifactId>mcn-boot-core</artifactId>
-                <version>${mcn.version}</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>cn.hiboot.mcn</groupId>
                 <artifactId>jersey-swagger2-ui</artifactId>
-                <version>${mcn.version}</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>cn.hiboot.mcn</groupId>
                 <artifactId>mvc-swagger2</artifactId>
-                <version>${mcn.version}</version>
+                <version>${revision}</version>
             </dependency>
 
             <dependency>
@@ -216,7 +216,7 @@
                 <plugin>
                     <groupId>cn.hiboot.mcn</groupId>
                     <artifactId>crud-maven-plugin</artifactId>
-                    <version>${mcn.version}</version>
+                    <version>${revision}</version>
                     <dependencies>
                         <dependency>
                             <groupId>mysql</groupId>
@@ -226,7 +226,7 @@
                         <dependency>
                             <groupId>cn.hiboot.mcn</groupId>
                             <artifactId>mcn-spring-boot-starter</artifactId>
-                            <version>${mcn.version}</version>
+                            <version>${revision}</version>
                         </dependency>
                     </dependencies>
                 </plugin>
