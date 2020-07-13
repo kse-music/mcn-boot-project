@@ -6,7 +6,7 @@
 
     <groupId>cn.hiboot.mcn</groupId>
     <artifactId>mcn-boot-project</artifactId>
-    <version>${mcn.version}</version>
+    <version>${revision}</version>
     <modules>
         <module>mcn-boot-parent</module>
         <module>mcn-boot-dependencies</module>
@@ -20,7 +20,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <mcn.version>2.3.1</mcn.version>
+        <revision>2.3.1</revision>
     </properties>
 
     <distributionManagement>
