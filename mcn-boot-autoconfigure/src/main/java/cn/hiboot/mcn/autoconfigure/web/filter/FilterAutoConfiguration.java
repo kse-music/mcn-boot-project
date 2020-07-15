@@ -29,7 +29,7 @@ public class FilterAutoConfiguration {
 
     @Bean
     @ConditionalOnClass(name = "org.springframework.web.cors.CorsConfigurationSource")
-    @ConditionalOnProperty(prefix = "filter", name = {"cross"}, havingValue = "true", matchIfMissing = true)
+    @ConditionalOnProperty(prefix = "filter", name = {"cross"}, havingValue = "true")
     public CorsFilter corsFilter() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration corsConfiguration = new CorsConfiguration();
