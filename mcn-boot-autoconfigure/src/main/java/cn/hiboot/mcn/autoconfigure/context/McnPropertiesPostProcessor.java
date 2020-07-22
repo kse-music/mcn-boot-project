@@ -1,5 +1,6 @@
 package cn.hiboot.mcn.autoconfigure.context;
 
+import cn.hiboot.mcn.autoconfigure.web.config.ConfigProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.context.config.ConfigFileApplicationListener;
@@ -8,9 +9,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.MutablePropertySources;
-import org.springframework.core.env.PropertiesPropertySource;
-import org.springframework.core.io.UrlResource;
-import org.springframework.core.io.support.PropertiesLoaderUtils;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.ResourcePropertySource;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ResourceUtils;
@@ -24,6 +23,7 @@ import java.util.Objects;
 public class McnPropertiesPostProcessor implements EnvironmentPostProcessor,Ordered {
     public static final String APP_BASE_PACKAGE = "app.base-package";
     private static final String MCN_DEFAULT_PROPERTY_SOURCE_NAME = "mcn-default";
+    private static final String MCN_LOG_FILE_ENABLE = "mcn.log.file.enable";
 
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
@@ -34,8 +34,28 @@ public class McnPropertiesPostProcessor implements EnvironmentPostProcessor,Orde
             //already initialized
             return;
         }
-        MutablePropertySources propertySources = environment.getPropertySources();
+
         //add map config
+        loadBasicConfig(environment, application);
+
+        MutablePropertySources propertySources = environment.getPropertySources();
+
+        //加载全局配置
+        loadGlobalConfig(environment);
+
+        //加载默认配置
+        loadDefaultConfig(propertySources);
+
+        //默认开启日志文件自动配置，在使用 Apollo以及nacos等配置中心可关闭以避免日志文件使用不到配置中心的配置
+        boolean logFileEnable = environment.getProperty(MCN_LOG_FILE_ENABLE,Boolean.class,true);
+
+        if (logFileEnable) {
+            loadLogFileConfig(propertySources);
+        }
+
+    }
+
+    private void loadBasicConfig(ConfigurableEnvironment environment, SpringApplication application){
         Map<String, Object> mapProp = new HashMap<>();
         Class<?> mainApplicationClass = application.getMainApplicationClass();//maybe is null
         if(Objects.nonNull(mainApplicationClass)){
@@ -55,7 +75,11 @@ public class McnPropertiesPostProcessor implements EnvironmentPostProcessor,Orde
             mapProp.put("logging.level."+abp+".dao","info");//do not println query statement
         }
 
-        propertySources.addLast(new MapPropertySource("mcn-map",mapProp));
+        environment.getPropertySources().addLast(new MapPropertySource("mcn-map",mapProp));
+    }
+
+    private void loadGlobalConfig(ConfigurableEnvironment environment){
+        MutablePropertySources propertySources = environment.getPropertySources();
 
         try {
             //add global unique config file
@@ -76,17 +100,24 @@ public class McnPropertiesPostProcessor implements EnvironmentPostProcessor,Orde
         } catch (IOException e) {
             //ignore file not found
         }
+    }
 
+    private void loadDefaultConfig(MutablePropertySources propertySources){
+        ClassPathResource classPathResource = new ClassPathResource("mcn-default.properties", ConfigProperties.class);
         try{
-            //add mcn default config can't override
-            String path = this.getClass().getResource("").getPath();
-            path = path.replaceFirst(ResourceUtils.FILE_URL_PREFIX, ResourceUtils.JAR_URL_PREFIX+ResourceUtils.FILE_URL_PREFIX);
-            path = path.replace(ClassUtils.getPackageName(this.getClass()).replace(".", "/"), "META-INF");
-            propertySources.addLast(new PropertiesPropertySource(MCN_DEFAULT_PROPERTY_SOURCE_NAME,PropertiesLoaderUtils.loadProperties(new UrlResource(path+"mcn-default.properties"))));
+            propertySources.addLast(new ResourcePropertySource(MCN_DEFAULT_PROPERTY_SOURCE_NAME,classPathResource));
         } catch (IOException e) {
             //ignore file not found
         }
+    }
 
+    private void loadLogFileConfig(MutablePropertySources propertySources){
+        ClassPathResource classPathResource = new ClassPathResource("log.properties", ConfigProperties.class);
+        try{
+            propertySources.addLast(new ResourcePropertySource("mcn-log-file",classPathResource));
+        } catch (IOException e) {
+            //ignore file not found
+        }
     }
 
     @Override
