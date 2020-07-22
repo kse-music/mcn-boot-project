@@ -1,6 +1,12 @@
 {
   "properties": [
     {
+      "name": "mcn.log.file.enable",
+      "type": "java.lang.Boolean",
+      "description": "是否开启日志文件配置.",
+      "defaultValue": true
+    },
+    {
       "name": "mcn.log.file.filter-level",
       "type": "java.lang.String",
       "description": "日志文件输出过滤器级别.",
@@ -16,7 +22,7 @@
       "name": "filter.cross",
       "type": "java.lang.Boolean",
       "description": "是否开启跨域支持.",
-      "defaultValue": true
+      "defaultValue": false
     }
   ]
 }
