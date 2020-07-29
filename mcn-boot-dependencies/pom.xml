@@ -24,7 +24,7 @@
         <jwt.version>3.1.0</jwt.version>
         <commons-io.version>2.7</commons-io.version>
         <fastjson.version>1.2.71</fastjson.version>
-        <boot-admin.version>2.2.3</boot-admin.version>
+        <boot-admin.version>2.2.4</boot-admin.version>
         <jsoup.version>1.13.1</jsoup.version>
         <springfox-swagger.version>2.9.2</springfox-swagger.version>
         <swagger.version>1.6.1</swagger.version>
