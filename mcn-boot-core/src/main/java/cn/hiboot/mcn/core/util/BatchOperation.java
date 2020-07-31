@@ -4,14 +4,14 @@ import java.util.List;
 import java.util.function.Consumer;
 
 /**
- * 批量操作接口，默认批量大小为 10W
+ * 批量操作接口，默认批量大小为 1000
  *
  * @author DingHao
  * @since 2019/8/15 13:21
  */
 public interface BatchOperation {
 
-    int DEFAULT_BATCH_SIZE = 100000;
+    int DEFAULT_BATCH_SIZE = 1000;
 
     default int getBatchSize(){
         return DEFAULT_BATCH_SIZE;
