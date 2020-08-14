@@ -126,7 +126,7 @@ public class McnPropertiesPostProcessor implements EnvironmentPostProcessor,Orde
     }
 
     private boolean notAppStart(SpringApplication springApplication){
-        return springApplication.getAllSources().contains(springApplication.getMainApplicationClass());
+        return !springApplication.getAllSources().contains(springApplication.getMainApplicationClass());
     }
 
 }
