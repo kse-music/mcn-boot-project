@@ -20,7 +20,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <revision>2.3.2</revision>
+        <revision>2.3.3</revision>
     </properties>
 
     <distributionManagement>
