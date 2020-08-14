@@ -27,7 +27,7 @@ public class McnPropertiesPostProcessor implements EnvironmentPostProcessor,Orde
 
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
-        if (isBootstrapContext(application)) {
+        if (notAppStart(application)) {
             return;
         }
         if (environment.getPropertySources().contains(MCN_DEFAULT_PROPERTY_SOURCE_NAME)) {
@@ -125,8 +125,8 @@ public class McnPropertiesPostProcessor implements EnvironmentPostProcessor,Orde
         return McnApplicationListener.DEFAULT_ORDER + 1;
     }
 
-    private boolean isBootstrapContext(SpringApplication springApplication){
-        return springApplication.getWebApplicationType() == WebApplicationType.NONE;
+    private boolean notAppStart(SpringApplication springApplication){
+        return springApplication.getAllSources().contains(springApplication.getMainApplicationClass());
     }
 
 }
