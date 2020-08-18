@@ -1,8 +1,5 @@
 package cn.hiboot.mcn.core.util;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -31,25 +28,24 @@ public interface BatchOperation {
      * @param consumer 批量处理函数
      * @param <S> 集合元素
      */
-    default <S> void operation(Collection<S> all, Consumer<Collection<S>> consumer) {
+    default <S> void operation(List<S> all, Consumer<List<S>> consumer) {
         if (all == null || all.isEmpty()) {
             return;
         }
-        int index = 0;
-        Collection<S> tmp = new ArrayList<>();
-        for (S next : all) {
-            tmp.add(next);
-            index++;
-            if (index % getBatchSize() == 0) {
-                consumer.accept(tmp);
-                index = 0;
-                tmp = new ArrayList<>();
+        int count = (all.size() - 1) / getBatchSize() + 1;
+        if (count == 1) {
+            consumer.accept(all);
+            return;
+        }
+        int toIndex;
+        for (int i = 0; i < count; i++) {
+            if (i == count - 1) {
+                toIndex = all.size();
+            } else {
+                toIndex = (i + 1) * getBatchSize();
             }
+            consumer.accept(all.subList(i * getBatchSize(), toIndex));
         }
-        if(index != 0){
-            consumer.accept(tmp);
-        }
-        tmp.clear();
         all.clear();
     }
 }
