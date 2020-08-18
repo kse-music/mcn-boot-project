@@ -1,48 +1,55 @@
 package cn.hiboot.mcn.core.util;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.function.Consumer;
 
 /**
- * 批量操作接口，默认批量大小为 1000
+ * 批量操作接口，默认批量大小为 10000
  *
  * @author DingHao
  * @since 2019/8/15 13:21
  */
 public interface BatchOperation {
 
-    int DEFAULT_BATCH_SIZE = 1000;
+    int DEFAULT_BATCH_SIZE = 10000;
 
+    /**
+     * 默认1w执行一次
+     * @return 批量大小
+     */
     default int getBatchSize(){
         return DEFAULT_BATCH_SIZE;
     }
 
     /**
-     * 多少次执行一次,
-     * 输入给函数的是list视图，所以不要对其增删
+     * 多少次执行一次consumer
      *
-     * @param all
-     * @param consumer
-     * @param <S>
+     * @param all 总输入
+     * @param consumer 批量处理函数
+     * @param <S> 集合元素
      */
-    default <S> void operation(List<S> all, Consumer<List<S>> consumer) {
+    default <S> void operation(Collection<S> all, Consumer<Collection<S>> consumer) {
         if (all == null || all.isEmpty()) {
             return;
         }
-        int count = (all.size() - 1) / getBatchSize() + 1;
-        if (count == 1) {
-            consumer.accept(all);
-            return;
-        }
-        int toIndex;
-        for (int i = 0; i < count; i++) {
-            if (i == count - 1) {
-                toIndex = all.size();
-            } else {
-                toIndex = (i + 1) * getBatchSize();
+        int index = 0;
+        Collection<S> tmp = new ArrayList<>();
+        for (S next : all) {
+            tmp.add(next);
+            index++;
+            if (index % getBatchSize() == 0) {
+                consumer.accept(tmp);
+                index = 0;
+                tmp = new ArrayList<>();
             }
-            consumer.accept(all.subList(i * getBatchSize(), toIndex));
         }
+        if(index != 0){
+            consumer.accept(tmp);
+        }
+        tmp.clear();
         all.clear();
     }
 }
