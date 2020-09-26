@@ -50,6 +50,5 @@ public interface BatchOperation {
             consumer.accept(tmp);
         }
         tmp.clear();
-        all.clear();
     }
 }
