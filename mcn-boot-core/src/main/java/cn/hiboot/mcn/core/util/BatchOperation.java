@@ -46,6 +46,5 @@ public interface BatchOperation {
             }
             consumer.accept(all.subList(i * getBatchSize(), toIndex));
         }
-        all.clear();
     }
 }
