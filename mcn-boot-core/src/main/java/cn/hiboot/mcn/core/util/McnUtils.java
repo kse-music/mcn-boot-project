@@ -19,11 +19,6 @@ public abstract class McnUtils {
         return Date.from(Instant.now());
     }
 
-    /**
-     * 判断字符串为null或者为空
-     * @param value
-     * @return null or empty is true
-     */
     public static boolean isNullOrEmpty(String value){
         return Objects.isNull(value) || value.isEmpty();
     }
@@ -32,11 +27,6 @@ public abstract class McnUtils {
         return !isNullOrEmpty(value);
     }
 
-    /**
-     *判断集合为null或者为空集合
-     * @param value
-     * @return
-     */
     public static boolean isNullOrEmpty(Collection<?> value){
         return Objects.isNull(value) || value.isEmpty();
     }
@@ -62,29 +52,19 @@ public abstract class McnUtils {
         return path;
     }
 
-    /**
-     * 获取文件扩展名
-     * @param fileName
-     * @return
-     */
     public static String getExtName(String fileName){
         return fileName.substring(fileName.lastIndexOf(".")+1);
     }
 
-    /**
-     * 默认先从文件系统加载，找不到尝试从classpath下加载
-     * @param fileName
-     * @return
-     */
     public static Properties loadProperties(String fileName){
         return loadProperties(fileName,McnUtils.class.getClassLoader());
     }
 
     /**
      * 从系统环境或者系统属性获取指定key的值，前者优先级高，然后解析(如果是/结尾，则自动拼上fileName)
-     * @param fileName
-     * @param key
-     * @return
+     * @param fileName 文件名
+     * @param key 文件路径key
+     * @return Properties
      *
      */
     public static Properties loadProperties(String fileName,String key){
@@ -118,27 +98,14 @@ public abstract class McnUtils {
         return properties;
     }
 
-    /**
-     * 获取一个uuid
-     * @return
-     */
     public static String randomUUID(){
         return UUID.randomUUID().toString();
     }
 
-    /**
-     * 获取一个无中划线的uuid
-     * @return
-     */
     public static String simpleUUID(){
         return randomUUID().replace("-","");
     }
 
-    /**
-     * 从系统环境或者系统属性获取指定key的值，前者优先级高
-     * @param key
-     * @return
-     */
     public static String getValueFromSystemEnvOrProp(String key){
         String value = System.getenv(key);
         if(isNullOrEmpty(value)){
@@ -152,11 +119,6 @@ public abstract class McnUtils {
         return isNullOrEmpty(value) ? defaultValue : value;
     }
 
-    /**
-     * 检查字符串是否为数字
-     * @param value
-     * @return
-     */
     public static boolean isDigital(String value){
         if(isNullOrEmpty(value)){
             return false;
@@ -169,50 +131,23 @@ public abstract class McnUtils {
         return true;
     }
 
-    /**
-     * 读取文件所有行
-     * @param filePath
-     * @return
-     */
     public static List<String> readAllLine(String filePath) throws IOException {
         return Files.readAllLines(buildPath(filePath));
     }
 
-    /**
-     * 读取文件一行内容
-     * @param path
-     * @return
-     */
     public static String readLine(String path) throws IOException {
         return readAllLine(path).get(0);
     }
 
-    /**
-     * 返回文件所有字节
-     * @param filePath 文件路径
-     * @return
-     */
     public static byte[] readAllBytes(String filePath) throws IOException {
         return Files.readAllBytes(buildPath(filePath));
     }
 
-    /**
-     * 复制文件
-     * @param source 源文件
-     * @param target 目标文件
-     * @return
-     */
     public static long copyFile(String source,String target) throws IOException {
         checkTarget(target);
         return Files.copy(buildPath(source),Files.newOutputStream(buildPath(target)));
     }
 
-    /**
-     * 复制文件
-     * @param source 源文件
-     * @param target 目标文件
-     * @return
-     */
     public static long copyFile(File source,File target) throws IOException {
         return copyFile(source.getAbsolutePath(),target.getAbsolutePath());
     }

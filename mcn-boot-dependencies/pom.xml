@@ -6,12 +6,23 @@
         <artifactId>mcn-boot-project</artifactId>
         <groupId>cn.hiboot.mcn</groupId>
         <version>${revision}</version>
-        <relativePath>../</relativePath>
+        <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>mcn-boot-dependencies</artifactId>
     <packaging>pom</packaging>
+    <name>MCN Boot Dependencies</name>
+    <description>MCN Boot Dependencies</description>
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0</url>
+        </license>
+    </licenses>
+    <scm>
+        <url>https://github.com/kse-music/mcn-boot-project</url>
+    </scm>
 
     <properties>
         <mcn.version>${revision}</mcn.version>

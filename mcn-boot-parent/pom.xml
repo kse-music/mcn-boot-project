@@ -12,6 +12,8 @@
 
     <artifactId>mcn-boot-parent</artifactId>
     <packaging>pom</packaging>
+    <name>MCN Boot Parent</name>
+    <description>MCN Boot Parent</description>
 
     <properties>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -20,8 +22,15 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.target>${java.version}</maven.compiler.target>
+        <git.url>https://github.com/kse-music/mcn-boot-project</git.url>
+        <git.connection>scm:git:git://github.com/kse-music/mcn-boot-project.git</git.connection>
+        <git.developerConnection>scm:git:ssh://git@github.com/kse-music/mcn-boot-project.git</git.developerConnection>
     </properties>
-
+    <scm>
+        <url>${git.url}</url>
+        <connection>${git.connection}</connection>
+        <developerConnection>${git.developerConnection}</developerConnection>
+    </scm>
     <build>
         <resources>
             <resource>
@@ -81,19 +90,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>attach-sources</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>jar-no-fork</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
