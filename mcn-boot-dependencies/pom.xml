@@ -303,6 +303,7 @@
                     <pomElements>
                         <pluginManagement>keep</pluginManagement>
                         <repositories>remove</repositories>
+                        <distributionManagement>remove</distributionManagement>
                     </pomElements>
                 </configuration>
                 <executions>
