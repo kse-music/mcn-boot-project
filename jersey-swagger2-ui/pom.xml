@@ -12,6 +12,14 @@
 
     <artifactId>jersey-swagger2-ui</artifactId>
 
+    <description>MCN Boot Jersey Swagger</description>
+
+    <url>http://www.hiboot.cn</url>
+    <scm>
+        <url>${git.url}</url>
+        <connection>${git.connection}</connection>
+        <developerConnection>${git.developerConnection}</developerConnection>
+    </scm>
     <dependencies>
         <dependency>
             <groupId>org.glassfish.jersey.ext</groupId>

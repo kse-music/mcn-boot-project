@@ -12,6 +12,16 @@
 
     <artifactId>mcn-boot-core</artifactId>
 
+    <description>MCN Boot Core</description>
+
+    <url>http://www.hiboot.cn</url>
+
+    <scm>
+        <url>${git.url}</url>
+        <connection>${git.connection}</connection>
+        <developerConnection>${git.developerConnection}</developerConnection>
+    </scm>
+
     <dependencies>
 
         <dependency>

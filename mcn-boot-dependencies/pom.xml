@@ -14,12 +14,16 @@
     <packaging>pom</packaging>
     <name>MCN Boot Dependencies</name>
     <description>MCN Boot Dependencies</description>
+
+    <url>http://www.hiboot.cn</url>
+
     <licenses>
         <license>
             <name>Apache License, Version 2.0</name>
             <url>https://www.apache.org/licenses/LICENSE-2.0</url>
         </license>
     </licenses>
+
     <scm>
         <url>https://github.com/kse-music/mcn-boot-project</url>
     </scm>

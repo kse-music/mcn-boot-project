@@ -13,6 +13,14 @@
     <artifactId>crud-maven-plugin</artifactId>
     <packaging>maven-plugin</packaging>
 
+    <description>CRUD Maven Plugin</description>
+
+    <url>http://www.hiboot.cn</url>
+    <scm>
+        <url>${git.url}</url>
+        <connection>${git.connection}</connection>
+        <developerConnection>${git.developerConnection}</developerConnection>
+    </scm>
     <dependencies>
 
         <dependency>

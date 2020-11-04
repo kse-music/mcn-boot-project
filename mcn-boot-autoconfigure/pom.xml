@@ -12,6 +12,14 @@
 
     <artifactId>mcn-boot-autoconfigure</artifactId>
 
+    <description>MCN Boot Autoconfigure</description>
+
+    <url>http://www.hiboot.cn</url>
+    <scm>
+        <url>${git.url}</url>
+        <connection>${git.connection}</connection>
+        <developerConnection>${git.developerConnection}</developerConnection>
+    </scm>
     <dependencies>
         <dependency>
             <groupId>cn.hiboot.mcn</groupId>

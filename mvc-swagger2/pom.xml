@@ -12,6 +12,14 @@
 
     <artifactId>mvc-swagger2</artifactId>
 
+    <description>MCN Boot Swagger2</description>
+
+    <url>http://www.hiboot.cn</url>
+    <scm>
+        <url>${git.url}</url>
+        <connection>${git.connection}</connection>
+        <developerConnection>${git.developerConnection}</developerConnection>
+    </scm>
     <dependencies>
         <dependency>
             <groupId>io.springfox</groupId>

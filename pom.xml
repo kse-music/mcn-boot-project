@@ -10,10 +10,9 @@
     <packaging>pom</packaging>
     <name>MCN Boot Project</name>
     <description>MCN Boot Project</description>
-    <url>http://www.hiboot.cn/</url>
 
     <properties>
-        <revision>2.3.5</revision>
+        <revision>2.3.3</revision>
     </properties>
 
     <modules>
