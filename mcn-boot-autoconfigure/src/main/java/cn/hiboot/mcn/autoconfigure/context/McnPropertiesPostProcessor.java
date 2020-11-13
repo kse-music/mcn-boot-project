@@ -2,7 +2,6 @@ package cn.hiboot.mcn.autoconfigure.context;
 
 import cn.hiboot.mcn.autoconfigure.web.config.ConfigProperties;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.context.config.ConfigFileApplicationListener;
 import org.springframework.boot.env.EnvironmentPostProcessor;
 import org.springframework.core.Ordered;
@@ -69,7 +68,7 @@ public class McnPropertiesPostProcessor implements EnvironmentPostProcessor,Orde
         }
         mapProp.put("mcn.log.file.name",logFileName);
 
-        mapProp.put("mcn.version",this.getClass().getPackage().getImplementationVersion());
+        mapProp.put("mcn.version","v"+ this.getClass().getPackage().getImplementationVersion());
         Object abp = mapProp.get(APP_BASE_PACKAGE);
         if(abp != null){
             mapProp.put("logging.level."+abp+".dao","info");//do not println query statement
