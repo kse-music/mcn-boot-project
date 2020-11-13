@@ -51,7 +51,7 @@
                         <manifestEntries>
                             <!--suppress UnresolvedMavenProperty -->
                             <Build-Timestamp>${timestamp}</Build-Timestamp>
-                            <Implementation-Version>${revision}</Implementation-Version>
+                            <Implementation-Version>v${revision}</Implementation-Version>
                         </manifestEntries>
                     </archive>
                 </configuration>
