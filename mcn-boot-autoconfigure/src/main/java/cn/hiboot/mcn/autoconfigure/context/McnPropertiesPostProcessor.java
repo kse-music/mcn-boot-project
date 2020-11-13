@@ -2,7 +2,6 @@ package cn.hiboot.mcn.autoconfigure.context;
 
 import cn.hiboot.mcn.autoconfigure.web.config.ConfigProperties;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.context.config.ConfigFileApplicationListener;
 import org.springframework.boot.env.EnvironmentPostProcessor;
 import org.springframework.core.Ordered;
 import org.springframework.core.env.ConfigurableEnvironment;
@@ -11,8 +10,6 @@ import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.ResourcePropertySource;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.ResourceUtils;
-import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -39,8 +36,8 @@ public class McnPropertiesPostProcessor implements EnvironmentPostProcessor,Orde
 
         MutablePropertySources propertySources = environment.getPropertySources();
 
-        //加载全局配置
-        loadGlobalConfig(environment);
+        //加载McnFile配置
+        loadMcnConfigFile(environment);
 
         //加载默认配置
         loadDefaultConfig(propertySources);
@@ -61,12 +58,7 @@ public class McnPropertiesPostProcessor implements EnvironmentPostProcessor,Orde
             mapProp.put(APP_BASE_PACKAGE,ClassUtils.getPackageName(mainApplicationClass));
         }
 
-        String profiles = environment.getProperty(ConfigFileApplicationListener.ACTIVE_PROFILES_PROPERTY);
-        String logFileName = environment.getProperty("mcn.log.file.name","error");
-        if(StringUtils.hasText(profiles)){
-            logFileName += "-" + StringUtils.commaDelimitedListToStringArray(StringUtils.trimAllWhitespace(profiles))[0];
-        }
-        mapProp.put("mcn.log.file.name",logFileName);
+        mapProp.put("mcn.log.file.name",environment.getProperty("mcn.log.file.name","error"));
 
         mapProp.put("mcn.version","v"+ this.getClass().getPackage().getImplementationVersion());
         Object abp = mapProp.get(APP_BASE_PACKAGE);
@@ -77,25 +69,11 @@ public class McnPropertiesPostProcessor implements EnvironmentPostProcessor,Orde
         environment.getPropertySources().addLast(new MapPropertySource("mcn-map",mapProp));
     }
 
-    private void loadGlobalConfig(ConfigurableEnvironment environment){
+    private void loadMcnConfigFile(ConfigurableEnvironment environment){
         MutablePropertySources propertySources = environment.getPropertySources();
-
         try {
             //add global unique config file
             propertySources.addLast(new ResourcePropertySource("mcn-global-unique","classpath:config/mcn.properties"));
-        } catch (IOException e) {
-            //ignore file not found
-        }
-
-        try{
-            //add global config file diff environment
-            String[] activeProfiles = environment.getActiveProfiles();
-            StringBuilder globalConfigName = new StringBuilder(ResourceUtils.CLASSPATH_URL_PREFIX).append("mcn-global");
-            if(activeProfiles.length > 0){
-                globalConfigName.append("-").append(activeProfiles[0]);
-            }
-            globalConfigName.append(".properties");
-            propertySources.addLast(new ResourcePropertySource("mcn-global",globalConfigName.toString()));
         } catch (IOException e) {
             //ignore file not found
         }
