@@ -52,6 +52,7 @@
                             <!--suppress UnresolvedMavenProperty -->
                             <Build-Timestamp>${timestamp}</Build-Timestamp>
                             <Implementation-Version>${revision}</Implementation-Version>
+                            <Created-By>DingHao</Created-By>
                         </manifestEntries>
                     </archive>
                 </configuration>
