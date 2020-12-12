@@ -4,8 +4,6 @@ import cn.hiboot.mcn.autoconfigure.web.exception.handler.AbstractExceptionHandle
 import cn.hiboot.mcn.core.model.ValidationErrorBean;
 import cn.hiboot.mcn.core.model.result.RestResp;
 import cn.hiboot.mcn.swagger.MvcSwagger2;
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
@@ -35,7 +33,6 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.ValidationException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -158,18 +155,9 @@ public class SpringMvcAutoConfiguration {
 
         @Bean
         public Docket createRestApi() {
-            List<String> packages = swagger2Properties.getPackages();
-
-            if(packages == null){
-                packages = new ArrayList<>();
-            }
-
-            packages.add(pkg + ".rest");
-
             Docket docket = new Docket(DocumentationType.SWAGGER_2)
                     .apiInfo(apiInfo())
                     .select()
-                    .apis(Predicates.or(packages.stream().map(RequestHandlerSelectors::basePackage).toArray(Predicate[]::new)))
                     .apis(RequestHandlerSelectors.withClassAnnotation(RestController.class))
                     .paths(PathSelectors.any())
                     .build().enable(swagger2Properties.isEnable());
