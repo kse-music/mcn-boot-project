@@ -2,8 +2,6 @@ package cn.hiboot.mcn.autoconfigure.web.mvc;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-import java.util.List;
-
 /**
  * describe about this class
  *
@@ -23,10 +21,6 @@ public class Swagger2Properties {
     private String name;
     private String url;
     private String email;
-    /**
-     * 需扫描接口的包名,多个以逗号分隔
-     */
-    private List<String> packages;
 
     public boolean isEnable() {
         return enable;
@@ -92,11 +86,4 @@ public class Swagger2Properties {
         this.email = email;
     }
 
-    public List<String> getPackages() {
-        return packages;
-    }
-
-    public void setPackages(List<String> packages) {
-        this.packages = packages;
-    }
 }

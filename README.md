@@ -21,9 +21,9 @@ SpringBoot-->SpringCloud
 
 ```
     <parent>
-        <artifactId>mcn-boot-parent</artifactId>
+        <artifactId>mcn-boot-starter-parent</artifactId>
         <groupId>cn.hiboot.mcn</groupId>
-        <version>2.3.1</version>
+        <version>2.3.7</version>
     </parent>
 ```
 
