@@ -23,7 +23,7 @@ SpringBoot-->SpringCloud
     <parent>
         <artifactId>mcn-boot-starter-parent</artifactId>
         <groupId>cn.hiboot.mcn</groupId>
-        <version>2.4.0</version>
+        <version>2.4.1</version>
     </parent>
 ```
 
