@@ -11,7 +11,7 @@ import cn.hiboot.mcn.core.model.result.RestResp;
  */
 public class RestRespTypeProvider implements TypeProvider  {
 
-    private BeanConversionService beanConversionService;
+    private final BeanConversionService beanConversionService;
 
     public RestRespTypeProvider(BeanConversionService beanConversionService) {
         this.beanConversionService = beanConversionService;
