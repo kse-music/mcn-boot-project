@@ -20,10 +20,11 @@ public class McnPropertiesPostProcessor implements EnvironmentPostProcessor,Orde
     public static final String APP_BASE_PACKAGE = "app.base-package";
     private static final String MCN_DEFAULT_PROPERTY_SOURCE_NAME = "mcn-default";
     private static final String MCN_LOG_FILE_ENABLE = "mcn.log.file.enable";
+    private static final String BOOTSTRAP_PROPERTY_SOURCE_NAME = "bootstrap";
 
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
-        if (notAppStart(application)) {
+        if (notAppStart(environment)) {
             return;
         }
         if (environment.getPropertySources().contains(MCN_DEFAULT_PROPERTY_SOURCE_NAME)) {
@@ -102,8 +103,8 @@ public class McnPropertiesPostProcessor implements EnvironmentPostProcessor,Orde
         return McnApplicationListener.DEFAULT_ORDER + 1;
     }
 
-    private boolean notAppStart(SpringApplication springApplication){
-        return !springApplication.getAllSources().contains(springApplication.getMainApplicationClass());
+    private boolean notAppStart(ConfigurableEnvironment environment){
+        return environment.getPropertySources().contains(BOOTSTRAP_PROPERTY_SOURCE_NAME);
     }
 
 }

@@ -30,6 +30,7 @@ public class McnBeanFactoryRegistryPostProcessor implements BeanDefinitionRegist
 //        beanFactory.addBeanPostProcessor(new McnBeanPostProcessor());
         AutowiredAnnotationBeanPostProcessor autowiredAnnotationBeanPostProcessor = new AutowiredAnnotationBeanPostProcessor();
         autowiredAnnotationBeanPostProcessor.setAutowiredAnnotationTypes(Collections.singleton(McnAutowired.class));
+        autowiredAnnotationBeanPostProcessor.setBeanFactory(beanFactory);
         beanFactory.addBeanPostProcessor(autowiredAnnotationBeanPostProcessor);
     }
 
