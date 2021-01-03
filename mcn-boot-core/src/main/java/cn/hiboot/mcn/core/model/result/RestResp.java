@@ -9,16 +9,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class RestResp<T> {
 	
     public enum ActionStatusMethod {
-        OK("OK"),
-        FAIL("FAIL");
-        private final String name;
-        ActionStatusMethod(final String name) {
-            this.name = name;
-        }
-        @Override
-        public String toString() {
-            return name;
-        }
+        OK,
+        FAIL
     }
 	
     @JsonProperty("ActionStatus")
