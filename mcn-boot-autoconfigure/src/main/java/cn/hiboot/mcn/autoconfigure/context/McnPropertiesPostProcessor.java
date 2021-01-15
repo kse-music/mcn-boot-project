@@ -18,12 +18,17 @@ import java.util.Objects;
 
 public class McnPropertiesPostProcessor implements EnvironmentPostProcessor,Ordered {
     public static final String APP_BASE_PACKAGE = "app.base-package";
+    private static final String MCN_SOURCE_NAME = "mcn-global-unique";
     private static final String MCN_DEFAULT_PROPERTY_SOURCE_NAME = "mcn-default";
     private static final String MCN_LOG_FILE_ENABLE = "mcn.log.file.enable";
     private static final String BOOTSTRAP_PROPERTY_SOURCE_NAME = "bootstrap";
 
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
+        //在引导上下文中也加载该源
+        if (!environment.getPropertySources().contains(MCN_SOURCE_NAME)) {
+            loadMcnConfigFile(environment);
+        }
         if (notAppStart(environment)) {
             return;
         }
@@ -36,9 +41,6 @@ public class McnPropertiesPostProcessor implements EnvironmentPostProcessor,Orde
         loadBasicConfig(environment, application);
 
         MutablePropertySources propertySources = environment.getPropertySources();
-
-        //加载McnFile配置
-        loadMcnConfigFile(environment);
 
         //加载默认配置
         loadDefaultConfig(propertySources);
@@ -74,7 +76,7 @@ public class McnPropertiesPostProcessor implements EnvironmentPostProcessor,Orde
         MutablePropertySources propertySources = environment.getPropertySources();
         try {
             //add global unique config file
-            propertySources.addLast(new ResourcePropertySource("mcn-global-unique","classpath:config/mcn.properties"));
+            propertySources.addLast(new ResourcePropertySource(MCN_SOURCE_NAME,"classpath:config/mcn.properties"));
         } catch (IOException e) {
             //ignore file not found
         }
