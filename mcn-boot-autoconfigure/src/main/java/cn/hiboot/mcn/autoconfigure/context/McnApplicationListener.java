@@ -8,15 +8,21 @@ import org.springframework.context.event.GenericApplicationListener;
 import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
 
+/**
+ * 监听器
+ * 通过事件以及发生时间的事件源过滤出自己感兴趣的事件
+ *
+ * @author DingHao
+ * @since 2021/1/16 16:28
+ */
 public class McnApplicationListener implements GenericApplicationListener {
 
     public static final int DEFAULT_ORDER = Ordered.HIGHEST_PRECEDENCE + 10;
-    private int order = DEFAULT_ORDER;
 
-    private static Class<?>[] EVENT_TYPES = { ApplicationStartingEvent.class, ApplicationEnvironmentPreparedEvent.class,
+    private static final Class<?>[] EVENT_TYPES = { ApplicationStartingEvent.class, ApplicationEnvironmentPreparedEvent.class,
             ApplicationPreparedEvent.class, ApplicationStartedEvent.class,ApplicationFailedEvent.class};
 
-    private static Class<?>[] SOURCE_TYPES = { SpringApplication.class };
+    private static final Class<?>[] SOURCE_TYPES = { SpringApplication.class };
 
     @Override
     public void onApplicationEvent(ApplicationEvent applicationEvent) {
@@ -56,10 +62,7 @@ public class McnApplicationListener implements GenericApplicationListener {
 
     @Override
     public int getOrder() {
-        return this.order;
+        return DEFAULT_ORDER;
     }
 
-    public void setOrder(int order) {
-        this.order = order;
-    }
 }

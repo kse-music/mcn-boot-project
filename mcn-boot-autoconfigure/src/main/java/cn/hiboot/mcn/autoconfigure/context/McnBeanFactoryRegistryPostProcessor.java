@@ -11,6 +11,8 @@ import java.util.Collections;
 
 /**
  *
+ * BeanFactoryPostProcessor
+ * 修改IOC容器即添加AutowiredAnnotationBeanPostProcessor以处理McnAutowired注解
  *
  * @author DingHao
  * @since 2019/1/7 2:09
@@ -25,9 +27,7 @@ public class McnBeanFactoryRegistryPostProcessor implements BeanDefinitionRegist
 
     @Override
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
-        //spring-framework issues/24003
-//        beanFactory.getBeanDefinition(AnnotationConfigUtils.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME).getPropertyValues().add("mcnAutowired", McnAutowired.class);
-//        beanFactory.addBeanPostProcessor(new McnBeanPostProcessor());
+        //https://github.com/spring-projects/spring-framework/issues/24003
         AutowiredAnnotationBeanPostProcessor autowiredAnnotationBeanPostProcessor = new AutowiredAnnotationBeanPostProcessor();
         autowiredAnnotationBeanPostProcessor.setAutowiredAnnotationTypes(Collections.singleton(McnAutowired.class));
         autowiredAnnotationBeanPostProcessor.setBeanFactory(beanFactory);
