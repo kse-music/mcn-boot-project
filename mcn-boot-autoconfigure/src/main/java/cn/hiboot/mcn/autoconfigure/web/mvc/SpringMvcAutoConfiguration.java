@@ -5,7 +5,6 @@ import cn.hiboot.mcn.core.model.ValidationErrorBean;
 import cn.hiboot.mcn.core.model.result.RestResp;
 import cn.hiboot.mcn.swagger.MvcSwagger2;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -68,7 +67,7 @@ public class SpringMvcAutoConfiguration {
     static class ValidationExceptionHandler extends AbstractExceptionHandler {
 
         @ExceptionHandler(ValidationException.class)
-        public RestResp handleValidationException(ValidationException exception){
+        public RestResp<?> handleValidationException(ValidationException exception){
             dealStackTraceElement(exception);
             RestResp<List<ValidationErrorBean>> objectRestResp = buildErrorMessage(PARAM_PARSE_ERROR);
             if (exception instanceof ConstraintViolationException) {
@@ -87,39 +86,39 @@ public class SpringMvcAutoConfiguration {
             } else {
                 if (invalidValue.getClass().isArray()) {
                     if (invalidValue instanceof Object[]) {
-                        return Arrays.toString((Object[])((Object[])invalidValue));
+                        return Arrays.toString((Object[]) invalidValue);
                     }
 
                     if (invalidValue instanceof boolean[]) {
-                        return Arrays.toString((boolean[])((boolean[])invalidValue));
+                        return Arrays.toString((boolean[]) invalidValue);
                     }
 
                     if (invalidValue instanceof byte[]) {
-                        return Arrays.toString((byte[])((byte[])invalidValue));
+                        return Arrays.toString((byte[]) invalidValue);
                     }
 
                     if (invalidValue instanceof char[]) {
-                        return Arrays.toString((char[])((char[])invalidValue));
+                        return Arrays.toString((char[]) invalidValue);
                     }
 
                     if (invalidValue instanceof double[]) {
-                        return Arrays.toString((double[])((double[])invalidValue));
+                        return Arrays.toString((double[]) invalidValue);
                     }
 
                     if (invalidValue instanceof float[]) {
-                        return Arrays.toString((float[])((float[])invalidValue));
+                        return Arrays.toString((float[]) invalidValue);
                     }
 
                     if (invalidValue instanceof int[]) {
-                        return Arrays.toString((int[])((int[])invalidValue));
+                        return Arrays.toString((int[]) invalidValue);
                     }
 
                     if (invalidValue instanceof long[]) {
-                        return Arrays.toString((long[])((long[])invalidValue));
+                        return Arrays.toString((long[]) invalidValue);
                     }
 
                     if (invalidValue instanceof short[]) {
-                        return Arrays.toString((short[])((short[])invalidValue));
+                        return Arrays.toString((short[]) invalidValue);
                     }
                 }
 
@@ -142,11 +141,8 @@ public class SpringMvcAutoConfiguration {
     @ConditionalOnProperty(prefix = "swagger", name = {"enable"}, havingValue = "true")
     private static class Swagger {
 
-        @Value("${app.base-package}")
-        private String pkg;
-
-        private Swagger2Properties swagger2Properties;
-        private ObjectProvider<DocketCustomizer> customizers;
+        private final Swagger2Properties swagger2Properties;
+        private final ObjectProvider<DocketCustomizer> customizers;
 
         public Swagger(Swagger2Properties swagger2Properties, ObjectProvider<DocketCustomizer> customizers) {
             this.swagger2Properties = swagger2Properties;
