@@ -15,6 +15,13 @@ import java.util.Set;
 
 /**
  * mainly deal annotation @McnAutowired
+ *
+ * this BeanPostProcessor will be remove in future,it's not used now.
+ *
+ * {@link McnBeanFactoryRegistryPostProcessor}
+ *
+ * @author DingHao
+ * @since 2019/1/7 2:09
  */
 public class McnBeanPostProcessor implements InstantiationAwareBeanPostProcessor {
 

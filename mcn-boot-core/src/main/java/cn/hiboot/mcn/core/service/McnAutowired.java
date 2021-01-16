@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * describe about this class
+ * 自定义bean注入注解,作用于Autowired相同
  *
  * @author DingHao
  * @since 2019/1/3 16:41

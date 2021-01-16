@@ -1,6 +1,13 @@
 {
   "properties": [
     {
+      "name": "mcn.bootstrap.eagerLoad.enable",
+      "type": "java.lang.Boolean",
+      "sourceType": "cn.hiboot.mcn.autoconfigure.context.McnPropertiesPostProcessor",
+      "description": "是否在引导上下文中加载.",
+      "defaultValue": false
+    },
+    {
       "name": "mcn.log.file.enable",
       "type": "java.lang.Boolean",
       "sourceType": "cn.hiboot.mcn.autoconfigure.context.McnPropertiesPostProcessor",
