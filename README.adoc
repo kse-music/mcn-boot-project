@@ -1,0 +1,190 @@
+:version: 2.4.2
+
+== 简介
+MCN是一个基于SpringBoot的一个快速构建Restful风格的Web系统。MCN在SpringBoot的基础上配置更多默认配置，比如mybatis多数据源配置、跨域、编码等等一些SpringBoot没有的或者扩展的配置。
+
+SpringBoot的问世不外乎就是之前的配置繁杂，但其实SpringBoot不算是一个严格意义上的框架（Spring是）。框架从字面上理解就是"框住"你，即遵循框架制定的规则来"玩"！其实,SpringBoot就是把以前我们自己在开发时需要的一些配置，直接帮我们配置好，对于开发就是拿来即用。
+
+image::http://cdn.hiboot.cn/5612db4209ee4b3cacd5993c17fd6645.jpg[]
+
+== 如何使用
+
+=== 搭建一个最简单的Web项目
+
+* 新建一个空的Maven项目并引入父模块
+
+[source,xml,subs="verbatim,attributes"]
+----
+<parent>
+    <artifactId>mcn-boot-starter-parent</artifactId>
+    <groupId>cn.hiboot.mcn</groupId>
+    <version>{version}</version>
+</parent>
+----
+
+* 引入相关依赖lib
+
+[source,xml,subs="verbatim,attributes"]
+----
+<dependencies>
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>cn.hiboot.mcn</groupId>
+        <artifactId>mcn-spring-boot-starter</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>cn.hiboot.mcn</groupId>
+        <artifactId>mvc-swagger2</artifactId>
+    </dependency>
+</dependencies>
+----
+
+* 创建base package，如com.hiekn.test，并在其下创建一个SpringBoot应用启动类，如：TestApplication，并写入以下信息
+
+[source,java]
+----
+package com.hiekn.test;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class TestApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(TestApplication.class,args);
+    }
+}
+
+----
+
+* 在src/java/resources下新建config文件夹，再在里面新建一个application.properties并写入以下内容
+
+....
+#一般与项目模块对应
+spring.application.name=test
+
+#开启swagger
+swagger.enable=true
+....
+
+* 运行TestApplication
+* http://127.0.0.1:8080/doc.html[打开swaggerUI]
+
+
+[WARN]
+====
+spring boot从2.3.0开始spring-boot-starter-validation默认不被spring-boot-starter-web所依赖
+
+所以需要手动添加依赖spring-boot-starter-validation才能使用校验框架
+[source,xml,subs="verbatim,attributes"]
+----
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-validation</artifactId>
+</dependency>
+----
+
+====
+
+=== 内置实现
+
+* 属性源mcn-global-unique
+
+[INFO]
+====
+classpath:config/mcn.properties无论是在SpringBoot上下文还是引导上下文都加载的属性源
+====
+
+* 默认配置
+
+....
+
+#mybatis数据模型默认别名包
+mybatis.type-aliases-package=${app.base-package}.bean
+#mybatis，mapper文件默认路径
+mybatis.mapper-locations=classpath:mapper/*.xml
+#mybatis，handlers默认包
+mybatis.type-handlers-package=${app.base-package}.dao.handler
+#mybatis，默认使用驼峰
+mybatis.configuration.map-underscore-to-camel-case=true
+
+#默认服务器路径
+server.tomcat.basedir=/tmp/tomcat/
+server.compression.enabled=true
+
+swagger.title=${spring.application.name} API
+swagger.version=@project.version@
+
+....
+
+* 日志配置
+
+....
+
+logging.file.name=${logging.file:${logging.baseDir:/work/logs}/${spring.application.name:none}/${mcn.log.file.name}.log}
+logging.pattern.console=%d{yyyy-MM-dd HH:mm:ss.SSS} %green(%-5level) %magenta(${PID:- }) --- [%15thread] %cyan(%-40logger{39}) %-5L : %msg%n
+logging.pattern.file=%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level ${PID:- } --- [%15thread] %-40logger{39} %-5L : %msg%n
+logging.config=classpath:META-INF/logback-spring.xml
+logging.level.root=info
+logging.level.org=warn
+logging.level.io=warn
+logging.file.max-history=30
+#文件输出过滤器掉info以下
+mcn.log.filter=info
+
+....
+
+* swagger自动配置,提供DocketCustomizer接口自定义Docket
+
+* 全局异常处理
+
+* SpringBeanUtils提供非spring bean中获取IOC容器中的Bean
+
+
+=== 注意事项
+
+* 默认配置以及日志配置在引导上下文不加载,可通过mcn.bootstrap.eagerLoad.enable=true强制开启加载
+
+* 用不到的依赖包一定要去掉
+
+[WARN]
+====
+为什么用不到的依赖包一定要去掉？
+
+因为在SpringBoot出现之前，我们开发依赖的jar包都很随意的瞎引，好像也没什么事！然而如今，用了SpringBoot之后就不一样了。就拿mongo来说，可能是由习惯问题吧，很多人就还和以前一样自己去写mongoclient单例，然后去对mono做CRUD操作。
+这时就发现启动项目之后，一段时间（超时）就报mongo连接超时！原来是在你引入mongo-java之后SpringBoot的自动配置就开始默认连接127.0.0.1:27017的地址，导致失败、资源浪费！
+
+====
+
+== FAQ
+
+. 版本管理
+
+.版本管理
+[width="100%",options="header,footer"]
+|====================
+| Jar | Version
+| SpringBoot | {version}
+| SpringCloud | 2020.0.0
+| guava | 30.0-jre
+| mybatis-spring-boot-starter | 2.1.3
+| commons-io | 2.7
+| spring-boot-admin-starter-client | 2.3.1
+| spring-boot-admin-starter-server | 2.3.1
+| elasticsearch-rest-high-level-client | 7.10.1
+| fastjson | 1.2.71
+|====================
+
+* 所有的默认配置都可以被覆盖
+
+
+
+
+
+== 相关链接
+. http://www.hiboot.cn/jie/83[SpringBoot启动源码分析]
+
+. 一个基于MCN的完整项目示例 https://github.com/kse-music/meta-boot[meta-boot]
