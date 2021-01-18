@@ -46,15 +46,13 @@ public class MybatisGeneratorMojo extends AbstractMojo {
             propConfig.setProperty("service-package",basePkg+".service");
             propConfig.setProperty("dao-package",basePkg+".dao");
         }
-        boolean overwrite = Boolean.valueOf(propConfig.getProperty("overwrite","false"));
+        boolean overwrite = Boolean.parseBoolean(propConfig.getProperty("overwrite","false"));
         List<String> warnings = new ArrayList<>();
         ConfigurationParser cfgParser = new ConfigurationParser(propConfig,warnings);
         Configuration config = null;
         try {
             config = cfgParser.parseConfiguration(configurationFile);
-        } catch (IOException e) {
-            getLog().error(e);
-        } catch (XMLParserException e) {
+        } catch (IOException | XMLParserException e) {
             getLog().error(e);
         }
         DefaultShellCallback callback = new DefaultShellCallback(overwrite);
@@ -67,11 +65,7 @@ public class MybatisGeneratorMojo extends AbstractMojo {
         try {
             generator.generate(null);
             getLog().info("code generate success");
-        } catch (SQLException e) {
-            getLog().error(e);
-        } catch (IOException e) {
-            getLog().error(e);
-        } catch (InterruptedException e) {
+        } catch (SQLException | IOException | InterruptedException e) {
             getLog().error(e);
         }
     }
