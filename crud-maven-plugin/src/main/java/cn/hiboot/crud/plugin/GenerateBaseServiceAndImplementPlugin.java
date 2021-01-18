@@ -30,8 +30,8 @@ public class GenerateBaseServiceAndImplementPlugin extends PluginAdapter {
         serviceTargetDir = properties.getProperty("targetProject");
         serviceTargetPackage = properties.getProperty("targetPackage");
         service = properties.getProperty("service");
-        overwrite = Boolean.valueOf(properties.getProperty("overwrite"));
-        isJersey = Boolean.valueOf(properties.getProperty("isJersey"));
+        overwrite = Boolean.parseBoolean(properties.getProperty("overwrite"));
+        isJersey = Boolean.parseBoolean(properties.getProperty("isJersey"));
         return stringHasValue(serviceTargetDir) && stringHasValue(serviceTargetPackage) && stringHasValue(service);
     }
 
