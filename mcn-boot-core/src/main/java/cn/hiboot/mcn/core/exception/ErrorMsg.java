@@ -24,7 +24,7 @@ public abstract class ErrorMsg implements ExceptionKeys {
                 return propertyValue;
             }
         }
-        return null;
+        return "";
     }
 
     public static RestResp invalidCertificate(){
