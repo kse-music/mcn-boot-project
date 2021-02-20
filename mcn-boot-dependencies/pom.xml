@@ -280,6 +280,10 @@
                     <version>${mcn.version}</version>
                     <dependencies>
                         <dependency>
+                            <groupId>mysql</groupId>
+                            <artifactId>mysql-connector-java</artifactId>
+                        </dependency>
+                        <dependency>
                             <groupId>cn.hiboot.mcn</groupId>
                             <artifactId>mcn-spring-boot-starter</artifactId>
                             <version>${mcn.version}</version>
