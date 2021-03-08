@@ -14,7 +14,7 @@ import java.util.function.Function;
 public class TaskExecutor<T>{
 
     private static final int DEFAULT_BATCH_SIZE = 1000;
-    private final TaskThreadPool taskThreadPool;
+    private final TaskThreadPool myThreadPoolExecutor;
     private final Iterable<T> iterable;
     private final int perBatchSize;
 
@@ -26,43 +26,45 @@ public class TaskExecutor<T>{
         this(iterable,new TaskThreadPool(Runtime.getRuntime().availableProcessors(), 10, "BatchTask"),perBatchSize);
     }
 
-    public TaskExecutor(Iterable<T> iterable, TaskThreadPool taskThreadPool, int perBatchSize) {
+    public TaskExecutor(Iterable<T> iterable, TaskThreadPool myThreadPoolExecutor, int perBatchSize) {
         this.iterable = iterable;
         this.perBatchSize = perBatchSize;
-        this.taskThreadPool = taskThreadPool;
+        this.myThreadPoolExecutor = myThreadPoolExecutor;
     }
 
-    public <S> void execute(Function<T,S> convert, Consumer<List<S>> opr){
-        execute(convert,opr,true);
+    public void execute(Consumer<List<T>> opr){
+        execute(Function.identity(),opr);
     }
 
-    private  <S> void execute(Function<T,S> convert, Consumer<List<S>> opr,boolean block){
+    public <S> void execute(Function<T, S> convert, Consumer<List<S>> opr) {
+        execute(convert,opr,false);
+    }
+
+    public <S> void execute(Function<T, S> convert, Consumer<List<S>> opr,boolean nullBreak){
+        assert convert != null;
         List<S> data = new ArrayList<>(perBatchSize);
         for (T t : iterable) {
             S apply = convert.apply(t);
-            if (apply == null) {
+            if(apply == null){
+                if(nullBreak){
+                    break;
+                }
                 continue;
             }
             data.add(apply);
             if(data.size() == perBatchSize){
-                write(data,opr);
+                execute0(data,opr);
                 data = new ArrayList<>();
             }
         }
         if(!data.isEmpty()){
-            write(data,opr);
+            execute0(data,opr);
         }
-        if(block){
-            taskThreadPool.closeUntilAllTaskFinish();
-        }
+        myThreadPoolExecutor.closeUntilAllTaskFinish();
     }
 
-    public <S> void nonBlockingExecute(Function<T,S> convert, Consumer<List<S>> opr){
-        execute(convert,opr,false);
-    }
-
-    private <S> void write(List<S> data,Consumer<List<S>> opr){
-        taskThreadPool.execute(() -> opr.accept(data));
+    private <S> void execute0(List<S> data,Consumer<List<S>> opr){
+        myThreadPoolExecutor.execute(() -> opr.accept(data));
     }
 
 }
