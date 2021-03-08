@@ -8,7 +8,7 @@ public class ServiceException extends BaseException{
 	}
 
 	private ServiceException(String msg) {
-		super(msg);
+		super(999999,msg);
 	}
 
 	public static ServiceException newInstance(){
