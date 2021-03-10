@@ -27,7 +27,7 @@
             <!--日志文件输出的文件名-->
             <FileNamePattern>${LOG_FILE}-%d{yyyy-MM-dd}.gz</FileNamePattern>
             <!--归档日志文件保留天数-->
-            <MaxHistory>${LOG_FILE_MAX_HISTORY}</MaxHistory>
+            <MaxHistory>${LOGBACK_ROLLINGPOLICY_MAX_HISTORY}</MaxHistory>
         </rollingPolicy>
         <encoder>
             <pattern>${FILE_LOG_PATTERN}</pattern>
