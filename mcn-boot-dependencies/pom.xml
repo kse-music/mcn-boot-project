@@ -33,7 +33,7 @@
         <spring-boot.version>2.4.4</spring-boot.version>
         <spring-cloud.version>2020.0.2</spring-cloud.version>
         <mybatis-generator.version>1.3.7</mybatis-generator.version>
-        <es.version>7.11.1</es.version>
+        <es.version>7.11.2</es.version>
         <mybatis-spring-boot.version>2.1.3</mybatis-spring-boot.version>
         <guava.version>30.0-jre</guava.version>
         <jwt.version>3.1.0</jwt.version>
