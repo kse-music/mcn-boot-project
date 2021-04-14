@@ -48,7 +48,7 @@
         <hutool.version>5.1.2</hutool.version>
         <orika.version>1.5.4</orika.version>
         <mapstruct.version>1.4.1.Final</mapstruct.version>
-        <spring-cloud-alibaba.version>2.2.35.RELEASE</spring-cloud-alibaba.version>
+        <spring-cloud-alibaba.version>2.2.5.RELEASE</spring-cloud-alibaba.version>
     </properties>
 
     <dependencyManagement>
