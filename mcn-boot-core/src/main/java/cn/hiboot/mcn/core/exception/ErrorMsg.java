@@ -9,7 +9,7 @@ import java.util.Properties;
 
 public abstract class ErrorMsg implements ExceptionKeys {
 
-    private static List<Properties> errMsgProp;
+    private static final List<Properties> errMsgProp;
 
     static {
         errMsgProp = new ArrayList<>();
@@ -31,12 +31,12 @@ public abstract class ErrorMsg implements ExceptionKeys {
         return buildErrorMessage(ExceptionKeys.INVALID_CERTIFICATE_ERROR);
     }
 
-    public static RestResp buildErrorMessage(int code){
+    public static RestResp buildErrorMessage(Integer code){
         return buildErrorMessage(code,getErrorMsg(code));
     }
 
-    public static RestResp buildErrorMessage(int code,String msg){
-        return new RestResp(code, msg);
+    public static RestResp buildErrorMessage(Integer code,String msg){
+        return new RestResp<>(code, msg);
     }
 
 }
