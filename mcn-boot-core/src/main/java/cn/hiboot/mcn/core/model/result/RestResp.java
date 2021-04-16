@@ -23,7 +23,7 @@ public class RestResp<T> {
 	private Long duration;
 	private T data;
 
-	private Integer count;
+	private Long count;
 
 	public RestResp() {	}
 	
@@ -37,7 +37,7 @@ public class RestResp<T> {
 		this.data = data;
 	}
 
-    public RestResp(T data, Integer count) {
+    public RestResp(T data, Long count) {
         this(data);
         this.count = count;
     }
@@ -86,11 +86,11 @@ public class RestResp<T> {
         this.data = data;
     }
 
-    public Integer getCount() {
+    public Long getCount() {
         return count;
     }
 
-    public void setCount(Integer count) {
+    public void setCount(Long count) {
         this.count = count;
     }
 }
