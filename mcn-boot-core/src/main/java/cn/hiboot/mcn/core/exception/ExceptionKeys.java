@@ -37,6 +37,7 @@ public interface ExceptionKeys {
     int HTTP_ERROR_408 = 80408;
     int HTTP_ERROR_409 = 80409;
     int HTTP_ERROR_500 = 80500;
+    int HTTP_ERROR_503 = 80503;
 
     int SERVICE_ERROR = 90000;
     int THIRD_PARTY_ERROR = 90001;
