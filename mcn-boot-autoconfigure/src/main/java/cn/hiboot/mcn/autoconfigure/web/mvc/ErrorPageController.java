@@ -17,12 +17,20 @@ public class ErrorPageController implements ErrorController {
     public RestResp error(HttpServletRequest request) {
         Integer statusCode = (Integer) request.getAttribute("javax.servlet.error.status_code");
         int code = ErrorMsg.HTTP_ERROR_500;
-        if(statusCode == 404){
+        if(statusCode == 401){
+            code = ErrorMsg.HTTP_ERROR_401;
+        }else if(statusCode == 403){
+            code = ErrorMsg.HTTP_ERROR_403;
+        }else if(statusCode == 404){
             code = ErrorMsg.HTTP_ERROR_404;
         }else if(statusCode == 405){
             code = ErrorMsg.HTTP_ERROR_405;
         }else if(statusCode == 406){
             code = ErrorMsg.HTTP_ERROR_406;
+        }else if(statusCode == 408){
+            code = ErrorMsg.HTTP_ERROR_408;
+        }else if(statusCode == 409){
+            code = ErrorMsg.HTTP_ERROR_409;
         }
         return ErrorMsg.buildErrorMessage(code);
     }

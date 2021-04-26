@@ -26,14 +26,17 @@ public interface ExceptionKeys {
     int AUTHENTICATION_ERROR = 30016;
     int INVALID_CERTIFICATE_ERROR = 30017;
 
-
-
     int UNKNOWN_ERROR = 70001;
 
-    int HTTP_ERROR_404 = 80001;
-    int HTTP_ERROR_405 = 80002;
-    int HTTP_ERROR_406 = 80003;
-    int HTTP_ERROR_500 = 80004;
+    int HTTP_ERROR_401 = 80401;
+    int HTTP_ERROR_402 = 80402;
+    int HTTP_ERROR_403 = 80403;
+    int HTTP_ERROR_404 = 80404;
+    int HTTP_ERROR_405 = 80405;
+    int HTTP_ERROR_406 = 80406;
+    int HTTP_ERROR_408 = 80408;
+    int HTTP_ERROR_409 = 80409;
+    int HTTP_ERROR_500 = 80500;
 
     int SERVICE_ERROR = 90000;
     int THIRD_PARTY_ERROR = 90001;
