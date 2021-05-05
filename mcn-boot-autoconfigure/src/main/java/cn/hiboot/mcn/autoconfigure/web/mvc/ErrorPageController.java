@@ -5,6 +5,7 @@ import cn.hiboot.mcn.core.model.result.RestResp;
 import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.WebUtils;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -15,7 +16,7 @@ public class ErrorPageController implements ErrorController {
 
     @RequestMapping(ERROR_PATH)
     public RestResp error(HttpServletRequest request) {
-        Integer statusCode = (Integer) request.getAttribute("javax.servlet.error.status_code");
+        Integer statusCode = (Integer) request.getAttribute(WebUtils.ERROR_STATUS_CODE_ATTRIBUTE);
         int code = ErrorMsg.HTTP_ERROR_500;
         if(statusCode == 401){
             code = ErrorMsg.HTTP_ERROR_401;
