@@ -18,7 +18,7 @@ public class FilterProperties {
     /**
      * 排除的url路径
      */
-    private List<String> excludes = new ArrayList<>(Arrays.asList("/favicon.ico,/img/*,/js/*,/css/*"));
+    private List<String> excludes = new ArrayList<>(Arrays.asList("/favicon.ico","/img/*","/js/*","/css/*"));
     /**
      * 是否过滤富文本内容
      */
@@ -39,4 +39,5 @@ public class FilterProperties {
     public void setIncludeRichText(boolean includeRichText) {
         this.includeRichText = includeRichText;
     }
+
 }

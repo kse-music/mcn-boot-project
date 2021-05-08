@@ -3,7 +3,7 @@ package cn.hiboot.mcn.autoconfigure.web.mvc;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * describe about this class
+ * swagger config
  *
  * @author DingHao
  * @since 2019/3/27 14:04

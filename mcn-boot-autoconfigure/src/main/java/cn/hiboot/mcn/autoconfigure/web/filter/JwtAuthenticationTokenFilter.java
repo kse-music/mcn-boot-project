@@ -1,7 +1,7 @@
 package cn.hiboot.mcn.autoconfigure.web.filter;
 
-import cn.hiboot.mcn.autoconfigure.jwt.JwtToken;
 import cn.hiboot.mcn.autoconfigure.jwt.InvalidAuthenticationTokenException;
+import cn.hiboot.mcn.autoconfigure.jwt.JwtToken;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
@@ -18,7 +18,7 @@ import java.util.ArrayList;
 
 public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
 
-    private AuthenticationEntryPoint authenticationEntryPoint;
+    private final AuthenticationEntryPoint authenticationEntryPoint;
 
     public JwtAuthenticationTokenFilter(AuthenticationEntryPoint authenticationEntryPoint) {
         this.authenticationEntryPoint = authenticationEntryPoint;
