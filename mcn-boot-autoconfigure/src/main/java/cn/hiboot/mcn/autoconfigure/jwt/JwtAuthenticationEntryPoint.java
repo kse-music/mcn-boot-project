@@ -15,7 +15,7 @@ import java.io.IOException;
 
 public final class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
-    private ObjectMapper mapper;
+    private final ObjectMapper mapper;
 
     public JwtAuthenticationEntryPoint(ObjectMapper mapper){
         this.mapper = mapper;

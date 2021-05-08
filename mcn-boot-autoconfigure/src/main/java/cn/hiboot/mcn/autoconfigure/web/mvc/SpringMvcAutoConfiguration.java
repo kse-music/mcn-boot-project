@@ -16,6 +16,8 @@ import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -139,6 +141,7 @@ public class SpringMvcAutoConfiguration {
     @EnableConfigurationProperties(Swagger2Properties.class)
     @ConditionalOnClass({MvcSwagger2.class})
     @ConditionalOnProperty(prefix = "swagger", name = {"enable"}, havingValue = "true")
+    @Import(Swagger.IgnoreSwaggerPath.class)
     private static class Swagger {
 
         private final Swagger2Properties swagger2Properties;
@@ -171,6 +174,18 @@ public class SpringMvcAutoConfiguration {
                     .contact(new Contact(swagger2Properties.getName(),swagger2Properties.getUrl(),swagger2Properties.getEmail()))
                     .version(swagger2Properties.getVersion())
                     .build();
+        }
+
+        @ConditionalOnProperty(prefix = "swagger", name = {"enable"}, havingValue = "true")
+        private static class IgnoreSwaggerPath extends WebSecurityConfigurerAdapter {
+
+            @Override
+            public void configure(WebSecurity web) throws Exception {
+                // web.ignoring是直接绕开spring security的所有filter，直接跳过验证
+                web.ignoring().antMatchers("/v2/api-docs", "/swagger-resources/**",
+                        "/doc.html", "/webjars/**");
+            }
+
         }
 
     }

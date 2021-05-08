@@ -20,6 +20,13 @@ import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServletRequest;
 import java.util.stream.Collectors;
 
+
+/**
+ * global exception config
+ *
+ * @author DingHao
+ * @since 2021/5/8 17:27
+ */
 @RestControllerAdvice
 public class GlobalExceptionHandler extends AbstractExceptionHandler {
 

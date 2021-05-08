@@ -35,9 +35,9 @@ import java.util.Objects;
 @Order(SecurityProperties.BASIC_AUTH_ORDER)
 public class WebSecurityAutoConfiguration extends WebSecurityConfigurerAdapter {
 
-    private Environment environment;
-    private JwtProperties jwtProperties;
-    private JerseySwaggerProperties jerseySwaggerProperties;
+    private final Environment environment;
+    private final JwtProperties jwtProperties;
+    private final JerseySwaggerProperties jerseySwaggerProperties;
 
     public WebSecurityAutoConfiguration(Environment environment, JwtProperties jwtProperties,JerseySwaggerProperties jerseySwaggerProperties) {
         this.environment = environment;
@@ -80,7 +80,7 @@ public class WebSecurityAutoConfiguration extends WebSecurityConfigurerAdapter {
                 defaultIgnoreUrls.add(basePath+ignoreUrl);
             }
         }
-        web.ignoring().antMatchers(defaultIgnoreUrls.toArray(new String[defaultIgnoreUrls.size()]));
+        web.ignoring().antMatchers(defaultIgnoreUrls.toArray(new String[0]));
     }
 
     private String parsePath(String path) {
