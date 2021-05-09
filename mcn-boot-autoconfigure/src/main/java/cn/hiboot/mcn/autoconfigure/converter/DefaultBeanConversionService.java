@@ -4,7 +4,6 @@ import cn.hiboot.mcn.autoconfigure.converter.provider.TypeProvider;
 import ma.glasnost.orika.MapperFactory;
 import org.springframework.beans.factory.ObjectProvider;
 
-import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -19,8 +18,8 @@ public class DefaultBeanConversionService implements BeanConversionService{
     private static final Map<Class<?>, TypeProvider> cache = new ConcurrentHashMap<>();
     private static final Map<Class<?>,Class<?>> convertMapperCache = new ConcurrentHashMap<>();
 
-    private MapperFactory mapperFactory;
-    private ObjectProvider<TypeProvider> typeProviders;
+    private final MapperFactory mapperFactory;
+    private final ObjectProvider<TypeProvider> typeProviders;
 
     public DefaultBeanConversionService(MapperFactory mapperFactory, ObjectProvider<TypeProvider> typeProviders) {
         this.mapperFactory = mapperFactory;
@@ -36,12 +35,10 @@ public class DefaultBeanConversionService implements BeanConversionService{
         if(cache.containsKey(sourceDataClass)){
             return cache.get(sourceDataClass).convert(sourceData,targetType);
         }
-        Iterator<TypeProvider> iterator = typeProviders.iterator();
-        while (iterator.hasNext()){
-            TypeProvider next = iterator.next();
-            if(next.match(sourceDataClass)){
-                cache.put(sourceDataClass,next);
-                return next.convert(sourceData,targetType);
+        for (TypeProvider next : typeProviders) {
+            if (next.match(sourceDataClass)) {
+                cache.put(sourceDataClass, next);
+                return next.convert(sourceData, targetType);
             }
         }
         convertMapperCache.put(sourceDataClass,targetType);
