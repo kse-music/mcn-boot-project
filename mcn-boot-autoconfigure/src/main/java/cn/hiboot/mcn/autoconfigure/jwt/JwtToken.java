@@ -67,13 +67,13 @@ public class JwtToken {
         //Integer Double Date Boolean String
         data.forEach((k,v) -> {
             if(v instanceof Integer){
-                builder.withClaim(k,((Integer) v).intValue());
+                builder.withClaim(k, (Integer) v);
             }else if(v instanceof Double){
-                builder.withClaim(k,((Double) v).doubleValue());
+                builder.withClaim(k, (Double) v);
             }else if(v instanceof Date){
                 builder.withClaim(k,(Date)v);
             }else if(v instanceof Boolean){
-                builder.withClaim(k,((Boolean) v).booleanValue());
+                builder.withClaim(k, (Boolean) v);
             }else {
                 builder.withClaim(k,v.toString());
             }
@@ -160,10 +160,7 @@ public class JwtToken {
     private HttpServletRequest getRequest(){
         RequestAttributes attributes = RequestContextHolder.getRequestAttributes();
         if(Objects.nonNull(attributes)){
-            HttpServletRequest request = ((ServletRequestAttributes) attributes).getRequest();
-            if(Objects.nonNull(request)){
-                this.request = request;
-            }
+            this.request = ((ServletRequestAttributes) attributes).getRequest();
         }
         return this.request;
     }
