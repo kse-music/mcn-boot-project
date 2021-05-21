@@ -139,9 +139,8 @@ public class SpringMvcAutoConfiguration {
     @Configuration(proxyBeanMethods = false)
     @EnableSwagger2
     @EnableConfigurationProperties(Swagger2Properties.class)
-    @ConditionalOnClass({MvcSwagger2.class})
+    @ConditionalOnClass(MvcSwagger2.class)
     @ConditionalOnProperty(prefix = "swagger", name = {"enable"}, havingValue = "true")
-    @Import(Swagger.IgnoreSwaggerPath.class)
     private static class Swagger {
 
         private final Swagger2Properties swagger2Properties;
@@ -176,13 +175,16 @@ public class SpringMvcAutoConfiguration {
                     .build();
         }
 
+        @Configuration(proxyBeanMethods = false)
+        @ConditionalOnProperty(prefix = "swagger.path", name = {"ignore"}, havingValue = "true",matchIfMissing = true)
+        @ConditionalOnClass(WebSecurityConfigurerAdapter.class)
         private static class IgnoreSwaggerPath extends WebSecurityConfigurerAdapter {
+
+            private static final String[] IGNORE_PATH = {"/v2/api-docs", "/swagger-resources/**","/doc.html", "/webjars/**"};
 
             @Override
             public void configure(WebSecurity web) throws Exception {
-                // web.ignoring是直接绕开spring security的所有filter，直接跳过验证
-                web.ignoring().antMatchers("/v2/api-docs", "/swagger-resources/**",
-                        "/doc.html", "/webjars/**");
+                web.ignoring().antMatchers(IGNORE_PATH);
             }
 
         }

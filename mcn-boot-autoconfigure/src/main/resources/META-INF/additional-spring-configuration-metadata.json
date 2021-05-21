@@ -33,6 +33,13 @@
       "sourceType": "cn.hiboot.mcn.autoconfigure.web.filter.FilterAutoConfiguration",
       "description": "是否开启跨域支持.",
       "defaultValue": false
+    },
+    {
+      "name": "swagger.path.ignore",
+      "type": "java.lang.Boolean",
+      "sourceType": "cn.hiboot.mcn.autoconfigure.web.mvc.SpringMvcAutoConfiguration$Swagger$IgnoreSwaggerPath",
+      "description": "是否开启忽略swagger路径.",
+      "defaultValue": true
     }
   ]
 }
