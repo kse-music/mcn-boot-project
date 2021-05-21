@@ -6,7 +6,7 @@ import cn.hiboot.mcn.core.model.ValidationErrorBean;
 import cn.hiboot.mcn.core.model.result.RestResp;
 import org.glassfish.jersey.server.ParamException;
 import org.glassfish.jersey.server.ServerProperties;
-import org.glassfish.jersey.server.validation.ValidationError;
+import org.glassfish.jersey.server.validation.ValidationErrorData;
 import org.glassfish.jersey.server.validation.internal.ValidationHelper;
 
 import javax.validation.ConstraintViolationException;
@@ -68,7 +68,7 @@ public class GlobalExceptionHandler extends AbstractExceptionHandler implements 
 
             if (property != null && Boolean.valueOf(property.toString())) {
                 response.type(MediaType.APPLICATION_JSON_TYPE);
-                List<ValidationError> errors = ValidationHelper.constraintViolationToValidationErrors(cve);
+                List<ValidationErrorData> errors = ValidationHelper.constraintViolationToValidationErrors(cve);
                 rs.setData(getValidationError(errors));
             }
         }
@@ -76,9 +76,9 @@ public class GlobalExceptionHandler extends AbstractExceptionHandler implements 
     }
 
 
-    private List<ValidationErrorBean> getValidationError(List<ValidationError> errors){
+    private List<ValidationErrorBean> getValidationError(List<ValidationErrorData> errors){
         List<ValidationErrorBean> list = new ArrayList();
-        for (ValidationError error : errors) {
+        for (ValidationErrorData error : errors) {
             list.add(new ValidationErrorBean(error.getMessage(),error.getPath(),error.getInvalidValue()));
         }
         return list;

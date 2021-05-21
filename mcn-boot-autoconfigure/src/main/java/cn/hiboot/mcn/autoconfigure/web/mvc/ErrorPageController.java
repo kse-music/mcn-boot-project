@@ -13,10 +13,8 @@ import javax.servlet.http.HttpServletRequest;
 @RestController
 public class ErrorPageController implements ErrorController {
 
-    private static final String ERROR_PATH = "/error";
-
-    @RequestMapping(ERROR_PATH)
-    public RestResp error(HttpServletRequest request) {
+    @RequestMapping("${server.error.path:${error.path:/error}}")
+    public RestResp<?> error(HttpServletRequest request) {
         Integer statusCode = (Integer) request.getAttribute(WebUtils.ERROR_STATUS_CODE_ATTRIBUTE);
         int code = ErrorMsg.HTTP_ERROR_500;
         if(statusCode == HttpStatus.UNAUTHORIZED.value()){
@@ -35,11 +33,6 @@ public class ErrorPageController implements ErrorController {
             code = ErrorMsg.HTTP_ERROR_409;
         }
         return ErrorMsg.buildErrorMessage(code);
-    }
-
-    @Override
-    public String getErrorPath() {
-        return ERROR_PATH;
     }
 
 }
