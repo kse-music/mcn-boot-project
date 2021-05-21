@@ -1,4 +1,4 @@
-:version: 2.4.5
+:version: 2.5.0
 
 == 简介
 MCN是一个基于SpringBoot的一个快速构建Restful风格的Web系统。MCN在SpringBoot的基础上配置更多默认配置，比如mybatis多数据源配置、跨域、编码等等一些SpringBoot没有的或者扩展的配置。
