@@ -176,7 +176,6 @@ public class SpringMvcAutoConfiguration {
                     .build();
         }
 
-        @ConditionalOnProperty(prefix = "swagger", name = {"enable"}, havingValue = "true")
         private static class IgnoreSwaggerPath extends WebSecurityConfigurerAdapter {
 
             @Override
