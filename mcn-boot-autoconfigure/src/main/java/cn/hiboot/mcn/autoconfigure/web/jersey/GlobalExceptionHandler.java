@@ -66,7 +66,7 @@ public class GlobalExceptionHandler extends AbstractExceptionHandler implements 
 
             Object property = config.getProperty(ServerProperties.BV_SEND_ERROR_IN_RESPONSE);
 
-            if (property != null && Boolean.valueOf(property.toString())) {
+            if (property != null && Boolean.parseBoolean(property.toString())) {
                 response.type(MediaType.APPLICATION_JSON_TYPE);
                 List<ValidationErrorData> errors = ValidationHelper.constraintViolationToValidationErrors(cve);
                 rs.setData(getValidationError(errors));
@@ -77,7 +77,7 @@ public class GlobalExceptionHandler extends AbstractExceptionHandler implements 
 
 
     private List<ValidationErrorBean> getValidationError(List<ValidationErrorData> errors){
-        List<ValidationErrorBean> list = new ArrayList();
+        List<ValidationErrorBean> list = new ArrayList<>();
         for (ValidationErrorData error : errors) {
             list.add(new ValidationErrorBean(error.getMessage(),error.getPath(),error.getInvalidValue()));
         }
