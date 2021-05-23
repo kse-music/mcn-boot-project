@@ -37,7 +37,7 @@
     {
       "name": "swagger.path.ignore",
       "type": "java.lang.Boolean",
-      "sourceType": "cn.hiboot.mcn.autoconfigure.web.mvc.SpringMvcAutoConfiguration$Swagger$IgnoreSwaggerPath",
+      "sourceType": "cn.hiboot.mcn.autoconfigure.web.security.WebSecurityAutoConfiguration",
       "description": "是否开启忽略swagger路径.",
       "defaultValue": true
     }

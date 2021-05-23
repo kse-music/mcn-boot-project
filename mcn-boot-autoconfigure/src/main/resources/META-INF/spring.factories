@@ -13,7 +13,8 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
   cn.hiboot.mcn.autoconfigure.jwt.JwtTokenAutoConfiguration,\
   cn.hiboot.mcn.autoconfigure.jwt.WebSecurityAutoConfiguration,\
   cn.hiboot.mcn.autoconfigure.converter.VOConverterAutoConfiguration,\
-  cn.hiboot.mcn.autoconfigure.web.mvc.WebMvcConfigurerAutoConfiguration
+  cn.hiboot.mcn.autoconfigure.web.mvc.WebMvcConfigurerAutoConfiguration,\
+  cn.hiboot.mcn.autoconfigure.web.security.WebSecurityAutoConfiguration
 
 org.springframework.boot.env.EnvironmentPostProcessor=\
   cn.hiboot.mcn.autoconfigure.context.McnPropertiesPostProcessor

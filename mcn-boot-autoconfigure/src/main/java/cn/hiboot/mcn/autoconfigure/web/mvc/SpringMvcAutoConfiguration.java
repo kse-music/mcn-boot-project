@@ -16,9 +16,6 @@ import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.core.annotation.Order;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -160,9 +157,7 @@ public class SpringMvcAutoConfiguration {
                     .apis(RequestHandlerSelectors.withClassAnnotation(RestController.class))
                     .paths(PathSelectors.any())
                     .build().enable(swagger2Properties.isEnable());
-            this.customizers.orderedStream().forEach((customizer) -> {
-                customizer.customize(docket);
-            });
+            this.customizers.orderedStream().forEach((customizer) -> customizer.customize(docket));
             return docket;
         }
 
@@ -174,21 +169,6 @@ public class SpringMvcAutoConfiguration {
                     .contact(new Contact(swagger2Properties.getName(),swagger2Properties.getUrl(),swagger2Properties.getEmail()))
                     .version(swagger2Properties.getVersion())
                     .build();
-        }
-
-        @Configuration(proxyBeanMethods = false)
-        @ConditionalOnProperty(prefix = "swagger.path", name = {"ignore"}, havingValue = "true",matchIfMissing = true)
-        @ConditionalOnClass(WebSecurityConfigurerAdapter.class)
-        @Order(0)
-        private static class IgnoreSwaggerPath extends WebSecurityConfigurerAdapter {
-
-            private static final String[] IGNORE_PATH = {"/v2/api-docs", "/swagger-resources/**","/doc.html", "/webjars/**"};
-
-            @Override
-            public void configure(WebSecurity web) throws Exception {
-                web.ignoring().antMatchers(IGNORE_PATH);
-            }
-
         }
 
     }
