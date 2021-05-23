@@ -16,6 +16,7 @@ import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -178,6 +179,7 @@ public class SpringMvcAutoConfiguration {
         @Configuration(proxyBeanMethods = false)
         @ConditionalOnProperty(prefix = "swagger.path", name = {"ignore"}, havingValue = "true",matchIfMissing = true)
         @ConditionalOnClass(WebSecurityConfigurerAdapter.class)
+        @Order(0)
         private static class IgnoreSwaggerPath extends WebSecurityConfigurerAdapter {
 
             private static final String[] IGNORE_PATH = {"/v2/api-docs", "/swagger-resources/**","/doc.html", "/webjars/**"};
