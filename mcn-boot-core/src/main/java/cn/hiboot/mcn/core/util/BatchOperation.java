@@ -29,6 +29,10 @@ public interface BatchOperation {
     }
 
     default <S> void operation(Iterable<S> all, Consumer<Collection<S>> consumer) {
+        operation(all,consumer,true);
+    }
+
+    default <S> void asyncOperation(Iterable<S> all, Consumer<Collection<S>> consumer) {
         operation(all,consumer,false);
     }
 
@@ -38,9 +42,9 @@ public interface BatchOperation {
      * @param all 总输入
      * @param consumer 批量处理函数
      * @param <S> 集合元素
-     * @param close 等待所有任务执行完关闭线程池
+     * @param closeWaitFinish 等待所有任务执行完关闭线程池
      */
-    default <S> void operation(Iterable<S> all, Consumer<Collection<S>> consumer,boolean close) {
+    default <S> void operation(Iterable<S> all, Consumer<Collection<S>> consumer,boolean closeWaitFinish) {
         if (all == null) {
             return;
         }
@@ -64,9 +68,9 @@ public interface BatchOperation {
         if(index != 0){
             consumer.accept(tmp);
         }
-        if(executor != null && close){
+        tmp.clear();
+        if(executor != null && closeWaitFinish){
             executor.closeUntilAllTaskFinish();
         }
-        tmp.clear();
     }
 }
