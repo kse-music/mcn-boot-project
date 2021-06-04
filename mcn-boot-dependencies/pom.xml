@@ -33,7 +33,6 @@
         <spring-boot.version>2.5.0</spring-boot.version>
         <spring-cloud.version>2020.0.3</spring-cloud.version>
         <mybatis-generator.version>1.3.7</mybatis-generator.version>
-        <es.version>7.13.0</es.version>
         <mybatis-spring-boot.version>2.2.0</mybatis-spring-boot.version>
         <guava.version>30.1.1-jre</guava.version>
         <jwt.version>3.1.0</jwt.version>
@@ -101,27 +100,6 @@
                 <groupId>de.codecentric</groupId>
                 <artifactId>spring-boot-admin-starter-server</artifactId>
                 <version>${boot-admin.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.elasticsearch.client</groupId>
-                <artifactId>transport</artifactId>
-                <version>${es.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.elasticsearch.client</groupId>
-                <artifactId>elasticsearch-rest-high-level-client</artifactId>
-                <version>${es.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.elasticsearch.client</groupId>
-                <artifactId>elasticsearch-rest-client</artifactId>
-                <version>${es.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.elasticsearch</groupId>
-                <artifactId>elasticsearch</artifactId>
-                <version>${es.version}</version>
             </dependency>
 
             <dependency>
