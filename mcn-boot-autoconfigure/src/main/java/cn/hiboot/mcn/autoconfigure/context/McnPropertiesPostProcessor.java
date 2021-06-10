@@ -10,7 +10,6 @@ import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.ResourcePropertySource;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.ResourceUtils;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -65,22 +64,6 @@ public class McnPropertiesPostProcessor implements EnvironmentPostProcessor,Orde
         try {
             //add global unique config file
             propertySources.addLast(new ResourcePropertySource(MCN_SOURCE_NAME,"classpath:config/mcn.properties"));
-        } catch (IOException e) {
-            //ignore file not found
-        }
-    }
-
-    private void loadGlobalConfig(ConfigurableEnvironment environment){
-        MutablePropertySources propertySources = environment.getPropertySources();
-        try{
-            //add global config file diff environment
-            String[] activeProfiles = environment.getActiveProfiles();
-            StringBuilder globalConfigName = new StringBuilder(ResourceUtils.CLASSPATH_URL_PREFIX).append("mcn-global");
-            if(activeProfiles.length > 0){
-                globalConfigName.append("-").append(activeProfiles[0]);
-            }
-            globalConfigName.append(".properties");
-            propertySources.addLast(new ResourcePropertySource("mcn-global",globalConfigName.toString()));
         } catch (IOException e) {
             //ignore file not found
         }
