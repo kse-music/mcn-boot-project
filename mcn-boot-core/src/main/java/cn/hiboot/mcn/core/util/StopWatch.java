@@ -1,8 +1,5 @@
 package cn.hiboot.mcn.core.util;
 
-
-import com.sun.istack.internal.Nullable;
-
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,10 +28,8 @@ public class StopWatch {
     private long startTimeNanos;
 
     /** Name of the current task. */
-    @Nullable
     private String currentTaskName;
 
-    @Nullable
     private TaskInfo lastTaskInfo;
 
     private int taskCount;
