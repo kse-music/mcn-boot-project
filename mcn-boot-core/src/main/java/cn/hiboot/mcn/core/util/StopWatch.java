@@ -1,5 +1,6 @@
 package cn.hiboot.mcn.core.util;
 
+
 import com.sun.istack.internal.Nullable;
 
 import java.text.NumberFormat;
@@ -145,7 +146,6 @@ public class StopWatch {
      * @since 4.2.2
      * @see #isRunning()
      */
-    @Nullable
     public String currentTaskName() {
         return this.currentTaskName;
     }
