@@ -48,6 +48,7 @@
         <orika.version>1.5.4</orika.version>
         <mapstruct.version>1.4.1.Final</mapstruct.version>
         <spring-cloud-alibaba.version>2.2.5.RELEASE</spring-cloud-alibaba.version>
+        <minio.version>8.2.2</minio.version>
     </properties>
 
     <dependencyManagement>
@@ -211,6 +212,12 @@
                 <groupId>org.mapstruct</groupId>
                 <artifactId>mapstruct-processor</artifactId>
                 <version>${mapstruct.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.minio</groupId>
+                <artifactId>minio</artifactId>
+                <version>${minio.version}</version>
             </dependency>
 
         </dependencies>
