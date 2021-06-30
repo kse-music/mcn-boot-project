@@ -10,6 +10,12 @@ import org.springframework.util.StringUtils;
 
 import java.util.Map;
 
+/**
+ * 多数据源条件配置同时注册MultipleDataSourceRegistryPostProcessor
+ *
+ * @author DingHao
+ * @since 2021/6/30 15:21
+ */
 class OnMultipleDatasourceCondition implements Condition {
 
     public static final String BEAN_NAME = MultipleDataSourceRegistryPostProcessor.class.getPackage().getName()+".multiplyDataSourceRegistryPostProcessor";
@@ -17,6 +23,9 @@ class OnMultipleDatasourceCondition implements Condition {
     @Override
     public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
         Map<String, Object> attributes = metadata.getAnnotationAttributes(ConditionOnMultipleDatasource.class.getName());
+        if(attributes == null){
+            return false;
+        }
         String prefix = attributes.get("prefix").toString();
         String name = attributes.get("name").toString();
         if(!StringUtils.hasText(prefix) || !StringUtils.hasText(name)){

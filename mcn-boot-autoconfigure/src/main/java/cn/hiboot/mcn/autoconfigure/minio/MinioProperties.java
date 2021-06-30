@@ -3,7 +3,7 @@ package cn.hiboot.mcn.autoconfigure.minio;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * describe about this class
+ * minio配置项
  *
  * @author DingHao
  * @since 2021/6/28 22:03

@@ -4,7 +4,7 @@ import java.time.ZonedDateTime;
 import java.util.Date;
 
 /**
- * describe about this class
+ * 简单封装bucket信息
  *
  * @author DingHao
  * @since 2021/6/28 23:02

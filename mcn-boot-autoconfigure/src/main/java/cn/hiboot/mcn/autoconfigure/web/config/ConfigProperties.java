@@ -1,7 +1,7 @@
 package cn.hiboot.mcn.autoconfigure.web.config;
 
 /**
- * describe about this class
+ * 定位mcn默认配置所在位置
  *
  * @author DingHao
  * @since 2020/7/22 23:57

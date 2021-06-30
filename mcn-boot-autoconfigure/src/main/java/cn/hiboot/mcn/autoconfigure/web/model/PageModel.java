@@ -9,6 +9,12 @@ import javax.ws.rs.DefaultValue;
 import javax.ws.rs.QueryParam;
 import java.util.Objects;
 
+/**
+ * 分页模型
+ *
+ * @author DingHao
+ * @since 2021/6/30 15:45
+ */
 public class PageModel extends BaseModel {
 
     @ApiParam("当前页，默认1")

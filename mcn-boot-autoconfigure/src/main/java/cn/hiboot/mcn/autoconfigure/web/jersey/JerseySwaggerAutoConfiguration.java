@@ -35,10 +35,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Configuration(proxyBeanMethods = false)
@@ -65,7 +62,7 @@ public class JerseySwaggerAutoConfiguration extends ResourceConfig {
             scanner.addIncludeFilter(new AnnotationTypeFilter(Path.class));
             scanner.addIncludeFilter(new AnnotationTypeFilter(Provider.class));
             String otherResourcePackage = jersey.getOtherResourcePackage();
-            Set<String> packages = new HashSet<>(Arrays.asList(jersey.getBasePackage()));
+            Set<String> packages = new HashSet<>(Collections.singletonList(jersey.getBasePackage()));
             if (StringUtils.hasLength(otherResourcePackage)) {
                 packages.addAll(Arrays.asList(StringUtils.tokenizeToStringArray(otherResourcePackage, ",")));
             }

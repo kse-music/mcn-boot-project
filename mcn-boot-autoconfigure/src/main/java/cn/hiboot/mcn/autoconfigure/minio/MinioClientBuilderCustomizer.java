@@ -3,7 +3,7 @@ package cn.hiboot.mcn.autoconfigure.minio;
 import io.minio.MinioClient;
 
 /**
- * describe about this class
+ * 自定义minio客户端
  *
  * @author DingHao
  * @since 2021/6/28 22:09

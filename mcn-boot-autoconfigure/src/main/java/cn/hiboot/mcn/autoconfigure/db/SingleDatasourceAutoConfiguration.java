@@ -8,6 +8,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Configuration;
 
 /**
+ * 单数据源自动配置
  * @author DingHao
  * @since 2018/11/28 10:32
  */

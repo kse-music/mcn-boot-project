@@ -10,6 +10,12 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.AnnotationMetadata;
 
+/**
+ * 扫描每个数据源下的mapper接口
+ *
+ * @author DingHao
+ * @since 2021/6/30 15:21
+ */
 class MapperScannerRegistry implements ImportBeanDefinitionRegistrar,EnvironmentAware,ResourceLoaderAware {
 
     private ResourceLoader resourceLoader;
@@ -19,6 +25,9 @@ class MapperScannerRegistry implements ImportBeanDefinitionRegistrar,Environment
     @Override
     public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
         String[] dbs = environment.getProperty(MultipleMybatisAutoConfiguration.PREFIX+"name", String[].class);
+        if(dbs == null){
+            return;
+        }
         String daoBasePackage = environment.getProperty((McnPropertiesPostProcessor.APP_BASE_PACKAGE))+".dao.";
         for (String db : dbs) {
             ClassPathMapperScanner scanner = new ClassPathMapperScanner(registry);

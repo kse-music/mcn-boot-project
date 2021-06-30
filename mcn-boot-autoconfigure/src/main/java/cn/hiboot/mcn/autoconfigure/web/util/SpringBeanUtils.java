@@ -3,6 +3,13 @@ package cn.hiboot.mcn.autoconfigure.web.util;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.Assert;
 
+/**
+ * SpringBeanUtils
+ * 当存在多个上下文时且当前上下文是子上下文时会更新applicationContext
+ *
+ * @author DingHao
+ * @since 2021/6/30 15:40
+ */
 public class SpringBeanUtils{
 	
 	private static ApplicationContext applicationContext;

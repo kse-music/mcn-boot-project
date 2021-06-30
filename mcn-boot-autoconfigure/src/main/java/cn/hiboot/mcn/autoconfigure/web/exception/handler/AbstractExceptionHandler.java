@@ -23,8 +23,8 @@ public abstract class AbstractExceptionHandler extends ErrorMsg implements Envir
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     protected void dealStackTraceElement(Exception exception){
-        List<StackTraceElement> elements = Arrays.asList(exception.getStackTrace()).stream().filter(s -> s.getClassName().contains(basePackage)).collect(Collectors.toList());
-        exception.setStackTrace(elements.toArray(new StackTraceElement[elements.size()]));
+        List<StackTraceElement> elements = Arrays.stream(exception.getStackTrace()).filter(s -> s.getClassName().contains(basePackage)).collect(Collectors.toList());
+        exception.setStackTrace(elements.toArray(new StackTraceElement[0]));
     }
 
     @Override
