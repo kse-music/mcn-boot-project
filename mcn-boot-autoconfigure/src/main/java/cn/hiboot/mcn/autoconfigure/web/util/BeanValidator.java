@@ -8,6 +8,9 @@ import java.util.Set;
 
 /**
  * 手动校验
+ *
+ * @author DingHao
+ * @since 2021/6/30 15:40
  */
 public class BeanValidator {
 

@@ -20,9 +20,15 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * 为每个数据源注册SqlSessionFactoryBean定义
+ *
+ * @author DingHao
+ * @since 2021/6/30 15:21
+ */
 public class MultipleDataSourceRegistryPostProcessor implements BeanDefinitionRegistryPostProcessor {
 
-    private Environment environment;
+    private final Environment environment;
 
     public MultipleDataSourceRegistryPostProcessor(Environment environment) {
         this.environment = environment;
@@ -33,6 +39,9 @@ public class MultipleDataSourceRegistryPostProcessor implements BeanDefinitionRe
         if (environment instanceof ConfigurableEnvironment) {
             ConfigurableEnvironment env = (ConfigurableEnvironment) environment;
             String[] dbs = env.getProperty(MultipleMybatisAutoConfiguration.PREFIX + "name", String[].class);
+            if(dbs == null){
+                return;
+            }
             String basePackage = env.getProperty((McnPropertiesPostProcessor.APP_BASE_PACKAGE));
             for (String db : dbs) {
                 GenericBeanDefinition beanDefinition = new GenericBeanDefinition();
@@ -76,7 +85,7 @@ public class MultipleDataSourceRegistryPostProcessor implements BeanDefinitionRe
                     registry.registerBeanDefinition(sb.toString(), rootBeanDefinition);
 
                 } catch (Exception e) {
-
+                    //
                 }
             }
         }

@@ -49,6 +49,7 @@ public class Minio {
             minioClient.putObject(args);
         }catch (Exception e){
             log.error("upload failed {}",e.getMessage());
+            throw new MinioException(e.getMessage());
         }
     }
 
@@ -67,6 +68,7 @@ public class Minio {
             minioClient.removeObject(args);
         }catch (Exception e){
             log.error("delete failed {}",e.getMessage());
+            throw new MinioException(e.getMessage());
         }
     }
 
@@ -90,8 +92,8 @@ public class Minio {
             }).filter(Objects::nonNull).collect(Collectors.toList());
         }catch (Exception e){
             log.error("list all failed {}",e.getMessage());
+            throw new MinioException(e.getMessage());
         }
-        return null;
     }
 
     public void deleteAll(String bucketName) {
@@ -112,6 +114,7 @@ public class Minio {
             }
         }catch (Exception e){
             log.error("delete all failed {}",e.getMessage());
+            throw new MinioException(e.getMessage());
         }
     }
 
@@ -131,9 +134,8 @@ public class Minio {
             return minioClient.getObject(args);
         }catch (Exception e){
             log.error("acquire failed {}",e.getMessage());
+            throw new MinioException(e.getMessage());
         }
-        return null;
-
     }
 
     /**
@@ -148,6 +150,7 @@ public class Minio {
             minioClient.makeBucket(args);
         }catch (Exception e){
             log.error("create bucket failed {}",e.getMessage());
+            throw new MinioException(e.getMessage());
         }
     }
 
@@ -159,6 +162,7 @@ public class Minio {
             }
         }catch (Exception e){
             log.error("create bucket failed {}",e.getMessage());
+            throw new MinioException(e.getMessage());
         }
         return Collections.emptyList();
     }
@@ -176,6 +180,7 @@ public class Minio {
             minioClient.removeBucket(args);
         }catch (Exception e){
             log.error("create bucket failed {}",e.getMessage());
+            throw new MinioException(e.getMessage());
         }
     }
 

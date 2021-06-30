@@ -9,7 +9,9 @@ public class ThirdPartyException extends BaseException {
     private ThirdPartyException(Integer code, String msg) {
         super(code,msg);
     }
-
+    private ThirdPartyException(String msg) {
+        super(msg);
+    }
     public static ThirdPartyException newInstance(){
         return newInstance(ExceptionKeys.REMOTE_SERVICE_ERROR);
     }
@@ -21,4 +23,9 @@ public class ThirdPartyException extends BaseException {
     public static ThirdPartyException newInstance(Integer code, String msg){
         return new ThirdPartyException(code,msg);
     }
+
+    public static ThirdPartyException newInstance(String msg){
+        return new ThirdPartyException(msg);
+    }
+
 }
