@@ -10,15 +10,15 @@ import cn.hiboot.mcn.core.exception.BaseException;
  */
 public class MinioException extends BaseException {
 
-    protected MinioException(Integer code) {
+    public MinioException(Integer code) {
         super(code);
     }
 
-    protected MinioException(String msg) {
+    public MinioException(String msg) {
         super(msg);
     }
 
-    protected MinioException(Integer code, String msg) {
+    public MinioException(Integer code, String msg) {
         super(code, msg);
     }
 
