@@ -1,7 +1,5 @@
 package cn.hiboot.mcn.core.exception;
 
-
-
 /**
  * 异常基类，各个模块的运行期异常均继承与该类 
  */
@@ -23,10 +21,6 @@ public class BaseException extends RuntimeException {
         super(msg(code, msg));
         this.code = code;
         this.msg = getMessage();
-    }
-
-    public BaseException(String message) {
-        super(message);
     }
 
     public BaseException(String message, Throwable cause) {
