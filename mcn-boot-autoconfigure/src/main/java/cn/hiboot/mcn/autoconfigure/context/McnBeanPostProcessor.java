@@ -1,6 +1,8 @@
 package cn.hiboot.mcn.autoconfigure.context;
 
 import cn.hiboot.mcn.core.service.McnAutowired;
+import cn.hiboot.mcn.core.util.JacksonUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
@@ -24,6 +26,14 @@ import java.util.Set;
  * @since 2019/1/7 2:09
  */
 public class McnBeanPostProcessor implements InstantiationAwareBeanPostProcessor {
+
+    @Override
+    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+        if(bean instanceof ObjectMapper){
+            JacksonUtils.setObjectMapper((ObjectMapper) bean);
+        }
+        return bean;
+    }
 
     @Override
     public PropertyValues postProcessProperties(PropertyValues pvs, Object bean, String beanName) throws BeansException {
