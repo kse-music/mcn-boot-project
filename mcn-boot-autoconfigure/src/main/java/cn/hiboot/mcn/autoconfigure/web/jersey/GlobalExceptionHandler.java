@@ -31,7 +31,7 @@ public class GlobalExceptionHandler extends AbstractExceptionHandler implements 
     @Override
     public Response toResponse(Exception e) {
         Response.Status statusCode = Response.Status.OK;
-        RestResp rs;
+        RestResp<Object> rs;
         if(e instanceof BaseException){
             rs = buildErrorMessage(((BaseException)e).getCode(),((BaseException)e).getMsg());
         }else if(e instanceof ParamException || e instanceof ValidationException){
@@ -58,8 +58,8 @@ public class GlobalExceptionHandler extends AbstractExceptionHandler implements 
         return Response.ok(rs).status(statusCode).type(MediaType.APPLICATION_JSON_TYPE).build();
     }
 
-    private RestResp parseParamException(Exception e) {
-        RestResp rs = buildErrorMessage(PARAM_PARSE_ERROR);
+    private RestResp<Object> parseParamException(Exception e) {
+        RestResp<Object> rs = buildErrorMessage(PARAM_PARSE_ERROR);
         if(e instanceof ConstraintViolationException){
             ConstraintViolationException cve = (ConstraintViolationException) e;
             Response.ResponseBuilder response = Response.status(ValidationHelper.getResponseStatus(cve));

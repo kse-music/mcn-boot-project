@@ -7,7 +7,7 @@ package cn.hiboot.mcn.core.exception;
  */
 public class BaseException extends RuntimeException {
 
-    private static final int DEFAULT_CODE = 999999;
+    public static final int DEFAULT_CODE = 999999;
     private Integer code;
     private String msg;
 

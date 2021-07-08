@@ -27,15 +27,15 @@ public abstract class ErrorMsg implements ExceptionKeys {
         return "";
     }
 
-    public static RestResp invalidCertificate(){
+    public static RestResp<Object> invalidCertificate(){
         return buildErrorMessage(ExceptionKeys.INVALID_CERTIFICATE_ERROR);
     }
 
-    public static RestResp buildErrorMessage(Integer code){
+    public static RestResp<Object> buildErrorMessage(Integer code){
         return buildErrorMessage(code,getErrorMsg(code));
     }
 
-    public static RestResp buildErrorMessage(Integer code,String msg){
+    public static RestResp<Object> buildErrorMessage(Integer code,String msg){
         return new RestResp<>(code, msg);
     }
 
