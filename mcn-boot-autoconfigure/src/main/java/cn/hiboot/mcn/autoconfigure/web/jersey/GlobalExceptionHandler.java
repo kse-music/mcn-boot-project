@@ -31,7 +31,7 @@ public class GlobalExceptionHandler extends AbstractExceptionHandler implements 
     @Override
     public Response toResponse(Exception e) {
         Response.Status statusCode = Response.Status.OK;
-        RestResp rs;
+        RestResp<Object> rs;
         if(e instanceof BaseException){
             rs = buildErrorMessage(((BaseException)e).getCode(),((BaseException)e).getMsg());
         }else if(e instanceof ParamException || e instanceof ValidationException){
@@ -58,15 +58,15 @@ public class GlobalExceptionHandler extends AbstractExceptionHandler implements 
         return Response.ok(rs).status(statusCode).type(MediaType.APPLICATION_JSON_TYPE).build();
     }
 
-    private RestResp parseParamException(Exception e) {
-        RestResp rs = buildErrorMessage(PARAM_PARSE_ERROR);
+    private RestResp<Object> parseParamException(Exception e) {
+        RestResp<Object> rs = buildErrorMessage(PARAM_PARSE_ERROR);
         if(e instanceof ConstraintViolationException){
             ConstraintViolationException cve = (ConstraintViolationException) e;
             Response.ResponseBuilder response = Response.status(ValidationHelper.getResponseStatus(cve));
 
             Object property = config.getProperty(ServerProperties.BV_SEND_ERROR_IN_RESPONSE);
 
-            if (property != null && Boolean.valueOf(property.toString())) {
+            if (property != null && Boolean.parseBoolean(property.toString())) {
                 response.type(MediaType.APPLICATION_JSON_TYPE);
                 List<ValidationError> errors = ValidationHelper.constraintViolationToValidationErrors(cve);
                 rs.setData(getValidationError(errors));
@@ -77,7 +77,7 @@ public class GlobalExceptionHandler extends AbstractExceptionHandler implements 
 
 
     private List<ValidationErrorBean> getValidationError(List<ValidationError> errors){
-        List<ValidationErrorBean> list = new ArrayList();
+        List<ValidationErrorBean> list = new ArrayList<>();
         for (ValidationError error : errors) {
             list.add(new ValidationErrorBean(error.getMessage(),error.getPath(),error.getInvalidValue()));
         }

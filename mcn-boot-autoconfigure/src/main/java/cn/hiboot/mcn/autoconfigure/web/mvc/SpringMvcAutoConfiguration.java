@@ -33,7 +33,6 @@ import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.ValidationException;
 import java.util.Arrays;
-import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -67,9 +66,9 @@ public class SpringMvcAutoConfiguration {
     static class ValidationExceptionHandler extends AbstractExceptionHandler {
 
         @ExceptionHandler(ValidationException.class)
-        public RestResp<?> handleValidationException(ValidationException exception){
+        public RestResp<Object> handleValidationException(ValidationException exception){
             dealStackTraceElement(exception);
-            RestResp<List<ValidationErrorBean>> objectRestResp = buildErrorMessage(PARAM_PARSE_ERROR);
+            RestResp<Object> objectRestResp = buildErrorMessage(PARAM_PARSE_ERROR);
             if (exception instanceof ConstraintViolationException) {
                 ConstraintViolationException cve = (ConstraintViolationException) exception;
                 objectRestResp.setData(cve.getConstraintViolations().stream().map(violation1 ->
