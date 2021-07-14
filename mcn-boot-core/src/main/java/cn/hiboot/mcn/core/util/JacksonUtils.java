@@ -1,8 +1,10 @@
 package cn.hiboot.mcn.core.util;
 
 import cn.hiboot.mcn.core.exception.JsonException;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.List;
@@ -25,6 +27,8 @@ public abstract class JacksonUtils {
     public static ObjectMapper getObjectMapper() {
         if(objectMapper == null){
             objectMapper = new ObjectMapper();
+            objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+            objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         }
         return objectMapper;
     }
