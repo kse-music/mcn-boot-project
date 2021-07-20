@@ -33,6 +33,13 @@
       "sourceType": "cn.hiboot.mcn.autoconfigure.web.filter.FilterAutoConfiguration",
       "description": "是否开启跨域支持.",
       "defaultValue": false
+    },
+    {
+      "name": "mcn.xss.enable",
+      "type": "java.lang.Boolean",
+      "sourceType": "cn.hiboot.mcn.autoconfigure.web.filter.FilterAutoConfiguration",
+      "description": "是否开启XSS过滤.",
+      "defaultValue": false
     }
   ]
 }

@@ -4,6 +4,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
@@ -21,7 +22,7 @@ import org.springframework.web.filter.CorsFilter;
 @EnableConfigurationProperties(FilterProperties.class)
 public class FilterAutoConfiguration {
 
-    private FilterProperties filterProperties;
+    private final FilterProperties filterProperties;
 
     public FilterAutoConfiguration(FilterProperties filterProperties) {
         this.filterProperties = filterProperties;
@@ -47,13 +48,14 @@ public class FilterAutoConfiguration {
         return new DurationAop();
     }
 
-//    @Bean
-//    @ConditionalOnClass(name = "org.jsoup.Jsoup")
-//    public FilterRegistrationBean xssFilter() {
-//        FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean(new XssFilter(filterProperties));
-//        filterRegistrationBean.setOrder(2);
-//        filterRegistrationBean.addUrlPatterns("/*");
-//        return filterRegistrationBean;
-//    }
+    @Bean
+    @ConditionalOnClass(name = "org.jsoup.Jsoup")
+    @ConditionalOnProperty(prefix = "mcn",name = "xss.enable",havingValue = "true")
+    public FilterRegistrationBean<XssFilter> xssFilter() {
+        FilterRegistrationBean<XssFilter> filterRegistrationBean = new FilterRegistrationBean<>(new XssFilter(filterProperties));
+        filterRegistrationBean.setOrder(2);
+        filterRegistrationBean.addUrlPatterns("/*");
+        return filterRegistrationBean;
+    }
 
 }

@@ -21,7 +21,7 @@ public class XssFilter implements Filter {
 
     private static final Logger logger = LoggerFactory.getLogger(XssFilter.class);
 
-    private FilterProperties filterProperties;
+    private final FilterProperties filterProperties;
 
     public XssFilter(FilterProperties filterProperties) {
         this.filterProperties = filterProperties;
@@ -60,16 +60,6 @@ public class XssFilter implements Filter {
         }
 
         return false;
-    }
-
-    @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
-
-    }
-
-    @Override
-    public void destroy() {
-
     }
 
 }
