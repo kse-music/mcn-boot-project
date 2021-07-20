@@ -8,8 +8,6 @@ import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 
 import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * common
@@ -23,8 +21,7 @@ public abstract class AbstractExceptionHandler extends ErrorMsg implements Envir
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     protected void dealStackTraceElement(Exception exception){
-        List<StackTraceElement> elements = Arrays.stream(exception.getStackTrace()).filter(s -> s.getClassName().contains(basePackage)).collect(Collectors.toList());
-        exception.setStackTrace(elements.toArray(new StackTraceElement[0]));
+        exception.setStackTrace(Arrays.stream(exception.getStackTrace()).filter(s -> s.getClassName().contains(basePackage)).toArray(StackTraceElement[]::new));
     }
 
     @Override
