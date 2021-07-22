@@ -40,6 +40,13 @@
       "sourceType": "cn.hiboot.mcn.autoconfigure.web.filter.FilterAutoConfiguration",
       "description": "是否开启XSS过滤.",
       "defaultValue": false
+    },
+    {
+      "name": "mcn.print-env.enable",
+      "type": "java.lang.Boolean",
+      "sourceType": "cn.hiboot.mcn.autoconfigure.context.McnApplicationListener",
+      "description": "是否打印环境配置.",
+      "defaultValue": false
     }
   ]
 }
