@@ -12,7 +12,7 @@
     <description>MCN Boot Project</description>
 
     <properties>
-        <revision>2.5.2</revision>
+        <revision>2.5.3</revision>
     </properties>
 
     <modules>
