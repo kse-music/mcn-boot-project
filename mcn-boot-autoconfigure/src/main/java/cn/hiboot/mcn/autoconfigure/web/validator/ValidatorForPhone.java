@@ -1,6 +1,5 @@
 package cn.hiboot.mcn.autoconfigure.web.validator;
 
-import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import java.util.regex.Pattern;
 
@@ -10,15 +9,21 @@ import java.util.regex.Pattern;
  * @author DingHao
  * @since 2021/6/30 15:45
  */
-public class ValidatorForPhone implements ConstraintValidator<Phone, String> {
+public class ValidatorForPhone extends AbstractConstraintValidator<Phone, String> {
 
-    public boolean isValid(String value, ConstraintValidatorContext context) {
+    @Override
+    public void config(ConstraintValidatorContext context) {
         //禁用默认提示信息
-//        context.disableDefaultConstraintViolation();
+        context.disableDefaultConstraintViolation();
         //设置提示语
-//        context.buildConstraintViolationWithTemplate("The phone number not correct").addConstraintViolation();
+        context.buildConstraintViolationWithTemplate("The phone number not correct").addConstraintViolation();
+    }
+
+    @Override
+    public boolean isValid(String value) {
         String pattern = "^\\d{11}$";
         return value != null && Pattern.matches(pattern, value);
     }
+
 }
 

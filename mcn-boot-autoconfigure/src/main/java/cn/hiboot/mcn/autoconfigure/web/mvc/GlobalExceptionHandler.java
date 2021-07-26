@@ -80,9 +80,10 @@ public class GlobalExceptionHandler extends AbstractExceptionHandler {
     private ObjectProvider<UnCaughtExceptionHandler<?>> exceptionHandlers;
 
     private Object dealBindingResult(BindingResult bindingResult){
-        return bindingResult.getAllErrors().stream().map((e) -> {
+        return bindingResult.getAllErrors().stream().map(e -> {
             if(e instanceof FieldError){
-                return new ValidationErrorBean(e.getDefaultMessage(),((FieldError )e).getField(), ((FieldError )e).getRejectedValue()==null?null:((FieldError )e).getRejectedValue().toString());
+                FieldError fieldError = (FieldError) e;
+                return new ValidationErrorBean(e.getDefaultMessage(),fieldError.getField(), fieldError.getRejectedValue()==null?null:fieldError.getRejectedValue().toString());
             }
             return new ValidationErrorBean(e.getDefaultMessage(),e.getObjectName(), null);
            }
