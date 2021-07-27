@@ -1,28 +1,29 @@
 package cn.hiboot.mcn.autoconfigure.web.validator;
 
-
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import java.lang.annotation.Annotation;
 
 /**
- * AbstractConstraintValidator
+ * ConstraintValidatorExtend
  *
  * @author DingHao
  * @since 2021/7/26 17:36
  */
-public abstract class AbstractConstraintValidator<A extends Annotation, T> implements ConstraintValidator<A, T> {
+public interface ConstraintValidatorExtend<A extends Annotation, T> extends ConstraintValidator<A, T> {
 
     @Override
-    public boolean isValid(T value, ConstraintValidatorContext context) {
+    default boolean isValid(T value, ConstraintValidatorContext context) {
         config(context);
         return isValid(value);
     }
 
-    protected void config(ConstraintValidatorContext context){
+    default void config(ConstraintValidatorContext context){
 
     }
 
-    public abstract boolean isValid(T value);
+    default boolean isValid(T value){
+        return true;
+    }
 
 }

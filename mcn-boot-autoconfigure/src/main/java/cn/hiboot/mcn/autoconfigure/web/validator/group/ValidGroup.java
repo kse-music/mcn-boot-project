@@ -8,6 +8,8 @@ import javax.validation.groups.Default;
  * 如果不继承Default则不会校验未指定分组的参数，
  * 需要加上@Validated(value = {ValidGroup.Crud.Update.class, Default.class}才会校验
  *
+ * GroupSequence注解可以指定校验顺序
+ *
  * @author DingHao
  * @since 2021/7/26 17:25
  */

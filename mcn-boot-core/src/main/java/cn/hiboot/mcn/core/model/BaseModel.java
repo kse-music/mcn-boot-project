@@ -7,29 +7,9 @@ import java.util.Date;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class BaseModel {
 
-    private Integer pageNo = 1;
-
-    private Integer pageSize = 10;
-
     private transient Date createTime;
 
     private transient Date updateTime;
-
-    public Integer getPageNo() {
-        return pageNo;
-    }
-
-    public void setPageNo(Integer pageNo) {
-        this.pageNo = pageNo;
-    }
-
-    public Integer getPageSize() {
-        return pageSize;
-    }
-
-    public void setPageSize(Integer pageSize) {
-        this.pageSize = pageSize;
-    }
 
     public Date getCreateTime() {
         return createTime;
