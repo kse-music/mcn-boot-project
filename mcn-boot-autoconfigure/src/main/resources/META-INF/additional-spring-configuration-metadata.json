@@ -47,6 +47,13 @@
       "sourceType": "cn.hiboot.mcn.autoconfigure.context.McnApplicationListener",
       "description": "是否打印环境配置.",
       "defaultValue": false
+    },
+    {
+      "name": "http.code.override",
+      "type": "java.lang.Boolean",
+      "sourceType": "cn.hiboot.mcn.autoconfigure.web.mvc.ErrorPageController",
+      "description": "是否重写http状态码.",
+      "defaultValue": true
     }
   ]
 }

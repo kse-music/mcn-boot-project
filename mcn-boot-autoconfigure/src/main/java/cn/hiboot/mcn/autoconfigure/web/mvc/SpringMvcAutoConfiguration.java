@@ -54,7 +54,7 @@ public class SpringMvcAutoConfiguration {
 
         @Bean
         @ConditionalOnMissingBean(ErrorController.class)
-        public ErrorController errorController() {
+        public ErrorPageController errorController() {
             return new ErrorPageController();
         }
 
