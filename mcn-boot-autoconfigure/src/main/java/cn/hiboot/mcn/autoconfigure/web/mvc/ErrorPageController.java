@@ -2,6 +2,7 @@ package cn.hiboot.mcn.autoconfigure.web.mvc;
 
 import cn.hiboot.mcn.core.exception.ErrorMsg;
 import cn.hiboot.mcn.core.model.result.RestResp;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -9,14 +10,16 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.WebUtils;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 @RestController
 public class ErrorPageController implements ErrorController {
 
-    private static final String ERROR_PATH = "/error";
+    @Value("${http.code.override:true}")
+    private boolean overrideHttpCode;
 
-    @RequestMapping(ERROR_PATH)
-    public RestResp error(HttpServletRequest request) {
+    @RequestMapping("${server.error.path:${error.path:/error}}")
+    public RestResp<?> error(HttpServletRequest request, HttpServletResponse response) {
         Integer statusCode = (Integer) request.getAttribute(WebUtils.ERROR_STATUS_CODE_ATTRIBUTE);
         int code = ErrorMsg.HTTP_ERROR_500;
         if(statusCode == HttpStatus.UNAUTHORIZED.value()){
@@ -34,12 +37,15 @@ public class ErrorPageController implements ErrorController {
         }else if(statusCode == HttpStatus.CONFLICT.value()){
             code = ErrorMsg.HTTP_ERROR_409;
         }
+        if(overrideHttpCode){
+            response.setStatus(HttpServletResponse.SC_OK);
+        }
         return ErrorMsg.buildErrorMessage(code);
     }
 
     @Override
     public String getErrorPath() {
-        return ERROR_PATH;
+        return "/error";
     }
 
 }
