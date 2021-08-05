@@ -1,4 +1,4 @@
-package cn.hiboot.mcn.autoconfigure.web.filter;
+package cn.hiboot.mcn.autoconfigure.web.filter.xss;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -13,12 +13,10 @@ import javax.servlet.http.HttpServletRequestWrapper;
  */
 public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
 
-    private final HttpServletRequest originalRequest;
     private final boolean isIncludeRichText;
 
     public XssHttpServletRequestWrapper(HttpServletRequest request, boolean isIncludeRichText) {
         super(request);
-        this.originalRequest = request;
         this.isIncludeRichText = isIncludeRichText;
     }
 
@@ -32,7 +30,7 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
      */
     @Override
     public String getParameter(String name) {
-        Boolean flag = ("content".equals(name) || name.endsWith("WithHtml"));
+        boolean flag = "content".equals(name) || name.endsWith("WithHtml");
         if (flag && !isIncludeRichText) {
             return super.getParameter(name);
         }
@@ -72,17 +70,6 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
             value = JsoupUtil.clean(value);
         }
         return value;
-    }
-
-    public HttpServletRequest getOriginalRequest() {
-        return originalRequest;
-    }
-
-    public static HttpServletRequest getOriginalRequest(HttpServletRequest req) {
-        if (req instanceof XssHttpServletRequestWrapper) {
-            return ((XssHttpServletRequestWrapper) req).getOriginalRequest();
-        }
-        return req;
     }
 
 }

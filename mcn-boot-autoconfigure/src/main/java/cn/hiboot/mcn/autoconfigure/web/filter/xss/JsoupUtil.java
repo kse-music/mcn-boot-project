@@ -1,4 +1,4 @@
-package cn.hiboot.mcn.autoconfigure.web.filter;
+package cn.hiboot.mcn.autoconfigure.web.filter.xss;
 
 
 import cn.hiboot.mcn.core.util.McnUtils;
