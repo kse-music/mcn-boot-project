@@ -1,8 +1,7 @@
-package cn.hiboot.mcn.autoconfigure.web.filter;
+package cn.hiboot.mcn.autoconfigure.web.filter.xss;
 
+import cn.hiboot.mcn.autoconfigure.web.filter.FilterProperties;
 import cn.hiboot.mcn.core.util.McnUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
@@ -19,8 +18,6 @@ import java.util.regex.Pattern;
  */
 public class XssFilter implements Filter {
 
-    private static final Logger logger = LoggerFactory.getLogger(XssFilter.class);
-
     private final FilterProperties filterProperties;
 
     public XssFilter(FilterProperties filterProperties) {
@@ -29,8 +26,6 @@ public class XssFilter implements Filter {
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws IOException, ServletException {
-        logger.debug("xss filter is open");
-
         HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse resp = (HttpServletResponse) response;
 
@@ -40,16 +35,13 @@ public class XssFilter implements Filter {
         }
 
         XssHttpServletRequestWrapper xssRequest = new XssHttpServletRequestWrapper((HttpServletRequest) request, filterProperties.isIncludeRichText());
-
         filterChain.doFilter(xssRequest, response);
     }
 
     private boolean handleExcludeURL(HttpServletRequest request, HttpServletResponse response) {
-
         if (McnUtils.isNullOrEmpty(filterProperties.getExcludes())) {
             return false;
         }
-
         String url = request.getServletPath();
         for (String pattern : filterProperties.getExcludes()) {
             Pattern p = Pattern.compile("^" + pattern);
@@ -58,7 +50,6 @@ public class XssFilter implements Filter {
                 return true;
             }
         }
-
         return false;
     }
 

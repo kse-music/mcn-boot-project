@@ -1,5 +1,6 @@
 package cn.hiboot.mcn.autoconfigure.web.filter;
 
+import cn.hiboot.mcn.autoconfigure.web.filter.xss.XssFilter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
