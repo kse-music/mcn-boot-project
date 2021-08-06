@@ -4,7 +4,8 @@ import cn.hiboot.mcn.autoconfigure.web.util.SpringBeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.context.event.*;
+import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
+import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.boot.context.logging.LoggingApplicationListener;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.event.GenericApplicationListener;
@@ -25,16 +26,13 @@ public class McnApplicationListener implements GenericApplicationListener {
 
     public static final int DEFAULT_ORDER = LoggingApplicationListener.DEFAULT_ORDER + 1;
 
-    private static final Class<?>[] EVENT_TYPES = { ApplicationStartingEvent.class, ApplicationEnvironmentPreparedEvent.class,
-            ApplicationPreparedEvent.class, ApplicationStartedEvent.class,ApplicationFailedEvent.class};
+    private static final Class<?>[] EVENT_TYPES = { ApplicationEnvironmentPreparedEvent.class, ApplicationStartedEvent.class};
 
     private static final Class<?>[] SOURCE_TYPES = { SpringApplication.class };
 
     @Override
     public void onApplicationEvent(ApplicationEvent applicationEvent) {
-        if(applicationEvent instanceof ApplicationStartingEvent){
-
-        }else if(applicationEvent instanceof ApplicationEnvironmentPreparedEvent){
+        if(applicationEvent instanceof ApplicationEnvironmentPreparedEvent){
             ApplicationEnvironmentPreparedEvent event = (ApplicationEnvironmentPreparedEvent) applicationEvent;
             if(event.getEnvironment().getProperty("mcn.print-env.enable",Boolean.class,false)){
                 for (PropertySource<?> propertySource : event.getEnvironment().getPropertySources()) {
@@ -49,12 +47,8 @@ public class McnApplicationListener implements GenericApplicationListener {
                     }
                 }
             }
-        }else if(applicationEvent instanceof ApplicationPreparedEvent){
-
         }else if(applicationEvent instanceof ApplicationStartedEvent){
             SpringBeanUtils.setApplicationContext(((ApplicationStartedEvent) applicationEvent).getApplicationContext());
-        }else if(applicationEvent instanceof ApplicationFailedEvent){
-
         }
     }
 
