@@ -1,13 +1,8 @@
 package cn.hiboot.mcn.autoconfigure.web.mvc;
 
 import cn.hiboot.mcn.core.model.result.RestResp;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.AutoConfigureAfter;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import cn.hiboot.mcn.core.util.JacksonUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
-import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Conventions;
 import org.springframework.core.MethodParameter;
@@ -33,36 +28,21 @@ import java.util.List;
  * @since 2021/5/9 20:46
  */
 @Configuration(proxyBeanMethods = false)
-@AutoConfigureAfter(JacksonAutoConfiguration.class)
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 public class WebMvcConfigurerAutoConfiguration {
 
 
     @Configuration(proxyBeanMethods = false)
-    @ConditionalOnBean(ObjectMapper.class)
     private static class WebMvcConfig implements WebMvcConfigurer {
-
-        private final ObjectMapper objectMapper;
-
-        public WebMvcConfig(ObjectMapper objectMapper) {
-            this.objectMapper = objectMapper;
-        }
 
         @Override
         public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-            resolvers.add(new MethodArgumentResolver(objectMapper));
+            resolvers.add(new MethodArgumentResolver());
         }
 
     }
 
-    @SuppressWarnings("all")
     private static class MethodArgumentResolver implements HandlerMethodArgumentResolver{
-
-        private final ObjectMapper objectMapper;
-
-        public MethodArgumentResolver(ObjectMapper objectMapper) {
-            this.objectMapper = objectMapper;
-        }
 
         @Override
         public boolean supportsParameter(MethodParameter parameter) {
@@ -76,18 +56,7 @@ public class WebMvcConfigurerAutoConfiguration {
             if(request == null){
                 return null;
             }
-            return readValue(objectMapper,request.getParameter(name),parameter.getParameterType());
-        }
-    }
-
-    private static Object readValue(ObjectMapper objectMapper,String data,Class<?> clazz){
-        if(data == null){
-            return null;
-        }
-        try {
-            return objectMapper.readValue(data,clazz);
-        } catch (JsonProcessingException e) {
-            return data;
+            return JacksonUtils.fromJson(request.getParameter(name),parameter.getParameterType());
         }
     }
 
@@ -95,9 +64,6 @@ public class WebMvcConfigurerAutoConfiguration {
     @ControllerAdvice
     @Configuration(proxyBeanMethods = false)
     private static class RestRespResponseBodyAdvice implements ResponseBodyAdvice<RestResp> {
-
-        @Autowired
-        private ObjectMapper objectMapper;
 
         @Override
         public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
@@ -107,7 +73,7 @@ public class WebMvcConfigurerAutoConfiguration {
         @Override
         public RestResp beforeBodyWrite(RestResp body, MethodParameter returnType, MediaType selectedContentType, Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
             if(body != null && body.getData() instanceof String){
-                body.setData(readValue(objectMapper,body.getData().toString(),returnType.getMethodAnnotation(StrToObj.class).value()));
+                body.setData(JacksonUtils.fromJson(body.getData().toString(),returnType.getMethodAnnotation(StrToObj.class).value()));
             }
             return body;
         }

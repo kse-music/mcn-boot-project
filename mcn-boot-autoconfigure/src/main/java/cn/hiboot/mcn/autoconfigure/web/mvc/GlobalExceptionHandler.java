@@ -114,7 +114,6 @@ public class GlobalExceptionHandler extends AbstractExceptionHandler {
         dealStackTraceElement(exception);
         Integer errorCode = exception.getCode();
         String errMsg = exception.getMsg();
-        dealStackTraceElement(exception);
         logger.error("ErrorMsg = {}",errMsg,exception);
         return buildErrorMessage(errorCode,errMsg);
     }
