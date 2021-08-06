@@ -7,7 +7,9 @@ import org.springframework.core.Ordered;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.MutablePropertySources;
+import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePropertySource;
 import org.springframework.util.ClassUtils;
 
@@ -61,34 +63,22 @@ public class McnPropertiesPostProcessor implements EnvironmentPostProcessor,Orde
 
     private void loadMcnConfigFile(ConfigurableEnvironment environment){
         MutablePropertySources propertySources = environment.getPropertySources();
-        try {
-            //add global unique config file
-            propertySources.addLast(new ResourcePropertySource(MCN_SOURCE_NAME,"classpath:config/mcn.properties"));
-        } catch (IOException e) {
-            //ignore file not found
+        //add global unique config file diff profile
+        String[] activeProfiles = environment.getActiveProfiles();
+        if(activeProfiles.length > 0){
+            for (int i = activeProfiles.length - 1; i >= 0; i--) {//后面申明的优先级高
+                String activeProfile = activeProfiles[i];
+                addLast(propertySources,loadResourcePropertySource(MCN_SOURCE_NAME.concat("-").concat(activeProfile),"classpath:config/mcn-"+activeProfile+".properties"));
+            }
         }
+        //总是加载mcn配置文件
+        addLast(propertySources,loadResourcePropertySource(MCN_SOURCE_NAME, "classpath:config/mcn.properties"));
     }
 
     private void loadDefaultConfig(ConfigurableEnvironment environment, SpringApplication application){
         MutablePropertySources propertySources = environment.getPropertySources();
 
         //add MapPropertySource,包含主源的包名,日志文件名,mcn版本,以及dao包下的日志打印级别
-        loadMapConfig(environment, application);
-
-        try{
-            propertySources.addLast(new ResourcePropertySource(MCN_DEFAULT_PROPERTY_SOURCE_NAME,loadClassPathResource("mcn-default.properties")));
-            //默认开启日志文件自动配置，在使用 Apollo以及nacos等配置中心可关闭以避免日志文件使用不到配置中心的配置
-            boolean logFileEnable = environment.getProperty(MCN_LOG_FILE_ENABLE,Boolean.class,true);
-            if (logFileEnable) {
-                propertySources.addLast(new ResourcePropertySource("mcn-log-file",loadClassPathResource("log.properties")));
-            }
-        } catch (IOException e) {
-            //ignore file not found
-        }
-
-    }
-
-    private void loadMapConfig(ConfigurableEnvironment environment, SpringApplication application){
         Map<String, Object> mapProp = new HashMap<>();
         Class<?> mainApplicationClass = application.getMainApplicationClass();//maybe is null
         if(Objects.nonNull(mainApplicationClass)){
@@ -98,11 +88,37 @@ public class McnPropertiesPostProcessor implements EnvironmentPostProcessor,Orde
         }
         mapProp.put("mcn.log.file.name",environment.getProperty("mcn.log.file.name","error"));
         mapProp.put("mcn.version","v"+ this.getClass().getPackage().getImplementationVersion());
-        environment.getPropertySources().addLast(new MapPropertySource("mcn-map",mapProp));
+        addLast(propertySources,new MapPropertySource("mcn-map",mapProp));
+
+        //加载默认配置
+        addLast(propertySources,loadResourcePropertySource(MCN_DEFAULT_PROPERTY_SOURCE_NAME, loadClassPathResource("mcn-default.properties")));
+        boolean logFileEnable = environment.getProperty(MCN_LOG_FILE_ENABLE,Boolean.class,true);
+        if (logFileEnable) {
+            //加载默认日志配置
+            addLast(propertySources,loadResourcePropertySource("mcn-log-file", loadClassPathResource("log.properties")));
+        }
     }
 
     private ClassPathResource loadClassPathResource(String file){
         return new ClassPathResource(file, ConfigProperties.class);
+    }
+
+    private ResourcePropertySource loadResourcePropertySource(String name, Object resource){
+        try {
+            if(resource instanceof Resource){
+                return new ResourcePropertySource(name, (Resource)resource);
+            }
+            return new ResourcePropertySource(name, resource.toString());
+        } catch (IOException e) {
+            //ignore resource not exist
+        }
+        return null;
+    }
+
+    private void addLast(MutablePropertySources propertySources, PropertySource<?> propertySource){
+        if(propertySource != null){
+            propertySources.addLast(propertySource);
+        }
     }
 
     @Override
