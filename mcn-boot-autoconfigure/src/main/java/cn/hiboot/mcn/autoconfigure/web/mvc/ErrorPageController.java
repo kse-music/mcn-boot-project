@@ -12,6 +12,7 @@ import org.springframework.web.util.WebUtils;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+@IgnoreApi
 @RestController
 public class ErrorPageController implements ErrorController {
 
