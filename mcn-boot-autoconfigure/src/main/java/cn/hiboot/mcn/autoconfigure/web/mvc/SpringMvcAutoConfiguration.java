@@ -4,6 +4,7 @@ import cn.hiboot.mcn.autoconfigure.web.exception.handler.AbstractExceptionHandle
 import cn.hiboot.mcn.core.model.ValidationErrorBean;
 import cn.hiboot.mcn.core.model.result.RestResp;
 import cn.hiboot.mcn.swagger.MvcSwagger2;
+import com.google.common.base.Predicates;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -153,7 +154,10 @@ public class SpringMvcAutoConfiguration {
             Docket docket = new Docket(DocumentationType.SWAGGER_2)
                     .apiInfo(apiInfo())
                     .select()
-                    .apis(RequestHandlerSelectors.withClassAnnotation(RestController.class))
+                    .apis(Predicates.and(
+                            Predicates.not(RequestHandlerSelectors.withClassAnnotation(IgnoreApi.class)),
+                            Predicates.not(RequestHandlerSelectors.withMethodAnnotation(IgnoreApi.class)),
+                            RequestHandlerSelectors.withClassAnnotation(RestController.class)))
                     .paths(PathSelectors.any())
                     .build().enable(swagger2Properties.isEnable());
             this.customizers.orderedStream().forEach((customizer) -> customizer.customize(docket));
