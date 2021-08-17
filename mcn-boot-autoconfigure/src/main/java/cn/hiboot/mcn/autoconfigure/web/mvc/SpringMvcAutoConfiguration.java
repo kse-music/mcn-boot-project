@@ -4,6 +4,7 @@ import cn.hiboot.mcn.autoconfigure.web.exception.handler.AbstractExceptionHandle
 import cn.hiboot.mcn.core.model.ValidationErrorBean;
 import cn.hiboot.mcn.core.model.result.RestResp;
 import cn.hiboot.mcn.swagger.MvcSwagger2;
+import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
@@ -21,18 +22,21 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.DispatcherServlet;
+import springfox.documentation.RequestHandler;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.service.Contact;
 import springfox.documentation.spi.DocumentationType;
+import springfox.documentation.spring.web.plugins.ApiSelectorBuilder;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.ValidationException;
+import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
@@ -142,26 +146,38 @@ public class SpringMvcAutoConfiguration {
     private static class Swagger {
 
         private final Swagger2Properties swagger2Properties;
-        private final ObjectProvider<DocketCustomizer> customizers;
+        private final ObjectProvider<RequestHandlerPredicate> requestHandlerPredicates;
+        private final Predicate<RequestHandler> DEFAULT_REQUEST_HANDLER = withClassAnnotation(RestController.class);
 
-        public Swagger(Swagger2Properties swagger2Properties, ObjectProvider<DocketCustomizer> customizers) {
+        public Swagger(Swagger2Properties swagger2Properties, ObjectProvider<RequestHandlerPredicate> requestHandlerPredicates) {
             this.swagger2Properties = swagger2Properties;
-            this.customizers = customizers;
+            this.requestHandlerPredicates = requestHandlerPredicates;
+        }
+
+        private Predicate<RequestHandler> withClassAnnotation(Class<? extends Annotation> annotation){
+            return RequestHandlerSelectors.withClassAnnotation(annotation);
+        }
+
+        @Bean
+        public RequestHandlerPredicate requestHandlerPredicate(){
+            return () -> Predicates.and(
+                        Predicates.not(withClassAnnotation(IgnoreApi.class)),
+                        Predicates.not(RequestHandlerSelectors.withMethodAnnotation(IgnoreApi.class)));
         }
 
         @Bean
         public Docket createRestApi() {
-            Docket docket = new Docket(DocumentationType.SWAGGER_2)
+            ApiSelectorBuilder apiSelectorBuilder = new Docket(DocumentationType.SWAGGER_2)
                     .apiInfo(apiInfo())
-                    .select()
-                    .apis(Predicates.and(
-                            Predicates.not(RequestHandlerSelectors.withClassAnnotation(IgnoreApi.class)),
-                            Predicates.not(RequestHandlerSelectors.withMethodAnnotation(IgnoreApi.class)),
-                            RequestHandlerSelectors.withClassAnnotation(RestController.class)))
+                    .select().apis(DEFAULT_REQUEST_HANDLER);
+
+            for (RequestHandlerPredicate requestHandlerPredicate : requestHandlerPredicates) {
+                apiSelectorBuilder.apis(requestHandlerPredicate.get());
+            }
+
+            return apiSelectorBuilder.apis(DEFAULT_REQUEST_HANDLER)
                     .paths(PathSelectors.any())
                     .build().enable(swagger2Properties.isEnable());
-            this.customizers.orderedStream().forEach((customizer) -> customizer.customize(docket));
-            return docket;
         }
 
         private ApiInfo apiInfo() {
