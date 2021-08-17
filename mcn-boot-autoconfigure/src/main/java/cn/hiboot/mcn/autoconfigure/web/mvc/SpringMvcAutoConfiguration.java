@@ -175,9 +175,7 @@ public class SpringMvcAutoConfiguration {
                 apiSelectorBuilder.apis(requestHandlerPredicate.get());
             }
 
-            return apiSelectorBuilder.apis(DEFAULT_REQUEST_HANDLER)
-                    .paths(PathSelectors.any())
-                    .build().enable(swagger2Properties.isEnable());
+            return apiSelectorBuilder.paths(PathSelectors.any()).build().enable(swagger2Properties.isEnable());
         }
 
         private ApiInfo apiInfo() {
