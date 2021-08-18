@@ -19,8 +19,8 @@ public class DefaultMinio implements Minio{
 
     public DefaultMinio(MinioClient minioClient, String bucketName,String previewParameterName) {
         this.minioClient = minioClient;
-        this.defaultBucketName = McnUtils.isNullOrEmpty(previewParameterName) ? DEFAULT_PREVIEW_PARAMETER_NAME : previewParameterName;
-        this.previewParameterName = previewParameterName;
+        this.defaultBucketName = bucketName;
+        this.previewParameterName = McnUtils.isNullOrEmpty(previewParameterName) ? DEFAULT_PREVIEW_PARAMETER_NAME : previewParameterName;
         if(McnUtils.isNotNullAndEmpty(bucketName)){
             //自动创建默认bucketName
             createBucket(bucketName);
