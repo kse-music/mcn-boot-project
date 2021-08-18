@@ -9,6 +9,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplicat
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
@@ -68,7 +69,7 @@ public class MinioAutoConfiguration {
 
         @Bean
         public SimpleUrlHandlerMapping simpleUrlHandlerMapping(){
-            return new SimpleUrlHandlerMapping(Collections.singletonMap("_imagePreview",new PreviewImageRequestHandler(minio)));
+            return new SimpleUrlHandlerMapping(Collections.singletonMap("_imagePreview",new PreviewImageRequestHandler(minio)), Ordered.LOWEST_PRECEDENCE - 2);
         }
 
         private static class PreviewImageRequestHandler implements HttpRequestHandler {
