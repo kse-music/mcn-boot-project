@@ -22,16 +22,17 @@ import java.util.stream.StreamSupport;
  * @author DingHao
  * @since 2021/6/28 22:13
  */
-public class Minio {
+public interface Minio {
 
-    private static final Logger log = LoggerFactory.getLogger(Minio.class);
+    Logger log = LoggerFactory.getLogger(DefaultMinio.class);
 
-    private final MinioClient minioClient;
+    String getDefaultBucketName();
+    
+    MinioClient getMinioClient();
 
-    public Minio(MinioClient minioClient) {
-        this.minioClient = minioClient;
+    default void upload(String objectName, InputStream stream){
+        upload(getDefaultBucketName(),objectName,stream);
     }
-
     /**
      * 文件上传
      *
@@ -39,39 +40,43 @@ public class Minio {
      * @param objectName 文件名
      * @param stream     文件流
      */
-    public void upload(String bucketName, String objectName, InputStream stream) {
+    default void upload(String bucketName, String objectName, InputStream stream) {
         try{
             PutObjectArgs args = PutObjectArgs.builder()
                     .bucket(bucketName)
                     .object(objectName)
                     .stream(stream, stream.available(), -1)
                     .build();
-            minioClient.putObject(args);
+            getMinioClient().putObject(args);
         }catch (Exception e){
-            log.error("upload failed {}",e.getMessage());
-            throw new MinioException(e.getMessage());
+            throw new MinioException(e);
         }
     }
 
+    default void delete(String objectName){
+        delete(getDefaultBucketName(),objectName);
+    }
     /**
      * 刪除文件
      *
      * @param bucketName 桶名称
      * @param objectName 文件名
      */
-    public void delete(String bucketName, String objectName) {
+    default void delete(String bucketName, String objectName) {
         try{
             RemoveObjectArgs args = RemoveObjectArgs.builder()
                     .bucket(bucketName)
                     .object(objectName)
                     .build();
-            minioClient.removeObject(args);
+            getMinioClient().removeObject(args);
         }catch (Exception e){
-            log.error("delete failed {}",e.getMessage());
-            throw new MinioException(e.getMessage());
+            throw new MinioException(e);
         }
     }
 
+    default List<Item> listObjects(boolean recursive){
+        return listObjects(getDefaultBucketName(),recursive);
+    }
     /**
      * 文件列表
      *
@@ -79,10 +84,10 @@ public class Minio {
      * @param recursive 列出所有文件包括子文件
      * @return item
      */
-    public List<Item> listObjects(String bucketName,boolean recursive) {
+    default List<Item> listObjects(String bucketName,boolean recursive) {
         try{
             ListObjectsArgs args = ListObjectsArgs.builder().bucket(bucketName).recursive(recursive).build();
-            Iterable<Result<Item>> list = minioClient.listObjects(args);
+            Iterable<Result<Item>> list = getMinioClient().listObjects(args);
             return StreamSupport.stream(list.spliterator(), true).map(r -> {
                 try {
                     return r.get();
@@ -92,15 +97,18 @@ public class Minio {
                 return null;
             }).filter(Objects::nonNull).collect(Collectors.toList());
         }catch (Exception e){
-            log.error("list all failed {}",e.getMessage());
-            throw new MinioException(e.getMessage());
+            throw new MinioException(e);
         }
     }
 
-    public void deleteAll(String bucketName) {
+    default void deleteAll(){
+        deleteAll(getDefaultBucketName());
+    }
+
+    default void deleteAll(String bucketName) {
         try{
             ListObjectsArgs args = ListObjectsArgs.builder().bucket(bucketName).recursive(true).build();
-            Iterable<Result<Item>> list = minioClient.listObjects(args);
+            Iterable<Result<Item>> list = getMinioClient().listObjects(args);
             List<DeleteObject> objectList = StreamSupport.stream(list.spliterator(), true).map(r -> {
                 try {
                     return new DeleteObject(r.get().objectName());
@@ -109,16 +117,18 @@ public class Minio {
                 }
                 return null;
             }).filter(Objects::nonNull).collect(Collectors.toList());
-            for (Result<DeleteError> errorResult : minioClient.removeObjects(RemoveObjectsArgs.builder().bucket(bucketName).objects(objectList).build())) {
+            for (Result<DeleteError> errorResult : getMinioClient().removeObjects(RemoveObjectsArgs.builder().bucket(bucketName).objects(objectList).build())) {
                 DeleteError error = errorResult.get();
-                log.error("Error in deleting object {} ; {}", error.objectName(),error.message());
+                log.error("Error delete object {} ; {}", error.objectName(),error.message());
             }
         }catch (Exception e){
-            log.error("delete all failed {}",e.getMessage());
-            throw new MinioException(e.getMessage());
+            throw new MinioException(e);
         }
     }
 
+    default InputStream getObject(String objectName){
+        return getObject(getDefaultBucketName(),objectName);
+    }
     /**
      * 获取文件
      *
@@ -126,16 +136,23 @@ public class Minio {
      * @param objectName 文件名称
      * @return 二进制流
      */
-    public InputStream getObject(String bucketName, String objectName) {
+    default InputStream getObject(String bucketName, String objectName) {
         try{
             GetObjectArgs args = GetObjectArgs.builder()
                     .bucket(bucketName)
                     .object(objectName)
                     .build();
-            return minioClient.getObject(args);
+            return getMinioClient().getObject(args);
         }catch (Exception e){
-            log.error("acquire failed {}",e.getMessage());
-            throw new MinioException(e.getMessage());
+            throw new MinioException(e);
+        }
+    }
+
+    default boolean buckExist(String bucketName){
+        try {
+            return getMinioClient().bucketExists(BucketExistsArgs.builder().bucket(bucketName).build());
+        } catch (Exception e) {
+            throw new MinioException(e);
         }
     }
 
@@ -143,27 +160,28 @@ public class Minio {
      * 创建bucket
      * @param bucketName bucket名称
      */
-    public void createBucket(String bucketName) {
+    default void createBucket(String bucketName) {
+        if(buckExist(bucketName)){
+            return;
+        }
         try{
             MakeBucketArgs args = MakeBucketArgs.builder()
                     .bucket(bucketName)
                     .build();
-            minioClient.makeBucket(args);
+            getMinioClient().makeBucket(args);
         }catch (Exception e){
-            log.error("create bucket failed {}",e.getMessage());
-            throw new MinioException(e.getMessage());
+            throw new MinioException(e);
         }
     }
 
-    public List<BucketItem> listBuckets() {
+    default List<BucketItem> listBuckets() {
         try{
-            List<Bucket> buckets = minioClient.listBuckets();
+            List<Bucket> buckets = getMinioClient().listBuckets();
             if(McnUtils.isNotNullAndEmpty(buckets)){
                 return buckets.stream().map(b -> new BucketItem(b.name(),b.creationDate())).collect(Collectors.toList());
             }
         }catch (Exception e){
-            log.error("create bucket failed {}",e.getMessage());
-            throw new MinioException(e.getMessage());
+            throw new MinioException(e);
         }
         return Collections.emptyList();
     }
@@ -173,15 +191,14 @@ public class Minio {
      * 该文件夹下不能有文件或子文件夹
      * @param bucketName bucket名称
      */
-    public void deleteBucket(String bucketName) {
+    default void deleteBucket(String bucketName) {
         try{
             RemoveBucketArgs args = RemoveBucketArgs.builder()
                     .bucket(bucketName)
                     .build();
-            minioClient.removeBucket(args);
+            getMinioClient().removeBucket(args);
         }catch (Exception e){
-            log.error("create bucket failed {}",e.getMessage());
-            throw new MinioException(e.getMessage());
+            throw new MinioException(e);
         }
     }
 

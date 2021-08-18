@@ -23,7 +23,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 public class WebSecurityAutoConfiguration extends WebSecurityConfigurerAdapter {
 
-    private static final String[] IGNORE_PATH = {"/v2/api-docs", "/swagger-resources/**","/doc.html", "/webjars/**","/error","/favicon.ico"};
+    private static final String[] IGNORE_PATH = {"/v2/api-docs", "/swagger-resources/**","/doc.html", "/webjars/**","/error","/favicon.ico","/_imagePreview"};
 
     private final WebSecurityProperties webSecurityProperties;
     private final ObjectProvider<HttpSecurityConfigCustomizer> httpCustomizers;

@@ -17,6 +17,8 @@ public class MinioProperties {
 
     private String secretKey;
 
+    private String defaultBucketName;
+
     public String getEndpoint() {
         return endpoint;
     }
@@ -39,5 +41,13 @@ public class MinioProperties {
 
     public void setSecretKey(String secretKey) {
         this.secretKey = secretKey;
+    }
+
+    public String getDefaultBucketName() {
+        return defaultBucketName;
+    }
+
+    public void setDefaultBucketName(String defaultBucketName) {
+        this.defaultBucketName = defaultBucketName;
     }
 }
