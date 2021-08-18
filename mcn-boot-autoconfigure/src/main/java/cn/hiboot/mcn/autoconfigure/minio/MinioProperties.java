@@ -19,6 +19,8 @@ public class MinioProperties {
 
     private String defaultBucketName;
 
+    private String previewImageParameterName;
+
     public String getEndpoint() {
         return endpoint;
     }
@@ -49,5 +51,13 @@ public class MinioProperties {
 
     public void setDefaultBucketName(String defaultBucketName) {
         this.defaultBucketName = defaultBucketName;
+    }
+
+    public String getPreviewImageParameterName() {
+        return previewImageParameterName;
+    }
+
+    public void setPreviewImageParameterName(String previewImageParameterName) {
+        this.previewImageParameterName = previewImageParameterName;
     }
 }

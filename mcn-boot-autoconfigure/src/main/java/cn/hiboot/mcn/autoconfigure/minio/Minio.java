@@ -24,11 +24,15 @@ import java.util.stream.StreamSupport;
  */
 public interface Minio {
 
+    String DEFAULT_PREVIEW_PARAMETER_NAME = "image";
+
     Logger log = LoggerFactory.getLogger(DefaultMinio.class);
 
     String getDefaultBucketName();
     
     MinioClient getMinioClient();
+
+    String getPreviewParameterName();
 
     default void upload(String objectName, InputStream stream){
         upload(getDefaultBucketName(),objectName,stream);

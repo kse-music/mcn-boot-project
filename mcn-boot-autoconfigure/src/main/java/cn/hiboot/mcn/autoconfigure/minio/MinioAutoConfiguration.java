@@ -55,7 +55,7 @@ public class MinioAutoConfiguration {
 
     @Bean
     public Minio minio(MinioClient minioClient){
-        return new DefaultMinio(minioClient,config.getDefaultBucketName());
+        return new DefaultMinio(minioClient,config.getDefaultBucketName(),config.getPreviewImageParameterName());
     }
 
     @Configuration(proxyBeanMethods = false)
@@ -82,7 +82,7 @@ public class MinioAutoConfiguration {
             public void handleRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
                 OutputStream os = null;
                 try {
-                    BufferedImage image = ImageIO.read(minio.getObject(request.getParameter("image")));
+                    BufferedImage image = ImageIO.read(minio.getObject(request.getParameter(minio.getPreviewParameterName())));
                     response.setContentType("image/png");
                     os = response.getOutputStream();
                     if (image != null) {
