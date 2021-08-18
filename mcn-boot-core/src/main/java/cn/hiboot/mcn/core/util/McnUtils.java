@@ -22,7 +22,6 @@ public abstract class McnUtils {
     public static boolean isNullOrEmpty(String value){
         return Objects.isNull(value) || value.isEmpty();
     }
-
     public static boolean isNotNullAndEmpty(String value){
         return !isNullOrEmpty(value);
     }
@@ -31,6 +30,13 @@ public abstract class McnUtils {
         return Objects.isNull(value) || value.isEmpty();
     }
     public static boolean isNotNullAndEmpty(Collection<?> value){
+        return !isNullOrEmpty(value);
+    }
+
+    public static boolean isNullOrEmpty(Map<?,?> value){
+        return Objects.isNull(value) || value.isEmpty();
+    }
+    public static boolean isNotNullAndEmpty(Map<?,?> value){
         return !isNullOrEmpty(value);
     }
 
