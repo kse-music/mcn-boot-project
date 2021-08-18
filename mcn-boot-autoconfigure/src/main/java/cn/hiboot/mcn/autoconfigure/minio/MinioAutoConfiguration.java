@@ -2,10 +2,25 @@ package cn.hiboot.mcn.autoconfigure.minio;
 
 import io.minio.MinioClient;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.HttpRequestHandler;
+import org.springframework.web.servlet.DispatcherServlet;
+import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
+
+import javax.imageio.ImageIO;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Collections;
 
 /**
  * Minio文件上传
@@ -40,7 +55,50 @@ public class MinioAutoConfiguration {
 
     @Bean
     public Minio minio(MinioClient minioClient){
-        return new Minio(minioClient);
+        return new DefaultMinio(minioClient,config.getDefaultBucketName());
+    }
+
+    @Configuration(proxyBeanMethods = false)
+    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
+    @ConditionalOnBean(DispatcherServlet.class)
+    private static class PreviewImage{
+
+        @Autowired
+        private Minio minio;
+
+        @Bean
+        public SimpleUrlHandlerMapping simpleUrlHandlerMapping(){
+            return new SimpleUrlHandlerMapping(Collections.singletonMap("_imagePreview",new PreviewImageRequestHandler(minio)));
+        }
+
+        private static class PreviewImageRequestHandler implements HttpRequestHandler {
+            private final Minio minio;
+
+            public PreviewImageRequestHandler(Minio minio) {
+                this.minio = minio;
+            }
+
+            @Override
+            public void handleRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+                OutputStream os = null;
+                try {
+                    BufferedImage image = ImageIO.read(minio.getObject(request.getParameter("image")));
+                    response.setContentType("image/png");
+                    os = response.getOutputStream();
+                    if (image != null) {
+                        ImageIO.write(image, "png", os);
+                    }
+                } catch (IOException e) {
+                    //
+                } finally {
+                    if (os != null) {
+                        os.flush();
+                        os.close();
+                    }
+                }
+            }
+        }
+
     }
 
 }

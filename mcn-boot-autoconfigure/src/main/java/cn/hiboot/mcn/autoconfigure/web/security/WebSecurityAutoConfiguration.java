@@ -27,7 +27,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 @AutoConfigureAfter(SecurityAutoConfiguration.class)
 public class WebSecurityAutoConfiguration implements WebSecurityCustomizer {
 
-    private static final String[] IGNORE_PATH = {"/v2/api-docs", "/swagger-resources/**","/doc.html", "/webjars/**","/error","/favicon.ico"};
+    private static final String[] IGNORE_PATH = {"/v2/api-docs", "/swagger-resources/**","/doc.html", "/webjars/**","/error","/favicon.ico","/_imagePreview"};
 
     private final WebSecurityProperties webSecurityProperties;
 
