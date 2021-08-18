@@ -17,9 +17,14 @@ public class WebSecurityProperties {
     private boolean enableDefaultIgnore = true;
 
     /**
+     * 默认不拦截的路径
+     */
+    private String[] defaultExcludeUrls;
+
+    /**
      * 不拦截的路径
      */
-    private String[] excludes;
+    private String[] excludeUrls;
 
     public boolean isEnableDefaultIgnore() {
         return enableDefaultIgnore;
@@ -29,11 +34,19 @@ public class WebSecurityProperties {
         this.enableDefaultIgnore = enableDefaultIgnore;
     }
 
-    public String[] getExcludes() {
-        return excludes;
+    public String[] getDefaultExcludeUrls() {
+        return defaultExcludeUrls;
     }
 
-    public void setExcludes(String[] excludes) {
-        this.excludes = excludes;
+    public void setDefaultExcludeUrls(String[] defaultExcludeUrls) {
+        this.defaultExcludeUrls = defaultExcludeUrls;
+    }
+
+    public String[] getExcludeUrls() {
+        return excludeUrls;
+    }
+
+    public void setExcludeUrls(String[] excludeUrls) {
+        this.excludeUrls = excludeUrls;
     }
 }

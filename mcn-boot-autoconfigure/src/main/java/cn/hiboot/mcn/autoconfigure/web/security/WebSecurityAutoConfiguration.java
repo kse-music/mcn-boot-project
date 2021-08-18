@@ -23,8 +23,6 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 public class WebSecurityAutoConfiguration extends WebSecurityConfigurerAdapter {
 
-    private static final String[] IGNORE_PATH = {"/v2/api-docs", "/swagger-resources/**","/doc.html", "/webjars/**","/error","/favicon.ico","/_imagePreview"};
-
     private final WebSecurityProperties webSecurityProperties;
     private final ObjectProvider<HttpSecurityConfigCustomizer> httpCustomizers;
     private final ObjectProvider<WebSecurityConfigCustomizer> webCustomizers;
@@ -47,10 +45,10 @@ public class WebSecurityAutoConfiguration extends WebSecurityConfigurerAdapter {
     @Override
     public void configure(WebSecurity web) throws Exception {
         if(webSecurityProperties.isEnableDefaultIgnore()){
-            web.ignoring().antMatchers(IGNORE_PATH);
+            web.ignoring().antMatchers(webSecurityProperties.getDefaultExcludeUrls());
         }
-        if(webSecurityProperties.getExcludes() != null){
-            web.ignoring().antMatchers(webSecurityProperties.getExcludes());
+        if(webSecurityProperties.getExcludeUrls() != null){
+            web.ignoring().antMatchers(webSecurityProperties.getExcludeUrls());
         }
         for (WebSecurityConfigCustomizer webCustomizer : webCustomizers) {
             webCustomizer.customize(web);
