@@ -15,9 +15,12 @@ public class DefaultMinio implements Minio{
 
     private final String defaultBucketName;
 
-    public DefaultMinio(MinioClient minioClient, String bucketName) {
+    private final String previewParameterName;
+
+    public DefaultMinio(MinioClient minioClient, String bucketName,String previewParameterName) {
         this.minioClient = minioClient;
-        this.defaultBucketName = bucketName;
+        this.defaultBucketName = McnUtils.isNullOrEmpty(previewParameterName) ? DEFAULT_PREVIEW_PARAMETER_NAME : previewParameterName;
+        this.previewParameterName = previewParameterName;
         if(McnUtils.isNotNullAndEmpty(bucketName)){
             //自动创建默认bucketName
             createBucket(bucketName);
@@ -34,4 +37,8 @@ public class DefaultMinio implements Minio{
         return minioClient;
     }
 
+    @Override
+    public String getPreviewParameterName() {
+        return previewParameterName;
+    }
 }
