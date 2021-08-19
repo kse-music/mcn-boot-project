@@ -178,5 +178,7 @@ public abstract class McnUtils {
         return Paths.get(filePath);
     }
 
-
+    public static String getVersion(Class<?> clazz){
+        return clazz.getPackage().getImplementationVersion();
+    }
 }

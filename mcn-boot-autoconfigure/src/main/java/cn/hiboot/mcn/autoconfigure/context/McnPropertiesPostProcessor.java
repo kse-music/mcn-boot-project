@@ -1,8 +1,10 @@
 package cn.hiboot.mcn.autoconfigure.context;
 
 import cn.hiboot.mcn.autoconfigure.web.config.ConfigProperties;
+import cn.hiboot.mcn.core.util.McnUtils;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.env.EnvironmentPostProcessor;
+import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.core.Ordered;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
@@ -17,6 +19,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * EnvironmentPostProcessor
@@ -35,7 +38,7 @@ public class McnPropertiesPostProcessor implements EnvironmentPostProcessor,Orde
     public static final String APP_BASE_PACKAGE = "app.base-package";
     private static final String MCN_SOURCE_NAME = "mcn-global-unique";
     private static final String MCN_DEFAULT_PROPERTY_SOURCE_NAME = "mcn-default";
-    private static final String MCN_LOG_FILE_ENABLE = "mcn.log.file.enable";
+    private static final String MCN_LOG_FILE_EAGER_LOAD = "mcn.log.file.eagerLoad";
     private static final String BOOTSTRAP_PROPERTY_SOURCE_NAME = "bootstrap";
 
     @Override
@@ -85,22 +88,46 @@ public class McnPropertiesPostProcessor implements EnvironmentPostProcessor,Orde
             String packageName = ClassUtils.getPackageName(mainApplicationClass);
             mapProp.put(APP_BASE_PACKAGE, packageName);
             mapProp.put("logging.level."+packageName+".dao","info");//do not println query statement
-            String projectVersion = mainApplicationClass.getPackage().getImplementationVersion();
+            String projectVersion =McnUtils.getVersion(mainApplicationClass);
             if(projectVersion != null){
                 mapProp.put("project.version","v"+ projectVersion);
             }
         }
         mapProp.put("mcn.log.file.name",environment.getProperty("mcn.log.file.name","error"));
-        mapProp.put("mcn.version","v"+ this.getClass().getPackage().getImplementationVersion());
+        mapProp.put("mcn.version","v"+ McnUtils.getVersion(this.getClass()));
         addLast(propertySources,new MapPropertySource("mcn-map",mapProp));
 
         //加载默认配置
         addLast(propertySources,loadResourcePropertySource(MCN_DEFAULT_PROPERTY_SOURCE_NAME, loadClassPathResource("mcn-default.properties")));
-        boolean logFileEnable = environment.getProperty(MCN_LOG_FILE_ENABLE,Boolean.class,true);
-        if (logFileEnable) {
+
+        /*
+         * 1.nacos使用的是ApplicationContextInitializer(PropertySourceBootstrapConfiguration)启动加载的,优先级低于EnvironmentPostProcessor,
+         * 所以此时McnPropertiesPostProcessor还读不到nacos中的配置
+         * 2.PropertySourceBootstrapConfiguration是需要Bootstrap上下文引导的,但是在spring  boot 2.4+默认不启动Bootstrap上下文
+         * 3.如果nacos中配置了logging开头的属性会触发重新初始化日志
+         * 4.如果此时nacos上配置的日志文件和mcn默认不一样就会生成两个文件
+         */
+        boolean logFileEnable = environment.getProperty(MCN_LOG_FILE_EAGER_LOAD,Boolean.class,false);
+
+        //手动开启日志配置或者没有nacos的情况下触发mcn默认日志配置
+        //此时nacos上必须配置了logging否则整个项目不会有日志文件的配置或者在配置文件中配置mcn.log.file.eagerLoad=true
+        if (logFileEnable || withoutPropertySourceLocator(application.getInitializers())) {
             //加载默认日志配置
             addLast(propertySources,loadResourcePropertySource("mcn-log-file", loadClassPathResource("log.properties")));
         }
+
+    }
+
+    private boolean withoutPropertySourceLocator(Set<ApplicationContextInitializer<?>> initializers){
+        boolean hasPropertySourceLocator = ClassUtils.isPresent("com.alibaba.cloud.nacos.client.NacosPropertySourceLocator",null);
+        boolean hasPropertySourceBootstrapConfiguration = false;
+        for (ApplicationContextInitializer<?> initializer : initializers) {
+            if(initializer.getClass().getName().equals("org.springframework.cloud.bootstrap.config.PropertySourceBootstrapConfiguration")){
+                hasPropertySourceBootstrapConfiguration = true;
+                break;
+            }
+        }
+        return !hasPropertySourceLocator || !hasPropertySourceBootstrapConfiguration;
     }
 
     private ClassPathResource loadClassPathResource(String file){

@@ -8,11 +8,11 @@
       "defaultValue": false
     },
     {
-      "name": "mcn.log.file.enable",
+      "name": "mcn.log.file.eagerLoad",
       "type": "java.lang.Boolean",
       "sourceType": "cn.hiboot.mcn.autoconfigure.context.McnPropertiesPostProcessor",
-      "description": "是否开启日志文件配置.",
-      "defaultValue": true
+      "description": "是否早期就加载默认日志文件配置.",
+      "defaultValue": false
     },
     {
       "name": "mcn.log.file.filter-level",
