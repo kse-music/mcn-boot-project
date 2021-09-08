@@ -90,7 +90,7 @@ public class McnPropertiesPostProcessor implements EnvironmentPostProcessor,Orde
             mapProp.put("logging.level."+packageName+".dao","info");//do not println query statement
             String projectVersion =McnUtils.getVersion(mainApplicationClass);
             if(projectVersion != null){
-                mapProp.put("project.version","v"+ projectVersion);
+                mapProp.put("project.version",projectVersion);
             }
         }
         mapProp.put("mcn.log.file.name",environment.getProperty("mcn.log.file.name","error"));
