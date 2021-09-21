@@ -19,14 +19,20 @@ import java.time.Duration;
 public class FeignCircuitBreakerProperties {
 
     /**
-     * feign断路器超时时间 默认2s
+     * feign断路器超时时间 默认10s
      */
-    private Duration timeoutDuration = Duration.ofSeconds(2);
+    private Duration timeoutDuration = Duration.ofSeconds(10);
 
     /**
-     * feign日志打印级别默认不打印
+     *  当 future.get 超时时候（TimeoutException）,是否调用 future.cancel 取消异步任务  默认true
      */
-    private Logger.Level level = Logger.Level.NONE;
+    private boolean cancelRunningFuture = true;
+
+    /**
+     * feign日志打印级别默认FULL
+     * 注意:feign的client日志级别只针对debug有效,需要单独设置client的level
+     */
+    private Logger.Level level = Logger.Level.FULL;
 
     /**
      * 连接超时时间 默认10秒

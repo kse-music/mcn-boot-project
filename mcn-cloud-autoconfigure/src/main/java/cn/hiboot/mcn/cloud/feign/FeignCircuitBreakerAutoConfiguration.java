@@ -6,6 +6,7 @@ import feign.codec.ErrorDecoder;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
 import io.github.resilience4j.timelimiter.TimeLimiterConfig;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.AnyNestedCondition;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -15,6 +16,7 @@ import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.cloud.client.circuitbreaker.Customizer;
 import org.springframework.cloud.openfeign.Targeter;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 import org.springframework.security.authentication.DefaultAuthenticationEventPublisher;
@@ -52,7 +54,7 @@ public class FeignCircuitBreakerAutoConfiguration {
 
     @Configuration(proxyBeanMethods = false)
     @ConditionalOnClass(Resilience4JCircuitBreakerFactory.class)
-    @ConditionalOnProperty(prefix = "feign.circuitbreaker",name = "enabled",havingValue = "true")
+    @Conditional(BreakerCondition.class)
     private static class CircuitBreakerConfiguration {
 
         private final FeignCircuitBreakerProperties properties;
@@ -65,12 +67,12 @@ public class FeignCircuitBreakerAutoConfiguration {
         public Customizer<Resilience4JCircuitBreakerFactory> defaultCustomizer() {
             return factory -> factory.configureDefault(
                     id -> new Resilience4JConfigBuilder(id)
-                            .timeLimiterConfig(TimeLimiterConfig.custom().timeoutDuration(properties.getTimeoutDuration()).build())
+                            .timeLimiterConfig(TimeLimiterConfig.custom().timeoutDuration(properties.getTimeoutDuration()).cancelRunningFuture(properties.isCancelRunningFuture()).build())
                             .circuitBreakerConfig(CircuitBreakerConfig.ofDefaults())
                             .build());
         }
 
-        @ConditionalOnProperty(prefix = "feign.circuitbreaker",name = "globalfallback.enabled", havingValue = "true")
+        @ConditionalOnProperty(prefix = "feign.circuitbreaker",name = "globalfallback.enabled", havingValue = "true",matchIfMissing = true)
         private static class GlobalFallbackConfig{
 
             @Bean
@@ -108,6 +110,24 @@ public class FeignCircuitBreakerAutoConfiguration {
         @Override
         public Exception decode(String methodKey, Response response) {
             return FeignException.errorStatus(methodKey, response);
+        }
+
+    }
+
+   static class BreakerCondition extends AnyNestedCondition {
+
+        BreakerCondition() {
+            super(ConfigurationPhase.REGISTER_BEAN);
+        }
+
+        @ConditionalOnProperty(prefix = "feign.circuitbreaker",name = "enabled",havingValue = "true")
+        static class NoComponentsAvailable {
+
+        }
+
+        @ConditionalOnProperty(prefix = "feign.circuitbreaker",name = "globalfallback.enabled", havingValue = "true")
+        static class CookieHttpSessionIdResolverAvailable {
+
         }
 
     }

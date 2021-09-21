@@ -28,7 +28,7 @@ public class FeignFallback<T> implements MethodInterceptor {
     @Override
     public Object intercept(Object o, Method method, Object[] objects, MethodProxy methodProxy) throws Throwable {
         String errorMessage = cause.getMessage();
-        log.error("FunFeignFallback:[{}.{}] serviceId:[{}] message:[{}]", targetType.getName(), method.getName(), targetName, errorMessage);
+        log.error("FullFeignFallback:[{}.{}] serviceId:[{}] message:[{}]", targetType.getName(), method.getName(), targetName, errorMessage);
         int defaultCode = BaseException.DEFAULT_CODE;
         if (!(cause instanceof FeignException)) {
             return new RestResp<>(defaultCode,errorMessage);
