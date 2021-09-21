@@ -15,7 +15,7 @@
     <name>MCN Boot Dependencies</name>
     <description>MCN Boot Dependencies</description>
 
-    <url>http://www.hiboot.cn</url>
+    <url>${web.url}</url>
 
     <licenses>
         <license>
@@ -111,6 +111,11 @@
             <dependency>
                 <groupId>cn.hiboot.mcn</groupId>
                 <artifactId>mcn-boot-autoconfigure</artifactId>
+                <version>${mcn.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.hiboot.mcn</groupId>
+                <artifactId>mcn-cloud-autoconfigure</artifactId>
                 <version>${mcn.version}</version>
             </dependency>
             <dependency>

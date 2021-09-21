@@ -1,0 +1,16 @@
+{
+  "properties": [
+    {
+      "name": "feign.circuitbreaker.globalfallback.enabled",
+      "type": "java.lang.Boolean",
+      "description": "是否启用全局fallback.",
+      "defaultValue": "false"
+    },
+    {
+      "name": "mcn.resource.server.enabled",
+      "type": "java.lang.Boolean",
+      "description": "是否启用资源服务器.",
+      "defaultValue": "false"
+    }
+  ]
+}

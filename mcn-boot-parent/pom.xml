@@ -14,7 +14,7 @@
     <packaging>pom</packaging>
     <name>MCN Boot Parent</name>
     <description>MCN Boot Parent</description>
-    <url>http://www.hiboot.cn</url>
+    <url>${web.url}</url>
 
     <properties>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>

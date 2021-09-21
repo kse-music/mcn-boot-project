@@ -14,7 +14,7 @@
 
     <description>MCN Boot Jersey Swagger</description>
 
-    <url>http://www.hiboot.cn</url>
+    <url>${web.url}</url>
     <scm>
         <url>${git.url}</url>
         <connection>${git.connection}</connection>
