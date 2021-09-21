@@ -95,11 +95,13 @@ public class FeignCircuitBreakerAutoConfiguration {
     @ConditionalOnClass({DefaultAuthenticationEventPublisher.class,JwtAuthenticationToken.class})
     private static class FeignRequestInterceptor implements RequestInterceptor {
 
+        private static final String TOKEN_TYPE = "Bearer ";
+
         @Override
         public void apply(RequestTemplate requestTemplate) {
             String authorization = SessionHolder.getToken();
             if (authorization != null) {
-                requestTemplate.header("Authorization", authorization);
+                requestTemplate.header("Authorization", TOKEN_TYPE.concat(authorization));
             }
         }
     }

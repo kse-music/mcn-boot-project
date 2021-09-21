@@ -24,7 +24,7 @@
     <dependencies>
         <dependency>
             <groupId>cn.hiboot.mcn</groupId>
-            <artifactId>mcn-boot-core</artifactId>
+            <artifactId>mcn-boot-autoconfigure</artifactId>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
