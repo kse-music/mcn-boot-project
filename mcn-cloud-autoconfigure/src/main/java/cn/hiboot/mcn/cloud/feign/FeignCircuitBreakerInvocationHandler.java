@@ -20,7 +20,7 @@ import java.util.function.Supplier;
 import static feign.Util.checkNotNull;
 
 /**
- * describe about this class
+ * FeignCircuitBreakerInvocationHandler
  *
  * @author DingHao
  * @since 2021/7/4 10:46

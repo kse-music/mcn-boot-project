@@ -8,7 +8,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import java.time.Duration;
 
 /**
- * describe about this class
+ * FeignCircuitBreakerProperties
  *
  * @author DingHao
  * @since 2021/9/21 13:43

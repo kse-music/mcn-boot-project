@@ -17,7 +17,7 @@ import org.springframework.context.annotation.Scope;
 import java.time.Duration;
 
 /**
- * describe about this class
+ * CircuitBreakerConfiguration
  *
  * @author DingHao
  * @since 2021/7/4 12:02

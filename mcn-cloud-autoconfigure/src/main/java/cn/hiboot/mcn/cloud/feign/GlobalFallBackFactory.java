@@ -5,7 +5,7 @@ import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.cloud.openfeign.FallbackFactory;
 
 /**
- * describe about this class
+ * 全局fallback工厂
  *
  * @author DingHao
  * @since 2021/7/4 10:17

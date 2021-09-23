@@ -1,6 +1,10 @@
 package cn.hiboot.mcn.core.util;
 
+import java.beans.BeanInfo;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
 import java.io.*;
+import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -22,6 +26,7 @@ public abstract class McnUtils {
     public static boolean isNullOrEmpty(String value){
         return Objects.isNull(value) || value.isEmpty();
     }
+
     public static boolean isNotNullAndEmpty(String value){
         return !isNullOrEmpty(value);
     }
@@ -29,6 +34,7 @@ public abstract class McnUtils {
     public static boolean isNullOrEmpty(Collection<?> value){
         return Objects.isNull(value) || value.isEmpty();
     }
+
     public static boolean isNotNullAndEmpty(Collection<?> value){
         return !isNullOrEmpty(value);
     }
@@ -36,6 +42,7 @@ public abstract class McnUtils {
     public static boolean isNullOrEmpty(Map<?,?> value){
         return Objects.isNull(value) || value.isEmpty();
     }
+
     public static boolean isNotNullAndEmpty(Map<?,?> value){
         return !isNullOrEmpty(value);
     }
@@ -180,5 +187,38 @@ public abstract class McnUtils {
 
     public static String getVersion(Class<?> clazz){
         return clazz.getPackage().getImplementationVersion();
+    }
+
+    public static <T> T map2bean(Map<String,Object> map, Class<T> clz) {
+        T obj = null;
+        try{
+            obj = clz.newInstance();
+            BeanInfo b = Introspector.getBeanInfo(clz,Object.class);
+            PropertyDescriptor[] pds = b.getPropertyDescriptors();
+            for (PropertyDescriptor pd : pds) {
+                Method setter = pd.getWriteMethod();
+                setter.invoke(obj, map.get(pd.getName()));
+            }
+        }catch (Exception e){
+            //
+        }
+        return obj;
+    }
+
+    public static Map<String,Object> bean2map(Object bean){
+        Map<String,Object> map = new HashMap<>();
+        try{
+            BeanInfo b = Introspector.getBeanInfo(bean.getClass(),Object.class);
+            PropertyDescriptor[] pds = b.getPropertyDescriptors();
+            for (PropertyDescriptor pd : pds) {
+                String propertyName = pd.getName();
+                Method m = pd.getReadMethod();
+                Object properValue = m.invoke(bean);
+                map.put(propertyName, properValue);
+            }
+        }catch (Exception e){
+            //
+        }
+        return map;
     }
 }

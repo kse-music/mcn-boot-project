@@ -6,7 +6,7 @@ import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.cloud.openfeign.FallbackFactory;
 
 /**
- * describe about this class
+ * FeignCircuitBreaker
  *
  * @author DingHao
  * @since 2021/7/4 10:43

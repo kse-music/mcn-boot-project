@@ -10,7 +10,7 @@ import org.springframework.cloud.openfeign.Targeter;
 import org.springframework.util.StringUtils;
 
 /**
- * describe about this class
+ * FeignCircuitBreakerTargeter
  *
  * @author DingHao
  * @since 2021/7/4 10:43

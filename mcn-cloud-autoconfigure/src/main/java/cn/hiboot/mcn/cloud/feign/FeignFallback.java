@@ -12,7 +12,7 @@ import java.lang.reflect.Method;
 import java.util.Objects;
 
 /**
- * describe about this class
+ * FeignFallback
  *
  * @author DingHao
  * @since 2021/7/4 10:18

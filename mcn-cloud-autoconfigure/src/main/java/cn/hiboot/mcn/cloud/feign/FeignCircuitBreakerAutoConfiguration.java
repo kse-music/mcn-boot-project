@@ -96,12 +96,13 @@ public class FeignCircuitBreakerAutoConfiguration {
     private static class FeignRequestInterceptor implements RequestInterceptor {
 
         private static final String TOKEN_TYPE = "Bearer ";
+        private static final String AUTHORIZATION = "Authorization";
 
         @Override
         public void apply(RequestTemplate requestTemplate) {
             String authorization = SessionHolder.getToken();
             if (authorization != null) {
-                requestTemplate.header("Authorization", TOKEN_TYPE.concat(authorization));
+                requestTemplate.header(AUTHORIZATION, TOKEN_TYPE.concat(authorization));
             }
         }
     }
