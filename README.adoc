@@ -1,4 +1,4 @@
-:version: 2.5.4
+:version: 2.5.5
 
 == 简介
 MCN是一个基于SpringBoot的一个快速构建Restful风格的Web系统。MCN在SpringBoot的基础上配置更多默认配置，比如mybatis多数据源配置、跨域、编码等等一些SpringBoot没有的或者扩展的配置。
@@ -168,7 +168,7 @@ mcn.log.filter=info
 |====================
 | Jar | Version
 | SpringBoot | {version}
-| SpringCloud | 2020.0.3
+| SpringCloud | 2020.0.4
 | guava | 30.0-jre
 | mybatis-spring-boot-starter | 2.1.3
 | commons-io | 2.7
