@@ -1,6 +1,5 @@
 package cn.hiboot.mcn.cloud.security;
 
-import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.security.ConditionalOnDefaultWebSecurity;
@@ -21,7 +20,6 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @ConditionalOnClass({DefaultAuthenticationEventPublisher.class, JwtAuthenticationToken.class})
 @ConditionalOnDefaultWebSecurity
-@AutoConfigureBefore(name = "org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration")
 public class ResourceServerAutoConfiguration extends WebSecurityConfigurerAdapter {
 
     @Override
