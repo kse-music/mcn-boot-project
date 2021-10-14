@@ -50,7 +50,7 @@ public interface JpaService<T,PK> {
     }
 
     default RestResp<List<T>> page(T t, PageSort pageSort){
-        Pageable pageable = PageRequest.of(pageSort.getSkip(),pageSort.getLimit());
+        Pageable pageable = PageRequest.of(pageSort.getPageNo(),pageSort.getPageSize());
         List<FieldSort> sort = pageSort.getSort();
         if(!sort.isEmpty()){
             Sort s = null;
@@ -66,7 +66,7 @@ public interface JpaService<T,PK> {
                 }
             }
             if(s != null){
-                pageable = PageRequest.of(pageSort.getSkip(),pageSort.getLimit(),s);
+                pageable = PageRequest.of(pageSort.getPageNo(),pageSort.getPageSize(),s);
             }
         }
         Page<T> all;
