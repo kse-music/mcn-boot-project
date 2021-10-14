@@ -5,6 +5,7 @@ import org.springframework.util.ObjectUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * PageSort
@@ -14,50 +15,44 @@ import java.util.List;
  */
 public class PageSort {
 
-    private int skip = 0;
-    private int limit = 10;
+    /**
+     * 当前页，默认1
+     */
+    private Integer pageNo = 1;
+    /**
+     * 每页数，默认10
+     */
+    private Integer pageSize = 10;
 
+    /**
+     * 字多排序,支持多字段排序
+     */
     private List<FieldSort> sort = new ArrayList<>(1);
 
-    public int getSkip() {
-        if(skip == 0){
-            return skip;
+    public PageSort(){}
+
+    public PageSort(Integer pageNo, Integer pageSize) {
+        this.pageNo = pageNo;
+        this.pageSize = pageSize;
+    }
+
+    public Integer getPageNo() {
+        if(Objects.isNull(pageNo)){//此处不能用三目表达式，猜测利用反射获取的值不能带逻辑判断？
+            return pageNo;
         }
-        return skip - 1;
+        return (pageNo - 1) * pageSize;
     }
 
-    public int getFrom(){
-        return getSkip() * limit;
+    public void setPageNo(Integer pageNo) {
+        this.pageNo = pageNo;
     }
 
-    public List<Sort.Order> getSorts(){
-        sort.removeIf(fieldSort -> ObjectUtils.isEmpty(fieldSort.getField()) || ObjectUtils.isEmpty(fieldSort.getSort()));
-        if (ObjectUtils.isEmpty( sort )) {
-            sort = new ArrayList<>();
-            sort.add( new FieldSort("createAt","desc") );
-        }
-        List<Sort.Order> sorts = new ArrayList<>();
-        for (FieldSort fieldSort : sort) {
-            String sort = fieldSort.getSort();
-            if (sort.equalsIgnoreCase( "desc" )) {
-                sorts.add( Sort.Order.desc( fieldSort.getField() ) );
-            } else if (sort.equalsIgnoreCase( "asc" )) {
-                sorts.add( Sort.Order.asc( fieldSort.getField() ) );
-            }
-        }
-        return sorts;
+    public Integer getPageSize() {
+        return pageSize;
     }
 
-    public void setSkip(int skip) {
-        this.skip = skip;
-    }
-
-    public int getLimit() {
-        return limit;
-    }
-
-    public void setLimit(int limit) {
-        this.limit = limit;
+    public void setPageSize(Integer pageSize) {
+        this.pageSize = pageSize;
     }
 
     public List<FieldSort> getSort() {
@@ -67,4 +62,21 @@ public class PageSort {
     public void setSort(List<FieldSort> sort) {
         this.sort = sort;
     }
+
+    public List<Sort.Order> getJpaSort(){
+        List<Sort.Order> sorts = new ArrayList<>();
+        if(ObjectUtils.isEmpty(sort)){
+            return sorts;
+        }
+        for (FieldSort fieldSort : sort) {
+            String sort = fieldSort.getSort();
+            if (sort.equalsIgnoreCase("desc")) {
+                sorts.add(Sort.Order.desc( fieldSort.getField()) );
+            } else if (sort.equalsIgnoreCase("asc" )) {
+                sorts.add(Sort.Order.asc( fieldSort.getField()) );
+            }
+        }
+        return sorts;
+    }
+
 }
