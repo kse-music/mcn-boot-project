@@ -10,7 +10,6 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
   cn.hiboot.mcn.autoconfigure.web.jersey.JerseySwaggerAutoConfiguration,\
   cn.hiboot.mcn.autoconfigure.web.filter.FilterAutoConfiguration,\
   cn.hiboot.mcn.autoconfigure.web.mvc.SpringMvcAutoConfiguration,\
-  cn.hiboot.mcn.autoconfigure.converter.VOConverterAutoConfiguration,\
   cn.hiboot.mcn.autoconfigure.web.mvc.WebMvcConfigurerAutoConfiguration,\
   cn.hiboot.mcn.autoconfigure.web.security.WebSecurityAutoConfiguration,\
   cn.hiboot.mcn.autoconfigure.minio.MinioAutoConfiguration,\

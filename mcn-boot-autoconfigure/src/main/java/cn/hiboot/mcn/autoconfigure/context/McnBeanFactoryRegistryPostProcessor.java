@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostP
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
+import org.springframework.core.env.Environment;
 
 import java.util.Collections;
 
@@ -19,6 +20,11 @@ import java.util.Collections;
  */
 public class McnBeanFactoryRegistryPostProcessor implements BeanDefinitionRegistryPostProcessor {
 
+    private Environment environment;
+
+    public McnBeanFactoryRegistryPostProcessor(Environment environment) {
+        this.environment = environment;
+    }
 
     @Override
     public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
@@ -32,7 +38,7 @@ public class McnBeanFactoryRegistryPostProcessor implements BeanDefinitionRegist
         autowiredAnnotationBeanPostProcessor.setAutowiredAnnotationTypes(Collections.singleton(McnAutowired.class));
         autowiredAnnotationBeanPostProcessor.setBeanFactory(beanFactory);
         beanFactory.addBeanPostProcessor(autowiredAnnotationBeanPostProcessor);
-        beanFactory.addBeanPostProcessor(new McnBeanPostProcessor());
+        beanFactory.addBeanPostProcessor(new McnBeanPostProcessor(environment));
     }
 
 }
