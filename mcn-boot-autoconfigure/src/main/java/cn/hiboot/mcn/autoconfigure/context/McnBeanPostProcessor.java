@@ -50,13 +50,15 @@ public class McnBeanPostProcessor implements BeanPostProcessor{
                 sentinel.setMaster(master);
                 sentinel.setNodes(hosts);
                 redisProperties.setSentinel(sentinel);
-            }else {//cluster
-                redisProperties.setSentinel(null);
+            }else {
                 if(hosts.size() == 1){//单机
                     String[] hp = hosts.get(0).split(":");
                     redisProperties.setHost(hp[0]);
                     redisProperties.setPort(Integer.parseInt(hp[1]));
-                    redisProperties.setCluster(null);
+                }else { //cluster
+                    RedisProperties.Cluster cluster = new RedisProperties.Cluster();
+                    cluster.setNodes(hosts);
+                    redisProperties.setCluster(cluster);
                 }
             }
         }
