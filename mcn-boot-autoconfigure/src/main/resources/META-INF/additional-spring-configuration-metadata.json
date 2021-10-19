@@ -1,4 +1,7 @@
 {
+  "groups": [
+
+  ],
   "properties": [
     {
       "name": "mcn.bootstrap.eagerLoad.enable",
@@ -54,6 +57,26 @@
       "sourceType": "cn.hiboot.mcn.autoconfigure.web.mvc.ErrorPageController",
       "description": "是否重写http状态码.",
       "defaultValue": true
+    }
+  ],
+  "hints": [
+    {
+      "name": "mcn.log.file.filter-level",
+      "values": [
+        {
+          "value": "debug",
+          "description": "调试级别."
+        },{
+          "value": "info",
+          "description": "提示级别."
+        },{
+          "value": "warn",
+          "description": "警告级别."
+        },{
+          "value": "error",
+          "description": "错误级别."
+        }
+      ]
     }
   ]
 }
