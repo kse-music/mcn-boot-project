@@ -20,7 +20,7 @@ import java.util.Collections;
  */
 public class McnBeanFactoryRegistryPostProcessor implements BeanDefinitionRegistryPostProcessor {
 
-    private Environment environment;
+    private final Environment environment;
 
     public McnBeanFactoryRegistryPostProcessor(Environment environment) {
         this.environment = environment;
