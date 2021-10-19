@@ -5,6 +5,7 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -55,6 +56,7 @@ public class MinioAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean(Minio.class)
     public Minio minio(MinioClient minioClient){
         return new DefaultMinio(minioClient,config.getDefaultBucketName(),config.getPreviewImageParameterName());
     }

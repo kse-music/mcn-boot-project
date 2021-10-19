@@ -41,4 +41,5 @@ public class DefaultMinio implements Minio{
     public String getPreviewParameterName() {
         return previewParameterName;
     }
+
 }

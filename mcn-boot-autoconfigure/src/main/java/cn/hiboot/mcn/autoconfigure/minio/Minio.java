@@ -35,7 +35,11 @@ public interface Minio {
     String getPreviewParameterName();
 
     default void upload(String objectName, InputStream stream){
-        upload(getDefaultBucketName(),objectName,stream);
+        upload(getDefaultBucketName(),null,objectName,stream);
+    }
+
+    default void upload(String objectName,String contentType,InputStream stream){
+        upload(getDefaultBucketName(),objectName,contentType,stream);
     }
     /**
      * 文件上传
@@ -44,14 +48,16 @@ public interface Minio {
      * @param objectName 文件名
      * @param stream     文件流
      */
-    default void upload(String bucketName, String objectName, InputStream stream) {
+    default void upload(String bucketName, String objectName,String contentType, InputStream stream) {
         try{
-            PutObjectArgs args = PutObjectArgs.builder()
+            PutObjectArgs.Builder builder = PutObjectArgs.builder()
                     .bucket(bucketName)
                     .object(objectName)
-                    .stream(stream, stream.available(), -1)
-                    .build();
-            getMinioClient().putObject(args);
+                    .stream(stream, stream.available(), -1);
+            if(McnUtils.isNotNullAndEmpty(contentType)){
+                builder.contentType(contentType);
+            }
+            getMinioClient().putObject(builder.build());
         }catch (Exception e){
             throw new MinioException(e);
         }
