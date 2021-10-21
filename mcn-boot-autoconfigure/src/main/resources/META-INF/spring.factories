@@ -13,7 +13,8 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
   cn.hiboot.mcn.autoconfigure.web.mvc.WebMvcConfigurerAutoConfiguration,\
   cn.hiboot.mcn.autoconfigure.web.security.WebSecurityAutoConfiguration,\
   cn.hiboot.mcn.autoconfigure.minio.MinioAutoConfiguration,\
-  cn.hiboot.mcn.autoconfigure.web.validator.ValidatorAutoConfiguration
+  cn.hiboot.mcn.autoconfigure.web.validator.ValidatorAutoConfiguration,\
+  cn.hiboot.mcn.autoconfigure.redis.RedisToolAutoConfiguration
 
 org.springframework.boot.env.EnvironmentPostProcessor=\
   cn.hiboot.mcn.autoconfigure.context.McnPropertiesPostProcessor
