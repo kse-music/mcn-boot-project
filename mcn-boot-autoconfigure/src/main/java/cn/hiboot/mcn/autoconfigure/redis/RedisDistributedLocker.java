@@ -2,7 +2,6 @@ package cn.hiboot.mcn.autoconfigure.redis;
 
 import cn.hiboot.mcn.core.exception.ServiceException;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.data.redis.core.BoundValueOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.scripting.support.ResourceScriptSource;
@@ -30,13 +29,12 @@ public class RedisDistributedLocker implements DistributedLocker{
     }
 
     @Override
-    public boolean tryLock(String lockKey, TimeUnit unit, int waitTime, int leaseTime) {
-        BoundValueOperations<String, String> boundValueOps = redisTemplate.boundValueOps(lockKey);
-        Boolean success = boundValueOps.setIfAbsent(DEFAULT_LOCK_VALUE, leaseTime, unit);
+    public boolean tryLock(String lockKey,int waitTime, int leaseTime,TimeUnit unit) {
+        Boolean success = setIfAbsent(lockKey,leaseTime, unit);
         long nanoWaitForLock = unit.toNanos(DEFAULT_WAIT_TIME);
         long start = System.nanoTime();
         while ((System.nanoTime() - start < nanoWaitForLock) && (success == null || !success)) {
-            success = boundValueOps.setIfAbsent(DEFAULT_LOCK_VALUE, leaseTime, unit);
+            success = setIfAbsent(lockKey,leaseTime, unit);
             if(success != null && success){
                 break;
             }
@@ -45,6 +43,10 @@ public class RedisDistributedLocker implements DistributedLocker{
             return true;
         }
         throw ServiceException.newInstance("获取锁超时");
+    }
+
+    private Boolean setIfAbsent(String lockKey, int leaseTime, TimeUnit unit){
+        return redisTemplate.opsForValue().setIfAbsent(lockKey,DEFAULT_LOCK_VALUE, leaseTime, unit);
     }
 
     @Override

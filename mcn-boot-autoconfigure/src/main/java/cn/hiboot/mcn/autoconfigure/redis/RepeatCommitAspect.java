@@ -10,7 +10,6 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -61,8 +60,7 @@ public class RepeatCommitAspect {
             String plainRequestContent = requestContent.toString();
             String hash = DigestUtils.md5DigestAsHex(plainRequestContent.getBytes(StandardCharsets.UTF_8));
             String key = REQUEST_HASH_PREFIX + hash;
-            ValueOperations<String, String> ops = redisTemplate.opsForValue();
-            Boolean status = ops.setIfAbsent(key, key, repeatCommit.value(), TimeUnit.MILLISECONDS);
+            Boolean status = redisTemplate.opsForValue().setIfAbsent(key, key, repeatCommit.value(), TimeUnit.MILLISECONDS);
             if (status == null || !status) {
                 throw ServiceException.newInstance("重复提交");
             }

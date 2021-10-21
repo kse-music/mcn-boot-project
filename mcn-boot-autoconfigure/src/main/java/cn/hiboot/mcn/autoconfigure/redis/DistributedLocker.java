@@ -27,18 +27,18 @@ public interface DistributedLocker{
     }
 
     default boolean tryLock(String lockKey, int waitTime, int leaseTime) {
-        return tryLock(lockKey,DEFAULT_TIME_UNIT,waitTime,leaseTime);
+        return tryLock(lockKey,waitTime,leaseTime,DEFAULT_TIME_UNIT);
     }
 
     /**
      * 获取分布式锁
      * @param lockKey 锁名称
-     * @param unit 锁时间单位 默认秒
      * @param waitTime 获取锁等待时间 默认5s
      * @param leaseTime 锁持有的时间 默认5s
+     * @param unit 锁时间单位 默认秒
      * @return true获取成功 false获取失败
      */
-    boolean tryLock(String lockKey, TimeUnit unit, int waitTime, int leaseTime);
+    boolean tryLock(String lockKey,int waitTime, int leaseTime, TimeUnit unit);
 
     /**
      * 手动释放锁
