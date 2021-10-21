@@ -16,8 +16,6 @@ public interface DistributedLocker{
 
     int DEFAULT_LEASE_TIME = 5;
 
-    String DEFAULT_LOCK_VALUE = "_DEFAULT_LOCK_VALUE";
-
     default boolean tryLock(String lockKey) {
         return tryLock(lockKey,DEFAULT_WAIT_TIME);
     }

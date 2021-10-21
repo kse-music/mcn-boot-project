@@ -42,16 +42,16 @@ public class RedisDistributedLocker implements DistributedLocker{
         if(success != null && success){
             return true;
         }
-        throw ServiceException.newInstance("获取锁超时");
+        throw ServiceException.newInstance(waitTime+"s内获取锁超时");
     }
 
     private Boolean setIfAbsent(String lockKey, int leaseTime, TimeUnit unit){
-        return redisTemplate.opsForValue().setIfAbsent(lockKey,DEFAULT_LOCK_VALUE, leaseTime, unit);
+        return redisTemplate.opsForValue().setIfAbsent(lockKey,lockKey, leaseTime, unit);
     }
 
     @Override
     public void unlock(String lockKey) {
-        redisTemplate.execute(redisScript, Collections.singletonList(lockKey), DEFAULT_LOCK_VALUE);
+        redisTemplate.execute(redisScript, Collections.singletonList(lockKey), lockKey);
     }
 
 }
