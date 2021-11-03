@@ -1,6 +1,7 @@
 package cn.hiboot.mcn.autoconfigure.minio;
 
 import io.minio.MinioClient;
+import io.minio.http.HttpUtils;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -52,13 +53,14 @@ public class MinioAutoConfiguration {
         return builder
                 .credentials(config.getAccessKey(), config.getSecretKey())
                 .endpoint(config.getEndpoint())
+                .httpClient(HttpUtils.newDefaultHttpClient(config.getConnectTimeout().toMillis(),config.getWriteTimeout().toMillis(),config.getReadTimeout().toMillis()))
                 .build();
     }
 
     @Bean
     @ConditionalOnMissingBean(Minio.class)
     public Minio minio(MinioClient minioClient){
-        return new DefaultMinio(minioClient,config.getDefaultBucketName(),config.getPreviewImageParameterName());
+        return new DefaultMinio(minioClient,config);
     }
 
     @Configuration(proxyBeanMethods = false)
@@ -85,7 +87,7 @@ public class MinioAutoConfiguration {
             public void handleRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
                 OutputStream os = null;
                 try {
-                    BufferedImage image = ImageIO.read(minio.getObject(request.getParameter(minio.getPreviewParameterName())));
+                    BufferedImage image = ImageIO.read(minio.getObject(request.getParameter(minio.getConfig().getPreviewImageParameterName())));
                     response.setContentType("image/png");
                     os = response.getOutputStream();
                     if (image != null) {

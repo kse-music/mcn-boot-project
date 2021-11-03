@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -24,36 +25,44 @@ import java.util.stream.StreamSupport;
  */
 public interface Minio {
 
-    String DEFAULT_PREVIEW_PARAMETER_NAME = "image";
-
     Logger log = LoggerFactory.getLogger(DefaultMinio.class);
 
-    String getDefaultBucketName();
-    
+    Map<String, String> map = Collections.singletonMap("Expect", "100-continue");
+
     MinioClient getMinioClient();
 
-    String getPreviewParameterName();
+    MinioProperties getConfig();
 
-    default void upload(String objectName, InputStream stream){
-        upload(getDefaultBucketName(),null,objectName,stream);
+    default String getDefaultBucketName(){
+        return getConfig().getDefaultBucketName();
     }
 
-    default void upload(String objectName,String contentType,InputStream stream){
-        upload(getDefaultBucketName(),objectName,contentType,stream);
+    default void upload(String objectName,long objectSize,InputStream stream){
+        upload(objectName,objectSize,null,stream);
+    }
+
+    default void upload(String objectName,long objectSize,String contentType,InputStream stream){
+        upload(getDefaultBucketName(),objectName,objectSize,getConfig().getMinMultipartSize().toBytes(),contentType,stream);
     }
     /**
      * 文件上传
      *
      * @param bucketName 桶名称
      * @param objectName 文件名
-     * @param stream     文件流
+     * @param objectSize 文件大小
+     * @param partSize 分片大小
+     * @param stream   文件流
      */
-    default void upload(String bucketName, String objectName,String contentType, InputStream stream) {
+    default void upload(String bucketName,String objectName,long objectSize,long partSize,String contentType, InputStream stream) {
+        if(McnUtils.isNullOrEmpty(bucketName)){
+            throw new MinioException(bucketName + " can not empty");
+        }
+
         try{
             PutObjectArgs.Builder builder = PutObjectArgs.builder()
                     .bucket(bucketName)
-                    .object(objectName)
-                    .stream(stream, stream.available(), -1);
+                    .object(objectName).headers(map)
+                    .stream(stream, objectSize, partSize);
             if(McnUtils.isNotNullAndEmpty(contentType)){
                 builder.contentType(contentType);
             }
@@ -162,8 +171,9 @@ public interface Minio {
         try {
             return getMinioClient().bucketExists(BucketExistsArgs.builder().bucket(bucketName).build());
         } catch (Exception e) {
-            throw new MinioException(e);
+            log.error("{}","check buck exist error");
         }
+        return false;
     }
 
     /**
