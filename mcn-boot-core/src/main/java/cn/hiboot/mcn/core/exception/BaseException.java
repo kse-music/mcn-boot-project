@@ -25,11 +25,12 @@ public class BaseException extends RuntimeException {
         this.msg = getMessage();
     }
 
-    public BaseException(String message, Throwable cause) {
+    protected BaseException(String message, Throwable cause) {
         super(message, cause);
+        this.msg = getMessage();
     }
 
-    public BaseException(Throwable cause) {
+    protected BaseException(Throwable cause) {
         super(cause);
     }
 
