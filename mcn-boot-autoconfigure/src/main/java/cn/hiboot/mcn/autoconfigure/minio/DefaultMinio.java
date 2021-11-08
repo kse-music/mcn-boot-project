@@ -1,7 +1,8 @@
 package cn.hiboot.mcn.autoconfigure.minio;
 
 import cn.hiboot.mcn.core.util.McnUtils;
-import io.minio.MinioClient;
+
+import java.io.InputStream;
 
 /**
  * Minio 工具类
@@ -11,11 +12,11 @@ import io.minio.MinioClient;
  */
 public class DefaultMinio implements Minio{
 
-    private final MinioClient minioClient;
+    private final DefaultMinioClient minioClient;
 
     private final MinioProperties config;
 
-    public DefaultMinio(MinioClient minioClient, MinioProperties config) {
+    public DefaultMinio(DefaultMinioClient minioClient, MinioProperties config) {
         this.minioClient = minioClient;
         this.config = config;
         String defaultBucketName = config.getDefaultBucketName();
@@ -26,13 +27,22 @@ public class DefaultMinio implements Minio{
     }
 
     @Override
-    public MinioClient getMinioClient() {
+    public DefaultMinioClient getMinioClient() {
         return minioClient;
     }
 
     @Override
     public MinioProperties getConfig() {
         return config;
+    }
+
+    @Override
+    public void uploadAsync(String bucketName, String objectName, long objectSize, long partSize, String contentType, InputStream stream) {
+        try {
+            minioClient.upload(bucketName,objectName,objectSize,contentType,stream);
+        } catch (Exception e) {
+            throw new MinioException(e);
+        }
     }
 
 }

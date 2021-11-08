@@ -1,7 +1,6 @@
 package cn.hiboot.mcn.autoconfigure.minio;
 
 import io.minio.MinioClient;
-import io.minio.http.HttpUtils;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -46,21 +45,17 @@ public class MinioAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public MinioClient minioClient(){
+    public DefaultMinioClient minioClient(){
         MinioClient.Builder builder = MinioClient.builder();
         for (MinioClientBuilderCustomizer customizer : customizers) {
             customizer.customize(builder);
         }
-        return builder
-                .credentials(config.getAccessKey(), config.getSecretKey())
-                .endpoint(config.getEndpoint())
-                .httpClient(HttpUtils.newDefaultHttpClient(config.getConnectTimeout().toMillis(),config.getWriteTimeout().toMillis(),config.getReadTimeout().toMillis()))
-                .build();
+        return new DefaultMinioClient(config,builder);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public Minio minio(MinioClient minioClient){
+    public Minio minio(DefaultMinioClient minioClient){
         return new DefaultMinio(minioClient,config);
     }
 

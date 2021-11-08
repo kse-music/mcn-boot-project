@@ -29,7 +29,7 @@ public interface Minio {
 
     Map<String, String> map = Collections.singletonMap("Expect", "100-continue");
 
-    MinioClient getMinioClient();
+    DefaultMinioClient getMinioClient();
 
     MinioProperties getConfig();
 
@@ -61,7 +61,8 @@ public interface Minio {
         try{
             PutObjectArgs.Builder builder = PutObjectArgs.builder()
                     .bucket(bucketName)
-                    .object(objectName).headers(map)
+                    .object(objectName)
+                    .headers(map)
                     .stream(stream, objectSize, partSize);
             if(McnUtils.isNotNullAndEmpty(contentType)){
                 builder.contentType(contentType);
@@ -71,6 +72,16 @@ public interface Minio {
             throw new MinioException(e);
         }
     }
+
+    default void uploadAsync(String objectName,long objectSize,InputStream stream){
+        uploadAsync(objectName,objectSize,null,stream);
+    }
+
+    default void uploadAsync(String objectName,long objectSize,String contentType,InputStream stream){
+        uploadAsync(getDefaultBucketName(),objectName,objectSize,getConfig().getMinMultipartSize().toBytes(),contentType,stream);
+    }
+
+    void uploadAsync(String bucketName,String objectName,long objectSize,long partSize,String contentType, InputStream stream);
 
     default void delete(String objectName){
         delete(getDefaultBucketName(),objectName);
@@ -96,6 +107,7 @@ public interface Minio {
     default List<Item> listObjects(boolean recursive){
         return listObjects(getDefaultBucketName(),recursive);
     }
+
     /**
      * 文件列表
      *
@@ -148,6 +160,7 @@ public interface Minio {
     default InputStream getObject(String objectName){
         return getObject(getDefaultBucketName(),objectName);
     }
+
     /**
      * 获取文件
      *

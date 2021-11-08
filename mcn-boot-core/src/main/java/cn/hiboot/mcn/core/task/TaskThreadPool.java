@@ -52,13 +52,14 @@ public class TaskThreadPool extends ThreadPoolExecutor {
         private final AtomicInteger nextId = new AtomicInteger();
 
         public CustomThreadFactory(String name) {
-            this.namePrefix = name + "-Worker-";
+            this.namePrefix = name + "-Worker";
         }
 
         @Override
         public Thread newThread(Runnable r) {
             return new Thread(r,namePrefix + nextId.getAndIncrement());
         }
+
     }
 
 }
