@@ -45,6 +45,7 @@ public class MinioAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean
     public MinioClient minioClient(){
         MinioClient.Builder builder = MinioClient.builder();
         for (MinioClientBuilderCustomizer customizer : customizers) {
@@ -58,7 +59,7 @@ public class MinioAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(Minio.class)
+    @ConditionalOnMissingBean
     public Minio minio(MinioClient minioClient){
         return new DefaultMinio(minioClient,config);
     }
