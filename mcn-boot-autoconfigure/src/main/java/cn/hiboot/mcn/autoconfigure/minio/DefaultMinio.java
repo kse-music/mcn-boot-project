@@ -37,7 +37,7 @@ public class DefaultMinio implements Minio{
     }
 
     @Override
-    public void uploadAsync(String bucketName, String objectName, long objectSize, long partSize, String contentType, InputStream stream) {
+    public void uploadParallel(String bucketName, String objectName, long objectSize, long partSize, String contentType, InputStream stream) {
         try {
             minioClient.upload(bucketName,objectName,objectSize,contentType,stream);
         } catch (Exception e) {

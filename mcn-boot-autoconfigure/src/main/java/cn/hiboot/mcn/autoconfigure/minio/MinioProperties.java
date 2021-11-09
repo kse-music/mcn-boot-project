@@ -6,6 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.util.unit.DataSize;
 
 import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 
 /**
  * minio配置项
@@ -35,6 +36,11 @@ public class MinioProperties {
      * 分块默认大小默认为10MB 最小值为5MB 最大值为5GB
      */
     private DataSize minMultipartSize = DataSize.ofMegabytes(10);
+
+    /**
+     * 预生成的url过期时间 默认1天 86400秒
+     */
+    private int expire = (int)TimeUnit.DAYS.toSeconds(1);
 
     private Pool pool = new Pool();
 
@@ -86,6 +92,14 @@ public class MinioProperties {
 
     public void setMinMultipartSize(DataSize minMultipartSize) {
         this.minMultipartSize = minMultipartSize;
+    }
+
+    public int getExpire() {
+        return expire;
+    }
+
+    public void setExpire(int expire) {
+        this.expire = expire;
     }
 
     public Pool getPool() {

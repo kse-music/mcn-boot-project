@@ -21,7 +21,6 @@ import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
-import java.util.concurrent.TimeUnit;
 
 /**
  * DefaultMinioClient
@@ -41,6 +40,8 @@ public class DefaultMinioClient extends MinioClient {
 
     private TaskThreadPool pool;
 
+    private int expire;
+
     public DefaultMinioClient(MinioProperties minioProperties,MinioClient.Builder builder) {
         this(builder.credentials(minioProperties.getAccessKey(),minioProperties.getSecretKey())
                 .endpoint(minioProperties.getEndpoint())
@@ -49,6 +50,7 @@ public class DefaultMinioClient extends MinioClient {
         this.okHttpClient = minioProperties.getClient().okHttpClient();
         this.pool = new TaskThreadPool(minioProperties.getPool().getCore(),minioProperties.getPool().getMax(),minioProperties.getPool().getQueueSize(),minioProperties.getPool().getThreadName());
         this.size = minioProperties.getMinMultipartSize().toBytes();
+        this.expire = minioProperties.getExpire();
     }
 
     private DefaultMinioClient(MinioClient client) {
@@ -99,17 +101,20 @@ public class DefaultMinioClient extends MinioClient {
         PreSignResult preSignResult = new PreSignResult(uploadId);
         for (int i = 1; i <= count; i++) {
             reqParams.put("partNumber", String.valueOf(i));
-            String uploadUrl = getPresignedObjectUrl(
-                    GetPresignedObjectUrlArgs.builder()
-                            .method(Method.PUT)
-                            .bucket(bucketName)
-                            .object(objectName)
-                            .expiry(1, TimeUnit.DAYS)
-                            .extraQueryParams(reqParams)
-                            .build());
-            preSignResult.uploadUrls.offer(uploadUrl);
+            preSignResult.uploadUrls.offer(getPresignedObjectUrl(bucketName,objectName,reqParams));
         }
         return preSignResult;
+    }
+
+    public String getPresignedObjectUrl(String bucketName,String objectName,Map<String, String> queryParams) throws Exception{
+        return getPresignedObjectUrl(
+                GetPresignedObjectUrlArgs.builder()
+                        .method(Method.PUT)
+                        .bucket(bucketName)
+                        .object(objectName)
+                        .expiry(expire)
+                        .extraQueryParams(queryParams)
+                        .build());
     }
 
     private void mergeMultipartUpload(String bucketName,String objectName, String uploadId) throws Exception{

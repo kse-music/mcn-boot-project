@@ -73,15 +73,31 @@ public interface Minio {
         }
     }
 
-    default void uploadAsync(String objectName,long objectSize,InputStream stream){
-        uploadAsync(objectName,objectSize,null,stream);
+    default void uploadParallel(String objectName,long objectSize,InputStream stream){
+        uploadParallel(objectName,objectSize,null,stream);
     }
 
-    default void uploadAsync(String objectName,long objectSize,String contentType,InputStream stream){
-        uploadAsync(getDefaultBucketName(),objectName,objectSize,getConfig().getMinMultipartSize().toBytes(),contentType,stream);
+    default void uploadParallel(String objectName,long objectSize,String contentType,InputStream stream){
+        uploadParallel(getDefaultBucketName(),objectName,objectSize,getConfig().getMinMultipartSize().toBytes(),contentType,stream);
     }
 
-    void uploadAsync(String bucketName,String objectName,long objectSize,long partSize,String contentType, InputStream stream);
+    void uploadParallel(String bucketName,String objectName,long objectSize,long partSize,String contentType, InputStream stream);
+
+    default String getPresignedObjectUrl(String objectName){
+        return getPresignedObjectUrl(objectName,null);
+    }
+
+    default String getPresignedObjectUrl(String objectName,Map<String, String> queryParams){
+        return getPresignedObjectUrl(getDefaultBucketName(),objectName,queryParams);
+    }
+
+    default String getPresignedObjectUrl(String bucketName,String objectName,Map<String, String> queryParams){
+        try {
+            return getMinioClient().getPresignedObjectUrl(bucketName,objectName,queryParams);
+        } catch (Exception e) {
+            throw new MinioException(e);
+        }
+    }
 
     default void delete(String objectName){
         delete(getDefaultBucketName(),objectName);
