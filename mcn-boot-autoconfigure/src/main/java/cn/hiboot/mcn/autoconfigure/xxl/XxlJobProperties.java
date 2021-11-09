@@ -11,9 +11,21 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties("xxl.job")
 public class XxlJobProperties {
 
+    /**
+     * 是否启用调度执行器自动配置
+     */
+    private boolean enable;
     private String adminAddresses = "http://127.0.0.1:8080/xxl-job-admin";
     private String accessToken;
     private Executor executor = new Executor();
+
+    public boolean isEnable() {
+        return enable;
+    }
+
+    public void setEnable(boolean enable) {
+        this.enable = enable;
+    }
 
     public String getAdminAddresses() {
         return adminAddresses;
@@ -43,9 +55,9 @@ public class XxlJobProperties {
         private String appName;
         private String address;
         private String ip;
-        private Integer port;
+        private int port;
         private String logPath;
-        private Integer logRetentionDays = 30;
+        private int logRetentionDays = 30;
 
         public String getAppName() {
             return appName;
@@ -71,11 +83,11 @@ public class XxlJobProperties {
             this.ip = ip;
         }
 
-        public Integer getPort() {
+        public int getPort() {
             return port;
         }
 
-        public void setPort(Integer port) {
+        public void setPort(int port) {
             this.port = port;
         }
 
@@ -87,12 +99,13 @@ public class XxlJobProperties {
             this.logPath = logPath;
         }
 
-        public Integer getLogRetentionDays() {
+        public int getLogRetentionDays() {
             return logRetentionDays;
         }
 
-        public void setLogRetentionDays(Integer logRetentionDays) {
+        public void setLogRetentionDays(int logRetentionDays) {
             this.logRetentionDays = logRetentionDays;
         }
     }
+
 }

@@ -31,7 +31,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class DefaultMinioClient extends MinioClient {
 
-    Logger log = LoggerFactory.getLogger(DefaultMinioClient.class);
+    private static final Logger log = LoggerFactory.getLogger(DefaultMinioClient.class);
 
     private long size;
 
