@@ -1,7 +1,7 @@
 package cn.hiboot.mcn.autoconfigure.minio;
 
-import java.util.ArrayDeque;
-import java.util.Queue;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * PreSignResult
@@ -12,18 +12,18 @@ import java.util.Queue;
 public class PreSignResult {
 
     private final String uploadId;
-    private final Queue<String> uploadUrls;
+    private final List<String> uploadUrls;
 
     public PreSignResult(String uploadId,int size) {
         this.uploadId = uploadId;
-        this.uploadUrls = new ArrayDeque<>(size);
+        this.uploadUrls = new ArrayList<>(size);
     }
 
     public String getUploadId() {
         return uploadId;
     }
 
-    public Queue<String> getUploadUrls() {
+    public List<String> getUploadUrls() {
         return uploadUrls;
     }
 }

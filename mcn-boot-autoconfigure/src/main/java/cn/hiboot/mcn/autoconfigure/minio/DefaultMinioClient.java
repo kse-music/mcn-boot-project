@@ -65,11 +65,12 @@ public class DefaultMinioClient extends MinioClient {
         byte[] d = new byte[intSize];
         PreSignResult preSignResult = getPresignedObjectUrl(bucketName,objectName,contentType,count);
         int c;
+        int index = 0;
         while ((c = inputStream.read(d)) != -1){
             outputStream.reset();
             outputStream.write(d,0,c);
             byte[] bytes = outputStream.toByteArray();
-            String url = preSignResult.getUploadUrls().poll();
+            String url = preSignResult.getUploadUrls().get(index++);
             pool.execute(() -> upload(url, contentType,bytes));
         }
         pool.closeUntilAllTaskFinish();
@@ -102,7 +103,7 @@ public class DefaultMinioClient extends MinioClient {
         PreSignResult preSignResult = new PreSignResult(uploadId,count);
         for (int i = 1; i <= count; i++) {
             reqParams.put("partNumber", String.valueOf(i));
-            preSignResult.getUploadUrls().offer(getPresignedObjectUrl(bucketName,objectName,reqParams));
+            preSignResult.getUploadUrls().add(getPresignedObjectUrl(bucketName,objectName,reqParams));
         }
         return preSignResult;
     }
