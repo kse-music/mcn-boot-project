@@ -38,9 +38,14 @@ public class MinioProperties {
     private DataSize minMultipartSize = DataSize.ofMegabytes(10);
 
     /**
-     * 预生成的url过期时间 默认1天 86400秒
+     * 预生成的url过期时间 默认6小时
      */
-    private int expire = (int)TimeUnit.DAYS.toSeconds(1);
+    private int expire = (int)TimeUnit.HOURS.toSeconds(6);
+
+    /**
+     * 上传方法
+     */
+    private String method = "PUT";
 
     private Pool pool = new Pool();
 
@@ -102,6 +107,14 @@ public class MinioProperties {
         this.expire = expire;
     }
 
+    public String getMethod() {
+        return method;
+    }
+
+    public void setMethod(String method) {
+        this.method = method;
+    }
+
     public Pool getPool() {
         return pool;
     }
@@ -119,6 +132,7 @@ public class MinioProperties {
     }
 
     public static class Pool{
+
         private static final int DEFAULT_SIZE = Runtime.getRuntime().availableProcessors();
 
         private Integer core = DEFAULT_SIZE;
@@ -160,6 +174,7 @@ public class MinioProperties {
         public void setThreadName(String threadName) {
             this.threadName = threadName;
         }
+
     }
 
     public static class Client{

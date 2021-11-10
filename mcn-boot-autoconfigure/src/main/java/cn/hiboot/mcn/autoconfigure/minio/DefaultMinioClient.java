@@ -17,10 +17,8 @@ import org.slf4j.LoggerFactory;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Queue;
 
 /**
  * DefaultMinioClient
@@ -42,6 +40,8 @@ public class DefaultMinioClient extends MinioClient {
 
     private int expire;
 
+    private Method method;
+
     public DefaultMinioClient(MinioProperties minioProperties,MinioClient.Builder builder) {
         this(builder.credentials(minioProperties.getAccessKey(),minioProperties.getSecretKey())
                 .endpoint(minioProperties.getEndpoint())
@@ -51,6 +51,7 @@ public class DefaultMinioClient extends MinioClient {
         this.pool = new TaskThreadPool(minioProperties.getPool().getCore(),minioProperties.getPool().getMax(),minioProperties.getPool().getQueueSize(),minioProperties.getPool().getThreadName());
         this.size = minioProperties.getMinMultipartSize().toBytes();
         this.expire = minioProperties.getExpire();
+        this.method = Method.valueOf(minioProperties.getMethod());
     }
 
     private DefaultMinioClient(MinioClient client) {
@@ -62,17 +63,17 @@ public class DefaultMinioClient extends MinioClient {
         int count = (int) ((length / size) + 1);
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream(intSize);
         byte[] d = new byte[intSize];
-        PreSignResult preSignResult = preSign(bucketName,objectName,contentType,count);
+        PreSignResult preSignResult = getPresignedObjectUrl(bucketName,objectName,contentType,count);
         int c;
         while ((c = inputStream.read(d)) != -1){
             outputStream.reset();
             outputStream.write(d,0,c);
             byte[] bytes = outputStream.toByteArray();
-            String url = preSignResult.uploadUrls.poll();
+            String url = preSignResult.getUploadUrls().poll();
             pool.execute(() -> upload(url, contentType,bytes));
         }
         pool.closeUntilAllTaskFinish();
-        mergeMultipartUpload(bucketName,objectName, preSignResult.uploadId);
+        mergeMultipartUpload(bucketName,objectName, preSignResult.getUploadId());
     }
 
     private void upload(String url,String contentType,byte[] data){
@@ -90,7 +91,7 @@ public class DefaultMinioClient extends MinioClient {
         return contentType;
     }
 
-    private PreSignResult preSign(String bucketName, String objectName,String contentType, int count) throws Exception{
+    public PreSignResult getPresignedObjectUrl(String bucketName,String objectName,String contentType, int count) throws Exception{
         Multimap<String, String> headers = HashMultimap.create();
         headers.put("Content-Type", getOrDefault(contentType));
         CreateMultipartUploadResponse response = this.createMultipartUpload(bucketName, region, objectName, headers, null);
@@ -98,18 +99,18 @@ public class DefaultMinioClient extends MinioClient {
 
         Map<String, String> reqParams = new HashMap<>();
         reqParams.put("uploadId", uploadId);
-        PreSignResult preSignResult = new PreSignResult(uploadId);
+        PreSignResult preSignResult = new PreSignResult(uploadId,count);
         for (int i = 1; i <= count; i++) {
             reqParams.put("partNumber", String.valueOf(i));
-            preSignResult.uploadUrls.offer(getPresignedObjectUrl(bucketName,objectName,reqParams));
+            preSignResult.getUploadUrls().offer(getPresignedObjectUrl(bucketName,objectName,reqParams));
         }
         return preSignResult;
     }
 
-    public String getPresignedObjectUrl(String bucketName,String objectName,Map<String, String> queryParams) throws Exception{
+    private String getPresignedObjectUrl(String bucketName,String objectName,Map<String, String> queryParams) throws Exception{
         return getPresignedObjectUrl(
                 GetPresignedObjectUrlArgs.builder()
-                        .method(Method.PUT)
+                        .method(method)
                         .bucket(bucketName)
                         .object(objectName)
                         .expiry(expire)
@@ -117,7 +118,7 @@ public class DefaultMinioClient extends MinioClient {
                         .build());
     }
 
-    private void mergeMultipartUpload(String bucketName,String objectName, String uploadId) throws Exception{
+    public void mergeMultipartUpload(String bucketName,String objectName, String uploadId) throws Exception{
         Part[] parts = new Part[MAX_PART];
         ListPartsResponse partResult = listParts(bucketName, null, objectName, MAX_PART, 0, uploadId, null, null);
         int partNumber = 1;
@@ -126,16 +127,6 @@ public class DefaultMinioClient extends MinioClient {
             partNumber++;
         }
         completeMultipartUpload(bucketName, region, objectName, uploadId, parts, null, null);
-    }
-
-    private static class PreSignResult {
-        private final String uploadId;
-        private final Queue<String> uploadUrls;
-
-        public PreSignResult(String uploadId) {
-            this.uploadId = uploadId;
-            this.uploadUrls = new ArrayDeque<>();
-        }
     }
 
 }

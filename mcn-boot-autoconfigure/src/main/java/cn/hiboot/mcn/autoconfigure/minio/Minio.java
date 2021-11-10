@@ -57,7 +57,6 @@ public interface Minio {
         if(McnUtils.isNullOrEmpty(bucketName)){
             throw new MinioException(bucketName + " can not empty");
         }
-
         try{
             PutObjectArgs.Builder builder = PutObjectArgs.builder()
                     .bucket(bucketName)
@@ -78,22 +77,40 @@ public interface Minio {
     }
 
     default void uploadParallel(String objectName,long objectSize,String contentType,InputStream stream){
-        uploadParallel(getDefaultBucketName(),objectName,objectSize,getConfig().getMinMultipartSize().toBytes(),contentType,stream);
+        uploadParallel(getDefaultBucketName(),objectName,objectSize,contentType,stream);
     }
 
-    void uploadParallel(String bucketName,String objectName,long objectSize,long partSize,String contentType, InputStream stream);
-
-    default String getPresignedObjectUrl(String objectName){
-        return getPresignedObjectUrl(objectName,null);
-    }
-
-    default String getPresignedObjectUrl(String objectName,Map<String, String> queryParams){
-        return getPresignedObjectUrl(getDefaultBucketName(),objectName,queryParams);
-    }
-
-    default String getPresignedObjectUrl(String bucketName,String objectName,Map<String, String> queryParams){
+    default void uploadParallel(String bucketName,String objectName,long objectSize,String contentType, InputStream stream){
         try {
-            return getMinioClient().getPresignedObjectUrl(bucketName,objectName,queryParams);
+            getMinioClient().upload(bucketName,objectName,objectSize,contentType,stream);
+        } catch (Exception e) {
+            throw new MinioException(e);
+        }
+    }
+
+    default PreSignResult getPresignedObjectUrl(String objectName,int count){
+        return getPresignedObjectUrl(getDefaultBucketName(),objectName,null,count);
+    }
+
+    default PreSignResult getPresignedObjectUrl(String objectName,String contentType, int count){
+        return getPresignedObjectUrl(getDefaultBucketName(),objectName,contentType,count);
+    }
+
+    default PreSignResult getPresignedObjectUrl(String bucketName,String objectName,String contentType, int count){
+        try {
+            return getMinioClient().getPresignedObjectUrl(bucketName,objectName,contentType,count);
+        } catch (Exception e) {
+            throw new MinioException(e);
+        }
+    }
+
+    default void mergeMultipartUpload(String objectName, String uploadId){
+        mergeMultipartUpload(getDefaultBucketName(),objectName,uploadId);
+    }
+
+    default void mergeMultipartUpload(String bucketName,String objectName, String uploadId){
+        try {
+            getMinioClient().mergeMultipartUpload(bucketName,objectName,uploadId);
         } catch (Exception e) {
             throw new MinioException(e);
         }

@@ -2,8 +2,6 @@ package cn.hiboot.mcn.autoconfigure.minio;
 
 import cn.hiboot.mcn.core.util.McnUtils;
 
-import java.io.InputStream;
-
 /**
  * Minio 工具类
  *
@@ -34,15 +32,6 @@ public class DefaultMinio implements Minio{
     @Override
     public MinioProperties getConfig() {
         return config;
-    }
-
-    @Override
-    public void uploadParallel(String bucketName, String objectName, long objectSize, long partSize, String contentType, InputStream stream) {
-        try {
-            minioClient.upload(bucketName,objectName,objectSize,contentType,stream);
-        } catch (Exception e) {
-            throw new MinioException(e);
-        }
     }
 
 }
