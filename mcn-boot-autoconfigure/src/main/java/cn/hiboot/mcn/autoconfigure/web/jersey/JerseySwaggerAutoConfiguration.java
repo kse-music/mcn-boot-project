@@ -2,6 +2,7 @@ package cn.hiboot.mcn.autoconfigure.web.jersey;
 
 import cn.hiboot.mcn.autoconfigure.context.McnPropertiesPostProcessor;
 import cn.hiboot.mcn.core.util.McnUtils;
+import cn.hiboot.mcn.jersey.JerseyUIConfig;
 import io.swagger.jaxrs.config.BeanConfig;
 import io.swagger.jaxrs.listing.ApiListingResource;
 import io.swagger.jaxrs.listing.SwaggerSerializers;
@@ -15,6 +16,7 @@ import org.glassfish.jersey.servlet.ServletProperties;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.jersey.JerseyAutoConfiguration;
 import org.springframework.boot.autoconfigure.jersey.ResourceConfigCustomizer;
@@ -95,9 +97,6 @@ public class JerseySwaggerAutoConfiguration extends ResourceConfig {
                 config.registerClasses(MultiPartFeature.class);
             }
 
-            //init swagger
-            initSwagger(config);
-
         };
     }
 
@@ -111,8 +110,22 @@ public class JerseySwaggerAutoConfiguration extends ResourceConfig {
         }
     }
 
-    private void initSwagger(ResourceConfig config){
-        if(jersey.getInit() && ClassUtils.isPresent("io.swagger.jaxrs.listing.ApiListingResource",null)){
+    @ConditionalOnClass({JerseyUIConfig.class,ApiListingResource.class})
+    @ConditionalOnProperty(value = "jersey.swagger",name = "init",havingValue = "true")
+    private static class SwaggerConfig{
+
+        private final JerseySwaggerProperties jersey;
+
+        private SwaggerConfig(JerseySwaggerProperties jersey) {
+            this.jersey = jersey;
+        }
+
+        @Bean
+        public ResourceConfigCustomizer resourceConfigCustomizer(){
+            return this::initSwagger;
+        }
+
+        private void initSwagger(ResourceConfig config){
             config.registerClasses(ApiListingResource.class, SwaggerSerializers.class);
             BeanConfig beanConfig = new BeanConfig(){
                 @Override
@@ -171,25 +184,26 @@ public class JerseySwaggerAutoConfiguration extends ResourceConfig {
                         .registerClasses(FreemarkerMvcFeature.class,SwaggerView.class);
             }
         }
-    }
 
-    private String extractMethod(Method method){
-        if (method.getAnnotation(javax.ws.rs.GET.class) != null) {
-            return "GET";
-        } else if (method.getAnnotation(javax.ws.rs.PUT.class) != null) {
-            return "PUT";
-        } else if (method.getAnnotation(javax.ws.rs.POST.class) != null) {
-            return "POST";
-        } else if (method.getAnnotation(javax.ws.rs.DELETE.class) != null) {
-            return "DELETE";
-        } else if (method.getAnnotation(javax.ws.rs.OPTIONS.class) != null) {
-            return "OPTIONS";
-        } else if (method.getAnnotation(javax.ws.rs.HEAD.class) != null) {
-            return "HEAD";
-        } else if (method.getAnnotation(PATCH.class) != null) {
-            return "PATCH";
+        private String extractMethod(Method method){
+            if (method.getAnnotation(javax.ws.rs.GET.class) != null) {
+                return "GET";
+            } else if (method.getAnnotation(javax.ws.rs.PUT.class) != null) {
+                return "PUT";
+            } else if (method.getAnnotation(javax.ws.rs.POST.class) != null) {
+                return "POST";
+            } else if (method.getAnnotation(javax.ws.rs.DELETE.class) != null) {
+                return "DELETE";
+            } else if (method.getAnnotation(javax.ws.rs.OPTIONS.class) != null) {
+                return "OPTIONS";
+            } else if (method.getAnnotation(javax.ws.rs.HEAD.class) != null) {
+                return "HEAD";
+            } else if (method.getAnnotation(PATCH.class) != null) {
+                return "PATCH";
+            }
+            return "";
         }
-        return "";
+
     }
 
 }
