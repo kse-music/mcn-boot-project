@@ -11,21 +11,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties("xxl.job")
 public class XxlJobProperties {
 
-    /**
-     * 是否启用调度执行器自动配置
-     */
-    private boolean enable;
     private String adminAddresses = "http://127.0.0.1:8080/xxl-job-admin";
     private String accessToken;
     private Executor executor = new Executor();
-
-    public boolean isEnable() {
-        return enable;
-    }
-
-    public void setEnable(boolean enable) {
-        this.enable = enable;
-    }
 
     public String getAdminAddresses() {
         return adminAddresses;
