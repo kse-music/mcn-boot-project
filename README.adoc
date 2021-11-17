@@ -1,9 +1,9 @@
-:version: 2.5.5
+:version: 2.5.7
 
 == 简介
-MCN是一个基于SpringBoot的一个快速构建Restful风格的Web系统。MCN在SpringBoot的基础上配置更多默认配置，比如mybatis多数据源配置、跨域、编码等等一些SpringBoot没有的或者扩展的配置。
+MCN是一个基于SpringBoot和SpringCloud的一个快速构建JavaWeb系统的工具。MCN在SpringBoot的基础上提供更多的默认配置，比如mybatis多数据源配置、跨域、编码等等一些SpringBoot没有的或者扩展的配置。
 
-SpringBoot的问世不外乎就是之前的配置繁杂，但其实SpringBoot不算是一个严格意义上的框架（Spring是）。框架从字面上理解就是"框住"你，即遵循框架制定的规则来"玩"！其实,SpringBoot就是把以前我们自己在开发时需要的一些配置，直接帮我们配置好，对于开发就是拿来即用。
+SpringBoot的问世不外乎就是之前的配置繁杂，但其实SpringBoot不算是一个严格意义上的框架（Spring是）。框架从字面上理解就是"框住"你，即遵循框架制定的规则来写代码！其实,SpringBoot就是把以前我们自己在开发时需要做的一些配置，直接帮我们配置好，拿来即用。
 
 image::http://cdn.hiboot.cn/5612db4209ee4b3cacd5993c17fd6645.jpg[]
 
@@ -100,25 +100,7 @@ classpath:config/mcn.properties无论是在SpringBoot上下文还是引导上下
 
 * 默认配置
 
-....
-
-#mybatis数据模型默认别名包
-mybatis.type-aliases-package=${app.base-package}.bean
-#mybatis，mapper文件默认路径
-mybatis.mapper-locations=classpath:mapper/*.xml
-#mybatis，handlers默认包
-mybatis.type-handlers-package=${app.base-package}.dao.handler
-#mybatis，默认使用驼峰
-mybatis.configuration.map-underscore-to-camel-case=true
-
-#默认服务器路径
-server.tomcat.basedir=/tmp/tomcat/
-server.compression.enabled=true
-
-swagger.title=${spring.application.name} API
-swagger.version=${project.version:1.0}
-
-....
+https://github.com/kse-music/mcn-boot-project/blob/master/mcn-boot-autoconfigure/src/main/java/cn/hiboot/mcn/autoconfigure/web/config/mcn-default.properties[内置的所有默认配置]
 
 * 日志配置
 
@@ -131,7 +113,8 @@ logging.config=classpath:META-INF/logback-spring.xml
 logging.level.root=info
 logging.level.org=warn
 logging.level.io=warn
-logging.file.max-history=30
+logging.level.springfox.documentation.spring.web.readers.operation.CachingOperationNameGenerator=warn
+logging.logback.rollingpolicy.max-history=30
 #文件输出过滤器掉info以下
 mcn.log.filter=info
 
@@ -158,30 +141,6 @@ mcn.log.filter=info
 这时就发现启动项目之后，一段时间（超时）就报mongo连接超时！原来是在你引入mongo-java之后SpringBoot的自动配置就开始默认连接127.0.0.1:27017的地址，导致失败、资源浪费！
 
 ====
-
-== FAQ
-
-. 版本管理
-
-.版本管理
-[width="100%",options="header,footer"]
-|====================
-| Jar | Version
-| SpringBoot | {version}
-| SpringCloud | 2020.0.4
-| guava | 30.0-jre
-| mybatis-spring-boot-starter | 2.1.3
-| commons-io | 2.7
-| spring-boot-admin-starter-client | 2.5.0
-| spring-boot-admin-starter-server | 2.5.0
-| fastjson | 1.2.78
-|====================
-
-* 所有的默认配置都可以被覆盖
-
-
-
-
 
 == 相关链接
 . http://www.hiboot.cn/jie/83[SpringBoot启动源码分析]
