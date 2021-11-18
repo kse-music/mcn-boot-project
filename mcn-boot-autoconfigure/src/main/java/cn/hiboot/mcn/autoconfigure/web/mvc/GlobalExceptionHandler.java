@@ -115,7 +115,7 @@ public class GlobalExceptionHandler extends AbstractExceptionHandler {
         Integer errorCode = exception.getCode();
         String errMsg = exception.getMsg();
         logger.error("ErrorMsg = {}",errMsg,exception);
-        return buildErrorMessage(errorCode,errMsg);
+        return buildErrorMessage(errorCode==null?BaseException.DEFAULT_CODE:errorCode,errMsg==null?exception.getMessage():errMsg);
     }
 
 }
