@@ -95,15 +95,20 @@ public class DefaultMinioClient extends MinioClient {
     public PreSignResult getPresignedObjectUrl(String bucketName,String objectName,String contentType, int count) throws Exception{
         Multimap<String, String> headers = HashMultimap.create();
         headers.put("Content-Type", getOrDefault(contentType));
-        CreateMultipartUploadResponse response = this.createMultipartUpload(bucketName, region, objectName, headers, null);
-        String uploadId = response.result().uploadId();
+        PreSignResult preSignResult = new PreSignResult(count);
+        if(count == 1){
+            preSignResult.getUploadUrls().add(getPresignedObjectUrl(bucketName,objectName,null));
+        }else {
+            CreateMultipartUploadResponse response = this.createMultipartUpload(bucketName, region, objectName, headers, null);
+            String uploadId = response.result().uploadId();
 
-        Map<String, String> reqParams = new HashMap<>();
-        reqParams.put("uploadId", uploadId);
-        PreSignResult preSignResult = new PreSignResult(uploadId,count);
-        for (int i = 1; i <= count; i++) {
-            reqParams.put("partNumber", String.valueOf(i));
-            preSignResult.getUploadUrls().add(getPresignedObjectUrl(bucketName,objectName,reqParams));
+            Map<String, String> reqParams = new HashMap<>();
+            reqParams.put("uploadId", uploadId);
+            preSignResult.setUploadId(uploadId);
+            for (int i = 1; i <= count; i++) {
+                reqParams.put("partNumber", String.valueOf(i));
+                preSignResult.getUploadUrls().add(getPresignedObjectUrl(bucketName,objectName,reqParams));
+            }
         }
         return preSignResult;
     }

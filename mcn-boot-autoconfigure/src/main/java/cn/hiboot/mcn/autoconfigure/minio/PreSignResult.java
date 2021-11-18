@@ -11,19 +11,26 @@ import java.util.List;
  */
 public class PreSignResult {
 
-    private final String uploadId;
-    private final List<String> uploadUrls;
+    private String uploadId;
+    private List<String> uploadUrls;
 
-    public PreSignResult(String uploadId,int size) {
-        this.uploadId = uploadId;
-        this.uploadUrls = new ArrayList<>(size);
+    public PreSignResult(int count) {
+        this.uploadUrls = new ArrayList<>(count);
     }
 
     public String getUploadId() {
         return uploadId;
     }
 
+    public void setUploadId(String uploadId) {
+        this.uploadId = uploadId;
+    }
+
     public List<String> getUploadUrls() {
         return uploadUrls;
+    }
+
+    public void setUploadUrls(List<String> uploadUrls) {
+        this.uploadUrls = uploadUrls;
     }
 }
