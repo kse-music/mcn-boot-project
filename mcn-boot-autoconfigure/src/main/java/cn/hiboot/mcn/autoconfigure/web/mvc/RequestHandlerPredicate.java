@@ -1,7 +1,8 @@
 package cn.hiboot.mcn.autoconfigure.web.mvc;
 
-import com.google.common.base.Predicate;
 import springfox.documentation.RequestHandler;
+
+import java.util.function.Predicate;
 
 
 /**
