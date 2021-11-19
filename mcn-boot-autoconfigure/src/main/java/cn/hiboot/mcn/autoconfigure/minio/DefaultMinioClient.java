@@ -132,6 +132,9 @@ public class DefaultMinioClient extends MinioClient {
             parts[partNumber - 1] = new Part(partNumber, part.etag());
             partNumber++;
         }
+        if(partNumber == 1){
+            throw new MinioException("未找到需要合并的块");
+        }
         completeMultipartUpload(bucketName, region, objectName, uploadId, parts, null, null);
     }
 
