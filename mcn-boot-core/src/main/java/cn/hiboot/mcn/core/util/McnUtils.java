@@ -214,6 +214,9 @@ public abstract class McnUtils {
                 String propertyName = pd.getName();
                 Method m = pd.getReadMethod();
                 Object properValue = m.invoke(bean);
+                if(properValue == null){
+                    continue;
+                }
                 map.put(propertyName, properValue);
             }
         }catch (Exception e){

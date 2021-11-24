@@ -1,17 +1,23 @@
 package cn.hiboot.mcn.autoconfigure.web.mvc;
 
 import cn.hiboot.mcn.autoconfigure.web.exception.handler.AbstractExceptionHandler;
+import cn.hiboot.mcn.autoconfigure.web.mvc.error.DefaultErrorView;
+import cn.hiboot.mcn.autoconfigure.web.mvc.error.ErrorPageController;
+import cn.hiboot.mcn.autoconfigure.web.mvc.swagger.IgnoreApi;
+import cn.hiboot.mcn.autoconfigure.web.mvc.swagger.RequestHandlerPredicate;
+import cn.hiboot.mcn.autoconfigure.web.mvc.swagger.Swagger2Properties;
 import cn.hiboot.mcn.core.model.ValidationErrorBean;
 import cn.hiboot.mcn.core.model.result.RestResp;
 import cn.hiboot.mcn.swagger.MvcSwagger2;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.boot.autoconfigure.condition.*;
+import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration;
+import org.springframework.boot.autoconfigure.web.servlet.error.ErrorViewResolver;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.web.servlet.error.DefaultErrorAttributes;
+import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,6 +26,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.DispatcherServlet;
+import org.springframework.web.servlet.View;
 import springfox.documentation.RequestHandler;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
@@ -54,12 +61,26 @@ public class SpringMvcAutoConfiguration {
 
     @Configuration(proxyBeanMethods = false)
     @Import(GlobalExceptionHandler.class)
+    @EnableConfigurationProperties(ServerProperties.class)
     static class SpringMvcExceptionHandler{
 
         @Bean
         @ConditionalOnMissingBean(ErrorController.class)
-        public ErrorPageController errorController() {
-            return new ErrorPageController();
+        public ErrorPageController errorController(ErrorAttributes errorAttributes, ServerProperties serverProperties, ObjectProvider<ErrorViewResolver> errorViewResolvers) {
+            return new ErrorPageController(errorAttributes, serverProperties.getError(),errorViewResolvers.orderedStream().collect(Collectors.toList()));
+        }
+
+        @Bean(name = "error")
+        @ConditionalOnProperty(prefix = "server.error.whitelabel", name = "enabled", matchIfMissing = true)
+        @ConditionalOnMissingBean(name = "error")
+        public View defaultErrorView(ServerProperties serverProperties) {
+            return new DefaultErrorView(serverProperties);
+        }
+
+        @Bean
+        @ConditionalOnMissingBean(value = ErrorAttributes.class, search = SearchStrategy.CURRENT)
+        public DefaultErrorAttributes errorAttributes() {
+            return new DefaultErrorAttributes();
         }
 
     }

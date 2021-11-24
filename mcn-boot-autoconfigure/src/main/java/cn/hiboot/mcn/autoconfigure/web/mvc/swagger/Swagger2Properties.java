@@ -1,4 +1,4 @@
-package cn.hiboot.mcn.autoconfigure.web.mvc;
+package cn.hiboot.mcn.autoconfigure.web.mvc.swagger;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

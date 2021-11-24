@@ -52,10 +52,10 @@
       "defaultValue": false
     },
     {
-      "name": "http.code.override",
+      "name": "http.error.override",
       "type": "java.lang.Boolean",
-      "sourceType": "cn.hiboot.mcn.autoconfigure.web.mvc.ErrorPageController",
-      "description": "是否重写http状态码.",
+      "sourceType": "cn.hiboot.mcn.autoconfigure.web.mvc.error.ErrorPageController",
+      "description": "是否重写http错误信息.",
       "defaultValue": true
     },
     {
