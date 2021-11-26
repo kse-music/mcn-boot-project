@@ -1,0 +1,5 @@
+== 参考
+
+. SpringBoot启动 http://www.hiboot.cn/jie/83[源码分析]
+
+. 一个基于MCN的 https://github.com/kse-music/meta-boot[项目示例]
