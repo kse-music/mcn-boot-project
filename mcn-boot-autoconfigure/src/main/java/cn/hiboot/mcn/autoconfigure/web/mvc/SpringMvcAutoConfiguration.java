@@ -96,9 +96,11 @@ public class SpringMvcAutoConfiguration {
             RestResp<Object> objectRestResp = buildErrorMessage(PARAM_PARSE_ERROR);
             if (exception instanceof ConstraintViolationException) {
                 ConstraintViolationException cve = (ConstraintViolationException) exception;
-                objectRestResp.setData(cve.getConstraintViolations().stream().map(violation1 ->
-                        new ValidationErrorBean(violation1.getMessage(), getViolationPath(violation1), getViolationInvalidValue(violation1.getInvalidValue()))
-                ).collect(Collectors.toList()));
+                if(setValidatorResult){
+                    objectRestResp.setData(cve.getConstraintViolations().stream().map(violation1 ->
+                            new ValidationErrorBean(violation1.getMessage(), getViolationPath(violation1), getViolationInvalidValue(violation1.getInvalidValue()))
+                    ).collect(Collectors.toList()));
+                }
             }
             logger.error("ErrorMsg = {}",objectRestResp.getErrorInfo(),exception);
             return objectRestResp;

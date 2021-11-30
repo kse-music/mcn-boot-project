@@ -2,7 +2,9 @@ package cn.hiboot.mcn.autoconfigure.web.mvc;
 
 import cn.hiboot.mcn.autoconfigure.web.exception.handler.AbstractExceptionHandler;
 import cn.hiboot.mcn.core.exception.BaseException;
-import cn.hiboot.mcn.core.exception.UnCaughtExceptionHandler;
+import cn.hiboot.mcn.core.exception.ExceptionKeys;
+import cn.hiboot.mcn.core.exception.ExceptionMessageCustomizer;
+import cn.hiboot.mcn.core.exception.JsonException;
 import cn.hiboot.mcn.core.model.ValidationErrorBean;
 import cn.hiboot.mcn.core.model.result.RestResp;
 import org.springframework.beans.factory.ObjectProvider;
@@ -34,7 +36,7 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class GlobalExceptionHandler extends AbstractExceptionHandler {
 
-    @ExceptionHandler(Exception.class)
+    @ExceptionHandler(Throwable.class)
     @SuppressWarnings("all")
     public RestResp<Object> handleException(HttpServletRequest request, Exception exception){
         dealStackTraceElement(exception);
@@ -52,23 +54,24 @@ public class GlobalExceptionHandler extends AbstractExceptionHandler {
             data = dealBindingResult(ex.getBindingResult());
         }
 
-        RestResp<Object> restResp = new RestResp<>(errorCode,exception.getMessage());
+        String errorMsg = exception.getMessage();
 
-        if(data != null){//参数校验具体错误数据信息
+        if(StringUtils.isEmpty(errorMsg)){//无异常信息,走服务端内部错误
+            errorMsg = getErrorMsg(SERVICE_ERROR);
+        }
+
+        RestResp<Object> restResp = new RestResp<>(errorCode,errorMsg);
+
+        if(data != null && setValidatorResult){//参数校验具体错误数据信息
             restResp.setData(data);
         }
 
-        for (UnCaughtExceptionHandler exceptionHandler : exceptionHandlers) {
-            Class<?> requiredType = GenericTypeResolver.resolveTypeArgument(exceptionHandler.getClass(),UnCaughtExceptionHandler.class);
+        for (ExceptionMessageCustomizer exceptionHandler : exceptionHandlers) {
+            Class<?> requiredType = GenericTypeResolver.resolveTypeArgument(exceptionHandler.getClass(),ExceptionMessageCustomizer.class);
             if(requiredType != null && requiredType.isInstance(exception)){
-                exceptionHandler.handle(restResp, exception);//设置错误信息或具体错误数据
-                restResp.setErrorCode(errorCode);//防止code码被修改
+                restResp.setErrorInfo(exceptionHandler.handle(exception));//设置错误信息提示
                 break;
             }
-        }
-
-        if(StringUtils.isEmpty(restResp.getErrorInfo())){//无异常信息,走服务端内部错误
-            restResp = buildErrorMessage(SERVICE_ERROR);
         }
 
         logger.error("ErrorMsg = {}",restResp.getErrorInfo(),exception);
@@ -77,7 +80,7 @@ public class GlobalExceptionHandler extends AbstractExceptionHandler {
     }
 
     @Autowired
-    private ObjectProvider<UnCaughtExceptionHandler<?>> exceptionHandlers;
+    private ObjectProvider<ExceptionMessageCustomizer<?>> exceptionHandlers;
 
     private Object dealBindingResult(BindingResult bindingResult){
         return bindingResult.getAllErrors().stream().map(e -> {
@@ -114,6 +117,10 @@ public class GlobalExceptionHandler extends AbstractExceptionHandler {
         dealStackTraceElement(exception);
         Integer errorCode = exception.getCode();
         String errMsg = exception.getMsg();
+        if(exception instanceof JsonException){
+            errorCode = ExceptionKeys.JSON_PARSE_ERROR;
+            errMsg = getErrorMsg(errorCode);
+        }
         logger.error("ErrorMsg = {}",errMsg,exception);
         return buildErrorMessage(errorCode==null?BaseException.DEFAULT_CODE:errorCode,errMsg==null?exception.getMessage():errMsg);
     }

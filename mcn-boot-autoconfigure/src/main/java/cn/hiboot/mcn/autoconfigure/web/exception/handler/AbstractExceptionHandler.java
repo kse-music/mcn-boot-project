@@ -17,16 +17,22 @@ import java.util.Arrays;
  */
 public abstract class AbstractExceptionHandler extends ErrorMsg implements EnvironmentAware {
 
-    protected String basePackage;
+    protected boolean setValidatorResult;
+    private boolean removeFrameworkStack;
+    private String basePackage;
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     protected void dealStackTraceElement(Exception exception){
-        exception.setStackTrace(Arrays.stream(exception.getStackTrace()).filter(s -> s.getClassName().contains(basePackage)).toArray(StackTraceElement[]::new));
+        if(removeFrameworkStack){
+            exception.setStackTrace(Arrays.stream(exception.getStackTrace()).filter(s -> s.getClassName().contains(basePackage)).toArray(StackTraceElement[]::new));
+        }
     }
 
     @Override
     public void setEnvironment(Environment environment) {
-        basePackage = environment.getProperty(McnPropertiesPostProcessor.APP_BASE_PACKAGE);
+        this.basePackage = environment.getProperty(McnPropertiesPostProcessor.APP_BASE_PACKAGE);
+        this.removeFrameworkStack = environment.getProperty("remove.framework.stack.enable",Boolean.class,true);
+        this.setValidatorResult = environment.getProperty("validator.result.set.enable",Boolean.class,true);
     }
 
 }

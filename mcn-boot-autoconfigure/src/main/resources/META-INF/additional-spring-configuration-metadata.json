@@ -64,6 +64,20 @@
       "sourceType": "cn.hiboot.mcn.autoconfigure.xxl.XxlJobAutoConfiguration",
       "description": "是否启用调度执行器自动配置.",
       "defaultValue": true
+    },
+    {
+      "name": "remove.framework.stack.enable",
+      "type": "java.lang.Boolean",
+      "sourceType": "cn.hiboot.mcn.autoconfigure.web.exception.handler.AbstractExceptionHandler",
+      "description": "是否过滤框架异常栈.",
+      "defaultValue": true
+    },
+    {
+      "name": "validator.result.set.enable",
+      "type": "java.lang.Boolean",
+      "sourceType": "cn.hiboot.mcn.autoconfigure.web.exception.handler.AbstractExceptionHandler",
+      "description": "是否将validator验证结果返回.",
+      "defaultValue": true
     }
   ],
   "hints": [

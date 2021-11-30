@@ -69,7 +69,9 @@ public class GlobalExceptionHandler extends AbstractExceptionHandler implements 
             if (property != null && Boolean.parseBoolean(property.toString())) {
                 response.type(MediaType.APPLICATION_JSON_TYPE);
                 List<ValidationErrorData> errors = ValidationHelper.constraintViolationToValidationErrors(cve);
-                rs.setData(getValidationError(errors));
+                if(setValidatorResult){
+                    rs.setData(getValidationError(errors));
+                }
             }
         }
         return rs;
