@@ -6,6 +6,7 @@ import cn.hiboot.mcn.autoconfigure.web.mvc.error.ErrorPageController;
 import cn.hiboot.mcn.autoconfigure.web.mvc.swagger.IgnoreApi;
 import cn.hiboot.mcn.autoconfigure.web.mvc.swagger.RequestHandlerPredicate;
 import cn.hiboot.mcn.autoconfigure.web.mvc.swagger.Swagger2Properties;
+import cn.hiboot.mcn.core.exception.ExceptionKeys;
 import cn.hiboot.mcn.core.model.ValidationErrorBean;
 import cn.hiboot.mcn.core.model.result.RestResp;
 import cn.hiboot.mcn.swagger.MvcSwagger2;
@@ -92,18 +93,14 @@ public class SpringMvcAutoConfiguration {
 
         @ExceptionHandler(ValidationException.class)
         public RestResp<Object> handleValidationException(ValidationException exception){
-            dealStackTraceElement(exception);
-            RestResp<Object> objectRestResp = buildErrorMessage(PARAM_PARSE_ERROR);
+            Object data = null;
             if (exception instanceof ConstraintViolationException) {
                 ConstraintViolationException cve = (ConstraintViolationException) exception;
-                if(setValidatorResult){
-                    objectRestResp.setData(cve.getConstraintViolations().stream().map(violation1 ->
-                            new ValidationErrorBean(violation1.getMessage(), getViolationPath(violation1), getViolationInvalidValue(violation1.getInvalidValue()))
-                    ).collect(Collectors.toList()));
-                }
+                data = cve.getConstraintViolations().stream().map(violation1 ->
+                        new ValidationErrorBean(violation1.getMessage(), getViolationPath(violation1), getViolationInvalidValue(violation1.getInvalidValue()))
+                ).collect(Collectors.toList());
             }
-            logError(objectRestResp.getErrorInfo(),exception);
-            return objectRestResp;
+            return buildErrorMessage(ExceptionKeys.PARAM_PARSE_ERROR,null,data,exception);
         }
 
         private String getViolationInvalidValue(Object invalidValue) {

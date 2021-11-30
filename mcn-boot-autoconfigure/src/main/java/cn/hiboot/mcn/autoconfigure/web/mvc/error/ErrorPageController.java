@@ -1,6 +1,7 @@
 package cn.hiboot.mcn.autoconfigure.web.mvc.error;
 
 import cn.hiboot.mcn.core.exception.ErrorMsg;
+import cn.hiboot.mcn.core.exception.ExceptionKeys;
 import cn.hiboot.mcn.core.model.result.RestResp;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.web.ErrorProperties;
@@ -30,23 +31,23 @@ public class ErrorPageController extends BasicErrorController {
         ResponseEntity<Map<String, Object>> error = super.error(request);
         if(overrideHttpError){
             int statusCode = error.getStatusCodeValue();
-            int code = ErrorMsg.HTTP_ERROR_500;
+            int code = ExceptionKeys.HTTP_ERROR_500;
             if(statusCode == HttpStatus.UNAUTHORIZED.value()){
-                code = ErrorMsg.HTTP_ERROR_401;
+                code = ExceptionKeys.HTTP_ERROR_401;
             }else if(statusCode == HttpStatus.FORBIDDEN.value()){
-                code = ErrorMsg.HTTP_ERROR_403;
+                code = ExceptionKeys.HTTP_ERROR_403;
             }else if(statusCode == HttpStatus.NOT_FOUND.value()){
-                code = ErrorMsg.HTTP_ERROR_404;
+                code = ExceptionKeys.HTTP_ERROR_404;
             }else if(statusCode == HttpStatus.METHOD_NOT_ALLOWED.value()){
-                code = ErrorMsg.HTTP_ERROR_405;
+                code = ExceptionKeys.HTTP_ERROR_405;
             }else if(statusCode == HttpStatus.NOT_ACCEPTABLE.value()){
-                code = ErrorMsg.HTTP_ERROR_406;
+                code = ExceptionKeys.HTTP_ERROR_406;
             }else if(statusCode == HttpStatus.REQUEST_TIMEOUT.value()){
-                code = ErrorMsg.HTTP_ERROR_408;
+                code = ExceptionKeys.HTTP_ERROR_408;
             }else if(statusCode == HttpStatus.CONFLICT.value()){
-                code = ErrorMsg.HTTP_ERROR_409;
+                code = ExceptionKeys.HTTP_ERROR_409;
             }
-            RestResp<Object> resp = ErrorMsg.buildErrorMessage(code);
+            RestResp<Object> resp = new RestResp<>(code, ErrorMsg.getErrorMsg(code));
             Map<String, Object> rs = new HashMap<>();
             rs.put("ActionStatus",resp.getActionStatus());
             rs.put("ErrorCode",resp.getErrorCode());

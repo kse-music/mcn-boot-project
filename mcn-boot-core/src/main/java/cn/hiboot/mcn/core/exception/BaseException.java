@@ -3,12 +3,18 @@ package cn.hiboot.mcn.core.exception;
 
 
 /**
- * 异常基类，各个模块的运行期异常均继承与该类 
+ * 异常基类，各个模块的运行期异常均继承与该类
+ *
+ *  @author DingHao
+ *  @since 2021/11/30 22:46
  */
 public class BaseException extends RuntimeException {
 
+    /**
+     * 通用错误码
+     */
     public static final int DEFAULT_CODE = 999999;
-    private Integer code;
+    private Integer code = DEFAULT_CODE;
     private String msg;
 
     protected BaseException(Integer code) {

@@ -1,10 +1,15 @@
 package cn.hiboot.mcn.core.exception;
+
 /*
-    3xxxx:通用错误码定义
-    5xxxx:业务相关错误码定义
-    7xxxx:未知错误码
-    8xxxx:Http相关错误码定义
-    9xxxx:统一错误码及第三方服务错误码定义
+ *
+ *  3xxxx:通用错误码定义
+ *  5xxxx:业务相关错误码定义
+ *  7xxxx:未知错误码
+ *  8xxxx:Http相关错误码定义
+ *  9xxxx:统一错误码及第三方服务错误码定义
+ *
+ *  @author DingHao
+ *  @since 2021/11/30 22:46
  */
 public interface ExceptionKeys {
 

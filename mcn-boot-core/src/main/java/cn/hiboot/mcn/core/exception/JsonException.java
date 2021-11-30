@@ -1,6 +1,12 @@
 package cn.hiboot.mcn.core.exception;
 
 
+/**
+ * JsonException
+ *
+ * @author DingHao
+ * @since 2021/11/30 17:45
+ */
 public class JsonException extends BaseException{
 
 	private JsonException(String message) {
