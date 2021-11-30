@@ -8,7 +8,6 @@ import cn.hiboot.mcn.core.exception.JsonException;
 import cn.hiboot.mcn.core.model.ValidationErrorBean;
 import cn.hiboot.mcn.core.model.result.RestResp;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindException;
@@ -36,9 +35,15 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class GlobalExceptionHandler extends AbstractExceptionHandler {
 
+    private final ObjectProvider<ExceptionMessageCustomizer<?>> exceptionHandlers;
+
+    public GlobalExceptionHandler(ObjectProvider<ExceptionMessageCustomizer<?>> exceptionHandlers) {
+        this.exceptionHandlers = exceptionHandlers;
+    }
+
     @ExceptionHandler(Throwable.class)
     @SuppressWarnings("all")
-    public RestResp<Object> handleException(HttpServletRequest request, Exception exception){
+    public RestResp<Object> handleException(HttpServletRequest request, Throwable exception){
         dealStackTraceElement(exception);
         Object data = null;
         int errorCode = BaseException.DEFAULT_CODE;
@@ -74,13 +79,10 @@ public class GlobalExceptionHandler extends AbstractExceptionHandler {
             }
         }
 
-        logger.error("ErrorMsg = {}",restResp.getErrorInfo(),exception);
+        logError(restResp.getErrorInfo(),exception);
 
         return restResp;
     }
-
-    @Autowired
-    private ObjectProvider<ExceptionMessageCustomizer<?>> exceptionHandlers;
 
     private Object dealBindingResult(BindingResult bindingResult){
         return bindingResult.getAllErrors().stream().map(e -> {
@@ -108,7 +110,7 @@ public class GlobalExceptionHandler extends AbstractExceptionHandler {
             code = HTTP_ERROR_503;
         }
         String errMsg = getErrorMsg(code);
-        logger.error("ErrorMsg = {}",errMsg,exception);
+        logError(errMsg,exception);
         return buildErrorMessage(code);
     }
 
@@ -121,7 +123,7 @@ public class GlobalExceptionHandler extends AbstractExceptionHandler {
             errorCode = ExceptionKeys.JSON_PARSE_ERROR;
             errMsg = getErrorMsg(errorCode);
         }
-        logger.error("ErrorMsg = {}",errMsg,exception);
+        logError(errMsg,exception);
         return buildErrorMessage(errorCode==null?BaseException.DEFAULT_CODE:errorCode,errMsg==null?exception.getMessage():errMsg);
     }
 

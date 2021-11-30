@@ -102,7 +102,7 @@ public class SpringMvcAutoConfiguration {
                     ).collect(Collectors.toList()));
                 }
             }
-            logger.error("ErrorMsg = {}",objectRestResp.getErrorInfo(),exception);
+            logError(objectRestResp.getErrorInfo(),exception);
             return objectRestResp;
         }
 

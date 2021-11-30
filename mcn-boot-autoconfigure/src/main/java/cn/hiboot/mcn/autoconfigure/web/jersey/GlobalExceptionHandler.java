@@ -54,7 +54,7 @@ public class GlobalExceptionHandler extends AbstractExceptionHandler implements 
             rs = buildErrorMessage(SERVICE_ERROR);
         }
         dealStackTraceElement(e);
-        logger.error("ErrorMsg = {}",rs.getErrorInfo(),e);
+        logError(rs.getErrorInfo(),e);
         return Response.ok(rs).status(statusCode).type(MediaType.APPLICATION_JSON_TYPE).build();
     }
 

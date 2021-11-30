@@ -20,12 +20,16 @@ public abstract class AbstractExceptionHandler extends ErrorMsg implements Envir
     protected boolean setValidatorResult;
     private boolean removeFrameworkStack;
     private String basePackage;
-    protected final Logger logger = LoggerFactory.getLogger(getClass());
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
-    protected void dealStackTraceElement(Exception exception){
+    protected void dealStackTraceElement(Throwable exception){
         if(removeFrameworkStack){
             exception.setStackTrace(Arrays.stream(exception.getStackTrace()).filter(s -> s.getClassName().contains(basePackage)).toArray(StackTraceElement[]::new));
         }
+    }
+
+    protected void logError(String msg,Throwable t){
+        log.error("ErrorMsg = {}",msg,t);
     }
 
     @Override
