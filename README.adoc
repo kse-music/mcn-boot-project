@@ -402,7 +402,24 @@ https://github.com/kse-music/mcn-boot-project/blob/master/mcn-boot-autoconfigure
 ====
 
 ==== 统一异常处理
-待补充
+====
+使用方式三种:
+
+. 直接使用异常ServiceException(推荐)
+
+. 直接自定义异常继承BaseException
+
+. 直接自定义异常继承RuntimeException
+
+====
+
+[WARNING]
+====
+. 如果只抛出异常信息则使用默认错误码999999
+. 如果抛出异常信息的同时指定了错误码则不使用默认的错误码
+. 如果只抛出错误码则从classpath:error-msg.properties中获取,获取不到则使用默认的内部服务器错误信息
+====
+
 
 ==== Swagger配置
 

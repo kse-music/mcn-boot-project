@@ -16,10 +16,6 @@ public class ServiceException extends BaseException{
 		super(msg);
 	}
 
-	public static ServiceException newInstance(){
-		return newInstance(ExceptionKeys.SERVICE_ERROR);
-	}
-	
 	public static ServiceException newInstance(Integer code){
 		return new ServiceException(code);
 	}

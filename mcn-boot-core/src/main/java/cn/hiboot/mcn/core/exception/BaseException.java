@@ -26,7 +26,7 @@ public class BaseException extends RuntimeException {
     }
 
     protected BaseException(Integer code, String msg) {
-        super(msg(code, msg));
+        super(msg);
         this.code = code;
         this.msg = getMessage();
     }
@@ -38,6 +38,7 @@ public class BaseException extends RuntimeException {
 
     protected BaseException(Throwable cause) {
         super(cause);
+        this.msg = getMessage();
     }
 
     public Integer getCode() {
@@ -54,10 +55,6 @@ public class BaseException extends RuntimeException {
 
     public void setMsg(String msg) {
         this.msg = msg;
-    }
-
-    private static String msg(Integer code, String msg){
-        return msg == null ? ErrorMsg.getErrorMsg(code) : ErrorMsg.getErrorMsg(code) + msg;
     }
 
 }
