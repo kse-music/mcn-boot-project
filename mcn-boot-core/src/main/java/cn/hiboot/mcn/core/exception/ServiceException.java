@@ -16,6 +16,22 @@ public class ServiceException extends BaseException{
 		super(msg);
 	}
 
+	private ServiceException(String message, Throwable cause) {
+		super(message, cause);
+	}
+
+	private ServiceException(Throwable cause) {
+		super(cause);
+	}
+
+	public static ServiceException newInstance(Throwable cause){
+		return new ServiceException(cause);
+	}
+
+	public static ServiceException newInstance(String message, Throwable cause){
+		return new ServiceException(message,cause);
+	}
+
 	public static ServiceException newInstance(Integer code){
 		return new ServiceException(code);
 	}

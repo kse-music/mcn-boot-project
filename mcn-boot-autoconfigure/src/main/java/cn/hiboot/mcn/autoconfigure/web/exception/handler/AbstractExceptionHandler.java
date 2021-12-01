@@ -35,14 +35,14 @@ public abstract class AbstractExceptionHandler implements EnvironmentAware {
     }
 
     public RestResp<Object> buildErrorMessage(Integer code,String msg,Object data,Throwable t){
-        if(ObjectUtils.isEmpty(msg)){
-            msg = ErrorMsg.getErrorMsg(code);//尝试从错误码中获取错误信息
+        if(ObjectUtils.isEmpty(msg)){//如果没有错误信息则尝试从错误码中获取错误信息
+            msg = ErrorMsg.getErrorMsg(code);
         }
-        if(ObjectUtils.isEmpty(msg)){//任无异常信息,fallback服务端内部错误,同时更改错误码
+        if(ObjectUtils.isEmpty(msg)){//如果任然无异常信息,fallback服务端内部错误并更改错误码
             code = ExceptionKeys.SERVICE_ERROR;
             msg = ErrorMsg.getErrorMsg(code);
         }
-        if(removeFrameworkStack){
+        if(removeFrameworkStack){//移除异常栈中非业务应用包下的栈信息
             dealStackTraceElement(t);
         }
         logError(msg,t);//打印异常栈

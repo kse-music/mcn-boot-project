@@ -10,6 +10,8 @@ import cn.hiboot.mcn.core.exception.ExceptionKeys;
 import cn.hiboot.mcn.core.model.ValidationErrorBean;
 import cn.hiboot.mcn.core.model.result.RestResp;
 import cn.hiboot.mcn.swagger.MvcSwagger2;
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.*;
@@ -44,7 +46,6 @@ import javax.validation.ConstraintViolationException;
 import javax.validation.ValidationException;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -179,7 +180,9 @@ public class SpringMvcAutoConfiguration {
 
         @Bean
         public RequestHandlerPredicate requestHandlerPredicate(){
-            return () -> (withClassAnnotation(IgnoreApi.class).negate()).and(RequestHandlerSelectors.withMethodAnnotation(IgnoreApi.class).negate());
+            return () -> Predicates.and(
+                    Predicates.not(withClassAnnotation(IgnoreApi.class)),
+                    Predicates.not(RequestHandlerSelectors.withMethodAnnotation(IgnoreApi.class)));
         }
 
         @Bean

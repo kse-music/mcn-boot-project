@@ -1,7 +1,9 @@
 package cn.hiboot.mcn.autoconfigure.web.mvc;
 
 import cn.hiboot.mcn.autoconfigure.web.exception.handler.AbstractExceptionHandler;
-import cn.hiboot.mcn.core.exception.*;
+import cn.hiboot.mcn.core.exception.BaseException;
+import cn.hiboot.mcn.core.exception.ExceptionKeys;
+import cn.hiboot.mcn.core.exception.ExceptionMessageCustomizer;
 import cn.hiboot.mcn.core.model.ValidationErrorBean;
 import cn.hiboot.mcn.core.model.result.RestResp;
 import org.springframework.beans.factory.ObjectProvider;
@@ -38,7 +40,7 @@ public class GlobalExceptionHandler extends AbstractExceptionHandler {
     }
 
     @ExceptionHandler(Throwable.class)
-    @SuppressWarnings("all")
+    @SuppressWarnings({"rawtypes","unchecked"})
     public RestResp<Object> handleException(HttpServletRequest request, Throwable exception){
         int errorCode = BaseException.DEFAULT_CODE;
         Object data = null;
@@ -95,13 +97,7 @@ public class GlobalExceptionHandler extends AbstractExceptionHandler {
 
     @ExceptionHandler(BaseException.class)
     public RestResp<Object> handleBaseException(HttpServletRequest request, BaseException exception){
-        Integer code = exception.getCode();
-        String msg = exception.getMsg();
-        if(exception instanceof JsonException){
-            code = ExceptionKeys.JSON_PARSE_ERROR;
-            msg = ErrorMsg.getErrorMsg(code);
-        }
-        return buildErrorMessage(code,msg,exception);
+        return buildErrorMessage(exception.getCode(),exception.getMsg(),exception);
     }
 
 }

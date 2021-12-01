@@ -17,7 +17,7 @@ public class MinioException extends RuntimeException {
     }
 
     public MinioException(Throwable cause) {
-        super(cause);
+        this("Invoke Minio Exception",cause);
     }
 
 }
