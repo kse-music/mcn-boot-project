@@ -1,12 +1,16 @@
 package cn.hiboot.mcn.autoconfigure.web.mvc.error;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
+import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.View;
 import org.springframework.web.util.HtmlUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 /**
@@ -17,6 +21,10 @@ import java.util.Map;
  */
 public class DefaultErrorView implements View {
 
+    private final Logger log = LoggerFactory.getLogger(DefaultErrorView.class);
+
+    private static final MediaType TEXT_HTML_UTF8 = new MediaType("text", "html", StandardCharsets.UTF_8);
+
     private final ServerProperties serverProperties;
 
     public DefaultErrorView(ServerProperties serverProperties) {
@@ -25,6 +33,12 @@ public class DefaultErrorView implements View {
 
     @Override
     public void render(Map<String, ?> model, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        if (response.isCommitted()) {
+            String message = getMessage(model);
+            log.error(message);
+            return;
+        }
+        response.setContentType(TEXT_HTML_UTF8.toString());
         String basePath = serverProperties.getServlet().getContextPath();
         String blueprint = "/blueprint.png";
         String errorHanger = "/error-hanger.png";
@@ -208,12 +222,22 @@ public class DefaultErrorView implements View {
                 .replace("{errorPin}",errorPin)
                 .replace("{status}",htmlEscape(status))
                 .replace("{msg}",htmlEscape(msg));
-        response.setCharacterEncoding("UTF-8");
         response.getWriter().append(view);
     }
 
     private String htmlEscape(Object input) {
         return (input != null) ? HtmlUtils.htmlEscape(input.toString()) : null;
+    }
+
+    private String getMessage(Map<String, ?> model) {
+        Object path = model.get("path");
+        String message = "Cannot render error page for request [" + path + "]";
+        if (model.get("message") != null) {
+            message += " and exception [" + model.get("message") + "]";
+        }
+        message += " as the response has already been committed.";
+        message += " As a result, the response may have the wrong status code.";
+        return message;
     }
 
     @Override
