@@ -11,6 +11,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.util.ObjectUtils;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * AbstractExceptionHandler
@@ -43,7 +44,7 @@ public abstract class AbstractExceptionHandler implements EnvironmentAware {
             msg = ErrorMsg.getErrorMsg(code);
         }
         if(removeFrameworkStack){//移除异常栈中非业务应用包下的栈信息
-            dealStackTraceElement(t);
+            dealCurrentStackTraceElement(t);
         }
         logError(msg,t);//打印异常栈
         RestResp<Object> resp = new RestResp<>(code, msg);
@@ -57,7 +58,10 @@ public abstract class AbstractExceptionHandler implements EnvironmentAware {
         log.error("ErrorMsg = {}",msg,t);
     }
 
-    private void dealStackTraceElement(Throwable exception){
+    private void dealCurrentStackTraceElement(Throwable exception){
+        if(Objects.isNull(exception.getCause())){//is self
+            return;
+        }
         exception.setStackTrace(Arrays.stream(exception.getStackTrace()).filter(s -> s.getClassName().contains(basePackage)).toArray(StackTraceElement[]::new));
     }
 
