@@ -66,17 +66,24 @@
       "defaultValue": true
     },
     {
-      "name": "remove.framework.stack.enable",
+      "name": "framework.stack.remove.enable",
       "type": "java.lang.Boolean",
       "sourceType": "cn.hiboot.mcn.autoconfigure.web.exception.handler.AbstractExceptionHandler",
       "description": "是否过滤框架异常栈.",
       "defaultValue": true
     },
     {
-      "name": "validator.result.set.enable",
+      "name": "validator.result.return.enable",
       "type": "java.lang.Boolean",
       "sourceType": "cn.hiboot.mcn.autoconfigure.web.exception.handler.AbstractExceptionHandler",
       "description": "是否将validator验证结果返回.",
+      "defaultValue": true
+    },
+    {
+      "name": "groovy.debug.enable",
+      "type": "java.lang.Boolean",
+      "sourceType": "cn.hiboot.mcn.autoconfigure.web.groovy.GroovyDebugAutoConfiguration",
+      "description": "是否启用groovy调试应用.",
       "defaultValue": true
     }
   ],

@@ -31,6 +31,12 @@
             <optional>true</optional>
         </dependency>
 
+        <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy</artifactId>
+            <optional>true</optional>
+        </dependency>
+
         <!-- Optional -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -44,16 +50,10 @@
         </dependency>
 
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-jersey</artifactId>
+            <groupId>jakarta.validation</groupId>
+            <artifactId>jakarta.validation-api</artifactId>
             <optional>true</optional>
         </dependency>
-        <dependency>
-            <groupId>cn.hiboot.mcn</groupId>
-            <artifactId>jersey-swagger2-ui</artifactId>
-            <optional>true</optional>
-        </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>

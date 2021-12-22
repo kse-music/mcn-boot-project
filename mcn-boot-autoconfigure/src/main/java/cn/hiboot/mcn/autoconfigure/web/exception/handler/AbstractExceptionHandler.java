@@ -68,8 +68,8 @@ public abstract class AbstractExceptionHandler implements EnvironmentAware {
     @Override
     public void setEnvironment(Environment environment) {
         this.basePackage = environment.getProperty(McnPropertiesPostProcessor.APP_BASE_PACKAGE);
-        this.removeFrameworkStack = environment.getProperty("remove.framework.stack.enable",Boolean.class,true);
-        this.setValidatorResult = environment.getProperty("validator.result.set.enable",Boolean.class,true);
+        this.removeFrameworkStack = environment.getProperty("framework.stack.remove.enable",Boolean.class,true);
+        this.setValidatorResult = environment.getProperty("validator.result.return.enable",Boolean.class,true);
     }
 
 }

@@ -1,6 +1,7 @@
 package cn.hiboot.mcn.autoconfigure.web.filter.xss;
 
-import org.apache.commons.lang3.StringUtils;
+
+import cn.hiboot.mcn.core.util.McnUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
@@ -36,7 +37,7 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
         }
         name = JsoupUtil.clean(name);
         String value = super.getParameter(name);
-        if (StringUtils.isNotBlank(value)) {
+        if (McnUtils.isNotNullAndEmpty(value)) {
             value = JsoupUtil.clean(value);
         }
         return value;
@@ -66,7 +67,7 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
     public String getHeader(String name) {
         name = JsoupUtil.clean(name);
         String value = super.getHeader(name);
-        if (StringUtils.isNotBlank(value)) {
+        if (McnUtils.isNotNullAndEmpty(value)) {
             value = JsoupUtil.clean(value);
         }
         return value;

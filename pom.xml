@@ -22,8 +22,6 @@
         <module>mcn-boot-core</module>
         <module>mcn-boot-autoconfigure</module>
         <module>mcn-spring-boot-starter</module>
-        <module>crud-maven-plugin</module>
-        <module>jersey-swagger2-ui</module>
         <module>mvc-swagger2</module>
         <module>mcn-boot-starter-parent</module>
         <module>mcn-cloud-autoconfigure</module>
