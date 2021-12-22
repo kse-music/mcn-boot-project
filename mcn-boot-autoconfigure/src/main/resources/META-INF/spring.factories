@@ -7,7 +7,7 @@ org.springframework.context.ApplicationListener=\
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
   cn.hiboot.mcn.autoconfigure.db.SingleDatasourceAutoConfiguration,\
   cn.hiboot.mcn.autoconfigure.db.MultipleMybatisAutoConfiguration,\
-  cn.hiboot.mcn.autoconfigure.web.groovy.GroovyDebugAutoConfiguration,\
+  cn.hiboot.mcn.autoconfigure.web.groovy.GroovyWebAutoConfiguration,\
   cn.hiboot.mcn.autoconfigure.web.filter.FilterAutoConfiguration,\
   cn.hiboot.mcn.autoconfigure.web.mvc.SpringMvcAutoConfiguration,\
   cn.hiboot.mcn.autoconfigure.web.mvc.WebMvcConfigurerAutoConfiguration,\

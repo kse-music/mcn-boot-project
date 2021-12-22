@@ -10,6 +10,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,11 +18,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 /**
- * GroovyDebugAutoConfiguration
+ * GroovyWebAutoConfiguration
  *
  * @author DingHao
  * @since 2021/12/22 15:31
@@ -29,12 +29,15 @@ import java.util.Map;
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnClass(GroovyObject.class)
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
-@ConditionalOnProperty(prefix = "groovy.debug", value = "enable", havingValue = "true")
-public class GroovyDebugAutoConfiguration {
+@EnableConfigurationProperties(GroovyWebProperties.class)
+@ConditionalOnProperty(prefix = "groovy.web", value = "enable", havingValue = "true")
+public class GroovyWebAutoConfiguration {
+    
+    private final GroovyWebProperties groovyDebugProperties;
+    private final ObjectProvider<GroovyWebCustomizer> customizers;
 
-    private final ObjectProvider<BindingCustomizer> customizers;
-
-    public GroovyDebugAutoConfiguration(ObjectProvider<BindingCustomizer> customizers) {
+    public GroovyWebAutoConfiguration(GroovyWebProperties groovyDebugProperties, ObjectProvider<GroovyWebCustomizer> customizers) {
+        this.groovyDebugProperties = groovyDebugProperties;
         this.customizers = customizers;
     }
 
@@ -43,7 +46,16 @@ public class GroovyDebugAutoConfiguration {
     public GroovyShell groovyShell(Binding groovyBinding) {
         GroovyClassLoader groovyClassLoader = new GroovyClassLoader(this.getClass().getClassLoader());
         CompilerConfiguration compilerConfiguration = new CompilerConfiguration();
-        compilerConfiguration.setSourceEncoding(StandardCharsets.UTF_8.displayName());
+        compilerConfiguration.setSourceEncoding(groovyDebugProperties.getSourceEncoding());
+        compilerConfiguration.setDebug(groovyDebugProperties.isDebug());
+        compilerConfiguration.setTargetDirectory(groovyDebugProperties.getTargetDirectory());
+        compilerConfiguration.setScriptBaseClass(groovyDebugProperties.getScriptBaseClass());
+        if(groovyDebugProperties.getClasspath() != null){
+            compilerConfiguration.setClasspath(groovyDebugProperties.getClasspath());
+        }
+        for (GroovyWebCustomizer customizer : customizers) {
+            customizer.customize(groovyBinding,compilerConfiguration);
+        }
         return new GroovyShell(groovyClassLoader, groovyBinding, compilerConfiguration);
     }
 
@@ -55,18 +67,15 @@ public class GroovyDebugAutoConfiguration {
         for (String beanName : beanMap.keySet()) {
             groovyBinding.setVariable(beanName, beanMap.get(beanName));
         }
-        for (BindingCustomizer customizer : customizers) {
-            customizer.customize(groovyBinding);
-        }
         return groovyBinding;
     }
 
     @RestController
-    static class GroovyDebugController {
+    static class GroovyWebController {
 
         GroovyShell groovyShell;
 
-        GroovyDebugController(GroovyShell groovyShell) {
+        GroovyWebController(GroovyShell groovyShell) {
             this.groovyShell = groovyShell;
         }
 
