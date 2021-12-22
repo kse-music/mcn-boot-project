@@ -29,7 +29,7 @@ import java.util.Map;
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnClass(GroovyObject.class)
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
-@ConditionalOnProperty(prefix = "groovy.debug", value = "enable", havingValue = "true", matchIfMissing = true)
+@ConditionalOnProperty(prefix = "groovy.debug", value = "enable", havingValue = "true")
 public class GroovyDebugAutoConfiguration {
 
     private final ObjectProvider<BindingCustomizer> customizers;

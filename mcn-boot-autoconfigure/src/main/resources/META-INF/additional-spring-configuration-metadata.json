@@ -84,7 +84,7 @@
       "type": "java.lang.Boolean",
       "sourceType": "cn.hiboot.mcn.autoconfigure.web.groovy.GroovyDebugAutoConfiguration",
       "description": "是否启用groovy调试应用.",
-      "defaultValue": true
+      "defaultValue": false
     }
   ],
   "hints": [
