@@ -26,14 +26,14 @@ import java.util.Set;
  * EnvironmentPostProcessor
  * 环境后置处理器
  * 该初始化器是在IOC容器刷新前执行
- *
+ * <p>
  * McnEnvironmentPostProcessor主要给SpringBoot应用添加一些默认参数以及自定义一些唯一数据源和共享数据源
  * 另外还添加了一个即便在引导上下文中也在的数据源(方便一个项目中共享公共数据源)
  *
  * @author DingHao
  * @since 2021/1/16 16:46
  */
-public class McnEnvironmentPostProcessor implements EnvironmentPostProcessor,Ordered {
+public class McnEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
 
     private static final String BOOTSTRAP_EAGER_LOAD = "mcn.bootstrap.eagerLoad.enable";
     private static final String MCN_SOURCE_NAME = "mcn-global-unique";
@@ -43,30 +43,42 @@ public class McnEnvironmentPostProcessor implements EnvironmentPostProcessor,Ord
 
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
-        //无论在什么上下文中都加载的数据源,常见的就是Spring Cloud引导上下文
-        if (!environment.getPropertySources().contains(MCN_SOURCE_NAME)) {
-            loadMcnConfigFile(environment);
+        //加载全局配置
+        loadMcnConfigFile(environment);
+
+        //引导上下文中默认不加载 默认配置和日志配置,但如果指定mcn.bootstrap.eagerLoad.enable=true则加载
+        if (environment.getPropertySources().contains(BOOTSTRAP_PROPERTY_SOURCE_NAME) && !environment.getProperty(BOOTSTRAP_EAGER_LOAD, Boolean.class, false)) {
+            return;
         }
 
-        if (loadDefaultConfig(environment)) {
-            //加载默认配置(包括日志的配置)
-            load(environment,application);
-        }
+        //加载默认配置
+        loadDefaultConfig(environment, application.getMainApplicationClass());
+
+        //加载日志的配置
+        loadLogConfig(environment, application.getInitializers());
 
     }
 
-    private void loadMcnConfigFile(ConfigurableEnvironment environment){
+    /**
+     * 无论在什么上下文中都加载的数据源,常见的就是Spring Cloud引导上下文
+     *
+     * @param environment 环境配置
+     */
+    private void loadMcnConfigFile(ConfigurableEnvironment environment) {
+        if (environment.getPropertySources().contains(MCN_SOURCE_NAME)) {
+            return;
+        }
         MutablePropertySources propertySources = environment.getPropertySources();
-        //add global unique config file diff profile
+        //add global unique config file distinguish profile
         String[] activeProfiles = environment.getActiveProfiles();
-        if(activeProfiles.length > 0){
+        if (activeProfiles.length > 0) {
             for (int i = activeProfiles.length - 1; i >= 0; i--) {//后面申明的优先级高
                 String activeProfile = activeProfiles[i];
-                addLast(propertySources,loadResourcePropertySource(MCN_SOURCE_NAME.concat("-").concat(activeProfile),"classpath:config/mcn-"+activeProfile+".properties"));
+                addLast(propertySources, loadResourcePropertySource(MCN_SOURCE_NAME.concat("-").concat(activeProfile), "classpath:config/mcn-" + activeProfile + ".properties"));
             }
         }
-        //总是加载mcn配置文件
-        addLast(propertySources,loadResourcePropertySource(MCN_SOURCE_NAME, "classpath:config/mcn.properties"));
+
+        addLast(propertySources, loadResourcePropertySource(MCN_SOURCE_NAME, "classpath:config/mcn.properties"));
     }
 
     /**
@@ -74,88 +86,87 @@ public class McnEnvironmentPostProcessor implements EnvironmentPostProcessor,Ord
      * <p>2.如果是Spring Cloud引导上下文,则不加载,但如果指定参数mcn.bootstrap.eagerLoad.enable=true,则在引导上下文中也加载</p>
      *
      * @param environment 环境配置
-     * @return true:加载默认配置,false:不加载
+     * @param mainApplicationClass 主类可能为null
      */
-    private boolean loadDefaultConfig(ConfigurableEnvironment environment){
-        //已加载
-        if (environment.getPropertySources().contains(MCN_DEFAULT_PROPERTY_SOURCE_NAME)) {
-            return false;
-        }
-        return !environment.getPropertySources().contains(BOOTSTRAP_PROPERTY_SOURCE_NAME) || environment.getProperty(BOOTSTRAP_EAGER_LOAD, Boolean.class, false);
-    }
-
-    private void load(ConfigurableEnvironment environment, SpringApplication application){
+    private void loadDefaultConfig(ConfigurableEnvironment environment, Class<?> mainApplicationClass) {
         MutablePropertySources propertySources = environment.getPropertySources();
-
+        //已加载
+        if (propertySources.contains(MCN_DEFAULT_PROPERTY_SOURCE_NAME)) {
+            return;
+        }
         //add MapPropertySource,包含主源的包名,日志文件名,mcn版本,以及dao包下的日志打印级别
         Map<String, Object> mapProp = new HashMap<>();
-        Class<?> mainApplicationClass = application.getMainApplicationClass();//maybe is null
-        if(Objects.nonNull(mainApplicationClass)){
+        if (Objects.nonNull(mainApplicationClass)) {
             String packageName = ClassUtils.getPackageName(mainApplicationClass);
             mapProp.put(McnConstant.APP_BASE_PACKAGE, packageName);
-            mapProp.put("logging.level."+packageName+".dao","info");//do not println query statement
-            String projectVersion =McnUtils.getVersion(mainApplicationClass);
-            if(projectVersion != null){
-                mapProp.put("project.version",projectVersion);
+            mapProp.put("logging.level." + packageName + ".dao", "info");//do not println query statement
+            String projectVersion = McnUtils.getVersion(mainApplicationClass);
+            if (projectVersion != null) {
+                mapProp.put("project.version", projectVersion);
             }
         }
-        mapProp.put("mcn.log.file.name",environment.getProperty("mcn.log.file.name","error"));
-        mapProp.put("mcn.version","v"+ McnUtils.getVersion(this.getClass()));
-        addLast(propertySources,new MapPropertySource("mcn-map",mapProp));
+        mapProp.put("mcn.log.file.name", environment.getProperty("mcn.log.file.name", "error"));
+        mapProp.put("mcn.version", "v" + McnUtils.getVersion(this.getClass()));
+        addLast(propertySources, new MapPropertySource("mcn-map", mapProp));
 
-        //加载默认配置
-        addLast(propertySources,loadResourcePropertySource(MCN_DEFAULT_PROPERTY_SOURCE_NAME, loadClassPathResource("mcn-default.properties")));
-
-        /*
-         * 1.nacos使用的是ApplicationContextInitializer(PropertySourceBootstrapConfiguration)启动加载的,优先级低于EnvironmentPostProcessor,
-         * 所以此时McnPropertiesPostProcessor还读不到nacos中的配置
-         * 2.PropertySourceBootstrapConfiguration是需要Bootstrap上下文引导的,但是在spring  boot 2.4+默认不启动Bootstrap上下文
-         * 3.如果nacos中配置了logging开头的属性会触发重新初始化日志
-         * 4.如果此时nacos上配置的日志文件和mcn默认不一样就会生成两个文件
-         */
-        boolean logFileEnable = environment.getProperty(MCN_LOG_FILE_EAGER_LOAD,Boolean.class,false);
-
-        //手动开启日志配置或者没有nacos的情况下触发mcn默认日志配置
-        //此时nacos上必须配置了logging否则整个项目不会有日志文件的配置或者在配置文件中配置mcn.log.file.eagerLoad=true
-        if (logFileEnable || withoutPropertySourceLocator(application.getInitializers())) {
-            //加载默认日志配置
-            addLast(propertySources,loadResourcePropertySource("mcn-log-file", loadClassPathResource("log.properties")));
-        }
-
+        addLast(propertySources, loadResourcePropertySource(MCN_DEFAULT_PROPERTY_SOURCE_NAME, buildClassPathResource("mcn-default.properties")));
     }
 
-    private boolean withoutPropertySourceLocator(Set<ApplicationContextInitializer<?>> initializers){
-        boolean hasPropertySourceLocator = ClassUtils.isPresent("com.alibaba.cloud.nacos.client.NacosPropertySourceLocator",null);
+    /**
+     * <p>1.nacos使用的是ApplicationContextInitializer(PropertySourceBootstrapConfiguration)启动加载的,优先级低于EnvironmentPostProcessor,
+     * 所以此时McnPropertiesPostProcessor还读不到nacos中的配置</p>
+     * <p>2.PropertySourceBootstrapConfiguration是需要Bootstrap上下文引导的,但是在springboot 2.4+默认不启动Bootstrap上下文</p>
+     * <p>
+     * 注意:
+     * <p>1.如果nacos中配置了logging开头的属性会触发日志系统重新初始化</p>
+     * <p>2.如果nacos上没配置日志文件且也没有设置mcn.log.file.eagerLoad=true则应用不会生成日志文件</p>
+     * <p>3.如果nacos上配置日志文件但文件名和mcn默认的不一样且又设置mcn.log.file.eagerLoad=true则会生成两个不一样的日志文件路径</p>
+     * <p>
+     * 最佳使用：
+     * <p>1.nacos上配置日志文件</p>
+     * <p>2.nacos上不配置日志文件,在配置文件中配置mcn.log.file.eagerLoad=true</p>
+     * 以上两种选一种方式就行
+     *
+     * @param environment 环境配置
+     * @param initializers 应用上下文初始化器
+     *
+     */
+    private void loadLogConfig(ConfigurableEnvironment environment, Set<ApplicationContextInitializer<?>> initializers) {
+        boolean logFileEnable = environment.getProperty(MCN_LOG_FILE_EAGER_LOAD, Boolean.class, false);
+        boolean hasPropertySourceLocator = ClassUtils.isPresent("com.alibaba.cloud.nacos.client.NacosPropertySourceLocator", null);
         boolean hasPropertySourceBootstrapConfiguration = false;
         for (ApplicationContextInitializer<?> initializer : initializers) {
-            if(initializer.getClass().getName().equals("org.springframework.cloud.bootstrap.config.PropertySourceBootstrapConfiguration")){
+            if (initializer.getClass().getName().equals("org.springframework.cloud.bootstrap.config.PropertySourceBootstrapConfiguration")) {
                 hasPropertySourceBootstrapConfiguration = true;
                 break;
             }
         }
-        return !hasPropertySourceLocator || !hasPropertySourceBootstrapConfiguration;
+        //这里假设当使用了nacos时配置了日志文件路径
+        if (logFileEnable || !(hasPropertySourceLocator && hasPropertySourceBootstrapConfiguration)) {
+            addLast(environment.getPropertySources(), loadResourcePropertySource("mcn-log-file", buildClassPathResource("log.properties")));
+        }
     }
 
-    private ClassPathResource loadClassPathResource(String file){
+    private ClassPathResource buildClassPathResource(String file) {
         return new ClassPathResource(file, ConfigProperties.class);
     }
 
-    private ResourcePropertySource loadResourcePropertySource(String name, Object resource){
+    private ResourcePropertySource loadResourcePropertySource(String name, Object resource) {
         try {
-            if(resource instanceof Resource){
-                return new ResourcePropertySource(name, (Resource)resource);
+            if (resource instanceof Resource) {
+                return new ResourcePropertySource(name, (Resource) resource);
             }
             return new ResourcePropertySource(name, resource.toString());
         } catch (IOException e) {
-            //ignore resource not exist
+            return null;
         }
-        return null;
     }
 
-    private void addLast(MutablePropertySources propertySources, PropertySource<?> propertySource){
-        if(propertySource != null){
-            propertySources.addLast(propertySource);
+    private void addLast(MutablePropertySources propertySources, PropertySource<?> propertySource) {
+        if (propertySource == null) {
+            return;
         }
+        propertySources.addLast(propertySource);
     }
 
     @Override
