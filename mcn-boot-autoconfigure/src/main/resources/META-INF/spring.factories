@@ -18,4 +18,4 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
   cn.hiboot.mcn.autoconfigure.xxl.XxlJobAutoConfiguration
 
 org.springframework.boot.env.EnvironmentPostProcessor=\
-  cn.hiboot.mcn.autoconfigure.context.McnPropertiesPostProcessor
+  cn.hiboot.mcn.autoconfigure.context.McnEnvironmentPostProcessor

@@ -6,14 +6,14 @@
     {
       "name": "mcn.bootstrap.eagerLoad.enable",
       "type": "java.lang.Boolean",
-      "sourceType": "cn.hiboot.mcn.autoconfigure.context.McnPropertiesPostProcessor",
+      "sourceType": "cn.hiboot.mcn.autoconfigure.context.McnEnvironmentPostProcessor",
       "description": "是否在引导上下文中加载.",
       "defaultValue": false
     },
     {
       "name": "mcn.log.file.eagerLoad",
       "type": "java.lang.Boolean",
-      "sourceType": "cn.hiboot.mcn.autoconfigure.context.McnPropertiesPostProcessor",
+      "sourceType": "cn.hiboot.mcn.autoconfigure.context.McnEnvironmentPostProcessor",
       "description": "是否早期就加载默认日志文件配置.",
       "defaultValue": false
     },
@@ -26,7 +26,7 @@
     {
       "name": "mcn.log.file.name",
       "type": "java.lang.String",
-      "sourceType": "cn.hiboot.mcn.autoconfigure.context.McnPropertiesPostProcessor",
+      "sourceType": "cn.hiboot.mcn.autoconfigure.context.McnEnvironmentPostProcessor",
       "description": "日志文件名称(仅仅文件名,不含路径).",
       "defaultValue": "error"
     },

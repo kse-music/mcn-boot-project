@@ -1,6 +1,7 @@
 package cn.hiboot.mcn.autoconfigure.context;
 
 import cn.hiboot.mcn.autoconfigure.web.config.ConfigProperties;
+import cn.hiboot.mcn.core.config.McnConstant;
 import cn.hiboot.mcn.core.util.McnUtils;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.env.EnvironmentPostProcessor;
@@ -26,16 +27,15 @@ import java.util.Set;
  * 环境后置处理器
  * 该初始化器是在IOC容器刷新前执行
  *
- * McnPropertiesPostProcessor主要给SpringBoot应用添加一些默认参数以及自定义一些唯一数据源和共享数据源
+ * McnEnvironmentPostProcessor主要给SpringBoot应用添加一些默认参数以及自定义一些唯一数据源和共享数据源
  * 另外还添加了一个即便在引导上下文中也在的数据源(方便一个项目中共享公共数据源)
  *
  * @author DingHao
  * @since 2021/1/16 16:46
  */
-public class McnPropertiesPostProcessor implements EnvironmentPostProcessor,Ordered {
+public class McnEnvironmentPostProcessor implements EnvironmentPostProcessor,Ordered {
 
     private static final String BOOTSTRAP_EAGER_LOAD = "mcn.bootstrap.eagerLoad.enable";
-    public static final String APP_BASE_PACKAGE = "app.base-package";
     private static final String MCN_SOURCE_NAME = "mcn-global-unique";
     private static final String MCN_DEFAULT_PROPERTY_SOURCE_NAME = "mcn-default";
     private static final String MCN_LOG_FILE_EAGER_LOAD = "mcn.log.file.eagerLoad";
@@ -48,19 +48,10 @@ public class McnPropertiesPostProcessor implements EnvironmentPostProcessor,Orde
             loadMcnConfigFile(environment);
         }
 
-        //如果是Spring Cloud引导上下文不加载后面的配置,可通过在bootstrap.properties指定参数mcn.bootstrap.eagerLoad.enable=true
-        if (needNotRun(environment)) {
-            return;
+        if (loadDefaultConfig(environment)) {
+            //加载默认配置(包括日志的配置)
+            load(environment,application);
         }
-
-        //如果默认配置已加载
-        if (environment.getPropertySources().contains(MCN_DEFAULT_PROPERTY_SOURCE_NAME)) {
-            //already initialized
-            return;
-        }
-
-        //加载默认配置
-        loadDefaultConfig(environment,application);
 
     }
 
@@ -78,7 +69,22 @@ public class McnPropertiesPostProcessor implements EnvironmentPostProcessor,Orde
         addLast(propertySources,loadResourcePropertySource(MCN_SOURCE_NAME, "classpath:config/mcn.properties"));
     }
 
-    private void loadDefaultConfig(ConfigurableEnvironment environment, SpringApplication application){
+    /**
+     * <p>1.如果默认配置已加载,则不再加载</p>
+     * <p>2.如果是Spring Cloud引导上下文,则不加载,但如果指定参数mcn.bootstrap.eagerLoad.enable=true,则在引导上下文中也加载</p>
+     *
+     * @param environment 环境配置
+     * @return true:加载默认配置,false:不加载
+     */
+    private boolean loadDefaultConfig(ConfigurableEnvironment environment){
+        //已加载
+        if (environment.getPropertySources().contains(MCN_DEFAULT_PROPERTY_SOURCE_NAME)) {
+            return false;
+        }
+        return !environment.getPropertySources().contains(BOOTSTRAP_PROPERTY_SOURCE_NAME) || environment.getProperty(BOOTSTRAP_EAGER_LOAD, Boolean.class, false);
+    }
+
+    private void load(ConfigurableEnvironment environment, SpringApplication application){
         MutablePropertySources propertySources = environment.getPropertySources();
 
         //add MapPropertySource,包含主源的包名,日志文件名,mcn版本,以及dao包下的日志打印级别
@@ -86,7 +92,7 @@ public class McnPropertiesPostProcessor implements EnvironmentPostProcessor,Orde
         Class<?> mainApplicationClass = application.getMainApplicationClass();//maybe is null
         if(Objects.nonNull(mainApplicationClass)){
             String packageName = ClassUtils.getPackageName(mainApplicationClass);
-            mapProp.put(APP_BASE_PACKAGE, packageName);
+            mapProp.put(McnConstant.APP_BASE_PACKAGE, packageName);
             mapProp.put("logging.level."+packageName+".dao","info");//do not println query statement
             String projectVersion =McnUtils.getVersion(mainApplicationClass);
             if(projectVersion != null){
@@ -155,13 +161,6 @@ public class McnPropertiesPostProcessor implements EnvironmentPostProcessor,Orde
     @Override
     public int getOrder() {
         return McnApplicationListener.DEFAULT_ORDER + 1;
-    }
-
-    private boolean needNotRun(ConfigurableEnvironment environment){
-        if(environment.getProperty(BOOTSTRAP_EAGER_LOAD, Boolean.class, false)){
-            return false;
-        }
-        return environment.getPropertySources().contains(BOOTSTRAP_PROPERTY_SOURCE_NAME);
     }
 
 }

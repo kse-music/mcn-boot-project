@@ -1,6 +1,6 @@
 package cn.hiboot.mcn.autoconfigure.db;
 
-import cn.hiboot.mcn.autoconfigure.context.McnPropertiesPostProcessor;
+import cn.hiboot.mcn.core.config.McnConstant;
 import org.mybatis.spring.mapper.ClassPathMapperScanner;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.EnvironmentAware;
@@ -28,7 +28,7 @@ class MapperScannerRegistry implements ImportBeanDefinitionRegistrar,Environment
         if(dbs == null){
             return;
         }
-        String daoBasePackage = environment.getProperty((McnPropertiesPostProcessor.APP_BASE_PACKAGE))+".dao.";
+        String daoBasePackage = environment.getProperty((McnConstant.APP_BASE_PACKAGE))+".dao.";
         for (String db : dbs) {
             ClassPathMapperScanner scanner = new ClassPathMapperScanner(registry);
             if (resourceLoader != null) {

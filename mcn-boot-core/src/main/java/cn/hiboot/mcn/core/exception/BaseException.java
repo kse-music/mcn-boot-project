@@ -1,7 +1,5 @@
 package cn.hiboot.mcn.core.exception;
 
-
-
 /**
  * 异常基类，各个模块的运行期异常均继承与该类
  *

@@ -1,6 +1,6 @@
 package cn.hiboot.mcn.autoconfigure.db;
 
-import cn.hiboot.mcn.autoconfigure.context.McnPropertiesPostProcessor;
+import cn.hiboot.mcn.core.config.McnConstant;
 import org.mybatis.spring.mapper.ClassPathMapperScanner;
 import org.springframework.context.annotation.Condition;
 import org.springframework.context.annotation.ConditionContext;
@@ -25,7 +25,7 @@ public class OnSingleDatasourceCondition implements Condition {
             ResourceLoader resourceLoader = context.getResourceLoader();
             scanner.setResourceLoader(resourceLoader);
             scanner.registerFilters();
-            String daoPackage = environment.getProperty((McnPropertiesPostProcessor.APP_BASE_PACKAGE))+".dao";
+            String daoPackage = environment.getProperty((McnConstant.APP_BASE_PACKAGE))+".dao";
             scanner.doScan(daoPackage);
         }
         return false;

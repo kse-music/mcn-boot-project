@@ -1,6 +1,6 @@
 package cn.hiboot.mcn.autoconfigure.db;
 
-import cn.hiboot.mcn.autoconfigure.context.McnPropertiesPostProcessor;
+import cn.hiboot.mcn.core.config.McnConstant;
 import com.zaxxer.hikari.HikariDataSource;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.boot.autoconfigure.SpringBootVFS;
@@ -42,7 +42,7 @@ public class MultipleDataSourceRegistryPostProcessor implements BeanDefinitionRe
             if(dbs == null){
                 return;
             }
-            String basePackage = env.getProperty((McnPropertiesPostProcessor.APP_BASE_PACKAGE));
+            String basePackage = env.getProperty((McnConstant.APP_BASE_PACKAGE));
             for (String db : dbs) {
                 GenericBeanDefinition beanDefinition = new GenericBeanDefinition();
                 beanDefinition.setBeanClass(HikariDataSource.class);
