@@ -11,11 +11,11 @@
       "defaultValue": false
     },
     {
-      "name": "mcn.log.file.eagerLoad",
+      "name": "delete.default.log-file.enable",
       "type": "java.lang.Boolean",
-      "sourceType": "cn.hiboot.mcn.autoconfigure.context.McnEnvironmentPostProcessor",
-      "description": "是否早期就加载默认日志文件配置.",
-      "defaultValue": false
+      "sourceType": "cn.hiboot.mcn.autoconfigure.bootstrap.DuplicateLogFile",
+      "description": "是否默认删除默认日志文件.",
+      "defaultValue": true
     },
     {
       "name": "mcn.log.file.filter-level",

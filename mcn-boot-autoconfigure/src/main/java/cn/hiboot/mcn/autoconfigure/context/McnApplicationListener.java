@@ -1,5 +1,6 @@
 package cn.hiboot.mcn.autoconfigure.context;
 
+import cn.hiboot.mcn.autoconfigure.bootstrap.DuplicateLogFile;
 import cn.hiboot.mcn.autoconfigure.web.util.SpringBeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +11,7 @@ import org.springframework.boot.context.logging.LoggingApplicationListener;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.event.GenericApplicationListener;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.PropertySource;
 
@@ -34,21 +36,27 @@ public class McnApplicationListener implements GenericApplicationListener {
     public void onApplicationEvent(ApplicationEvent applicationEvent) {
         if(applicationEvent instanceof ApplicationEnvironmentPreparedEvent){
             ApplicationEnvironmentPreparedEvent event = (ApplicationEnvironmentPreparedEvent) applicationEvent;
-            if(event.getEnvironment().getProperty("mcn.print-env.enable",Boolean.class,false)){
-                for (PropertySource<?> propertySource : event.getEnvironment().getPropertySources()) {
-                    if(!(propertySource instanceof EnumerablePropertySource)){
-                        log.info("skip propertySource name = {}",propertySource.getName());
-                        continue;
-                    }
-                    System.out.println();
-                    log.info("start print ------------ {} ------------ ",propertySource.getName());
-                    for (String propertyName : ((EnumerablePropertySource<?>) propertySource).getPropertyNames()) {
-                        log.info("{} = {}",propertyName,propertySource.getProperty(propertyName));
-                    }
-                }
-            }
+            ConfigurableEnvironment environment = event.getEnvironment();
+            logPropertySource(environment);
+            event.getBootstrapContext().get(DuplicateLogFile.class).setOriginalLogFile(environment);
         }else if(applicationEvent instanceof ApplicationStartedEvent){
             SpringBeanUtils.setApplicationContext(((ApplicationStartedEvent) applicationEvent).getApplicationContext());
+        }
+    }
+
+    private void logPropertySource(ConfigurableEnvironment environment){
+        if(environment.getProperty("mcn.print-env.enable",Boolean.class,false)){
+            for (PropertySource<?> propertySource : environment.getPropertySources()) {
+                if(!(propertySource instanceof EnumerablePropertySource)){
+                    log.info("skip propertySource name = {}",propertySource.getName());
+                    continue;
+                }
+                System.out.println();
+                log.info("start print ------------ {} ------------ ",propertySource.getName());
+                for (String propertyName : ((EnumerablePropertySource<?>) propertySource).getPropertyNames()) {
+                    log.info("{} = {}",propertyName,propertySource.getProperty(propertyName));
+                }
+            }
         }
     }
 

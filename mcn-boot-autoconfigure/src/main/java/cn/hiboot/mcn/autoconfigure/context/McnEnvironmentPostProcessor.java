@@ -5,7 +5,6 @@ import cn.hiboot.mcn.core.config.McnConstant;
 import cn.hiboot.mcn.core.util.McnUtils;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.env.EnvironmentPostProcessor;
-import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.core.Ordered;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
@@ -20,7 +19,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * EnvironmentPostProcessor
@@ -38,7 +36,6 @@ public class McnEnvironmentPostProcessor implements EnvironmentPostProcessor, Or
     private static final String BOOTSTRAP_EAGER_LOAD = "mcn.bootstrap.eagerLoad.enable";
     private static final String MCN_SOURCE_NAME = "mcn-global-unique";
     private static final String MCN_DEFAULT_PROPERTY_SOURCE_NAME = "mcn-default";
-    private static final String MCN_LOG_FILE_EAGER_LOAD = "mcn.log.file.eagerLoad";
     private static final String BOOTSTRAP_PROPERTY_SOURCE_NAME = "bootstrap";
 
     @Override
@@ -53,9 +50,6 @@ public class McnEnvironmentPostProcessor implements EnvironmentPostProcessor, Or
 
         //加载默认配置
         loadDefaultConfig(environment, application.getMainApplicationClass());
-
-        //加载日志的配置
-        loadLogConfig(environment, application.getInitializers());
 
     }
 
@@ -110,41 +104,9 @@ public class McnEnvironmentPostProcessor implements EnvironmentPostProcessor, Or
         addLast(propertySources, new MapPropertySource("mcn-map", mapProp));
 
         addLast(propertySources, loadResourcePropertySource(MCN_DEFAULT_PROPERTY_SOURCE_NAME, buildClassPathResource("mcn-default.properties")));
-    }
 
-    /**
-     * <p>1.nacos使用的是ApplicationContextInitializer(PropertySourceBootstrapConfiguration)启动加载的,优先级低于EnvironmentPostProcessor,
-     * 所以此时McnPropertiesPostProcessor还读不到nacos中的配置</p>
-     * <p>2.PropertySourceBootstrapConfiguration是需要Bootstrap上下文引导的,但是在springboot 2.4+默认不启动Bootstrap上下文</p>
-     * <p>
-     * 注意:
-     * <p>1.如果nacos中配置了logging开头的属性会触发日志系统重新初始化</p>
-     * <p>2.如果nacos上没配置日志文件且也没有设置mcn.log.file.eagerLoad=true则应用不会生成日志文件</p>
-     * <p>3.如果nacos上配置日志文件但文件名和mcn默认的不一样且又设置mcn.log.file.eagerLoad=true则会生成两个不一样的日志文件路径</p>
-     * <p>
-     * 最佳使用：
-     * <p>1.nacos上配置日志文件</p>
-     * <p>2.nacos上不配置日志文件,在配置文件中配置mcn.log.file.eagerLoad=true</p>
-     * 以上两种选一种方式就行
-     *
-     * @param environment 环境配置
-     * @param initializers 应用上下文初始化器
-     *
-     */
-    private void loadLogConfig(ConfigurableEnvironment environment, Set<ApplicationContextInitializer<?>> initializers) {
-        boolean logFileEnable = environment.getProperty(MCN_LOG_FILE_EAGER_LOAD, Boolean.class, false);
-        boolean hasPropertySourceLocator = ClassUtils.isPresent("com.alibaba.cloud.nacos.client.NacosPropertySourceLocator", null);
-        boolean hasPropertySourceBootstrapConfiguration = false;
-        for (ApplicationContextInitializer<?> initializer : initializers) {
-            if (initializer.getClass().getName().equals("org.springframework.cloud.bootstrap.config.PropertySourceBootstrapConfiguration")) {
-                hasPropertySourceBootstrapConfiguration = true;
-                break;
-            }
-        }
-        //这里假设当使用了nacos时配置了日志文件路径
-        if (logFileEnable || !(hasPropertySourceLocator && hasPropertySourceBootstrapConfiguration)) {
-            addLast(environment.getPropertySources(), loadResourcePropertySource("mcn-log-file", buildClassPathResource("log.properties")));
-        }
+        addLast(environment.getPropertySources(), loadResourcePropertySource("mcn-log-file", buildClassPathResource("log.properties")));
+
     }
 
     private ClassPathResource buildClassPathResource(String file) {
