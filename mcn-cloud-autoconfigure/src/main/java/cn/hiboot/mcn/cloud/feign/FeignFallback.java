@@ -3,7 +3,6 @@ package cn.hiboot.mcn.cloud.feign;
 import cn.hiboot.mcn.core.exception.BaseException;
 import cn.hiboot.mcn.core.model.result.RestResp;
 import feign.FeignException;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cglib.proxy.MethodInterceptor;
 import org.springframework.cglib.proxy.MethodProxy;
@@ -18,17 +17,22 @@ import java.util.Objects;
  * @since 2021/7/4 10:18
  */
 @Slf4j
-@AllArgsConstructor
 public class FeignFallback<T> implements MethodInterceptor {
 
     private final Class<T> targetType;
     private final String targetName;
     private final Throwable cause;
 
+    public FeignFallback(Class<T> targetType, String targetName, Throwable cause) {
+        this.targetType = targetType;
+        this.targetName = targetName;
+        this.cause = cause;
+    }
+
     @Override
     public Object intercept(Object o, Method method, Object[] objects, MethodProxy methodProxy) throws Throwable {
         String errorMessage = cause.getMessage();
-        log.error("FullFeignFallback:[{}.{}] serviceId:[{}] message:[{}]", targetType.getName(), method.getName(), targetName, errorMessage);
+        log.error("GlobalFallback:[{}.{}] serviceId:[{}] message:[{}]", targetType.getName(), method.getName(), targetName, errorMessage);
         int defaultCode = BaseException.DEFAULT_CODE;
         if (!(cause instanceof FeignException)) {
             return new RestResp<>(defaultCode,errorMessage);

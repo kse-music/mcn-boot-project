@@ -81,18 +81,21 @@ public class GlobalExceptionHandler extends AbstractExceptionHandler {
     }
 
     @ExceptionHandler(ServletException.class)
-    public RestResp<Object> handleServletException(HttpServletRequest request, ServletException exception){
-        int code = ExceptionKeys.HTTP_ERROR_500;
-        if (exception instanceof NoHandlerFoundException) {
-            code = ExceptionKeys.HTTP_ERROR_404;
-        } else if (exception instanceof HttpRequestMethodNotSupportedException) {
-            code = ExceptionKeys.HTTP_ERROR_405;
-        } else if (exception instanceof HttpMediaTypeException) {
-            code = ExceptionKeys.HTTP_ERROR_406;
-        } else if (exception instanceof UnavailableException) {
-            code = ExceptionKeys.HTTP_ERROR_503;
+    public RestResp<Object> handleServletException(HttpServletRequest request, ServletException exception) throws ServletException {
+        if(isOverrideHttpError()){
+            int code = ExceptionKeys.HTTP_ERROR_500;
+            if (exception instanceof NoHandlerFoundException) {
+                code = ExceptionKeys.HTTP_ERROR_404;
+            } else if (exception instanceof HttpRequestMethodNotSupportedException) {
+                code = ExceptionKeys.HTTP_ERROR_405;
+            } else if (exception instanceof HttpMediaTypeException) {
+                code = ExceptionKeys.HTTP_ERROR_406;
+            } else if (exception instanceof UnavailableException) {
+                code = ExceptionKeys.HTTP_ERROR_503;
+            }
+            return buildErrorMessage(code,exception);
         }
-        return buildErrorMessage(code,exception);
+        throw exception;
     }
 
     @ExceptionHandler(BaseException.class)

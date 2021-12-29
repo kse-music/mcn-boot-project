@@ -25,6 +25,7 @@ public abstract class AbstractExceptionHandler implements EnvironmentAware {
 
     private boolean setValidatorResult;
     private boolean removeFrameworkStack;
+    private boolean overrideHttpError;
     private String basePackage;
 
     public RestResp<Object> buildErrorMessage(Integer code,Throwable t){
@@ -70,6 +71,11 @@ public abstract class AbstractExceptionHandler implements EnvironmentAware {
         this.basePackage = environment.getProperty(McnConstant.APP_BASE_PACKAGE);
         this.removeFrameworkStack = environment.getProperty("framework.stack.remove.enable",Boolean.class,true);
         this.setValidatorResult = environment.getProperty("validator.result.return.enable",Boolean.class,true);
+        this.overrideHttpError = environment.getProperty("http.error.override",Boolean.class,true);
+    }
+
+    protected boolean isOverrideHttpError(){
+        return overrideHttpError;
     }
 
 }
