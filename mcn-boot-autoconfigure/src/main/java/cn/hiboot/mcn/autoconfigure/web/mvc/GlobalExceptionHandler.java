@@ -7,7 +7,6 @@ import cn.hiboot.mcn.core.exception.ExceptionMessageCustomizer;
 import cn.hiboot.mcn.core.model.ValidationErrorBean;
 import cn.hiboot.mcn.core.model.result.RestResp;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.core.GenericTypeResolver;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -22,6 +21,7 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 import javax.servlet.ServletException;
 import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServletRequest;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -33,14 +33,13 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class GlobalExceptionHandler extends AbstractExceptionHandler {
 
-    private final ObjectProvider<ExceptionMessageCustomizer<?>> exceptionHandlers;
+    private final ObjectProvider<ExceptionMessageCustomizer> exceptionHandlers;
 
-    public GlobalExceptionHandler(ObjectProvider<ExceptionMessageCustomizer<?>> exceptionHandlers) {
+    public GlobalExceptionHandler(ObjectProvider<ExceptionMessageCustomizer> exceptionHandlers) {
         this.exceptionHandlers = exceptionHandlers;
     }
 
     @ExceptionHandler(Throwable.class)
-    @SuppressWarnings({"rawtypes","unchecked"})
     public RestResp<Object> handleException(HttpServletRequest request, Throwable exception){
         int errorCode = BaseException.DEFAULT_CODE;
         Object data = null;
@@ -55,17 +54,11 @@ public class GlobalExceptionHandler extends AbstractExceptionHandler {
             BindException ex = (BindException) exception;
             data = dealBindingResult(ex.getBindingResult());
         }
-
         String errorMsg = exception.getMessage();
-
-        for (ExceptionMessageCustomizer exceptionHandler : exceptionHandlers) {
-            Class<?> requiredType = GenericTypeResolver.resolveTypeArgument(exceptionHandler.getClass(),ExceptionMessageCustomizer.class);
-            if(requiredType != null && requiredType.isInstance(exception)){
-                errorMsg = exceptionHandler.handle(exception);//设置错误信息提示
-                break;
-            }
+        ExceptionMessageCustomizer exceptionHandler = exceptionHandlers.getIfUnique();
+        if(Objects.nonNull(exceptionHandler)){
+            errorMsg = exceptionHandler.handle(exception);
         }
-
         return buildErrorMessage(errorCode,errorMsg,data,exception);
     }
 
@@ -100,7 +93,7 @@ public class GlobalExceptionHandler extends AbstractExceptionHandler {
 
     @ExceptionHandler(BaseException.class)
     public RestResp<Object> handleBaseException(HttpServletRequest request, BaseException exception){
-        return buildErrorMessage(exception.getCode(),exception.getMsg(),exception);
+        return buildErrorMessage(exception.getCode(),exception.getMessage(),exception);
     }
 
 }

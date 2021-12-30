@@ -6,8 +6,8 @@ package cn.hiboot.mcn.core.exception;
  * @author DingHao
  * @since 2021/11/30 17:45
  */
-public interface ExceptionMessageCustomizer<E extends Throwable> {
+public interface ExceptionMessageCustomizer{
 
-    String handle(E e);
+    String handle(Throwable t);
 
 }

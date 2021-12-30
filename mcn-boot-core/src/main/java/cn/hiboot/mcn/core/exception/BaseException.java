@@ -13,10 +13,9 @@ public class BaseException extends RuntimeException {
      */
     public static final int DEFAULT_CODE = 999999;
     private Integer code = DEFAULT_CODE;
-    private String msg;
 
     protected BaseException(Integer code) {
-        this(code, null);
+        this(code, ErrorMsg.getErrorMsg(code));
     }
 
     protected BaseException(String msg) {
@@ -26,17 +25,14 @@ public class BaseException extends RuntimeException {
     protected BaseException(Integer code, String msg) {
         super(msg);
         this.code = code;
-        this.msg = getMessage();
     }
 
     protected BaseException(String message, Throwable cause) {
         super(message, cause);
-        this.msg = getMessage();
     }
 
     protected BaseException(Throwable cause) {
         super(cause);
-        this.msg = getMessage();
     }
 
     public Integer getCode() {
@@ -47,12 +43,5 @@ public class BaseException extends RuntimeException {
         this.code = code;
     }
 
-    public String getMsg() {
-        return msg;
-    }
-
-    public void setMsg(String msg) {
-        this.msg = msg;
-    }
 
 }

@@ -2,7 +2,6 @@ package cn.hiboot.mcn.autoconfigure.web.exception.handler;
 
 import cn.hiboot.mcn.core.config.McnConstant;
 import cn.hiboot.mcn.core.exception.ErrorMsg;
-import cn.hiboot.mcn.core.exception.ExceptionKeys;
 import cn.hiboot.mcn.core.model.result.RestResp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,26 +36,22 @@ public abstract class AbstractExceptionHandler implements EnvironmentAware {
     }
 
     public RestResp<Object> buildErrorMessage(Integer code,String msg,Object data,Throwable t){
-        if(ObjectUtils.isEmpty(msg)){//如果没有错误信息则尝试从错误码中获取错误信息
+        if(ObjectUtils.isEmpty(msg)){//try to acquire msg from code
             msg = ErrorMsg.getErrorMsg(code);
         }
-        if(ObjectUtils.isEmpty(msg)){//如果任然无异常信息,fallback服务端内部错误并更改错误码
-            code = ExceptionKeys.SERVICE_ERROR;
-            msg = ErrorMsg.getErrorMsg(code);
+        if(ObjectUtils.isEmpty(msg)){
+            log.warn("please set exception message");
         }
         if(removeFrameworkStack){//移除异常栈中非业务应用包下的栈信息
             dealCurrentStackTraceElement(t);
         }
-        logError(msg,t);//打印异常栈
+        //打印异常栈
+        log.error("The exception information is as follows",t);
         RestResp<Object> resp = new RestResp<>(code, msg);
         if(data != null && setValidatorResult){//参数校验具体错误数据信息
             resp.setData(data);
         }
         return resp;
-    }
-
-    private void logError(String msg,Throwable t){
-        log.error("ErrorMsg = {}",msg,t);
     }
 
     private void dealCurrentStackTraceElement(Throwable exception){
