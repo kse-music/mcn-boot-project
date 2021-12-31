@@ -35,13 +35,13 @@ public class FeignFallback<T> implements MethodInterceptor {
         log.error("GlobalFallback:[{}.{}] serviceId:[{}] message:[{}]", targetType.getName(), method.getName(), targetName, errorMessage);
         int defaultCode = BaseException.DEFAULT_CODE;
         if (!(cause instanceof FeignException)) {
-            return new RestResp<>(defaultCode,errorMessage);
+            return RestResp.error(defaultCode, errorMessage);
         }
         FeignException exception = (FeignException) cause;
         if(exception.contentUTF8().isEmpty()){
-            return new RestResp<>(defaultCode,errorMessage);
+            return RestResp.error(defaultCode,errorMessage);
         }
-        return new RestResp<>(defaultCode,exception.contentUTF8());
+        return RestResp.error(defaultCode,exception.contentUTF8());
     }
 
     @Override

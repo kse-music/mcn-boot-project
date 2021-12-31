@@ -1,6 +1,5 @@
 package cn.hiboot.mcn.autoconfigure.web.mvc.error;
 
-import cn.hiboot.mcn.core.exception.ErrorMsg;
 import cn.hiboot.mcn.core.exception.ExceptionKeys;
 import cn.hiboot.mcn.core.model.result.RestResp;
 import org.springframework.beans.factory.annotation.Value;
@@ -47,7 +46,7 @@ public class ErrorPageController extends BasicErrorController {
             }else if(statusCode == HttpStatus.CONFLICT.value()){
                 code = ExceptionKeys.HTTP_ERROR_409;
             }
-            RestResp<Object> resp = new RestResp<>(code, ErrorMsg.getErrorMsg(code));
+            RestResp<Object> resp = RestResp.error(code);
             Map<String, Object> rs = new HashMap<>();
             rs.put("ActionStatus",resp.getActionStatus());
             rs.put("ErrorCode",resp.getErrorCode());

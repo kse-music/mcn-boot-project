@@ -1,5 +1,6 @@
 package cn.hiboot.mcn.core.model.result;
 
+import cn.hiboot.mcn.core.exception.ErrorMsg;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -29,8 +30,8 @@ public class RestResp<T> {
 	private Long count;
 
 	public RestResp() {	}
-	
-	public RestResp(Integer code,String msg){
+
+	private RestResp(Integer code,String msg){
 		this.ActionStatus = ActionStatusMethod.FAIL;
 		this.ErrorCode = code;
 		this.ErrorInfo = msg;
@@ -97,4 +98,11 @@ public class RestResp<T> {
         this.count = count;
     }
 
+	public static RestResp<Object> error(Integer code,String msg){
+		return new RestResp<>(code, msg);
+	}
+
+	public static RestResp<Object> error(Integer code){
+		return error(code, ErrorMsg.getErrorMsg(code));
+	}
 }

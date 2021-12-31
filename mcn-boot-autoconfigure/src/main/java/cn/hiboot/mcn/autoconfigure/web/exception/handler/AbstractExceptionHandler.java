@@ -48,7 +48,7 @@ public abstract class AbstractExceptionHandler implements EnvironmentAware {
         }
         //打印异常栈
         log.error("The exception information is as follows",t);
-        RestResp<Object> resp = new RestResp<>(code, msg);
+        RestResp<Object> resp = RestResp.error(code, msg);
         if(data != null && setValidatorResult){//参数校验具体错误数据信息
             resp.setData(data);
         }

@@ -76,6 +76,14 @@ public abstract class JacksonUtils {
         }
     }
 
+    public static <T> T fromJson(String json, TypeReference<T> reference) {
+        try {
+            return JacksonUtils.getObjectMapper().readValue(json, reference);
+        } catch (Exception e) {
+            throw newInstance(e);
+        }
+    }
+
     public static String toJson(Object value){
         try {
             return getObjectMapper().writeValueAsString(value);
