@@ -44,8 +44,8 @@
         <knife4j.version>3.0.3</knife4j.version>
         <hutool.version>5.7.14</hutool.version>
         <mapstruct.version>1.4.2.Final</mapstruct.version>
-        <spring-cloud-alibaba.version>2021.1</spring-cloud-alibaba.version>
-        <minio.version>8.3.3</minio.version>
+        <spring-cloud-alibaba.version>2.2.7.RELEASE</spring-cloud-alibaba.version>
+        <minio.version>8.3.4</minio.version>
         <xxl-job.version>2.3.0</xxl-job.version>
     </properties>
 
