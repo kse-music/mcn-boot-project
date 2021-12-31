@@ -1,6 +1,7 @@
 package cn.hiboot.mcn.autoconfigure.web.exception.handler;
 
 import cn.hiboot.mcn.core.config.McnConstant;
+import cn.hiboot.mcn.core.exception.BaseException;
 import cn.hiboot.mcn.core.exception.ErrorMsg;
 import cn.hiboot.mcn.core.model.result.RestResp;
 import org.slf4j.Logger;
@@ -40,7 +41,7 @@ public abstract class AbstractExceptionHandler implements EnvironmentAware {
             msg = ErrorMsg.getErrorMsg(code);
         }
         if(ObjectUtils.isEmpty(msg)){
-            log.warn("please set exception message");
+            log.warn("please set {} exception message",code == BaseException.DEFAULT_CODE?"":"code = "+code);
         }
         if(removeFrameworkStack){//移除异常栈中非业务应用包下的栈信息
             dealCurrentStackTraceElement(t);

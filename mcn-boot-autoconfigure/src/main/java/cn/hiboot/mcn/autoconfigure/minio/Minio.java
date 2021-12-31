@@ -68,7 +68,7 @@ public interface Minio {
             }
             getMinioClient().putObject(builder.build());
         }catch (Exception e){
-            throw new MinioException(e);
+            throw new MinioException(e,getConfig().isReturnPreviousExceptionMessage());
         }
     }
 
@@ -84,7 +84,7 @@ public interface Minio {
         try {
             getMinioClient().upload(bucketName,objectName,objectSize,contentType,stream);
         } catch (Exception e) {
-            throw new MinioException(e);
+            throw new MinioException(e,getConfig().isReturnPreviousExceptionMessage());
         }
     }
 
@@ -100,7 +100,7 @@ public interface Minio {
         try {
             return getMinioClient().getPresignedObjectUrl(bucketName,objectName,contentType,count);
         } catch (Exception e) {
-            throw new MinioException(e);
+            throw new MinioException(e,getConfig().isReturnPreviousExceptionMessage());
         }
     }
 
@@ -112,7 +112,7 @@ public interface Minio {
         try {
             getMinioClient().mergeMultipartUpload(bucketName,objectName,uploadId);
         } catch (Exception e) {
-            throw new MinioException(e);
+            throw new MinioException(e,getConfig().isReturnPreviousExceptionMessage());
         }
     }
 
@@ -133,7 +133,7 @@ public interface Minio {
                     .build();
             getMinioClient().removeObject(args);
         }catch (Exception e){
-            throw new MinioException(e);
+            throw new MinioException(e,getConfig().isReturnPreviousExceptionMessage());
         }
     }
 
@@ -161,7 +161,7 @@ public interface Minio {
                 return null;
             }).filter(Objects::nonNull).collect(Collectors.toList());
         }catch (Exception e){
-            throw new MinioException(e);
+            throw new MinioException(e,getConfig().isReturnPreviousExceptionMessage());
         }
     }
 
@@ -186,7 +186,7 @@ public interface Minio {
                 log.error("Error delete object {} ; {}", error.objectName(),error.message());
             }
         }catch (Exception e){
-            throw new MinioException(e);
+            throw new MinioException(e,getConfig().isReturnPreviousExceptionMessage());
         }
     }
 
@@ -209,7 +209,7 @@ public interface Minio {
                     .build();
             return getMinioClient().getObject(args);
         }catch (Exception e){
-            throw new MinioException(e);
+            throw new MinioException(e,getConfig().isReturnPreviousExceptionMessage());
         }
     }
 
@@ -236,7 +236,7 @@ public interface Minio {
                     .build();
             getMinioClient().makeBucket(args);
         }catch (Exception e){
-            throw new MinioException(e);
+            throw new MinioException(e,getConfig().isReturnPreviousExceptionMessage());
         }
     }
 
@@ -247,7 +247,7 @@ public interface Minio {
                 return buckets.stream().map(b -> new BucketItem(b.name(),b.creationDate())).collect(Collectors.toList());
             }
         }catch (Exception e){
-            throw new MinioException(e);
+            throw new MinioException(e,getConfig().isReturnPreviousExceptionMessage());
         }
         return Collections.emptyList();
     }
@@ -264,7 +264,7 @@ public interface Minio {
                     .build();
             getMinioClient().removeBucket(args);
         }catch (Exception e){
-            throw new MinioException(e);
+            throw new MinioException(e,getConfig().isReturnPreviousExceptionMessage());
         }
     }
 
