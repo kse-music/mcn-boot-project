@@ -39,30 +39,31 @@ import org.springframework.util.StringUtils;
 @ConditionalOnMissingBean(MapperFactoryBean.class)
 public class MybatisQuickAutoConfiguration {
 
-    private static final String PREFIX = "multiply.datasource.";
+    private static final String MULTIPLY_DATASOURCE_CONFIG_KEY = "multiply.datasource.name";
 
     @Configuration(proxyBeanMethods = false)
     private static class MapperScannerBeanFactoryPostProcessor implements BeanDefinitionRegistryPostProcessor, EnvironmentAware, ResourceLoaderAware,Ordered {
-        private ResourceLoader resourceLoader;
 
+        private ResourceLoader resourceLoader;
         private Environment environment;
 
         @Override
         public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
-            String[] dbs = environment.getProperty(PREFIX + "name", String[].class);
+            String[] dbs = environment.getProperty(MULTIPLY_DATASOURCE_CONFIG_KEY, String[].class);
+            String basePackage = environment.getProperty(McnConstant.APP_BASE_PACKAGE);
+
             if(dbs == null || dbs.length == 0){
-                configDefaultScanPackage(registry);
+                configDefaultScanPackage(basePackage,registry);
             }else {
-                configMultipleDataSource(dbs,registry);
+                configMultipleDataSource(basePackage,dbs,registry);
             }
         }
 
-        private void configDefaultScanPackage(BeanDefinitionRegistry registry){
+        private void configDefaultScanPackage(String basePackage,BeanDefinitionRegistry registry){
            try{
                BeanDefinition beanDefinition = registry.getBeanDefinition(MapperScannerConfigurer.class.getName());
                beanDefinition.getPropertyValues().removePropertyValue("annotationClass");
-               String basePkg = environment.getProperty(McnConstant.APP_BASE_PACKAGE);
-               String toScanPkg = basePkg + "," + basePkg + ".dao";
+               String toScanPkg = basePackage + ".dao";
                String pkg = environment.getProperty("mapper.scan.additional-package", "");
                if(StringUtils.hasText(pkg)){
                    toScanPkg += "," + pkg;
@@ -73,12 +74,9 @@ public class MybatisQuickAutoConfiguration {
            }
        }
 
-        private void configMultipleDataSource(String[] dbs,BeanDefinitionRegistry registry){
-            String basePackage = environment.getProperty(McnConstant.APP_BASE_PACKAGE);
-            String daoBasePackage = basePackage + ".dao.";
-
-            for (String db : dbs) {
-                String sqlSessionFactoryName = db + "SqlSessionFactory";
+        private void configMultipleDataSource(String basePackage,String[] dbs,BeanDefinitionRegistry registry){
+            for (String dsName : dbs) {
+                String sqlSessionFactoryName = dsName + "SqlSessionFactory";
 
                 ClassPathMapperScanner scanner = new ClassPathMapperScanner(registry);
                 if (resourceLoader != null) {
@@ -86,9 +84,9 @@ public class MybatisQuickAutoConfiguration {
                 }
                 scanner.setSqlSessionFactoryBeanName(sqlSessionFactoryName);
                 scanner.registerFilters();
-                scanner.doScan(daoBasePackage + db);
+                scanner.doScan(basePackage + ".dao." + dsName);
 
-                String dataSourceName = db + "DataSource";
+                String dataSourceName = dsName + "DataSource";
                 registry.registerBeanDefinition(dataSourceName,BeanDefinitionBuilder.genericBeanDefinition(HikariDataSource.class)
                         .setRole(BeanDefinition.ROLE_INFRASTRUCTURE).setSynthetic(true).getBeanDefinition());
 
@@ -102,7 +100,7 @@ public class MybatisQuickAutoConfiguration {
                             BeanDefinitionBuilder.rootBeanDefinition(SqlSessionFactoryBean.class).setRole(BeanDefinition.ROLE_INFRASTRUCTURE)
                                     .addPropertyValue("vfs", SpringBootVFS.class)
                                     .addPropertyValue("dataSource", new RuntimeBeanReference(dataSourceName))
-                                    .addPropertyValue("mapperLocations", pathResolver.getResources("classpath*:mapper/"+db+"/*.xml"))
+                                    .addPropertyValue("mapperLocations", pathResolver.getResources("classpath*:mapper/"+dsName+"/*.xml"))
                                     .addPropertyValue("typeAliasesPackage", basePackage + ".bean")
                                     .addPropertyValue("typeHandlersPackage", basePackage + ".dao.handler")
                                     .addPropertyValue("configuration", conf)
