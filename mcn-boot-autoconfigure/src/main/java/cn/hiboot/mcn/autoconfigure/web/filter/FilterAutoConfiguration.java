@@ -9,6 +9,7 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
@@ -30,8 +31,8 @@ public class FilterAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnClass(name = "org.springframework.web.cors.CorsConfigurationSource")
-    @ConditionalOnProperty(prefix = "filter", name = {"cross"}, havingValue = "true")
+    @ConditionalOnClass(CorsConfigurationSource.class)
+    @ConditionalOnProperty(prefix = "filter", name = "cross", havingValue = "true")
     public CorsFilter corsFilter() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration corsConfiguration = new CorsConfiguration();
@@ -51,7 +52,7 @@ public class FilterAutoConfiguration {
 
     @Bean
     @ConditionalOnClass(name = "org.jsoup.Jsoup")
-    @ConditionalOnProperty(prefix = "mcn",name = "xss.enable",havingValue = "true")
+    @ConditionalOnProperty(prefix = "mcn.xss",name = "enable",havingValue = "true")
     public FilterRegistrationBean<XssFilter> xssFilter() {
         FilterRegistrationBean<XssFilter> filterRegistrationBean = new FilterRegistrationBean<>(new XssFilter(filterProperties));
         filterRegistrationBean.setOrder(2);
