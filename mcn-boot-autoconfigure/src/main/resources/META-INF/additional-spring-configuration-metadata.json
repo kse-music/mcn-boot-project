@@ -31,6 +31,19 @@
       "defaultValue": "error"
     },
     {
+      "name": "mapper.scan.additional-package",
+      "type": "java.lang.String",
+      "sourceType": "cn.hiboot.mcn.autoconfigure.mybatis.SingleDataSourceBeanFactoryPostProcessor",
+      "description": "额外需要扫描的包.",
+      "defaultValue": ""
+    },
+    {
+      "name": "multiply.datasource.name",
+      "type": "java.lang.String",
+      "sourceType": "cn.hiboot.mcn.autoconfigure.mybatis.MultipleDataSourceBeanFactoryPostProcessor",
+      "description": "多数据源名称."
+    },
+    {
       "name": "filter.cross",
       "type": "java.lang.Boolean",
       "sourceType": "cn.hiboot.mcn.autoconfigure.web.filter.FilterAutoConfiguration",
