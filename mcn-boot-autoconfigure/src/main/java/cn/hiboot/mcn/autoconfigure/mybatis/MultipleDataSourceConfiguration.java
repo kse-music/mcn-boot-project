@@ -10,12 +10,13 @@ import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.ResourceLoaderAware;
+import org.springframework.context.annotation.Conditional;
+import org.springframework.context.annotation.FullyQualifiedAnnotationBeanNameGenerator;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
@@ -30,7 +31,7 @@ import org.springframework.core.type.AnnotationMetadata;
  * @since 2022/1/2 22:21
  */
 @ConditionalOnClass(HikariDataSource.class)
-@ConditionalOnProperty(MybatisQuickAutoConfiguration.MULTIPLY_DATASOURCE_CONFIG_KEY)
+@Conditional(MultipleDataSourceCondition.class)
 public class MultipleDataSourceConfiguration implements ImportBeanDefinitionRegistrar, EnvironmentAware, ResourceLoaderAware {
 
     private ResourceLoader resourceLoader;
@@ -38,10 +39,7 @@ public class MultipleDataSourceConfiguration implements ImportBeanDefinitionRegi
 
     @Override
     public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry){
-        String[] dbs = environment.getProperty(MybatisQuickAutoConfiguration.MULTIPLY_DATASOURCE_CONFIG_KEY, String[].class);
-        if(dbs == null || dbs.length == 0 || dbs.length == 1){//只支持一个以上的数据源
-            return;
-        }
+        String[] dbs = environment.getProperty(MybatisQuickAutoConfiguration.MULTIPLY_DATASOURCE_CONFIG_KEY, String[].class,new String[0]);
         String basePackage = environment.getProperty(McnConstant.APP_BASE_PACKAGE);
         for (String dsName : dbs) {
             String sqlSessionFactoryName = dsName + "SqlSessionFactory";
@@ -77,6 +75,7 @@ public class MultipleDataSourceConfiguration implements ImportBeanDefinitionRegi
         if (resourceLoader != null) {
             scanner.setResourceLoader(resourceLoader);
         }
+        scanner.setBeanNameGenerator(new FullyQualifiedAnnotationBeanNameGenerator());
         scanner.setSqlSessionFactoryBeanName(sqlSessionFactoryName);
         scanner.registerFilters();
         scanner.doScan(pkg);
