@@ -2,13 +2,12 @@ package cn.hiboot.mcn.autoconfigure.web.filter.xss;
 
 import cn.hiboot.mcn.autoconfigure.web.filter.FilterProperties;
 import cn.hiboot.mcn.core.util.McnUtils;
+import org.springframework.util.AntPathMatcher;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.List;
 
 /**
  * XssFilter
@@ -18,18 +17,25 @@ import java.util.regex.Pattern;
  */
 public class XssFilter implements Filter {
 
+    private final AntPathMatcher antPathMatcher = new AntPathMatcher();
     private final FilterProperties filterProperties;
+    private final List<String> excludes;
 
     public XssFilter(FilterProperties filterProperties) {
         this.filterProperties = filterProperties;
+        List<String> excludes = filterProperties.getExcludes();
+        if (McnUtils.isNullOrEmpty(excludes)) {
+            excludes = FilterProperties.DEFAULT_EXCLUDE_URL;
+        }else {
+            excludes.addAll(FilterProperties.DEFAULT_EXCLUDE_URL);
+        }
+        this.excludes = excludes;
     }
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest req = (HttpServletRequest) request;
-        HttpServletResponse resp = (HttpServletResponse) response;
-
-        if (handleExcludeURL(req, resp)) {
+        if (isExcludeURL(req)) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -38,15 +44,10 @@ public class XssFilter implements Filter {
         filterChain.doFilter(xssRequest, response);
     }
 
-    private boolean handleExcludeURL(HttpServletRequest request, HttpServletResponse response) {
-        if (McnUtils.isNullOrEmpty(filterProperties.getExcludes())) {
-            return false;
-        }
+    private boolean isExcludeURL(HttpServletRequest request) {
         String url = request.getServletPath();
-        for (String pattern : filterProperties.getExcludes()) {
-            Pattern p = Pattern.compile("^" + pattern);
-            Matcher m = p.matcher(url);
-            if (m.find()) {
+        for (String pattern : excludes) {
+            if (antPathMatcher.match(pattern,url)) {
                 return true;
             }
         }

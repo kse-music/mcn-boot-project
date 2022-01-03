@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletRequestWrapper;
  * @author DingHao
  * @since 2019/1/9 11:02
  */
-public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
+public class  XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
 
     private final boolean isIncludeRichText;
 
@@ -31,8 +31,7 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
      */
     @Override
     public String getParameter(String name) {
-        boolean flag = "content".equals(name) || name.endsWith("WithHtml");
-        if (flag && !isIncludeRichText) {
+        if(("content".equals(name) || name.endsWith("WithHtml")) && !isIncludeRichText){
             return super.getParameter(name);
         }
         name = JsoupUtil.clean(name);

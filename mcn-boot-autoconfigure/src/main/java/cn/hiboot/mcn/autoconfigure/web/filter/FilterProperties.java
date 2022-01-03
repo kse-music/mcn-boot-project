@@ -2,7 +2,6 @@ package cn.hiboot.mcn.autoconfigure.web.filter;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -12,13 +11,15 @@ import java.util.List;
  * @author DingHao
  * @since 2019/1/9 11:34
  */
-@ConfigurationProperties("mcn.filter")
+@ConfigurationProperties("mcn.xss.filter")
 public class FilterProperties {
+
+    public static final List<String> DEFAULT_EXCLUDE_URL = Arrays.asList("/favicon.ico","/img/*","/js/*","/css/*");
 
     /**
      * 排除的url路径
      */
-    private List<String> excludes = new ArrayList<>(Arrays.asList("/favicon.ico","/img/*","/js/*","/css/*"));
+    private List<String> excludes;
     /**
      * 是否过滤富文本内容
      */
