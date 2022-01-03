@@ -5,13 +5,10 @@ import com.zaxxer.hikari.HikariDataSource;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.boot.autoconfigure.SpringBootVFS;
 import org.mybatis.spring.mapper.ClassPathMapperScanner;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
@@ -19,10 +16,12 @@ import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.ResourceLoaderAware;
+import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.core.type.AnnotationMetadata;
 
 /**
  * MultipleDataSourceBeanFactoryPostProcessor
@@ -32,15 +31,15 @@ import org.springframework.core.io.support.ResourcePatternResolver;
  */
 @ConditionalOnClass(HikariDataSource.class)
 @ConditionalOnProperty(MybatisQuickAutoConfiguration.MULTIPLY_DATASOURCE_CONFIG_KEY)
-public class MultipleDataSourceBeanFactoryPostProcessor implements BeanDefinitionRegistryPostProcessor, EnvironmentAware, ResourceLoaderAware {
+public class MultipleDataSourceConfiguration implements ImportBeanDefinitionRegistrar, EnvironmentAware, ResourceLoaderAware {
 
     private ResourceLoader resourceLoader;
     private Environment environment;
 
     @Override
-    public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
+    public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry){
         String[] dbs = environment.getProperty(MybatisQuickAutoConfiguration.MULTIPLY_DATASOURCE_CONFIG_KEY, String[].class);
-        if(dbs == null || dbs.length == 0){
+        if(dbs == null || dbs.length == 0 || dbs.length == 1){//只支持一个以上的数据源
             return;
         }
         String basePackage = environment.getProperty(McnConstant.APP_BASE_PACKAGE);
@@ -62,7 +61,7 @@ public class MultipleDataSourceBeanFactoryPostProcessor implements BeanDefinitio
                         BeanDefinitionBuilder.rootBeanDefinition(SqlSessionFactoryBean.class).setRole(BeanDefinition.ROLE_INFRASTRUCTURE)
                                 .addPropertyValue("vfs", SpringBootVFS.class)
                                 .addPropertyValue("dataSource", new RuntimeBeanReference(dataSourceName))
-                                .addPropertyValue("mapperLocations", pathResolver.getResources("classpath*:mapper/"+dsName+"/*.xml"))
+                                .addPropertyValue("mapperLocations", pathResolver.getResources("classpath:mapper/"+dsName+"/*.xml"))
                                 .addPropertyValue("typeAliasesPackage", basePackage + ".bean")
                                 .addPropertyValue("typeHandlersPackage", basePackage + ".dao.handler")
                                 .addPropertyValue("configuration", conf)
@@ -86,11 +85,6 @@ public class MultipleDataSourceBeanFactoryPostProcessor implements BeanDefinitio
     private HikariDataSource createDataSource(String dsName) {
         DataSourceProperties dataSourceProperties = Binder.get(environment).bind("spring.datasource." + dsName, Bindable.of(DataSourceProperties.class)).get();
         return dataSourceProperties.initializeDataSourceBuilder().type(HikariDataSource.class).build();
-    }
-
-    @Override
-    public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
-
     }
 
     @Override
