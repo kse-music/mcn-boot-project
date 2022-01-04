@@ -35,14 +35,12 @@
         <mybatis-spring-boot.version>2.2.0</mybatis-spring-boot.version>
         <guava.version>31.0.1-jre</guava.version>
         <commons-io.version>2.11.0</commons-io.version>
-        <fastjson.version>1.2.78</fastjson.version>
+        <fastjson.version>1.2.79</fastjson.version>
         <boot-admin.version>2.5.5</boot-admin.version>
         <jsoup.version>1.14.3</jsoup.version>
         <springfox-swagger.version>2.9.2</springfox-swagger.version>
-        <swagger.version>1.6.1</swagger.version>
         <swagger-bootstrap-ui.version>1.9.6</swagger-bootstrap-ui.version>
         <knife4j.version>3.0.3</knife4j.version>
-        <hutool.version>5.7.14</hutool.version>
         <mapstruct.version>1.4.2.Final</mapstruct.version>
         <spring-cloud-alibaba.version>2021.1</spring-cloud-alibaba.version>
         <minio.version>8.3.3</minio.version>
@@ -128,12 +126,6 @@
             </dependency>
 
             <dependency>
-                <groupId>io.swagger</groupId>
-                <artifactId>swagger-jersey2-jaxrs</artifactId>
-                <version>${swagger.version}</version>
-            </dependency>
-
-            <dependency>
                 <groupId>com.alibaba</groupId>
                 <artifactId>fastjson</artifactId>
                 <version>${fastjson.version}</version>
@@ -155,16 +147,7 @@
                 <artifactId>springfox-swagger-ui</artifactId>
                 <version>${springfox-swagger.version}</version>
             </dependency>
-            <dependency>
-                <groupId>io.swagger</groupId>
-                <artifactId>swagger-annotations</artifactId>
-                <version>${swagger.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.swagger</groupId>
-                <artifactId>swagger-models</artifactId>
-                <version>${swagger.version}</version>
-            </dependency>
+
             <dependency>
                 <groupId>com.github.xiaoymin</groupId>
                 <artifactId>swagger-bootstrap-ui</artifactId>
@@ -174,12 +157,6 @@
                 <groupId>com.github.xiaoymin</groupId>
                 <artifactId>knife4j-spring-ui</artifactId>
                 <version>${knife4j.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>cn.hutool</groupId>
-                <artifactId>hutool-core</artifactId>
-                <version>${hutool.version}</version>
             </dependency>
 
             <dependency>
