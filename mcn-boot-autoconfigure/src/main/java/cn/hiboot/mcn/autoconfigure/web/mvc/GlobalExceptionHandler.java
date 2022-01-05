@@ -1,9 +1,9 @@
 package cn.hiboot.mcn.autoconfigure.web.mvc;
 
+import cn.hiboot.mcn.autoconfigure.web.exception.ExceptionMessageCustomizer;
 import cn.hiboot.mcn.autoconfigure.web.exception.handler.AbstractExceptionHandler;
 import cn.hiboot.mcn.core.exception.BaseException;
 import cn.hiboot.mcn.core.exception.ExceptionKeys;
-import cn.hiboot.mcn.core.exception.ExceptionMessageCustomizer;
 import cn.hiboot.mcn.core.model.ValidationErrorBean;
 import cn.hiboot.mcn.core.model.result.RestResp;
 import org.springframework.beans.factory.ObjectProvider;

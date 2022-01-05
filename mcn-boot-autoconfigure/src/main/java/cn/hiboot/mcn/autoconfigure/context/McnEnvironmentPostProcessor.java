@@ -1,6 +1,6 @@
 package cn.hiboot.mcn.autoconfigure.context;
 
-import cn.hiboot.mcn.autoconfigure.web.config.ConfigProperties;
+import cn.hiboot.mcn.autoconfigure.config.ConfigProperties;
 import cn.hiboot.mcn.core.config.McnConstant;
 import cn.hiboot.mcn.core.util.McnUtils;
 import org.springframework.boot.SpringApplication;
@@ -10,7 +10,6 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePropertySource;
 import org.springframework.util.ClassUtils;
@@ -35,7 +34,7 @@ public class McnEnvironmentPostProcessor implements EnvironmentPostProcessor, Or
 
     private static final String BOOTSTRAP_EAGER_LOAD = "mcn.bootstrap.eagerLoad.enable";
     private static final String MCN_SOURCE_NAME = "mcn-global-unique";
-    private static final String MCN_DEFAULT_PROPERTY_SOURCE_NAME = "mcn-default";
+    private static final String MCN_DEFAULT_PROPERTY_SOURCE_NAME = McnConstant.DEFAULT_PROPERTY_SOURCE_NAME;
     private static final String BOOTSTRAP_PROPERTY_SOURCE_NAME = "bootstrap";
 
     @Override
@@ -103,14 +102,8 @@ public class McnEnvironmentPostProcessor implements EnvironmentPostProcessor, Or
         mapProp.put("mcn.version", "v" + McnUtils.getVersion(this.getClass()));
         addLast(propertySources, new MapPropertySource("mcn-map", mapProp));
 
-        addLast(propertySources, loadResourcePropertySource(MCN_DEFAULT_PROPERTY_SOURCE_NAME, buildClassPathResource("mcn-default.properties")));
+        addLast(propertySources, loadResourcePropertySource(MCN_DEFAULT_PROPERTY_SOURCE_NAME, ConfigProperties.mcnDefault()));
 
-        addLast(environment.getPropertySources(), loadResourcePropertySource("mcn-log-file", buildClassPathResource("log.properties")));
-
-    }
-
-    private ClassPathResource buildClassPathResource(String file) {
-        return new ClassPathResource(file, ConfigProperties.class);
     }
 
     private ResourcePropertySource loadResourcePropertySource(String name, Object resource) {

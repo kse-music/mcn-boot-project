@@ -6,7 +6,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.boot.autoconfigure.mongo.MongoProperties;
-import org.springframework.core.env.Environment;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.util.StringUtils;
 
 import java.util.Arrays;
@@ -21,9 +21,9 @@ import java.util.List;
  */
 public class McnBeanPostProcessor implements BeanPostProcessor{
 
-    private final Environment environment;
+    private final ConfigurableEnvironment environment;
 
-    public McnBeanPostProcessor(Environment environment) {
+    public McnBeanPostProcessor(ConfigurableEnvironment environment) {
         this.environment = environment;
     }
 

@@ -9,4 +9,5 @@ package cn.hiboot.mcn.core.config;
  */
 public interface McnConstant {
     String APP_BASE_PACKAGE = "app.base-package";
+    String DEFAULT_PROPERTY_SOURCE_NAME = "mcn-default";
 }

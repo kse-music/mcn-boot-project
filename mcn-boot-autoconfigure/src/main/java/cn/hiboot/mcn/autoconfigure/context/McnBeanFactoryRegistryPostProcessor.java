@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostP
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
-import org.springframework.core.env.Environment;
+import org.springframework.core.env.ConfigurableEnvironment;
 
 import java.util.Collections;
 
@@ -20,9 +20,9 @@ import java.util.Collections;
  */
 public class McnBeanFactoryRegistryPostProcessor implements BeanDefinitionRegistryPostProcessor {
 
-    private final Environment environment;
+    private final ConfigurableEnvironment environment;
 
-    public McnBeanFactoryRegistryPostProcessor(Environment environment) {
+    public McnBeanFactoryRegistryPostProcessor(ConfigurableEnvironment environment) {
         this.environment = environment;
     }
 

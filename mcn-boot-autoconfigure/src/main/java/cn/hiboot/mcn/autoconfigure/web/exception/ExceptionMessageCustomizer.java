@@ -1,4 +1,4 @@
-package cn.hiboot.mcn.core.exception;
+package cn.hiboot.mcn.autoconfigure.web.exception;
 
 /**
  * 自定义异常消息提示
