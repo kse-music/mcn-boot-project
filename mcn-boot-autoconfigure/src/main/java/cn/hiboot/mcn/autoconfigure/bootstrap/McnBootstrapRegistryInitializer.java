@@ -13,10 +13,8 @@ public class McnBootstrapRegistryInitializer implements BootstrapRegistryInitial
 
     @Override
     public void initialize(BootstrapRegistry registry) {
-        registry.registerIfAbsent(DuplicateLogFile.class, context -> new DuplicateLogFile());
         registry.addCloseListener(event -> {
             DuplicateLogFile duplicateLogFile = event.getBootstrapContext().get(DuplicateLogFile.class);
-            duplicateLogFile.setFinalLogFile(event.getApplicationContext().getEnvironment());
             duplicateLogFile.check();
         });
     }

@@ -4,6 +4,8 @@ import cn.hiboot.mcn.autoconfigure.bootstrap.DuplicateLogFile;
 import cn.hiboot.mcn.autoconfigure.web.util.SpringBeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.BootstrapRegistry;
+import org.springframework.boot.ConfigurableBootstrapContext;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
@@ -38,7 +40,7 @@ public class McnApplicationListener implements GenericApplicationListener {
             ApplicationEnvironmentPreparedEvent event = (ApplicationEnvironmentPreparedEvent) applicationEvent;
             ConfigurableEnvironment environment = event.getEnvironment();
             logPropertySource(environment);
-            event.getBootstrapContext().get(DuplicateLogFile.class).setOriginalLogFile(environment);
+            checkLogFileName(environment,event.getBootstrapContext());
         }else if(applicationEvent instanceof ApplicationStartedEvent){
             SpringBeanUtils.setApplicationContext(((ApplicationStartedEvent) applicationEvent).getApplicationContext());
         }
@@ -57,6 +59,12 @@ public class McnApplicationListener implements GenericApplicationListener {
                     log.info("{} = {}",propertyName,propertySource.getProperty(propertyName));
                 }
             }
+        }
+    }
+
+    private void checkLogFileName(ConfigurableEnvironment environment, ConfigurableBootstrapContext context){
+        if(environment.getProperty("delete.default.log-file.enable", Boolean.class, true)){
+            context.registerIfAbsent(DuplicateLogFile.class, BootstrapRegistry.InstanceSupplier.of(new DuplicateLogFile(environment)));
         }
     }
 

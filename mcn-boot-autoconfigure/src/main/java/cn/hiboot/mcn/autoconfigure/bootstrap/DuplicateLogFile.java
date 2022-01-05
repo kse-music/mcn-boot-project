@@ -15,12 +15,17 @@ import java.util.Objects;
  */
 public class DuplicateLogFile{
 
-    private String originalLogFile;
-    private String finalLogFile;
-    private boolean check;
+    private final String originalLogFile;
+    private final ConfigurableEnvironment environment;
+
+    public DuplicateLogFile(ConfigurableEnvironment environment) {
+        this.environment = environment;
+        this.originalLogFile = getLogFile(environment);
+    }
 
     public void check(){
-        if(Objects.nonNull(finalLogFile) && !finalLogFile.equals(originalLogFile) && check){
+        String finalLogFile = getLogFile(environment);
+        if(Objects.nonNull(finalLogFile) && !finalLogFile.equals(originalLogFile)){
             try {
                 Files.delete(Paths.get(originalLogFile));
             } catch (IOException e) {
@@ -29,16 +34,8 @@ public class DuplicateLogFile{
         }
     }
 
-    public void setOriginalLogFile(ConfigurableEnvironment environment ) {
-        this.originalLogFile = getLogFile(environment);
-    }
-
     private String getLogFile(ConfigurableEnvironment environment ) {
         return environment.getProperty("logging.file.name");
     }
 
-    public void setFinalLogFile(ConfigurableEnvironment environment ) {
-        this.finalLogFile = getLogFile(environment);
-        this.check = environment.getProperty("delete.default.log-file.enable", Boolean.class, true);
-    }
 }
