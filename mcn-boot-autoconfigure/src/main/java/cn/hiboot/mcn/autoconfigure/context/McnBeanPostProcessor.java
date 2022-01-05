@@ -31,7 +31,7 @@ public class McnBeanPostProcessor implements BeanPostProcessor{
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
         if(bean instanceof ObjectMapper){
             JacksonUtils.setObjectMapper((ObjectMapper) bean);
-        }else if(bean instanceof MongoProperties && StringUtils.hasText(environment.getProperty("mongo.addrs"))){//使用了自由配置变量名
+        }else if(bean instanceof MongoProperties && StringUtils.hasText(environment.getProperty("mongo.addrs"))){//使用了自定义配置变量
             String mongoAddress = environment.getProperty("mongo.addrs");
             MongoProperties mongoProperties = (MongoProperties) bean;
             String username = mongoProperties.getUsername();
@@ -41,7 +41,7 @@ public class McnBeanPostProcessor implements BeanPostProcessor{
                 uri = replace(username)+":" + replace(password) + "@" + mongoAddress;
             }
             mongoProperties.setUri("mongodb://"+uri);
-        }else if(bean instanceof RedisProperties && StringUtils.hasText(environment.getProperty("redis.addrs"))){//使用了自由配置变量名
+        }else if(bean instanceof RedisProperties && StringUtils.hasText(environment.getProperty("redis.addrs"))){//使用了自定义配置变量
             RedisProperties redisProperties = (RedisProperties) bean;
             String master = environment.getProperty("redis.sentinel");
             List<String> hosts = Arrays.asList(StringUtils.commaDelimitedListToStringArray(environment.getProperty("redis.addrs")));
