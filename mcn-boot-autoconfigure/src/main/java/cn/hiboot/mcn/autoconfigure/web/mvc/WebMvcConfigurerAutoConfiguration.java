@@ -4,7 +4,6 @@ import cn.hiboot.mcn.core.model.result.RestResp;
 import cn.hiboot.mcn.core.util.JacksonUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.Conventions;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -37,33 +36,32 @@ public class WebMvcConfigurerAutoConfiguration {
 
         @Override
         public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-            resolvers.add(new MethodArgumentResolver());
+            resolvers.add(new StringObjectMethodArgumentResolver());
         }
 
     }
 
-    private static class MethodArgumentResolver implements HandlerMethodArgumentResolver{
+    private static class StringObjectMethodArgumentResolver implements HandlerMethodArgumentResolver{
 
         @Override
         public boolean supportsParameter(MethodParameter parameter) {
-            return parameter.hasParameterAnnotation(StrToObj.class);
+            return parameter.hasParameterAnnotation(StrToObj.class) && parameter.getParameterType() != String.class;
         }
 
         @Override
         public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
-            String name = Conventions.getVariableNameForParameter(parameter);
             HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
             if(request == null){
                 return null;
             }
-            return JacksonUtils.fromJson(request.getParameter(name),parameter.getParameterType());
+            return JacksonUtils.fromJson(request.getParameter(parameter.getParameterName()),parameter.getParameterType());
         }
     }
 
     @SuppressWarnings("all")
     @ControllerAdvice
     @Configuration(proxyBeanMethods = false)
-    private static class RestRespResponseBodyAdvice implements ResponseBodyAdvice<RestResp> {
+    private static class RestRespDataResponseBodyAdvice implements ResponseBodyAdvice<RestResp> {
 
         @Override
         public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {

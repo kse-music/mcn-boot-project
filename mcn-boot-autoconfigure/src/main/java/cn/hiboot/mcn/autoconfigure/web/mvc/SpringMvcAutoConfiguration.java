@@ -10,8 +10,6 @@ import cn.hiboot.mcn.core.exception.ExceptionKeys;
 import cn.hiboot.mcn.core.model.ValidationErrorBean;
 import cn.hiboot.mcn.core.model.result.RestResp;
 import cn.hiboot.mcn.swagger.MvcSwagger2;
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.*;
@@ -46,6 +44,7 @@ import javax.validation.ConstraintViolationException;
 import javax.validation.ValidationException;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -167,7 +166,7 @@ public class SpringMvcAutoConfiguration {
 
         private final Swagger2Properties swagger2Properties;
         private final ObjectProvider<RequestHandlerPredicate> requestHandlerPredicates;
-        private final Predicate<RequestHandler> DEFAULT_REQUEST_HANDLER = withClassAnnotation(RestController.class);
+        private final java.util.function.Predicate<RequestHandler> DEFAULT_REQUEST_HANDLER = withClassAnnotation(RestController.class);
 
         public Swagger(Swagger2Properties swagger2Properties, ObjectProvider<RequestHandlerPredicate> requestHandlerPredicates) {
             this.swagger2Properties = swagger2Properties;
@@ -180,9 +179,7 @@ public class SpringMvcAutoConfiguration {
 
         @Bean
         public RequestHandlerPredicate requestHandlerPredicate(){
-            return () -> Predicates.and(
-                    Predicates.not(withClassAnnotation(IgnoreApi.class)),
-                    Predicates.not(RequestHandlerSelectors.withMethodAnnotation(IgnoreApi.class)));
+            return () -> (withClassAnnotation(IgnoreApi.class).negate()).and(RequestHandlerSelectors.withMethodAnnotation(IgnoreApi.class).negate());
         }
 
         @Bean
