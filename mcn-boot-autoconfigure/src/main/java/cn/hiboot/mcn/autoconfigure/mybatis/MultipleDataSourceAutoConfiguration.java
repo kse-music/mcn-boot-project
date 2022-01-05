@@ -2,6 +2,7 @@ package cn.hiboot.mcn.autoconfigure.mybatis;
 
 import cn.hiboot.mcn.core.config.McnConstant;
 import com.zaxxer.hikari.HikariDataSource;
+import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.mybatis.spring.boot.autoconfigure.SpringBootVFS;
@@ -36,7 +37,7 @@ import java.io.IOException;
  * @since 2022/1/2 22:21
  */
 @Configuration(proxyBeanMethods = false)
-@ConditionalOnClass(HikariDataSource.class)
+@ConditionalOnClass({SqlSessionFactory.class, SqlSessionFactoryBean.class,HikariDataSource.class})
 @Conditional(MultipleDataSourceAutoConfiguration.MultipleDataSourceCondition.class)
 public class MultipleDataSourceAutoConfiguration implements ImportBeanDefinitionRegistrar, EnvironmentAware, ResourceLoaderAware {
 
