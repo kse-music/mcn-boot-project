@@ -1,5 +1,6 @@
 package cn.hiboot.mcn.autoconfigure.bootstrap;
 
+import org.springframework.boot.BootstrapContext;
 import org.springframework.boot.BootstrapRegistry;
 import org.springframework.boot.BootstrapRegistryInitializer;
 
@@ -14,9 +15,9 @@ public class McnBootstrapRegistryInitializer implements BootstrapRegistryInitial
     @Override
     public void initialize(BootstrapRegistry registry) {
         registry.addCloseListener(event -> {
-            DuplicateLogFile duplicateLogFile = event.getBootstrapContext().get(DuplicateLogFile.class);
-            if(duplicateLogFile != null){
-                duplicateLogFile.check();
+            BootstrapContext bootstrapContext = event.getBootstrapContext();
+            if(bootstrapContext.isRegistered(DuplicateLogFile.class)){
+               bootstrapContext.get(DuplicateLogFile.class).check();
             }
         });
     }
