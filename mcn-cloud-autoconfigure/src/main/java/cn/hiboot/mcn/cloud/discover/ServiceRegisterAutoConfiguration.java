@@ -1,11 +1,13 @@
 package cn.hiboot.mcn.cloud.discover;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnSingleCandidate;
 import org.springframework.cloud.client.serviceregistry.AbstractAutoServiceRegistration;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.core.Ordered;
 
 /**
  * ServiceRegisterAutoConfiguration
@@ -15,6 +17,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnSingleCandidate(AbstractAutoServiceRegistration.class)
+@AutoConfigureOrder(Ordered.LOWEST_PRECEDENCE)
 public class ServiceRegisterAutoConfiguration implements ApplicationListener<ContextRefreshedEvent> {
 
     @Autowired(required = false)
