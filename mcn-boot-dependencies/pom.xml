@@ -39,6 +39,7 @@
         <boot-admin.version>2.5.5</boot-admin.version>
         <jsoup.version>1.14.3</jsoup.version>
         <springfox-swagger.version>3.0.0</springfox-swagger.version>
+        <swagger.version>1.6.4</swagger.version>
         <swagger-bootstrap-ui.version>1.9.6</swagger-bootstrap-ui.version>
         <knife4j.version>3.0.3</knife4j.version>
         <mapstruct.version>1.4.2.Final</mapstruct.version>
@@ -147,7 +148,16 @@
                 <artifactId>springfox-swagger-ui</artifactId>
                 <version>${springfox-swagger.version}</version>
             </dependency>
-
+            <dependency>
+                <groupId>io.swagger</groupId>
+                <artifactId>swagger-annotations</artifactId>
+                <version>${swagger.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.swagger</groupId>
+                <artifactId>swagger-models</artifactId>
+                <version>${swagger.version}</version>
+            </dependency>
             <dependency>
                 <groupId>com.github.xiaoymin</groupId>
                 <artifactId>swagger-bootstrap-ui</artifactId>
