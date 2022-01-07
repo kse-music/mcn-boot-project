@@ -27,8 +27,6 @@ public @interface ConditionalOnPropertyValueNumber {
     @AliasFor("value")
     String name() default "";
 
-    int min() default 1;
-
     int max() default 10;
 
 }

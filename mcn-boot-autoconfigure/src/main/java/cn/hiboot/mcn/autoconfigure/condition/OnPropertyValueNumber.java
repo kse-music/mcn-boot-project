@@ -1,5 +1,6 @@
 package cn.hiboot.mcn.autoconfigure.condition;
 
+import cn.hiboot.mcn.core.util.McnUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionMessage;
 import org.springframework.boot.autoconfigure.condition.ConditionOutcome;
 import org.springframework.boot.autoconfigure.condition.SpringBootCondition;
@@ -7,6 +8,7 @@ import org.springframework.context.annotation.ConditionContext;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.env.PropertyResolver;
 import org.springframework.core.type.AnnotatedTypeMetadata;
+import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
@@ -69,7 +71,6 @@ class OnPropertyValueNumber extends SpringBootCondition {
 
         private final String prefix;
         private final String name;
-        private final int min;
         private final int max;
 
         Spec(AnnotationAttributes annotationAttributes) {
@@ -78,20 +79,20 @@ class OnPropertyValueNumber extends SpringBootCondition {
                 prefix = prefix + ".";
             }
             this.prefix = prefix;
-            this.min = annotationAttributes.getNumber("min");
             this.max = annotationAttributes.getNumber("max");
             this.name = annotationAttributes.getString("name").trim();
+            Assert.state(McnUtils.isNotNullAndEmpty(name),"The name or value attribute of @ConditionalOnPropertyValueNumber must be specified");
         }
 
         private ConditionOutcome check(PropertyResolver resolver) {
             String key = this.prefix + name;
             if (resolver.containsProperty(key)) {
                 String[] dbs = resolver.getProperty(key, String[].class);
-                if(dbs != null && dbs.length > min && dbs.length < max){
-                    return ConditionOutcome.match("match multiple datasource");
+                if(dbs != null && dbs.length > 1 && dbs.length < max){
+                    return ConditionOutcome.match("match " + dbs.length + " value");
                 }
             }
-            return ConditionOutcome.noMatch("no multiple datasource");
+            return ConditionOutcome.noMatch("no value number > 1");
         }
 
 
@@ -99,7 +100,7 @@ class OnPropertyValueNumber extends SpringBootCondition {
         public String toString() {
             return "(" +
                     this.prefix + this.name +
-                    " min = " + this.min + " max = " + this.max +
+                    ",max = " + this.max +
                     ")";
         }
 
