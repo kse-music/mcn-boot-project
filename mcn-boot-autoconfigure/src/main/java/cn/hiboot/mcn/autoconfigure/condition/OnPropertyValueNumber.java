@@ -68,12 +68,9 @@ class OnPropertyValueNumber extends SpringBootCondition {
     private static class Spec {
 
         private final String prefix;
-
         private final String name;
-
         private final int min;
         private final int max;
-
 
         Spec(AnnotationAttributes annotationAttributes) {
             String prefix = annotationAttributes.getString("prefix").trim();
@@ -102,7 +99,7 @@ class OnPropertyValueNumber extends SpringBootCondition {
         public String toString() {
             return "(" +
                     this.prefix + this.name +
-                    "min = " + this.min + "max = " + this.max +
+                    " min = " + this.min + " max = " + this.max +
                     ")";
         }
 
