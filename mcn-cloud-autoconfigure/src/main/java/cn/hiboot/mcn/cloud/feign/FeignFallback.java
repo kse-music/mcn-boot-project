@@ -3,7 +3,8 @@ package cn.hiboot.mcn.cloud.feign;
 import cn.hiboot.mcn.core.exception.BaseException;
 import cn.hiboot.mcn.core.model.result.RestResp;
 import feign.FeignException;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cglib.proxy.MethodInterceptor;
 import org.springframework.cglib.proxy.MethodProxy;
 
@@ -16,8 +17,9 @@ import java.util.Objects;
  * @author DingHao
  * @since 2021/7/4 10:18
  */
-@Slf4j
 public class FeignFallback<T> implements MethodInterceptor {
+
+    private static final Logger log = LoggerFactory.getLogger(FeignFallback.class);
 
     private final Class<T> targetType;
     private final String targetName;

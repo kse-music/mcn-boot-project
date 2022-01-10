@@ -49,7 +49,7 @@ public class FeignCircuitBreakerAutoConfiguration {
 
     @Bean
     public Request.Options options(){
-        return new Request.Options(properties.getConnectTimeout(), TimeUnit.SECONDS, properties.getReadTimeout(), TimeUnit.SECONDS, properties.isFollowRedirects());
+        return new Request.Options(properties.getConnectTimeout().getSeconds(), TimeUnit.SECONDS, properties.getReadTimeout().getSeconds(), TimeUnit.SECONDS, properties.isFollowRedirects());
     }
 
     @Configuration(proxyBeanMethods = false)

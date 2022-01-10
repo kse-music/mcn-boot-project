@@ -1,8 +1,6 @@
 package cn.hiboot.mcn.cloud.feign;
 
 import feign.Logger;
-import lombok.Getter;
-import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.time.Duration;
@@ -14,8 +12,6 @@ import java.time.Duration;
  * @since 2021/9/21 13:43
  */
 @ConfigurationProperties("mcn.feign")
-@Setter
-@Getter
 public class FeignCircuitBreakerProperties {
 
     /**
@@ -37,15 +33,60 @@ public class FeignCircuitBreakerProperties {
     /**
      * 连接超时时间 默认10秒
      */
-    private long connectTimeout = 10;
+    private Duration connectTimeout = Duration.ofSeconds(10);
 
     /**
-     * 都去超时时间 默认60秒
+     * 读取超时时间 默认60秒
      */
-    private long readTimeout = 60;
+    private Duration readTimeout = Duration.ofSeconds(60);
 
     private boolean followRedirects = true;
 
+    public Duration getTimeoutDuration() {
+        return timeoutDuration;
+    }
 
+    public void setTimeoutDuration(Duration timeoutDuration) {
+        this.timeoutDuration = timeoutDuration;
+    }
 
+    public boolean isCancelRunningFuture() {
+        return cancelRunningFuture;
+    }
+
+    public void setCancelRunningFuture(boolean cancelRunningFuture) {
+        this.cancelRunningFuture = cancelRunningFuture;
+    }
+
+    public Logger.Level getLevel() {
+        return level;
+    }
+
+    public void setLevel(Logger.Level level) {
+        this.level = level;
+    }
+
+    public Duration getConnectTimeout() {
+        return connectTimeout;
+    }
+
+    public void setConnectTimeout(Duration connectTimeout) {
+        this.connectTimeout = connectTimeout;
+    }
+
+    public Duration getReadTimeout() {
+        return readTimeout;
+    }
+
+    public void setReadTimeout(Duration readTimeout) {
+        this.readTimeout = readTimeout;
+    }
+
+    public boolean isFollowRedirects() {
+        return followRedirects;
+    }
+
+    public void setFollowRedirects(boolean followRedirects) {
+        this.followRedirects = followRedirects;
+    }
 }
