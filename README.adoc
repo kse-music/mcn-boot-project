@@ -206,11 +206,7 @@ swagger.enable=true
 
 * http://127.0.0.1:8080/doc.html[查看rest接口]
 
-
-
 === 注意事项
-
-
 
 ==== 日志打印
 
@@ -298,7 +294,7 @@ public class RestResp<T> {
 
 ==== 内置属性源
 
-系统内置五中属性源名称分别是：mcn-global-unique、mcn-default、mcn-map、mcn-log-file
+系统内置三种属性源名称分别是：mcn-global-unique、mcn-default、mcn-map
 
 * mcn-global-unique
 ....
@@ -307,17 +303,6 @@ public class RestResp<T> {
 注意：当启用了spring.profiles.active配置同时会加载文件mcn-{profile}.properties,当激活多个profile时且存在相同属性配置时后面的优先级比前面的高
 
 ....
-
-* mcn-default
-
-====
-该属性源里包含很多配置如:
-
-. server.tomcat.basedir=/tmp/tomcat/ #内嵌tomcat根路径
-. server.compression.enabled=true #启用tomcat数据压缩
-
-https://github.com/kse-music/mcn-boot-project/blob/master/mcn-boot-autoconfigure/src/main/java/cn/hiboot/mcn/autoconfigure/web/config/mcn-default.properties[查看所有配置]
-====
 
 * mcn-map
 ====
@@ -330,29 +315,16 @@ https://github.com/kse-music/mcn-boot-project/blob/master/mcn-boot-autoconfigure
 . mcn.version:mcn版本号读取manifest文件
 ====
 
-* mcn-log-file
-....
-该属性源里包含以下配置：
+* mcn-default
 
-#日志文件所在路径,默认为/work/logs/${spring.application.name:none}/error.log
-logging.file.name=${logging.file:${logging.baseDir:/work/logs}/${spring.application.name:none}/${mcn.log.file.name}.log}
-#日志控制台输出格式
-logging.pattern.console=%d{yyyy-MM-dd HH:mm:ss.SSS} %green(%-5level) %magenta(${PID:- }) --- [%15thread] %cyan(%-40logger{39}) %-5L : %msg%n
-#日志文件输出格式
-logging.pattern.file=%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level ${PID:- } --- [%15thread] %-40logger{39} %-5L : %msg%n
-#日志配置文件
-logging.config=classpath:META-INF/logback-spring.xml
-#日志默认输出级别为info
-logging.level.root=info
-#org开头的包日志级别设为info
-logging.level.org=warn
-#io开头的包日志级别设为info
-logging.level.io=warn
-#CachingOperationNameGenerator类的日志级别设为warn
-logging.level.springfox.documentation.spring.web.readers.operation.CachingOperationNameGenerator=warn
-#日志文件保留最长时间30天
-logging.logback.rollingpolicy.max-history=30
-....
+====
+该属性源里包含很多配置如:
+
+. server.tomcat.basedir=/tmp/tomcat/ #内嵌tomcat根路径
+. server.compression.enabled=true #启用tomcat数据压缩
+
+https://github.com/kse-music/mcn-boot-project/blob/master/mcn-boot-autoconfigure/src/main/java/cn/hiboot/mcn/autoconfigure/web/config/mcn-default.properties[查看所有配置]
+====
 
 [WARNING]
 ====
@@ -360,7 +332,7 @@ logging.logback.rollingpolicy.max-history=30
 
 . 当配置mcn.bootstrap.eagerLoad.enable=true可启用其它三个属性源也在引导上下文中加载
 
-. 当环境中存在mcn-default属性源，则mcn-default、mcn-map、mcn-log-file属性源都不会加载
+. 当环境中存在mcn-default属性源，则mcn-default、mcn-map属性源都不会加载
 
 . 日志文件按天压缩，自动删除30天前日志
 ====
@@ -370,9 +342,6 @@ logging.logback.rollingpolicy.max-history=30
 当环境中存在mcn.print-env.enable=true时,项目在启动时会自动打印所有可枚举的属性源。
 
 === 自动配置
-
-==== mybatis多数据源自动配置
-由于目前推荐使用Jpa这里就不作介绍了
 
 ==== minio自动配置
 
@@ -457,29 +426,6 @@ https://github.com/kse-music/mcn-boot-project/blob/master/mcn-boot-autoconfigure
 ====
 @Phone 仅简单校验了11位数字手机号
 ====
-
-
-=== 版本管理
-
-. 除SpringBoot和SpringCloud管理以外的版本管理
-
-.版本管理
-[width="100%",options="header,footer"]
-|====================
-| Jar | Version
-| guava | 31.0.1-jre
-| mybatis-spring-boot-starter | 2.2.0
-| commons-io | 2.11.0
-| spring-boot-admin-starter-client | 2.5.2
-| spring-boot-admin-starter-server | 2.5.2
-| jsoup | 1.14.3
-| fastjson | 1.2.78
-| swagger | 1.6.1
-| mapstruct | 1.4.2.Final
-| minio | 8.3.3
-| spring-cloud-alibaba | 2021.1
-| xxl-job | 2.3.0
-|====================
 
 == 参考
 
