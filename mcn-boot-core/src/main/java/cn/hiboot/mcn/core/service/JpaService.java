@@ -86,7 +86,7 @@ public interface JpaService<T,PK> {
         if (fieldSort.getSort() == null) {
             return null;
         }
-        if (fieldSort.getSort().equals("asc")) {
+        if (fieldSort.getSort().equalsIgnoreCase("asc")) {
             return Sort.by(fieldSort.getField()).ascending();
         }
         return Sort.by(fieldSort.getField()).descending();
