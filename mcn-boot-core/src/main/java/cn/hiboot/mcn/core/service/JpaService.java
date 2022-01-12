@@ -14,9 +14,9 @@ import java.util.List;
  * @author DingHao
  * @since 2021/10/11 13:39
  */
-public interface JpaService<T,PK> {
+public interface JpaService<T,PK,R extends JpaRepository<T,PK>> {
 
-    JpaRepository<T,PK> getRepository();
+    R getRepository();
 
     default T save(T data){
         beforeSave(data);
