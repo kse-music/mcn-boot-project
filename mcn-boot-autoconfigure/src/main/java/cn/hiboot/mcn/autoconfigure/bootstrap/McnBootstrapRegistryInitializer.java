@@ -16,8 +16,8 @@ public class McnBootstrapRegistryInitializer implements BootstrapRegistryInitial
     public void initialize(BootstrapRegistry registry) {
         registry.addCloseListener(event -> {
             BootstrapContext bootstrapContext = event.getBootstrapContext();
-            if(bootstrapContext.isRegistered(DuplicateLogFile.class)){
-               bootstrapContext.get(DuplicateLogFile.class).check();
+            if(bootstrapContext.isRegistered(LogFileChecker.class)){
+               bootstrapContext.get(LogFileChecker.class).check();
             }
         });
     }

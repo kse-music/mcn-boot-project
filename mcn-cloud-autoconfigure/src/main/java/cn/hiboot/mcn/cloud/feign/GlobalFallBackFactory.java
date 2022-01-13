@@ -26,7 +26,7 @@ public class GlobalFallBackFactory<T> implements FallbackFactory<T> {
         Enhancer enhancer = new Enhancer();
         enhancer.setSuperclass(targetType);
         enhancer.setUseCache(true);
-        enhancer.setCallback(new FeignFallback<>(targetType, targetName, cause));
+        enhancer.setCallback(new GlobalFallback<>(targetType, targetName, cause));
         return (T) enhancer.create();
     }
 

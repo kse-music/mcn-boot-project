@@ -13,7 +13,7 @@
     {
       "name": "delete.default.log-file.enable",
       "type": "java.lang.Boolean",
-      "sourceType": "cn.hiboot.mcn.autoconfigure.bootstrap.DuplicateLogFile",
+      "sourceType": "cn.hiboot.mcn.autoconfigure.bootstrap.LogFileChecker",
       "description": "是否默认删除默认日志文件.",
       "defaultValue": true
     },

@@ -8,17 +8,17 @@ import java.nio.file.Paths;
 import java.util.Objects;
 
 /**
- * DuplicateLogFile
+ * LogFileChecker
  *
  * @author DingHao
  * @since 2021/12/25 16:46
  */
-public class DuplicateLogFile{
+public class LogFileChecker {
 
     private final String originalLogFile;
     private final ConfigurableEnvironment environment;
 
-    public DuplicateLogFile(ConfigurableEnvironment environment) {
+    public LogFileChecker(ConfigurableEnvironment environment) {
         this.environment = environment;
         this.originalLogFile = getLogFile(environment);
     }

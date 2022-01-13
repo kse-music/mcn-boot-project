@@ -1,4 +1,4 @@
-package cn.hiboot.mcn.autoconfigure.web.mvc;
+package cn.hiboot.mcn.autoconfigure.web.mvc.converter;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

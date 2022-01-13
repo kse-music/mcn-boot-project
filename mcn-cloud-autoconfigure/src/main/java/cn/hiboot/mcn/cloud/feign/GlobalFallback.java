@@ -17,15 +17,15 @@ import java.util.Objects;
  * @author DingHao
  * @since 2021/7/4 10:18
  */
-public class FeignFallback<T> implements MethodInterceptor {
+public class GlobalFallback<T> implements MethodInterceptor {
 
-    private static final Logger log = LoggerFactory.getLogger(FeignFallback.class);
+    private static final Logger log = LoggerFactory.getLogger(GlobalFallback.class);
 
     private final Class<T> targetType;
     private final String targetName;
     private final Throwable cause;
 
-    public FeignFallback(Class<T> targetType, String targetName, Throwable cause) {
+    public GlobalFallback(Class<T> targetType, String targetName, Throwable cause) {
         this.targetType = targetType;
         this.targetName = targetName;
         this.cause = cause;
@@ -54,7 +54,7 @@ public class FeignFallback<T> implements MethodInterceptor {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        FeignFallback<?> that = (FeignFallback<?>) o;
+        GlobalFallback<?> that = (GlobalFallback<?>) o;
         return targetType.equals(that.targetType);
     }
 

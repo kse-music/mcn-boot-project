@@ -1,6 +1,6 @@
 package cn.hiboot.mcn.autoconfigure.context;
 
-import cn.hiboot.mcn.autoconfigure.bootstrap.DuplicateLogFile;
+import cn.hiboot.mcn.autoconfigure.bootstrap.LogFileChecker;
 import cn.hiboot.mcn.autoconfigure.web.util.SpringBeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,7 +64,7 @@ public class McnApplicationListener implements GenericApplicationListener {
 
     private void checkLogFileName(ConfigurableEnvironment environment, ConfigurableBootstrapContext context){
         if(environment.getProperty("delete.default.log-file.enable", Boolean.class, true)){
-            context.registerIfAbsent(DuplicateLogFile.class, BootstrapRegistry.InstanceSupplier.of(new DuplicateLogFile(environment)));
+            context.registerIfAbsent(LogFileChecker.class, BootstrapRegistry.InstanceSupplier.of(new LogFileChecker(environment)));
         }
     }
 

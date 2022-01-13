@@ -79,7 +79,7 @@ public interface JpaService<T,PK,R extends JpaRepository<T,PK>> {
     }
 
     default void updateById(PK id,T data){
-        getRepository().findById(id).ifPresent(d -> getRepository().save(data));
+        getRepository().save(data);
     }
 
     static Sort convertSort(FieldSort fieldSort) {

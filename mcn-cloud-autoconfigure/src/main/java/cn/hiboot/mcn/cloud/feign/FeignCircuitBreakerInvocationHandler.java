@@ -81,8 +81,7 @@ public class FeignCircuitBreakerInvocationHandler implements InvocationHandler {
                 Object fallback = this.nullableFallbackFactory.create(throwable);
                 try {
                     return this.fallbackMethodMap.get(method).invoke(fallback, args);
-                }
-                catch (Exception e) {
+                }catch (Exception e) {
                     throw new IllegalStateException(e);
                 }
             };

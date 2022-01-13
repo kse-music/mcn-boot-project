@@ -1,7 +1,9 @@
 package cn.hiboot.mcn.autoconfigure.web.mvc;
 
+import cn.hiboot.mcn.autoconfigure.web.mvc.converter.StrToObj;
 import cn.hiboot.mcn.core.model.result.RestResp;
 import cn.hiboot.mcn.core.util.JacksonUtils;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.MethodParameter;
@@ -27,6 +29,7 @@ import java.util.List;
  * @since 2021/5/9 20:46
  */
 @Configuration(proxyBeanMethods = false)
+@ConditionalOnClass(WebMvcConfigurer.class)
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 public class WebMvcConfigurerAutoConfiguration {
 

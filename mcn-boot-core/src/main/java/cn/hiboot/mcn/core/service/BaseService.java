@@ -6,9 +6,9 @@ import cn.hiboot.mcn.core.model.result.RestResp;
 
 import java.util.List;
 
-public interface BaseService<T,PK> {
+public interface BaseService<T,PK,R extends BaseMapper<T,PK> > {
 
-    BaseMapper<T,PK> getBaseMapper();
+    R getBaseMapper();
 
     default void assertSelfData(PK id){
 
