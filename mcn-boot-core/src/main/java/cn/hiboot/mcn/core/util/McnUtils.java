@@ -1,5 +1,7 @@
 package cn.hiboot.mcn.core.util;
 
+import cn.hiboot.mcn.core.exception.ServiceException;
+
 import java.beans.BeanInfo;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
@@ -200,7 +202,7 @@ public abstract class McnUtils {
                 setter.invoke(obj, map.get(pd.getName()));
             }
         }catch (Exception e){
-            //
+            throw ServiceException.newInstance(e);
         }
         return obj;
     }
@@ -220,7 +222,7 @@ public abstract class McnUtils {
                 map.put(propertyName, properValue);
             }
         }catch (Exception e){
-            //
+            throw ServiceException.newInstance(e);
         }
         return map;
     }

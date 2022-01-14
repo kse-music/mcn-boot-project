@@ -45,7 +45,7 @@ public final class HttpUtils {
 
     private static String dealGetParam(String url, Map<String,String> getParam){
         String f = "?";
-        if(url.indexOf("?") != -1){
+        if(url.contains("?")){
             f = "&";
         }
         url = url + f + parseParam(getParam);
@@ -95,13 +95,14 @@ public final class HttpUtils {
                 result.append(line);
             }
         } catch (Exception e) {
-
+            //
         }finally {
             try {
                 if (in != null) {
                     in.close();
                 }
             } catch (Exception e2) {
+                //
             }
         }
         return result.toString();
@@ -136,7 +137,7 @@ public final class HttpUtils {
                 result.append(line);
 			}
 		} catch (Exception e) {
-
+            //
         }finally{
 			try{
 				if(out!=null){
@@ -147,6 +148,7 @@ public final class HttpUtils {
 				}
 			}
 			catch(IOException ex){
+                //
             }
 		}
 		return result.toString();
