@@ -1,12 +1,10 @@
 package cn.hiboot.mcn.core.service;
 
-import cn.hiboot.mcn.core.model.base.FieldSort;
 import cn.hiboot.mcn.core.model.base.PageSort;
 import cn.hiboot.mcn.core.model.result.RestResp;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -57,20 +55,7 @@ public interface JpaService<T,PK,R extends JpaRepository<T,PK>> {
     }
 
     default RestResp<List<T>> page(T t, PageSort pageSort){
-        PageRequest pageRequest = PageRequest.of(pageSort.getPageNo(),pageSort.getPageSize());
-        List<FieldSort> sort = pageSort.getSort();
-        Sort s = null;
-        for (FieldSort fieldSort : sort) {
-            Sort orders = fieldSort.toJpaSort();
-            if(s == null){
-                s = orders;
-            }else {
-                s = s.and(orders);
-            }
-        }
-        if(s != null){
-            pageRequest.withSort(s);
-        }
+        PageRequest pageRequest = PageRequest.of(pageSort.getPageNo(),pageSort.getPageSize(),pageSort.jpaSort());
         Page<T> page;
         if(t == null){
             page = getRepository().findAll(pageRequest);

@@ -5,7 +5,6 @@ import org.springframework.util.Assert;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * PageSort
@@ -36,6 +35,10 @@ public class PageSort {
         this.pageSize = pageSize;
     }
 
+    public PageSort(List<FieldSort> sort) {
+        this.sort = sort;
+    }
+
     public int getPageNo() {
         return (pageNo - 1) * pageSize;
     }
@@ -61,8 +64,16 @@ public class PageSort {
         this.sort = sort;
     }
 
-    public List<Sort> getJpaSort(){
-        return sort.stream().map(FieldSort::toJpaSort).collect(Collectors.toList());
+    public Sort jpaSort(){
+        Sort s = Sort.unsorted();
+        for (FieldSort fieldSort : sort) {
+            if(s.isUnsorted()){
+                s = fieldSort.toJpaSort();
+                continue;
+            }
+            s = s.and(fieldSort.toJpaSort());
+        }
+        return s;
     }
 
 }
