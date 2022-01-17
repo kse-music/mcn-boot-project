@@ -1,4 +1,4 @@
-package cn.hiboot.mcn.autoconfigure.web.mvc.swagger;
+package cn.hiboot.mcn.autoconfigure.web.swagger;
 
 import springfox.documentation.RequestHandler;
 

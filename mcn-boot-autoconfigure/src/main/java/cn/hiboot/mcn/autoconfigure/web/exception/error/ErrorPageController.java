@@ -1,4 +1,4 @@
-package cn.hiboot.mcn.autoconfigure.web.mvc.error;
+package cn.hiboot.mcn.autoconfigure.web.exception.error;
 
 import cn.hiboot.mcn.core.exception.ExceptionKeys;
 import cn.hiboot.mcn.core.model.result.RestResp;

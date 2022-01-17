@@ -1,4 +1,4 @@
-package cn.hiboot.mcn.autoconfigure.web.mvc.swagger;
+package cn.hiboot.mcn.autoconfigure.web.swagger;
 
 import cn.hiboot.mcn.swagger.MvcSwagger2;
 import org.springframework.beans.factory.ObjectProvider;

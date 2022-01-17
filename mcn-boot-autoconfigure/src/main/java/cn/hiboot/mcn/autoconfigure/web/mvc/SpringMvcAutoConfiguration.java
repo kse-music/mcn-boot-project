@@ -1,9 +1,13 @@
 package cn.hiboot.mcn.autoconfigure.web.mvc;
 
+import cn.hiboot.mcn.autoconfigure.web.exception.error.DefaultErrorView;
+import cn.hiboot.mcn.autoconfigure.web.exception.error.ErrorPageController;
 import cn.hiboot.mcn.autoconfigure.web.exception.handler.GlobalExceptionHandler;
 import cn.hiboot.mcn.autoconfigure.web.exception.handler.ValidationExceptionHandler;
-import cn.hiboot.mcn.autoconfigure.web.mvc.error.DefaultErrorView;
-import cn.hiboot.mcn.autoconfigure.web.mvc.error.ErrorPageController;
+import cn.hiboot.mcn.autoconfigure.web.mvc.resolver.StrToObj;
+import cn.hiboot.mcn.autoconfigure.web.mvc.resolver.StringObjectMethodArgumentResolver;
+import cn.hiboot.mcn.core.model.result.RestResp;
+import cn.hiboot.mcn.core.util.JacksonUtils;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.*;
@@ -17,9 +21,19 @@ import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.MethodParameter;
+import org.springframework.http.MediaType;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.server.ServerHttpRequest;
+import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.View;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -61,5 +75,33 @@ public class SpringMvcAutoConfiguration {
 
     }
 
+    @Configuration(proxyBeanMethods = false)
+    private static class WebMvcConfig implements WebMvcConfigurer {
+
+        @Override
+        public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
+            resolvers.add(new StringObjectMethodArgumentResolver());
+        }
+
+    }
+
+    @SuppressWarnings("all")
+    @ControllerAdvice
+    @Configuration(proxyBeanMethods = false)
+    private static class RestRespDataResponseBodyAdvice implements ResponseBodyAdvice<RestResp> {
+
+        @Override
+        public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
+            return returnType.getParameterType() == RestResp.class && returnType.hasMethodAnnotation(StrToObj.class);
+        }
+
+        @Override
+        public RestResp beforeBodyWrite(RestResp body, MethodParameter returnType, MediaType selectedContentType, Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
+            if(body != null && body.getData() instanceof String){
+                body.setData(JacksonUtils.fromJson(body.getData().toString(),returnType.getMethodAnnotation(StrToObj.class).value()));
+            }
+            return body;
+        }
+    }
 
 }

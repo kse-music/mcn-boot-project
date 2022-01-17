@@ -67,7 +67,7 @@
     {
       "name": "http.error.override",
       "type": "java.lang.Boolean",
-      "sourceType": "cn.hiboot.mcn.autoconfigure.web.mvc.error.ErrorPageController",
+      "sourceType": "cn.hiboot.mcn.autoconfigure.web.exception.error.ErrorPageController",
       "description": "是否重写http错误信息.",
       "defaultValue": true
     },
