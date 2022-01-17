@@ -70,7 +70,7 @@ public abstract class AbstractExceptionHandler implements EnvironmentAware {
         if(ObjectUtils.isEmpty(exMsg)){
             log.warn("please set {} exception message",code == BaseException.DEFAULT_CODE?"":"code = "+code);
         }
-        return msg;
+        return exMsg;
     }
 
     private void logError(Throwable t){
