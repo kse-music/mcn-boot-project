@@ -25,7 +25,7 @@ import java.util.Objects;
 public abstract class AbstractExceptionHandler implements EnvironmentAware {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
-    private GlobalExceptionViewResolver errorViewProvider;
+    private GlobalExceptionViewResolver viewResolver;
     private boolean setValidatorResult;
     private boolean removeFrameworkStack;
     private boolean overrideHttpError;
@@ -33,14 +33,14 @@ public abstract class AbstractExceptionHandler implements EnvironmentAware {
 
     @ExceptionHandler(Throwable.class)
     public Object handleException(HttpServletRequest request, Throwable exception) throws Throwable{
-        if(errorViewProvider != null && errorViewProvider.support(request)){
+        if(viewResolver != null && viewResolver.support(request)){
             logError(exception);
-            return errorViewProvider.view(request, exception);
+            return viewResolver.view(request, exception);
         }
         return buildErrorData(request, exception);
     }
 
-    protected abstract Object buildErrorData(HttpServletRequest request,Throwable exception) throws Throwable;
+    protected abstract RestResp<Object> buildErrorData(HttpServletRequest request,Throwable exception) throws Throwable;
 
     protected RestResp<Object> buildErrorMessage(Integer code,Throwable t){
         return buildErrorMessage(code,null,t);
@@ -92,7 +92,7 @@ public abstract class AbstractExceptionHandler implements EnvironmentAware {
         return overrideHttpError;
     }
 
-    public void setErrorViewProvider(GlobalExceptionViewResolver errorViewProvider) {
-        this.errorViewProvider = errorViewProvider;
+    public void setErrorViewResolver(GlobalExceptionViewResolver viewResolver) {
+        this.viewResolver = viewResolver;
     }
 }

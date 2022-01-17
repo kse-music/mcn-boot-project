@@ -2,6 +2,7 @@ package cn.hiboot.mcn.autoconfigure.web.exception.handler;
 
 import cn.hiboot.mcn.core.exception.ExceptionKeys;
 import cn.hiboot.mcn.core.model.ValidationErrorBean;
+import cn.hiboot.mcn.core.model.result.RestResp;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -23,14 +24,14 @@ import java.util.stream.Collectors;
 public class ValidationExceptionHandler extends AbstractExceptionHandler {
 
     @Override
-    public Object buildErrorData(HttpServletRequest request, Throwable exception) throws Throwable {
+    public RestResp<Object> buildErrorData(HttpServletRequest request, Throwable exception) throws Throwable {
         if(exception instanceof ValidationException){
             return handleValidationException((ValidationException) exception);
         }
         return null;
     }
 
-    public Object handleValidationException(ValidationException exception){
+    public RestResp<Object> handleValidationException(ValidationException exception){
         Object data = null;
         if (exception instanceof ConstraintViolationException) {
             ConstraintViolationException cve = (ConstraintViolationException) exception;

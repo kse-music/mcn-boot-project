@@ -39,10 +39,9 @@ public class GlobalExceptionHandler extends AbstractExceptionHandler {
         this.exceptionHandlers = exceptionHandlers;
     }
 
-    @Override
     @Autowired(required = false)
-    public void setErrorViewProvider(GlobalExceptionViewResolver errorViewProvider) {
-        super.setErrorViewProvider(errorViewProvider);
+    public void setErrorView(GlobalExceptionViewResolver exceptionViewResolver) {
+        super.setErrorViewResolver(exceptionViewResolver);
     }
 
     @Override
