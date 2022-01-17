@@ -1,18 +1,19 @@
 package cn.hiboot.mcn.autoconfigure.web.exception.handler;
 
 import cn.hiboot.mcn.autoconfigure.web.exception.ExceptionMessageCustomizer;
+import cn.hiboot.mcn.autoconfigure.web.exception.error.GlobalExceptionViewResolver;
 import cn.hiboot.mcn.core.exception.BaseException;
 import cn.hiboot.mcn.core.exception.ExceptionKeys;
 import cn.hiboot.mcn.core.model.ValidationErrorBean;
 import cn.hiboot.mcn.core.model.result.RestResp;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.HttpMediaTypeException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.NoHandlerFoundException;
@@ -38,8 +39,19 @@ public class GlobalExceptionHandler extends AbstractExceptionHandler {
         this.exceptionHandlers = exceptionHandlers;
     }
 
-    @ExceptionHandler(Throwable.class)
-    public RestResp<Object> handleException(HttpServletRequest request, Throwable exception){
+    @Override
+    @Autowired(required = false)
+    public void setErrorViewProvider(GlobalExceptionViewResolver errorViewProvider) {
+        super.setErrorViewProvider(errorViewProvider);
+    }
+
+    @Override
+    public RestResp<Object> buildErrorData(HttpServletRequest request, Throwable exception) throws ServletException {
+        if(exception instanceof BaseException){
+            return handleBaseException(request, ((BaseException) exception));
+        }else if(exception instanceof ServletException){
+            return handleServletException(request, ((ServletException) exception));
+        }
         int errorCode = BaseException.DEFAULT_CODE;
         Object data = null;
         if(exception instanceof MethodArgumentTypeMismatchException){
@@ -72,8 +84,7 @@ public class GlobalExceptionHandler extends AbstractExceptionHandler {
         ).collect(Collectors.toList());
     }
 
-    @ExceptionHandler(ServletException.class)
-    public RestResp<Object> handleServletException(HttpServletRequest request, ServletException exception) throws ServletException {
+    private RestResp<Object> handleServletException(HttpServletRequest request, ServletException exception) throws ServletException {
         if(isOverrideHttpError()){
             int code = ExceptionKeys.HTTP_ERROR_500;
             if (exception instanceof NoHandlerFoundException) {
@@ -90,8 +101,7 @@ public class GlobalExceptionHandler extends AbstractExceptionHandler {
         throw exception;
     }
 
-    @ExceptionHandler(BaseException.class)
-    public RestResp<Object> handleBaseException(HttpServletRequest request, BaseException exception){
+    private RestResp<Object> handleBaseException(HttpServletRequest request, BaseException exception){
         return buildErrorMessage(exception.getCode(),exception.getMessage(),exception);
     }
 
