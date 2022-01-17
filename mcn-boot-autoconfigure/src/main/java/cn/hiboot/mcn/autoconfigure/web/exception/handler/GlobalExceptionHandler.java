@@ -13,7 +13,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.HttpMediaTypeException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
-import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.NoHandlerFoundException;
@@ -45,31 +45,27 @@ public class GlobalExceptionHandler extends AbstractExceptionHandler {
     }
 
     @Override
-    public RestResp<Object> buildErrorData(HttpServletRequest request, Throwable exception) throws ServletException {
-        if(exception instanceof BaseException){
-            return handleBaseException(request, ((BaseException) exception));
-        }else if(exception instanceof ServletException){
-            return handleServletException(request, ((ServletException) exception));
-        }
+    public RestResp<Object> buildErrorData(HttpServletRequest request, Throwable exception) throws Throwable {
         int errorCode = BaseException.DEFAULT_CODE;
         Object data = null;
-        if(exception instanceof MethodArgumentTypeMismatchException){
+        if(exception instanceof BaseException){
+            errorCode = ((BaseException) exception).getCode();
+        }else if(exception instanceof MethodArgumentTypeMismatchException){
             errorCode = ExceptionKeys.PARAM_PARSE_ERROR;
-        }else if(exception instanceof MethodArgumentNotValidException){
+        }else if(exception instanceof ServletRequestBindingException){
             errorCode = ExceptionKeys.PARAM_PARSE_ERROR;
-            MethodArgumentNotValidException ex = (MethodArgumentNotValidException) exception;
-            data = dealBindingResult(ex.getBindingResult());
         }else if(exception instanceof BindException){
             errorCode = ExceptionKeys.PARAM_PARSE_ERROR;
             BindException ex = (BindException) exception;
             data = dealBindingResult(ex.getBindingResult());
+        }else if(exception instanceof ServletException){
+            errorCode =  mappingCode(((ServletException) exception));
         }
-        String errorMsg = exception.getMessage();
         ExceptionMessageCustomizer exceptionHandler = exceptionHandlers.getIfUnique();
         if(Objects.nonNull(exceptionHandler)){
-            errorMsg = exceptionHandler.handle(exception);
+            return buildErrorMessage(errorCode,exceptionHandler.handle(exception),data,exception);
         }
-        return buildErrorMessage(errorCode,errorMsg,data,exception);
+        return buildErrorMessage(errorCode,data,exception);
     }
 
     private Object dealBindingResult(BindingResult bindingResult){
@@ -83,7 +79,7 @@ public class GlobalExceptionHandler extends AbstractExceptionHandler {
         ).collect(Collectors.toList());
     }
 
-    private RestResp<Object> handleServletException(HttpServletRequest request, ServletException exception) throws ServletException {
+    private int mappingCode(ServletException exception) throws ServletException {
         if(isOverrideHttpError()){
             int code = ExceptionKeys.HTTP_ERROR_500;
             if (exception instanceof NoHandlerFoundException) {
@@ -95,13 +91,9 @@ public class GlobalExceptionHandler extends AbstractExceptionHandler {
             } else if (exception instanceof UnavailableException) {
                 code = ExceptionKeys.HTTP_ERROR_503;
             }
-            return buildErrorMessage(code,exception);
+            return code;
         }
         throw exception;
-    }
-
-    private RestResp<Object> handleBaseException(HttpServletRequest request, BaseException exception){
-        return buildErrorMessage(exception.getCode(),exception.getMessage(),exception);
     }
 
 }

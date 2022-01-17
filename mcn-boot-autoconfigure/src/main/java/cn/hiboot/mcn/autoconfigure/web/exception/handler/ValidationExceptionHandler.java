@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 public class ValidationExceptionHandler extends AbstractExceptionHandler {
 
     @Override
-    public RestResp<Object> buildErrorData(HttpServletRequest request, Throwable exception) throws Throwable {
+    public RestResp<Object> buildErrorData(HttpServletRequest request, Throwable exception) {
         if(exception instanceof ValidationException){
             return handleValidationException((ValidationException) exception);
         }
@@ -39,7 +39,7 @@ public class ValidationExceptionHandler extends AbstractExceptionHandler {
                     new ValidationErrorBean(violation1.getMessage(), getViolationPath(violation1), getViolationInvalidValue(violation1.getInvalidValue()))
             ).collect(Collectors.toList());
         }
-        return buildErrorMessage(ExceptionKeys.PARAM_PARSE_ERROR,null,data,exception);
+        return buildErrorMessage(ExceptionKeys.PARAM_PARSE_ERROR,data,exception);
     }
 
     private String getViolationInvalidValue(Object invalidValue) {

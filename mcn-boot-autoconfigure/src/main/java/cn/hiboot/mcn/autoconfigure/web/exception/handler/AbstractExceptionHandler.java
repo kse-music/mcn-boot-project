@@ -42,12 +42,8 @@ public abstract class AbstractExceptionHandler implements EnvironmentAware {
 
     protected abstract RestResp<Object> buildErrorData(HttpServletRequest request,Throwable exception) throws Throwable;
 
-    protected RestResp<Object> buildErrorMessage(Integer code,Throwable t){
-        return buildErrorMessage(code,null,t);
-    }
-
-    protected RestResp<Object> buildErrorMessage(Integer code,String msg,Throwable t){
-        return buildErrorMessage(code,msg,null,t);
+    protected RestResp<Object> buildErrorMessage(Integer code,Object data,Throwable t){
+        return buildErrorMessage(code, null,data, t);
     }
 
     protected RestResp<Object> buildErrorMessage(Integer code,String msg,Object data,Throwable t){
@@ -56,17 +52,25 @@ public abstract class AbstractExceptionHandler implements EnvironmentAware {
         }
         //打印异常栈
         logError(t);
-        if(ObjectUtils.isEmpty(msg)){//try to acquire msg from code
-            msg = ErrorMsg.getErrorMsg(code);
-        }
-        if(ObjectUtils.isEmpty(msg)){
-            log.warn("please set {} exception message",code == BaseException.DEFAULT_CODE?"":"code = "+code);
-        }
-        RestResp<Object> resp = RestResp.error(code, msg);
+        RestResp<Object> resp = RestResp.error(code, getExceptionMsg(code,msg,t));
         if(data != null && setValidatorResult){//参数校验具体错误数据信息
             resp.setData(data);
         }
         return resp;
+    }
+
+    private String getExceptionMsg(Integer code,String msg,Throwable t){
+        String exMsg = msg;
+        if(ObjectUtils.isEmpty(exMsg)){//acquire msg from exception
+            exMsg = t.getMessage();
+        }
+        if(ObjectUtils.isEmpty(exMsg)){//acquire msg from code
+            exMsg = ErrorMsg.getErrorMsg(code);
+        }
+        if(ObjectUtils.isEmpty(exMsg)){
+            log.warn("please set {} exception message",code == BaseException.DEFAULT_CODE?"":"code = "+code);
+        }
+        return msg;
     }
 
     private void logError(Throwable t){
