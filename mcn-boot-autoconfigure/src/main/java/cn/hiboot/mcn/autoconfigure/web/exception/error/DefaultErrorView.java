@@ -43,10 +43,7 @@ public class DefaultErrorView implements View {
         String blueprint = "/blueprint.png";
         String errorHanger = "/error-hanger.png";
         String errorPin = "/error-pin.png";
-        if(StringUtils.hasText(basePath) && !basePath.equals("/")){
-            if(basePath.endsWith("/")){
-                basePath = basePath.substring(0,basePath.length()-2);
-            }
+        if(StringUtils.hasText(basePath)){
             blueprint = basePath + blueprint;
             errorHanger = basePath + errorHanger;
             errorPin = basePath + errorPin;
