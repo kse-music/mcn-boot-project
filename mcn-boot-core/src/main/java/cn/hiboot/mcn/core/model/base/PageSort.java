@@ -30,8 +30,8 @@ public class PageSort {
     public PageSort(){}
 
     public PageSort(int pageNo, int pageSize) {
-        this.pageNo = pageNo;
-        this.pageSize = pageSize;
+        setPageNo(pageNo);
+        setPageSize(pageSize);
     }
 
     public PageSort(List<FieldSort> sort) {
@@ -39,10 +39,15 @@ public class PageSort {
     }
 
     public int getPageNo() {
+        return pageNo - 1;
+    }
+
+    public int getSkip() {
         return (pageNo - 1) * pageSize;
     }
 
     public void setPageNo(int pageNo) {
+        McnAssert.state(pageNo > 0,"pageNo must gt 0");
         this.pageNo = pageNo;
     }
 
@@ -51,6 +56,7 @@ public class PageSort {
     }
 
     public void setPageSize(int pageSize) {
+        McnAssert.state(pageSize > 0,"pageSize must gt 0");
         this.pageSize = pageSize;
     }
 

@@ -19,4 +19,10 @@ public interface McnAssert {
             throw new IllegalArgumentException(message);
         }
     }
+
+    static void state(boolean state, String message) {
+        if (!state) {
+            throw new IllegalArgumentException(message);
+        }
+    }
 }
