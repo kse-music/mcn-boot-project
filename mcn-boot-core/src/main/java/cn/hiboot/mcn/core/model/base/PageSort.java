@@ -1,7 +1,6 @@
 package cn.hiboot.mcn.core.model.base;
 
-import org.springframework.data.domain.Sort;
-import org.springframework.util.Assert;
+import cn.hiboot.mcn.core.util.McnAssert;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,20 +59,8 @@ public class PageSort {
     }
 
     public void setSort(List<FieldSort> sort) {
-        Assert.notNull(sort,"sort must not null");
+        McnAssert.notNull(sort,"sort must not null");
         this.sort = sort;
-    }
-
-    public Sort jpaSort(){
-        Sort s = Sort.unsorted();
-        for (FieldSort fieldSort : sort) {
-            if(s.isUnsorted()){
-                s = fieldSort.toJpaSort();
-                continue;
-            }
-            s = s.and(fieldSort.toJpaSort());
-        }
-        return s;
     }
 
 }

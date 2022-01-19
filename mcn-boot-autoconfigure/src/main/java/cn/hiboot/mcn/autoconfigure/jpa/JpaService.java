@@ -1,4 +1,4 @@
-package cn.hiboot.mcn.core.service;
+package cn.hiboot.mcn.autoconfigure.jpa;
 
 import cn.hiboot.mcn.core.model.base.PageSort;
 import cn.hiboot.mcn.core.model.result.RestResp;
@@ -21,21 +21,15 @@ public interface JpaService<T,PK,R extends JpaRepository<T,PK>> {
 
     default T save(T data){
         beforeSave(data);
-        T save = getRepository().save( data );
-        afterSave(data);
-        return save;
+        return getRepository().save( data );
     }
 
     default void beforeSave(T data){
 
     }
 
-    default void afterSave(T data){
-
-    }
-
     default void deleteById(PK id){
-        getRepository().deleteById(id);
+        getRepository().findById(id).ifPresent(u -> getRepository().delete(u));
     }
 
     default T getById(PK id){
@@ -55,7 +49,7 @@ public interface JpaService<T,PK,R extends JpaRepository<T,PK>> {
     }
 
     default RestResp<List<T>> page(T t, PageSort pageSort){
-        PageRequest pageRequest = PageRequest.of(pageSort.getPageNo(),pageSort.getPageSize(),pageSort.jpaSort());
+        PageRequest pageRequest = PageRequest.of(pageSort.getPageNo(),pageSort.getPageSize(),JpaUtils.jpaSort(pageSort.getSort()));
         Page<T> page;
         if(t == null){
             page = getRepository().findAll(pageRequest);
@@ -66,7 +60,10 @@ public interface JpaService<T,PK,R extends JpaRepository<T,PK>> {
     }
 
     default void updateById(PK id,T data){
-        getRepository().save(data);
+        getRepository().findById(id).ifPresent(d -> {
+            JpaUtils.copyTo(data,d);
+            getRepository().save(d);
+        });
     }
 
 }
