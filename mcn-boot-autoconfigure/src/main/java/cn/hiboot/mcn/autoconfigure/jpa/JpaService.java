@@ -36,6 +36,11 @@ public interface JpaService<T,PK,R extends JpaRepository<T,PK>> {
         return getRepository().findById(id).orElse(null);
     }
 
+    default T getOne(T t){
+        List<T> list = list(t);
+        return list.isEmpty() ? null : list.get(0);
+    }
+
     default List<T> list(T t){
         return getRepository().findAll(Example.of(t));
     }
