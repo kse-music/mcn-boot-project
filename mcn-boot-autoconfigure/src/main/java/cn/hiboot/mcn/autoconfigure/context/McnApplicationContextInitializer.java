@@ -15,7 +15,7 @@ import org.springframework.core.annotation.Order;
  * @since 2021/1/16 16:41
  */
 @Order(McnApplicationListener.DEFAULT_ORDER)
-public class McnContextInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext>{
+public class McnApplicationContextInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext>{
 
     @Override
     public void initialize(ConfigurableApplicationContext configurableApplicationContext) {

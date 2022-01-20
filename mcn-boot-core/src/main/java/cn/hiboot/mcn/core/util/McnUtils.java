@@ -192,7 +192,7 @@ public abstract class McnUtils {
     }
 
     public static <T> T map2bean(Map<String,Object> map, Class<T> clz) {
-        T obj = null;
+        T obj;
         try{
             obj = clz.newInstance();
             BeanInfo b = Introspector.getBeanInfo(clz,Object.class);

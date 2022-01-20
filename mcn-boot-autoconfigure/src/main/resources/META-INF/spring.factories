@@ -1,5 +1,5 @@
 org.springframework.context.ApplicationContextInitializer=\
-  cn.hiboot.mcn.autoconfigure.context.McnContextInitializer
+  cn.hiboot.mcn.autoconfigure.context.McnApplicationContextInitializer
 
 org.springframework.context.ApplicationListener=\
   cn.hiboot.mcn.autoconfigure.context.McnApplicationListener

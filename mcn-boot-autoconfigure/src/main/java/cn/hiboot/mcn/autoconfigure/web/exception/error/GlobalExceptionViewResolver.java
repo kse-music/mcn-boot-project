@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 public interface GlobalExceptionViewResolver {
 
     boolean support(HttpServletRequest request);
+
     ModelAndView view(HttpServletRequest request, Throwable exception);
 
 }
