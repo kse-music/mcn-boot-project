@@ -3,7 +3,7 @@ package cn.hiboot.mcn.core.util;
 import cn.hiboot.mcn.core.task.TaskThreadPool;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -14,7 +14,7 @@ import java.util.function.Consumer;
  */
 public interface BatchOperation {
 
-    int DEFAULT_BATCH_SIZE = 10000;
+    int DEFAULT_BATCH_SIZE = 1000;
 
     /**
      * 默认1w执行一次
@@ -28,11 +28,11 @@ public interface BatchOperation {
         return null;
     }
 
-    default <S> void operation(Iterable<S> all, Consumer<Collection<S>> consumer) {
+    default <S> void operation(Iterable<S> all, Consumer<List<S>> consumer) {
         operation(all,consumer,true);
     }
 
-    default <S> void asyncOperation(Iterable<S> all, Consumer<Collection<S>> consumer) {
+    default <S> void asyncOperation(Iterable<S> all, Consumer<List<S>> consumer) {
         operation(all,consumer,false);
     }
 
@@ -42,30 +42,27 @@ public interface BatchOperation {
      * @param all 总输入
      * @param consumer 批量处理函数
      * @param <S> 集合元素
-     * @param closeWaitFinish 等待所有任务执行完关闭线程池
+     * @param closeWaitFinish 等待所有任务执行完关闭线程池须配合TaskThreadPool
      */
-    default <S> void operation(Iterable<S> all, Consumer<Collection<S>> consumer,boolean closeWaitFinish) {
+    default <S> void operation(Iterable<S> all, Consumer<List<S>> consumer,boolean closeWaitFinish) {
         if (all == null) {
             return;
         }
         TaskThreadPool executor = getExecutor();
-        int index = 0;
-        Collection<S> tmp = new ArrayList<>();
+        List<S> tmp = new ArrayList<>();
         for (S next : all) {
             tmp.add(next);
-            index++;
-            if (index % getBatchSize() == 0) {
+            if (tmp.size() % getBatchSize() == 0) {
                 if(executor == null){
                     consumer.accept(tmp);
                 }else {
-                    Collection<S> finalTmp = tmp;
+                    List<S> finalTmp = tmp;
                     executor.execute(() -> consumer.accept(finalTmp));
                 }
-                index = 0;
                 tmp = new ArrayList<>();
             }
         }
-        if(index != 0){
+        if(tmp.size() != 0){
             consumer.accept(tmp);
         }
         tmp.clear();
