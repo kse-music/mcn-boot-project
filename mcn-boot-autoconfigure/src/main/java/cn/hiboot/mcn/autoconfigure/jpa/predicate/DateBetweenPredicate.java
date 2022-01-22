@@ -1,11 +1,12 @@
 package cn.hiboot.mcn.autoconfigure.jpa.predicate;
 
-import cn.hiboot.mcn.autoconfigure.jpa.PredicateProvider;
+import cn.hiboot.mcn.autoconfigure.jpa.AbstractPredicateProvider;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * DateBetweenPredicate
@@ -13,21 +14,25 @@ import java.util.Date;
  * @author DingHao
  * @since 2022/1/22 11:28
  */
-public class DateBetweenPredicate<T> implements PredicateProvider<T> {
+public class DateBetweenPredicate<T> extends AbstractPredicateProvider<T> {
 
-    private final String fieldName;
     private final Date startTime;
     private final Date endTime;
 
     public DateBetweenPredicate(String fieldName, Date startTime, Date endTime) {
-        this.fieldName = fieldName;
+        super(fieldName);
         this.startTime = startTime;
         this.endTime = endTime;
     }
 
     @Override
-    public Predicate getRestriction(Root<T> root, CriteriaBuilder criteriaBuilder) {
-        return criteriaBuilder.between(root.get(fieldName),startTime,endTime);
+    public boolean isValid() {
+        return Objects.nonNull(startTime) && Objects.nonNull(endTime);
+    }
+
+    @Override
+    protected Predicate doGetPredicate(Root<T> root, CriteriaBuilder criteriaBuilder) {
+        return criteriaBuilder.between(root.get(getFieldName()),startTime,endTime);
     }
 
 }
