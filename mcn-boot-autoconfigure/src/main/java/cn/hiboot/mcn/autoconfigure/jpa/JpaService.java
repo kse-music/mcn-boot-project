@@ -1,10 +1,12 @@
 package cn.hiboot.mcn.autoconfigure.jpa;
 
+import cn.hiboot.mcn.core.model.base.FieldSort;
 import cn.hiboot.mcn.core.model.base.PageSort;
 import cn.hiboot.mcn.core.model.result.RestResp;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.util.List;
 
@@ -36,20 +38,15 @@ public interface JpaService<T,PK,R extends BaseRepository<T,PK>> {
     }
 
     default T getOne(T t){
-        List<T> list = list(t);
-        return list.isEmpty() ? null : list.get(0);
+        return getRepository().findOne(Example.of(t)).orElse(null);
     }
 
     default List<T> list(T t){
         return getRepository().findAll(Example.of(t));
     }
 
-    default List<T> list(T t,PageSort pageSort){
-        return page(t,pageSort).getData();
-    }
-
-    default RestResp<List<T>> page(PageSort pageSort){
-        return page(null,pageSort);
+    default List<T> list(T t,List<FieldSort> sort){
+        return getRepository().findAll(Example.of(t),JpaUtils.jpaSort(sort));
     }
 
     default RestResp<List<T>> page(T t, PageSort pageSort){
@@ -60,6 +57,24 @@ public interface JpaService<T,PK,R extends BaseRepository<T,PK>> {
         }else {
             page = getRepository().findAll(Example.of(t),pageRequest);
         }
+        return new RestResp<>(page.getContent(),page.getTotalElements());
+    }
+
+    default T getOne(Specification<T> s){
+        return getRepository().findOne(s).orElse(null);
+    }
+
+    default List<T> list(Specification<T> s){
+        return getRepository().findAll(s);
+    }
+
+    default List<T> list(Specification<T> s,List<FieldSort> sort){
+        return getRepository().findAll(s,JpaUtils.jpaSort(sort));
+    }
+
+    default RestResp<List<T>> page(Specification<T> s, PageSort pageSort){
+        PageRequest pageRequest = PageRequest.of(pageSort.getPageNo(),pageSort.getPageSize(),JpaUtils.jpaSort(pageSort.getSort()));
+        Page<T> page = getRepository().findAll(s,pageRequest);
         return new RestResp<>(page.getContent(),page.getTotalElements());
     }
 
