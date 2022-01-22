@@ -80,9 +80,14 @@ public interface JpaService<T,PK,R extends BaseRepository<T,PK>> {
 
     default void updateById(PK id,T data){
         getRepository().findById(id).ifPresent(d -> {
+            beforeUpdate(d,data);
             JpaUtils.copyTo(data,d);
             getRepository().save(d);
         });
+    }
+
+    default void beforeUpdate(T oldData,T newData){
+
     }
 
 }
