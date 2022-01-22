@@ -5,7 +5,6 @@ import cn.hiboot.mcn.core.model.result.RestResp;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
@@ -15,7 +14,7 @@ import java.util.List;
  * @author DingHao
  * @since 2021/10/11 13:39
  */
-public interface JpaService<T,PK,R extends JpaRepository<T,PK>> {
+public interface JpaService<T,PK,R extends BaseRepository<T,PK>> {
 
     R getRepository();
 
