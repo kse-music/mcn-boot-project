@@ -12,6 +12,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -28,23 +29,33 @@ public class ExampleSpecification<T> implements Specification<T> {
     private EscapeCharacter escapeCharacter = EscapeCharacter.DEFAULT;
     private boolean isOr;
 
-    public ExampleSpecification(PredicateProvider<T> predicateProvider) {
+    private ExampleSpecification(PredicateProvider<T> predicateProvider) {
         this(Collections.singletonList(predicateProvider));
     }
 
-    public ExampleSpecification(List<PredicateProvider<T>> predicateProviders) {
+    private ExampleSpecification(List<PredicateProvider<T>> predicateProviders) {
         this(null,predicateProviders);
     }
 
-    public ExampleSpecification(T t, PredicateProvider<T> predicateProvider) {
+    private ExampleSpecification(T t, PredicateProvider<T> predicateProvider) {
         this(t, Collections.singletonList(predicateProvider));
     }
 
-    public ExampleSpecification(T t, List<PredicateProvider<T>> predicateProviders) {
+    private ExampleSpecification(T t, List<PredicateProvider<T>> predicateProviders) {
         this.predicateProviders = predicateProviders;
         if(t != null){
             this.example = Example.of(t);
         }
+    }
+
+    @SafeVarargs
+    public static <S> ExampleSpecification<S> of(PredicateProvider<S>... predicateProviders){
+        return and(null,predicateProviders);
+    }
+
+    @SafeVarargs
+    public static <S> ExampleSpecification<S> and(S t, PredicateProvider<S>... predicateProviders){
+        return new ExampleSpecification<>(t, Arrays.asList(predicateProviders));
     }
 
     @Override
