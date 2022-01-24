@@ -24,6 +24,11 @@ import java.util.*;
  */
 public abstract class McnUtils {
 
+    /**
+     * 获取一周的第一天和最后一天的日期时间
+     * @param week 0:当前周,-1:上一周,1:下一周
+     * @return firstDate endDate
+     */
     public static Pair<Date,Date> startEndDateTimeInWeek(int week){
         LocalDateTime now = LocalDateTime.now();
         now = (LocalDateTime) with(now,now.getDayOfWeek(),week);
@@ -44,13 +49,18 @@ public abstract class McnUtils {
         return temporal;
     }
 
+    /**
+     * 获取一周的第一天和最后一天的日期
+     * @param week 0:当前周,-1:上一周,1:下一周
+     * @return firstDate endDate
+     */
     public static Pair<Date,Date> startEndDateInWeek(int week){
         LocalDate now = LocalDate.now();
         now = (LocalDate) with(now, now.getDayOfWeek(), week);
         return Pair.with(Date.from(now.with(DayOfWeek.MONDAY).atStartOfDay(ZoneId.systemDefault()).toInstant()),Date.from(now.with(DayOfWeek.SUNDAY).atStartOfDay(ZoneId.systemDefault()).toInstant()));
     }
 
-    public static Date getTime(){
+    public static Date now(){
         return Date.from(Instant.now());
     }
 
