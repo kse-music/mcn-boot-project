@@ -1,6 +1,7 @@
 package cn.hiboot.mcn.core.util;
 
 import cn.hiboot.mcn.core.exception.ServiceException;
+import cn.hiboot.mcn.core.tuples.Pair;
 
 import java.beans.BeanInfo;
 import java.beans.Introspector;
@@ -10,7 +11,9 @@ import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.Instant;
+import java.time.*;
+import java.time.temporal.Temporal;
+import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 
 /**
@@ -20,6 +23,32 @@ import java.util.*;
  * @since 2018/12/22 13:23
  */
 public abstract class McnUtils {
+
+    public static Pair<Date,Date> startEndDateTimeInWeek(int week){
+        LocalDateTime now = LocalDateTime.now();
+        now = (LocalDateTime) with(now,now.getDayOfWeek(),week);
+        return Pair.with(Date.from(now.with(DayOfWeek.MONDAY).withHour(0).withMinute(0).withSecond(0).atZone(ZoneId.systemDefault()).toInstant())
+                ,Date.from(now.with(DayOfWeek.SUNDAY).withHour(23).withMinute(59).withSecond(59).atZone(ZoneId.systemDefault()).toInstant()));
+    }
+
+    private static Temporal with(Temporal temporal,DayOfWeek dayOfWeek,int week){
+        if(week > 0){//下几周的第一天和最后一天
+            for (long i = 0; i < week; i++) {
+                temporal = temporal.with(TemporalAdjusters.next(dayOfWeek));
+            }
+        }else {//上几周的第一天和最后一天
+            for (long i = 0; i < Math.abs(week); i++) {
+                temporal = temporal.with(TemporalAdjusters.previous(dayOfWeek));
+            }
+        }
+        return temporal;
+    }
+
+    public static Pair<Date,Date> startEndDateInWeek(int week){
+        LocalDate now = LocalDate.now();
+        now = (LocalDate) with(now, now.getDayOfWeek(), week);
+        return Pair.with(Date.from(now.with(DayOfWeek.MONDAY).atStartOfDay(ZoneId.systemDefault()).toInstant()),Date.from(now.with(DayOfWeek.SUNDAY).atStartOfDay(ZoneId.systemDefault()).toInstant()));
+    }
 
     public static Date getTime(){
         return Date.from(Instant.now());
