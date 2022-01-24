@@ -12,7 +12,6 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -29,33 +28,23 @@ public class ExampleSpecification<T> implements Specification<T> {
     private EscapeCharacter escapeCharacter = EscapeCharacter.DEFAULT;
     private boolean isOr;
 
-    private ExampleSpecification(PredicateProvider<T> predicateProvider) {
+    ExampleSpecification(PredicateProvider<T> predicateProvider) {
         this(Collections.singletonList(predicateProvider));
     }
 
-    private ExampleSpecification(List<PredicateProvider<T>> predicateProviders) {
+    ExampleSpecification(List<PredicateProvider<T>> predicateProviders) {
         this(null,predicateProviders);
     }
 
-    private ExampleSpecification(T t, PredicateProvider<T> predicateProvider) {
+    ExampleSpecification(T t, PredicateProvider<T> predicateProvider) {
         this(t, Collections.singletonList(predicateProvider));
     }
 
-    private ExampleSpecification(T t, List<PredicateProvider<T>> predicateProviders) {
+    ExampleSpecification(T t, List<PredicateProvider<T>> predicateProviders) {
         this.predicateProviders = predicateProviders;
         if(t != null){
             this.example = Example.of(t);
         }
-    }
-
-    @SafeVarargs
-    public static <S> ExampleSpecification<S> of(PredicateProvider<S>... predicateProviders){
-        return and(null,predicateProviders);
-    }
-
-    @SafeVarargs
-    public static <S> ExampleSpecification<S> and(S t, PredicateProvider<S>... predicateProviders){
-        return new ExampleSpecification<>(t, Arrays.asList(predicateProviders));
     }
 
     @Override
@@ -90,7 +79,7 @@ public class ExampleSpecification<T> implements Specification<T> {
         return this;
     }
 
-    public ExampleSpecification<T> or() {
+    ExampleSpecification<T> or() {
         this.isOr = true;
         return this;
     }
