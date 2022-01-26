@@ -8,7 +8,6 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.DigestUtils;
@@ -31,12 +30,12 @@ public class RepeatCommitAspect {
 
     private final static String REQUEST_HASH_PREFIX = "request:hash:";
 
-    @Autowired
-    private ObjectProvider<Identifier> provider;
+    private final ObjectProvider<Identifier> provider;
 
     private final StringRedisTemplate redisTemplate;
 
-    public RepeatCommitAspect(StringRedisTemplate redisTemplate) {
+    public RepeatCommitAspect(ObjectProvider<Identifier> provider,StringRedisTemplate redisTemplate) {
+        this.provider = provider;
         this.redisTemplate = redisTemplate;
     }
 

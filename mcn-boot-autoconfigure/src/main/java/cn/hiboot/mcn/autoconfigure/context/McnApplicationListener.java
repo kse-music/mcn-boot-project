@@ -40,7 +40,7 @@ public class McnApplicationListener implements GenericApplicationListener {
             ApplicationEnvironmentPreparedEvent event = (ApplicationEnvironmentPreparedEvent) applicationEvent;
             ConfigurableEnvironment environment = event.getEnvironment();
             logPropertySource(environment);
-            checkLogFileName(environment,event.getBootstrapContext());
+            initLogFileChecker(environment,event.getBootstrapContext());
         }else if(applicationEvent instanceof ApplicationStartedEvent){
             SpringBeanUtils.setApplicationContext(((ApplicationStartedEvent) applicationEvent).getApplicationContext());
         }
@@ -62,7 +62,7 @@ public class McnApplicationListener implements GenericApplicationListener {
         }
     }
 
-    private void checkLogFileName(ConfigurableEnvironment environment, ConfigurableBootstrapContext context){
+    private void initLogFileChecker(ConfigurableEnvironment environment, ConfigurableBootstrapContext context){
         if(environment.getProperty("delete.default.log-file.enable", Boolean.class, true)){
             context.registerIfAbsent(LogFileChecker.class, BootstrapRegistry.InstanceSupplier.of(new LogFileChecker(environment)));
         }

@@ -1,4 +1,4 @@
-package cn.hiboot.mcn.autoconfigure.web.validator;
+package cn.hiboot.mcn.autoconfigure.validator;
 
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 

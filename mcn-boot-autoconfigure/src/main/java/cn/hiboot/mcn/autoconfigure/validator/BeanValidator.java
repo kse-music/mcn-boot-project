@@ -1,4 +1,6 @@
-package cn.hiboot.mcn.autoconfigure.web.util;
+package cn.hiboot.mcn.autoconfigure.validator;
+
+import cn.hiboot.mcn.autoconfigure.web.util.SpringBeanUtils;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
@@ -12,7 +14,9 @@ import java.util.Set;
  * @author DingHao
  * @since 2021/6/30 15:40
  */
-public class BeanValidator {
+public abstract class BeanValidator {
+
+    private static volatile Validator validator;
 
     public static <T> void validate(T object) {
         //获得验证器
@@ -25,11 +29,14 @@ public class BeanValidator {
     }
 
     private static Validator getValidator(){
-        try{
-            return SpringBeanUtils.getBean(Validator.class);
-        }catch (Exception e){
-            return Validation.buildDefaultValidatorFactory().getValidator();
+        if(validator == null){
+            try{
+                validator = SpringBeanUtils.getBean(Validator.class);
+            }catch (Exception e){
+                validator = Validation.buildDefaultValidatorFactory().getValidator();
+            }
         }
+        return validator;
     }
 
 }

@@ -1,4 +1,4 @@
-package cn.hiboot.mcn.autoconfigure.web.validator.group;
+package cn.hiboot.mcn.autoconfigure.validator.group;
 
 /**
  * 不校验默认分组

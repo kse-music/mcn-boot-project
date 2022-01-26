@@ -12,7 +12,7 @@ import java.util.Collections;
 
 /**
  *
- * BeanFactoryPostProcessor
+ * McnBeanFactoryRegistryPostProcessor
  * 修改IOC容器即添加AutowiredAnnotationBeanPostProcessor以处理McnAutowired注解
  *
  * @author DingHao

@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * EnvironmentPostProcessor
+ * McnEnvironmentPostProcessor
  * 环境后置处理器
  * 该初始化器是在IOC容器刷新前执行
  * <p>

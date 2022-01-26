@@ -5,7 +5,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.annotation.Order;
 
 /**
- * ApplicationContextInitializer
+ * McnApplicationContextInitializer
  * 应用上下文初始化器
  * 该初始化器是在IOC容器刷新前执行
  *

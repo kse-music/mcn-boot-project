@@ -1,6 +1,7 @@
 package cn.hiboot.mcn.autoconfigure.redis;
 
 import org.aspectj.lang.annotation.Aspect;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -32,8 +33,8 @@ public class RedisToolAutoConfiguration {
     private static class RepeatLockConfiguration{
 
         @Bean
-        public RepeatCommitAspect repeatCommitAspect(StringRedisTemplate redisTemplate) {
-            return new RepeatCommitAspect(redisTemplate);
+        public RepeatCommitAspect repeatCommitAspect(ObjectProvider<Identifier> provider, StringRedisTemplate redisTemplate) {
+            return new RepeatCommitAspect(provider,redisTemplate);
         }
 
         @Bean

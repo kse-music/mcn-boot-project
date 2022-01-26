@@ -1,4 +1,4 @@
-package cn.hiboot.mcn.autoconfigure.web.validator;
+package cn.hiboot.mcn.autoconfigure.validator;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.BeanDefinition;
