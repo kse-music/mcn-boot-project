@@ -1,4 +1,4 @@
-package cn.hiboot.mcn.autoconfigure.web.util;
+package cn.hiboot.mcn.autoconfigure.util;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.Assert;
@@ -12,7 +12,7 @@ import org.springframework.util.Assert;
  */
 public class SpringBeanUtils{
 	
-	private static ApplicationContext applicationContext;
+	private static volatile ApplicationContext context;
 
 	public static Object getBean(String name) {  
 		return getApplicationContext().getBean(name);
@@ -27,14 +27,14 @@ public class SpringBeanUtils{
 	}
 
 	public static void setApplicationContext(ApplicationContext applicationContext) {
-		if(SpringBeanUtils.applicationContext == null || applicationContext.getParent() != null){//if child set child
-			SpringBeanUtils.applicationContext = applicationContext;
+		if(context == null || applicationContext.getParent() != null){//if child set child
+			context = applicationContext;
 		}
 	}
 
 	public static ApplicationContext getApplicationContext() {
-		Assert.notNull(applicationContext,"applicationContext not inject yet");
-		return applicationContext;
+		Assert.notNull(context,"applicationContext not inject yet");
+		return context;
 	}
 
 }

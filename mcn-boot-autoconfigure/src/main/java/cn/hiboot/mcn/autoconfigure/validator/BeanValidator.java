@@ -1,6 +1,6 @@
 package cn.hiboot.mcn.autoconfigure.validator;
 
-import cn.hiboot.mcn.autoconfigure.web.util.SpringBeanUtils;
+import cn.hiboot.mcn.autoconfigure.util.SpringBeanUtils;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
