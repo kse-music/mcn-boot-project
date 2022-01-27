@@ -11,12 +11,12 @@ import org.springframework.data.jpa.domain.Specification;
 import java.util.List;
 
 /**
- * JpaService
+ * BaseService
  *
  * @author DingHao
  * @since 2021/10/11 13:39
  */
-public interface JpaService<T,PK,R extends BaseRepository<T,PK>> {
+public interface BaseService<T,PK,R extends BaseRepository<T,PK>> {
 
     R getRepository();
 
