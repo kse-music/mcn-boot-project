@@ -1,4 +1,4 @@
-package cn.hiboot.mcn.autoconfigure.validator;
+package cn.hiboot.mcn.autoconfigure.validator.annotation;
 
 import javax.validation.Constraint;
 import javax.validation.Payload;
