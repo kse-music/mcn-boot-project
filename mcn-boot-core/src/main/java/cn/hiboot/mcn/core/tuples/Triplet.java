@@ -96,6 +96,7 @@ public final class Triplet<A,B,C>
      * 
      * @param <X> the iterable component type 
      * @param iterable the iterable to be converted to a tuple
+     * @param index index
      * @return the tuple
      */
     public static <X> Triplet<X,X,X> fromIterable(final Iterable<X> iterable, int index) {

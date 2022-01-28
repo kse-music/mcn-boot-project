@@ -51,6 +51,7 @@ public interface Minio {
      * @param objectName 文件名
      * @param objectSize 文件大小
      * @param partSize 分片大小
+     * @param contentType contentType
      * @param stream   文件流
      */
     default void upload(String bucketName,String objectName,long objectSize,long partSize,String contentType, InputStream stream) {

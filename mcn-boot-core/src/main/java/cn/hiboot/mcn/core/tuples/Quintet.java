@@ -99,6 +99,7 @@ public final class Quintet<A,B,C,D,E>
      * 
      * @param <X> the iterable component type 
      * @param iterable the iterable to be converted to a tuple
+     * @param index index
      * @return the tuple
      */
     public static <X> Quintet<X,X,X,X,X> fromIterable(final Iterable<X> iterable, int index) {

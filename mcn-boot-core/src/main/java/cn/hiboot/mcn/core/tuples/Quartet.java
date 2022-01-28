@@ -100,6 +100,7 @@ public final class Quartet<A,B,C,D>
      * 
      * @param <X> the iterable component type 
      * @param iterable the iterable to be converted to a tuple
+     * @param index index
      * @return the tuple
      */
     public static <X> Quartet<X,X,X,X> fromIterable(final Iterable<X> iterable, int index) {

@@ -109,6 +109,7 @@ public final class Decade<A,B,C,D,E,F,G,H,I,J>
      * 
      * @param <X> the iterable component type 
      * @param iterable the iterable to be converted to a tuple
+     * @param index index
      * @return the tuple
      */
     public static <X> Decade<X,X,X,X,X,X,X,X,X,X> fromIterable(final Iterable<X> iterable, int index) {

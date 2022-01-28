@@ -106,6 +106,7 @@ public final class Octet<A,B,C,D,E,F,G,H>
      * 
      * @param <X> the iterable component type 
      * @param iterable the iterable to be converted to a tuple
+     * @param index index
      * @return the tuple
      */
     public static <X> Octet<X,X,X,X,X,X,X,X> fromIterable(final Iterable<X> iterable, int index) {

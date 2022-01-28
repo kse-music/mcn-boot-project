@@ -102,6 +102,7 @@ public final class Sextet<A,B,C,D,E,F>
      * 
      * @param <X> the iterable component type 
      * @param iterable the iterable to be converted to a tuple
+     * @param index index
      * @return the tuple
      */
     public static <X> Sextet<X,X,X,X,X,X> fromIterable(final Iterable<X> iterable, int index) {
