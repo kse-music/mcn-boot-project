@@ -8,18 +8,14 @@ package cn.hiboot.mcn.core.exception;
  */
 public class BaseException extends RuntimeException {
 
-    /**
-     * 通用错误码
-     */
-    public static final int DEFAULT_CODE = 999999;
-    private Integer code = DEFAULT_CODE;
+    private Integer code = ExceptionKeys.DEFAULT_ERROR_CODE;
 
     protected BaseException(Integer code) {
         this(code, ErrorMsg.getErrorMsg(code));
     }
 
     protected BaseException(String msg) {
-        this(DEFAULT_CODE, msg);
+        super(msg);
     }
 
     protected BaseException(Integer code, String msg) {
@@ -42,6 +38,5 @@ public class BaseException extends RuntimeException {
     public void setCode(Integer code) {
         this.code = code;
     }
-
 
 }

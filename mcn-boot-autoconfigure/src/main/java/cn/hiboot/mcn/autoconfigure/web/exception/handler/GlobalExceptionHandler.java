@@ -10,15 +10,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
-import org.springframework.web.HttpMediaTypeException;
-import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-import org.springframework.web.servlet.NoHandlerFoundException;
 
 import javax.servlet.ServletException;
-import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -45,19 +41,17 @@ public class GlobalExceptionHandler extends AbstractExceptionHandler {
 
     @Override
     public RestResp<Object> buildErrorData(HttpServletRequest request, Throwable exception) throws Throwable {
-        int errorCode = BaseException.DEFAULT_CODE;
+        Integer errorCode = null;
         Object data = null;
         if(exception instanceof BaseException){
             errorCode = ((BaseException) exception).getCode();
-        }else if(exception instanceof MethodArgumentTypeMismatchException){
+        }else if(exception instanceof MethodArgumentTypeMismatchException || exception instanceof ServletRequestBindingException || exception instanceof BindException){
             errorCode = ExceptionKeys.PARAM_PARSE_ERROR;
-        }else if(exception instanceof ServletRequestBindingException){
-            errorCode = ExceptionKeys.PARAM_PARSE_ERROR;
-        }else if(exception instanceof BindException){
-            errorCode = ExceptionKeys.PARAM_PARSE_ERROR;
-            BindException ex = (BindException) exception;
-            data = dealBindingResult(ex.getBindingResult());
-        }else if(exception instanceof ServletException){
+            if(exception instanceof BindException){
+                BindException ex = (BindException) exception;
+                data = dealBindingResult(ex.getBindingResult());
+            }
+        }if(exception instanceof ServletException){
             errorCode =  mappingCode(((ServletException) exception));
         }
         ExceptionMessageCustomizer exceptionHandler = exceptionHandlers.getIfUnique();
@@ -76,23 +70,6 @@ public class GlobalExceptionHandler extends AbstractExceptionHandler {
             return new ValidationErrorBean(e.getDefaultMessage(),e.getObjectName(), null);
            }
         ).collect(Collectors.toList());
-    }
-
-    private int mappingCode(ServletException exception) throws ServletException {
-        if(isOverrideHttpError()){
-            int code = ExceptionKeys.HTTP_ERROR_500;
-            if (exception instanceof NoHandlerFoundException) {
-                code = ExceptionKeys.HTTP_ERROR_404;
-            } else if (exception instanceof HttpRequestMethodNotSupportedException) {
-                code = ExceptionKeys.HTTP_ERROR_405;
-            } else if (exception instanceof HttpMediaTypeException) {
-                code = ExceptionKeys.HTTP_ERROR_406;
-            } else if (exception instanceof UnavailableException) {
-                code = ExceptionKeys.HTTP_ERROR_503;
-            }
-            return code;
-        }
-        throw exception;
     }
 
 }

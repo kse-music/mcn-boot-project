@@ -2,16 +2,21 @@ package cn.hiboot.mcn.autoconfigure.web.exception.handler;
 
 import cn.hiboot.mcn.autoconfigure.web.exception.error.GlobalExceptionViewResolver;
 import cn.hiboot.mcn.core.config.McnConstant;
-import cn.hiboot.mcn.core.exception.BaseException;
 import cn.hiboot.mcn.core.exception.ErrorMsg;
+import cn.hiboot.mcn.core.exception.ExceptionKeys;
 import cn.hiboot.mcn.core.model.result.RestResp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 import org.springframework.util.ObjectUtils;
+import org.springframework.web.HttpMediaTypeException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.servlet.NoHandlerFoundException;
 
+import javax.servlet.ServletException;
+import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.Objects;
@@ -24,7 +29,9 @@ import java.util.Objects;
  */
 public abstract class AbstractExceptionHandler implements EnvironmentAware {
 
-    private final Logger log = LoggerFactory.getLogger(getClass());
+    private final Logger log = LoggerFactory.getLogger(AbstractExceptionHandler.class);
+    private static final int DEFAULT_ERROR_CODE = ExceptionKeys.DEFAULT_ERROR_CODE;
+
     private GlobalExceptionViewResolver viewResolver;
     private boolean setValidatorResult;
     private boolean removeFrameworkStack;
@@ -47,30 +54,27 @@ public abstract class AbstractExceptionHandler implements EnvironmentAware {
     }
 
     protected RestResp<Object> buildErrorMessage(Integer code,String msg,Object data,Throwable t){
+        if(code == null){
+            code = DEFAULT_ERROR_CODE;
+        }
         if(removeFrameworkStack){//移除异常栈中非业务应用包下的栈信息
             dealCurrentStackTraceElement(t);
         }
-        //打印异常栈
-        logError(t);
-        RestResp<Object> resp = RestResp.error(code, getExceptionMsg(code,msg,t));
-        if(data != null && setValidatorResult){//参数校验具体错误数据信息
+        logError(t);//打印异常栈
+        if(ObjectUtils.isEmpty(msg)){//这里的消息可能是重写后的
+            msg = t.getMessage();//1.take msg from exception
+            if(ObjectUtils.isEmpty(msg)){
+                msg = ErrorMsg.getErrorMsg(code);//2.take msg from code
+                if(ObjectUtils.isEmpty(msg) && code != DEFAULT_ERROR_CODE){
+                    log.warn("please set code = {} exception message", code);//3.log no exception message
+                }
+            }
+        }
+        RestResp<Object> resp = RestResp.error(code, msg);
+        if(data != null && setValidatorResult){//设置参数校验具体错误数据信息
             resp.setData(data);
         }
         return resp;
-    }
-
-    private String getExceptionMsg(Integer code,String msg,Throwable t){
-        String exMsg = msg;
-        if(ObjectUtils.isEmpty(exMsg)){//acquire msg from exception
-            exMsg = t.getMessage();
-        }
-        if(ObjectUtils.isEmpty(exMsg)){//acquire msg from code
-            exMsg = ErrorMsg.getErrorMsg(code);
-        }
-        if(ObjectUtils.isEmpty(exMsg)){
-            log.warn("please set {} exception message",code == BaseException.DEFAULT_CODE?"":"code = "+code);
-        }
-        return exMsg;
     }
 
     private void logError(Throwable t){
@@ -92,8 +96,21 @@ public abstract class AbstractExceptionHandler implements EnvironmentAware {
         this.overrideHttpError = environment.getProperty("http.error.override",Boolean.class,true);
     }
 
-    protected boolean isOverrideHttpError(){
-        return overrideHttpError;
+    int mappingCode(ServletException exception) throws ServletException {
+        if(overrideHttpError){
+            int code = ExceptionKeys.HTTP_ERROR_500;
+            if (exception instanceof NoHandlerFoundException) {
+                code = ExceptionKeys.HTTP_ERROR_404;
+            } else if (exception instanceof HttpRequestMethodNotSupportedException) {
+                code = ExceptionKeys.HTTP_ERROR_405;
+            } else if (exception instanceof HttpMediaTypeException) {
+                code = ExceptionKeys.HTTP_ERROR_406;
+            } else if (exception instanceof UnavailableException) {
+                code = ExceptionKeys.HTTP_ERROR_503;
+            }
+            return code;
+        }
+        throw exception;
     }
 
     public void setErrorViewResolver(GlobalExceptionViewResolver viewResolver) {

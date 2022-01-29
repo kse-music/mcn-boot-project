@@ -2,11 +2,11 @@ package cn.hiboot.mcn.core.exception;
 
 /**
  *
- *  <p>3xxxx:通用错误码定义</p>
- *  <p>5xxxx:业务相关错误码定义</p>
- *  <p>7xxxx:未知错误码</p>
- *  <p>8xxxx:Http相关错误码定义</p>
- *  <p>9xxxx:统一错误码及第三方服务错误码定义</p>
+ *  <p>3xxxxx:通用错误码定义</p>
+ *  <p>5xxxxx:业务相关错误码定义</p>
+ *  <p>7xxxxx:未知错误码</p>
+ *  <p>8xxxxx:Http相关错误码定义</p>
+ *  <p>9xxxxx:统一错误码及第三方服务错误码定义</p>
  *
  *  @author DingHao
  *  @since 2021/11/30 22:46
@@ -38,5 +38,7 @@ public interface ExceptionKeys {
     int THIRD_PARTY_ERROR = 900001;
     int REMOTE_SERVICE_ERROR = 900002;
     int REMOTE_DATA_PARSE_ERROR = 900003;
+
+    int DEFAULT_ERROR_CODE = 999999;
 
 }
