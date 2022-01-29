@@ -18,8 +18,8 @@ import org.springframework.core.annotation.Order;
 public class McnApplicationContextInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext>{
 
     @Override
-    public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
-        configurableApplicationContext.addBeanFactoryPostProcessor(new McnBeanFactoryRegistryPostProcessor(configurableApplicationContext.getEnvironment()));
+    public void initialize(ConfigurableApplicationContext context) {
+        context.addBeanFactoryPostProcessor(new McnBeanFactoryRegistryPostProcessor(context.getEnvironment()));
     }
 
 }

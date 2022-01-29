@@ -1,14 +1,10 @@
 package cn.hiboot.mcn.autoconfigure.context;
 
-import cn.hiboot.mcn.core.service.McnAutowired;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.core.env.ConfigurableEnvironment;
-
-import java.util.Collections;
 
 /**
  *
@@ -33,11 +29,6 @@ public class McnBeanFactoryRegistryPostProcessor implements BeanDefinitionRegist
 
     @Override
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
-        //https://github.com/spring-projects/spring-framework/issues/24003
-        AutowiredAnnotationBeanPostProcessor autowiredAnnotationBeanPostProcessor = new AutowiredAnnotationBeanPostProcessor();
-        autowiredAnnotationBeanPostProcessor.setAutowiredAnnotationTypes(Collections.singleton(McnAutowired.class));
-        autowiredAnnotationBeanPostProcessor.setBeanFactory(beanFactory);
-        beanFactory.addBeanPostProcessor(autowiredAnnotationBeanPostProcessor);
         beanFactory.addBeanPostProcessor(new McnBeanPostProcessor(environment));
     }
 
