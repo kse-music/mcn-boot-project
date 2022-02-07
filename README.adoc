@@ -3,7 +3,7 @@
 
 MCN是一个基于SpringBoot和SpringCloud的一个快速构建JavaWeb系统的工具。MCN在SpringBoot的基础上提供更多的默认配置，比如mybatis多数据源配置、跨域、编码等等一些SpringBoot没有的或者扩展的配置。
 
-SpringBoot的问世不外乎就是之前的配置繁杂，但其实SpringBoot不算是一个严格意义上的框架（Spring是）。框架从字面上理解就是"框住"你，即遵循框架制定的规则来写代码！其实,SpringBoot就是把以前我们自己在开发时需要做的一些配置，直接帮我们配置好，拿来即用。
+SpringBoot其实不算是一个严格意义上的框架（Spring是）。框架从字面上理解就是"框住"你，即遵循框架制定的规则来写代码。而SpringBoot就是按照我们平时的开发习惯直接将配置配好，拿来即用。
 
 image::http://cdn.hiboot.cn/5612db4209ee4b3cacd5993c17fd6645.jpg[]
 
@@ -16,7 +16,7 @@ image::http://cdn.hiboot.cn/5612db4209ee4b3cacd5993c17fd6645.jpg[]
 . 安装JDK版本1.8+
 . 使用maven(版本3.6.3+)管理包依赖
 
-:mcn-version: 2.5.12
+:mcn-version: 2.5.13
 
 == 项目搭建
 
@@ -294,7 +294,7 @@ public class RestResp<T> {
 
 ==== 内置属性源
 
-系统内置三种属性源名称分别是：mcn-global-unique、mcn-default、mcn-map
+系统内置三种属性源名称分别是：mcn-global-unique、mcn-map、mcn-default
 
 * mcn-global-unique
 ....
