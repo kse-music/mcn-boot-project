@@ -43,9 +43,25 @@ public abstract class JacksonUtils {
         }
     }
 
+    public static <T> T fromJson(String json, TypeReference<T> reference) {
+        try {
+            return JacksonUtils.getObjectMapper().readValue(json, reference);
+        } catch (Exception e) {
+            throw newInstance(e);
+        }
+    }
+
     public static <T> List<T> fromList(String content,Class<T> clazz){
         try {
             return getObjectMapper().readValue(content,getObjectMapper().getTypeFactory().constructCollectionType(List.class, clazz));
+        } catch (JsonProcessingException e) {
+            throw newInstance(e);
+        }
+    }
+
+    public static List<Map<String,Object>> fromListMap(String content){
+        try {
+            return getObjectMapper().readValue(content,getObjectMapper().getTypeFactory().constructCollectionType(List.class,Map.class));
         } catch (JsonProcessingException e) {
             throw newInstance(e);
         }
@@ -72,14 +88,6 @@ public abstract class JacksonUtils {
         try {
             return getObjectMapper().readValue(content,getObjectMapper().getTypeFactory().constructMapType(Map.class,keyClass,valueClass));
         } catch (JsonProcessingException e) {
-            throw newInstance(e);
-        }
-    }
-
-    public static <T> T fromJson(String json, TypeReference<T> reference) {
-        try {
-            return JacksonUtils.getObjectMapper().readValue(json, reference);
-        } catch (Exception e) {
             throw newInstance(e);
         }
     }

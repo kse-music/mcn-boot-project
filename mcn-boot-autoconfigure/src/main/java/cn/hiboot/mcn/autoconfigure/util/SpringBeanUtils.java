@@ -10,7 +10,7 @@ import org.springframework.util.Assert;
  * @author DingHao
  * @since 2021/6/30 15:40
  */
-public class SpringBeanUtils{
+public abstract class SpringBeanUtils{
 	
 	private static volatile ApplicationContext context;
 
