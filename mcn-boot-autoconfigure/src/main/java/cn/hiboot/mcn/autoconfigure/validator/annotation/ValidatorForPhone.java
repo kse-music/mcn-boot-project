@@ -16,19 +16,11 @@ public class ValidatorForPhone implements ConstraintValidator<Phone, String> {
 
     private final Pattern pattern = Pattern.compile("^\\d{11}$");
 
-    private void config(ConstraintValidatorContext context) {
-        //禁用默认提示信息
-        context.disableDefaultConstraintViolation();
-        //设置提示语
-        context.buildConstraintViolationWithTemplate("The phone number not correct").addConstraintViolation();
-    }
-
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
         if(McnUtils.isNullOrEmpty(value)){
             return true;
         }
-        config(context);
         return pattern.matcher(value).find();
     }
 
