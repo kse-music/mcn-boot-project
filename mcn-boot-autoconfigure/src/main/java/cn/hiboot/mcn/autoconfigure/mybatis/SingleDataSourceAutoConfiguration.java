@@ -1,6 +1,6 @@
 package cn.hiboot.mcn.autoconfigure.mybatis;
 
-import cn.hiboot.mcn.core.config.McnConstant;
+import cn.hiboot.mcn.autoconfigure.config.ConfigProperties;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.mapper.MapperScannerConfigurer;
@@ -34,7 +34,7 @@ public class SingleDataSourceAutoConfiguration implements BeanDefinitionRegistry
         if(registry.containsBeanDefinition(name)){
             BeanDefinition beanDefinition = registry.getBeanDefinition(name);
             beanDefinition.getPropertyValues().removePropertyValue("annotationClass");
-            String toScanPkg = environment.getProperty(McnConstant.APP_BASE_PACKAGE) + ".dao";
+            String toScanPkg = environment.getProperty(ConfigProperties.APP_BASE_PACKAGE) + ".dao";
             String additionalPkg = environment.getProperty("mapper.scan.additional-package", "");
             if (StringUtils.hasText(additionalPkg)) {
                 toScanPkg += "," + additionalPkg;

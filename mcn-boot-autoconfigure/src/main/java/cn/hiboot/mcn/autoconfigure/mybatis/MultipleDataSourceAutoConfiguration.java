@@ -1,7 +1,7 @@
 package cn.hiboot.mcn.autoconfigure.mybatis;
 
 import cn.hiboot.mcn.autoconfigure.condition.ConditionalOnPropertyValueNumber;
-import cn.hiboot.mcn.core.config.McnConstant;
+import cn.hiboot.mcn.autoconfigure.config.ConfigProperties;
 import com.zaxxer.hikari.HikariDataSource;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionFactoryBean;
@@ -52,7 +52,7 @@ public class MultipleDataSourceAutoConfiguration{
         @Override
         public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry){
             String[] dbs = environment.getProperty(MULTIPLY_DATASOURCE_PREFIX + ".name", String[].class,new String[0]);
-            String basePackage = environment.getProperty(McnConstant.APP_BASE_PACKAGE);
+            String basePackage = environment.getProperty(ConfigProperties.APP_BASE_PACKAGE);
             ResourcePatternResolver pathResolver = new PathMatchingResourcePatternResolver();
 
             for (String dsName : dbs) {

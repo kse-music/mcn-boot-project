@@ -27,7 +27,7 @@ public class SpringBeanUtils{
 	}
 
 	public static void setApplicationContext(ApplicationContext applicationContext) {
-		if(context == null || applicationContext.getParent() != null){//if child set child
+		if(context == null || applicationContext.getParent() != null){//if context is child
 			context = applicationContext;
 		}
 	}

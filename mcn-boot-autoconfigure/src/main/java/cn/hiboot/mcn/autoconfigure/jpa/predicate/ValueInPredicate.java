@@ -15,6 +15,7 @@ import java.util.List;
  * @since 2022/1/22 11:29
  */
 public class ValueInPredicate<T, E> extends AbstractPredicateProvider<T> {
+
     private final List<E> valueList;
 
     public ValueInPredicate(String fieldName, List<E> valueList) {

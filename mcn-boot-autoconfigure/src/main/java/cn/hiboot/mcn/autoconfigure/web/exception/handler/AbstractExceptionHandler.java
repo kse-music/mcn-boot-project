@@ -1,7 +1,7 @@
 package cn.hiboot.mcn.autoconfigure.web.exception.handler;
 
+import cn.hiboot.mcn.autoconfigure.config.ConfigProperties;
 import cn.hiboot.mcn.autoconfigure.web.exception.error.GlobalExceptionViewResolver;
-import cn.hiboot.mcn.core.config.McnConstant;
 import cn.hiboot.mcn.core.exception.ErrorMsg;
 import cn.hiboot.mcn.core.exception.ExceptionKeys;
 import cn.hiboot.mcn.core.model.result.RestResp;
@@ -90,7 +90,7 @@ public abstract class AbstractExceptionHandler implements EnvironmentAware {
 
     @Override
     public void setEnvironment(Environment environment) {
-        this.basePackage = environment.getProperty(McnConstant.APP_BASE_PACKAGE);
+        this.basePackage = environment.getProperty(ConfigProperties.APP_BASE_PACKAGE);
         this.removeFrameworkStack = environment.getProperty("framework.stack.remove.enable",Boolean.class,true);
         this.setValidatorResult = environment.getProperty("validator.result.return.enable",Boolean.class,true);
         this.overrideHttpError = environment.getProperty("http.error.override",Boolean.class,true);

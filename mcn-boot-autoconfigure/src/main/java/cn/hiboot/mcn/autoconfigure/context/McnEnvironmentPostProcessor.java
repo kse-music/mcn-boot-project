@@ -1,7 +1,6 @@
 package cn.hiboot.mcn.autoconfigure.context;
 
 import cn.hiboot.mcn.autoconfigure.config.ConfigProperties;
-import cn.hiboot.mcn.core.config.McnConstant;
 import cn.hiboot.mcn.core.util.McnUtils;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.env.EnvironmentPostProcessor;
@@ -34,7 +33,7 @@ public class McnEnvironmentPostProcessor implements EnvironmentPostProcessor, Or
 
     private static final String BOOTSTRAP_EAGER_LOAD = "mcn.bootstrap.eagerLoad.enable";
     private static final String MCN_SOURCE_NAME = "mcn-global-unique";
-    private static final String MCN_DEFAULT_PROPERTY_SOURCE_NAME = McnConstant.DEFAULT_PROPERTY_SOURCE_NAME;
+    private static final String MCN_DEFAULT_PROPERTY_SOURCE_NAME = ConfigProperties.DEFAULT_PROPERTY_SOURCE_NAME;
     private static final String BOOTSTRAP_PROPERTY_SOURCE_NAME = "bootstrap";
 
     @Override
@@ -91,7 +90,7 @@ public class McnEnvironmentPostProcessor implements EnvironmentPostProcessor, Or
         Map<String, Object> mapProp = new HashMap<>();
         if (Objects.nonNull(mainApplicationClass)) {
             String packageName = ClassUtils.getPackageName(mainApplicationClass);
-            mapProp.put(McnConstant.APP_BASE_PACKAGE, packageName);
+            mapProp.put(ConfigProperties.APP_BASE_PACKAGE, packageName);
             mapProp.put("logging.level." + packageName + ".dao", "info");//do not println query statement
             String projectVersion = McnUtils.getVersion(mainApplicationClass);
             if (projectVersion != null) {
