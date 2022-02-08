@@ -185,45 +185,37 @@ public abstract class McnUtils {
         return true;
     }
 
-    public static List<String> readAllLine(String filePath) throws IOException {
-        return Files.readAllLines(buildPath(filePath));
-    }
-
-    public static String readLine(String path) throws IOException {
-        return readAllLine(path).get(0);
-    }
-
-    public static byte[] readAllBytes(String filePath) throws IOException {
-        return Files.readAllBytes(buildPath(filePath));
-    }
-
-    public static long copyFile(String source,String target) throws IOException {
-        checkTarget(target);
-        return Files.copy(buildPath(source),Files.newOutputStream(buildPath(target)));
-    }
-
-    public static long copyFile(File source,File target) throws IOException {
-        return copyFile(source.getAbsolutePath(),target.getAbsolutePath());
-    }
-
-    public static long copyFile(InputStream in,String target) throws IOException {
-        checkTarget(target);
-        return Files.copy(in,buildPath(target));
-    }
-
-    public static long copyFile(InputStream in,File target) throws IOException {
-        return copyFile(in,target.getAbsolutePath());
-    }
-
-    private static void checkTarget(String target){
-        File d = new File(target).getParentFile();
-        if(!d.exists()){
-            d.mkdirs();
+    public static List<String> readAllLine(String filePath) {
+        try {
+            return Files.readAllLines(Paths.get(filePath));
+        } catch (IOException e) {
+            throw ServiceException.newInstance("read "+filePath+" failed",e);
         }
     }
 
-    private static Path buildPath(String filePath){
-        return Paths.get(filePath);
+    public static String readLine(String path) {
+        List<String> list = readAllLine(path);
+        return list.isEmpty() ? null : list.get(0);
+    }
+
+    public static byte[] readAllBytes(String filePath) {
+        try {
+            return Files.readAllBytes(Paths.get(filePath));
+        } catch (IOException e) {
+            throw ServiceException.newInstance("read "+filePath+" failed",e);
+        }
+    }
+
+    public static long copyFile(InputStream in,Path target) {
+        try{
+            Path parent = target.getParent();
+            if(!Files.exists(parent)){
+                Files.createDirectories(parent);
+            }
+            return Files.copy(in,target);
+        }catch (IOException e){
+            throw ServiceException.newInstance("copy file failed",e);
+        }
     }
 
     public static String getVersion(Class<?> clazz){

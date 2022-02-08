@@ -17,7 +17,7 @@ public interface BatchOperation {
     int DEFAULT_BATCH_SIZE = 1000;
 
     /**
-     * 默认1w执行一次
+     * 默认1k执行一次
      * @return 批量大小
      */
     default int getBatchSize(){
