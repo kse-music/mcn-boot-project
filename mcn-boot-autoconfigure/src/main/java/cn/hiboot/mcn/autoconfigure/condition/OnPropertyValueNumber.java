@@ -63,14 +63,14 @@ class OnPropertyValueNumber extends SpringBootCondition {
     }
 
     private ConditionOutcome determineOutcome(AnnotationAttributes annotationAttributes, PropertyResolver resolver) {
-        OnPropertyValueNumber.Spec spec = new OnPropertyValueNumber.Spec(annotationAttributes);
-        return spec.check(resolver);
+        return new OnPropertyValueNumber.Spec(annotationAttributes).check(resolver);
     }
 
     private static class Spec {
 
         private final String prefix;
         private final String name;
+        private final int min;
         private final int max;
 
         Spec(AnnotationAttributes annotationAttributes) {
@@ -79,6 +79,7 @@ class OnPropertyValueNumber extends SpringBootCondition {
                 prefix = prefix + ".";
             }
             this.prefix = prefix;
+            this.min = annotationAttributes.getNumber("min");
             this.max = annotationAttributes.getNumber("max");
             this.name = annotationAttributes.getString("name").trim();
             Assert.state(McnUtils.isNotNullAndEmpty(name),"The name or value attribute of @ConditionalOnPropertyValueNumber must be specified");
@@ -86,13 +87,11 @@ class OnPropertyValueNumber extends SpringBootCondition {
 
         private ConditionOutcome check(PropertyResolver resolver) {
             String key = this.prefix + name;
-            if (resolver.containsProperty(key)) {
-                String[] dbs = resolver.getProperty(key, String[].class);
-                if(dbs != null && dbs.length > 1 && dbs.length < max){
-                    return ConditionOutcome.match("match " + dbs.length + " value");
-                }
+            String[] dbs = resolver.getProperty(key, String[].class);
+            if(dbs != null && dbs.length >= min && dbs.length <= max){
+                return ConditionOutcome.match("match " + dbs.length + " value");
             }
-            return ConditionOutcome.noMatch("no value number > 1");
+            return ConditionOutcome.noMatch("no value number >= " + min + " and number <= " + max);
         }
 
 
@@ -100,6 +99,7 @@ class OnPropertyValueNumber extends SpringBootCondition {
         public String toString() {
             return "(" +
                     this.prefix + this.name +
+                    ",min = " + this.min +
                     ",max = " + this.max +
                     ")";
         }

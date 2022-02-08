@@ -15,7 +15,7 @@ import java.lang.annotation.Target;
  * @since 2022/1/7 10:04
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.TYPE, ElementType.METHOD })
+@Target({ElementType.TYPE, ElementType.METHOD})
 @Conditional(OnPropertyValueNumber.class)
 public @interface ConditionalOnPropertyValueNumber {
 
@@ -26,6 +26,8 @@ public @interface ConditionalOnPropertyValueNumber {
 
     @AliasFor("value")
     String name() default "";
+
+    int min() default 1;
 
     int max() default 10;
 
