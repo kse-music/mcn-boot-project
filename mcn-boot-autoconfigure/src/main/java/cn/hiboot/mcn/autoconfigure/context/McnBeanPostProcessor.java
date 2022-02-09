@@ -31,27 +31,60 @@ public class McnBeanPostProcessor implements BeanPostProcessor{
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
         if(bean instanceof ObjectMapper){
             JacksonUtils.setObjectMapper((ObjectMapper) bean);
-        }else if(bean instanceof MongoProperties && StringUtils.hasText(environment.getProperty("mongo.addrs"))){//使用了自定义配置变量
-            String mongoAddress = environment.getProperty("mongo.addrs");
-            MongoProperties mongoProperties = (MongoProperties) bean;
-            String username = mongoProperties.getUsername();
+        }else if(bean instanceof MongoProperties){
+            checkCustomMongoConfig((MongoProperties) bean);
+        }else if(bean instanceof RedisProperties){
+            checkCustomRedisConfig((RedisProperties) bean);
+        }
+        return bean;
+    }
+
+    private void checkCustomMongoConfig(MongoProperties mongoProperties){
+        if (mongoProperties.getUri() != null || hasCustomAddress(mongoProperties) || hasCustomCredentials(mongoProperties) || hasReplicaSet(mongoProperties)) {
+            return;
+        }
+        String mongoAddress = environment.getProperty("mongo.addrs");
+        //使用了自定义配置变量
+        if(StringUtils.hasText(mongoAddress)){
+            String username = environment.getProperty("mongo.username");
             String password = environment.getProperty("mongo.password");
             String uri = mongoAddress;
             if(StringUtils.hasText(username) && StringUtils.hasText(password)){
                 uri = replace(username)+":" + replace(password) + "@" + mongoAddress;
             }
             mongoProperties.setUri("mongodb://"+uri);
-        }else if(bean instanceof RedisProperties && StringUtils.hasText(environment.getProperty("redis.addrs"))){//使用了自定义配置变量
-            RedisProperties redisProperties = (RedisProperties) bean;
+        }
+    }
+
+    private boolean hasCustomCredentials(MongoProperties properties) {
+        return properties.getUsername() != null && properties.getPassword() != null;
+    }
+
+    private boolean hasCustomAddress(MongoProperties properties) {
+        return properties.getHost() != null || properties.getPort() != null;
+    }
+
+    private boolean hasReplicaSet(MongoProperties properties) {
+        return properties.getReplicaSetName() != null;
+    }
+
+    private String replace(String str){
+        return str.replace(":","%3A").replace("@","%40").replace("/","%2F");
+    }
+
+    private void checkCustomRedisConfig(RedisProperties redisProperties){
+        String redisAddress = environment.getProperty("redis.addrs");
+        //使用了自定义配置变量
+        if(StringUtils.hasText(redisAddress)){
             String master = environment.getProperty("redis.sentinel");
-            List<String> hosts = Arrays.asList(StringUtils.commaDelimitedListToStringArray(environment.getProperty("redis.addrs")));
-            if(StringUtils.hasText(master)){//哨兵
+            List<String> hosts = Arrays.asList(StringUtils.commaDelimitedListToStringArray(redisAddress));
+            if(StringUtils.hasText(master)){//sentinel
                 RedisProperties.Sentinel sentinel = new RedisProperties.Sentinel();
                 sentinel.setMaster(master);
                 sentinel.setNodes(hosts);
                 redisProperties.setSentinel(sentinel);
             }else {
-                if(hosts.size() == 1){//单机
+                if(hosts.size() == 1){//standalone
                     String[] hp = hosts.get(0).split(":");
                     redisProperties.setHost(hp[0]);
                     redisProperties.setPort(Integer.parseInt(hp[1]));
@@ -62,11 +95,6 @@ public class McnBeanPostProcessor implements BeanPostProcessor{
                 }
             }
         }
-        return bean;
-    }
-
-    private String replace(String str){
-        return str.replace(":","%3A").replace("@","%40").replace("/","%2F");
     }
 
 }
