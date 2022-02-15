@@ -23,7 +23,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-        <excludeGroupIds>org.projectlombok,org.mapstruct</excludeGroupIds>
+        <excludeGroupIds>org.projectlombok</excludeGroupIds>
     </properties>
 
     <build>

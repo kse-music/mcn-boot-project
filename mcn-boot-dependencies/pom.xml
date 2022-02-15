@@ -46,6 +46,7 @@
         <spring-cloud-alibaba.version>2021.1</spring-cloud-alibaba.version>
         <minio.version>8.3.4</minio.version>
         <xxl-job.version>2.3.0</xxl-job.version>
+        <hutool.version>5.7.20</hutool.version>
     </properties>
 
     <dependencyManagement>
@@ -72,6 +73,12 @@
                 <version>${spring-cloud-alibaba.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>cn.hutool</groupId>
+                <artifactId>hutool-crypto</artifactId>
+                <version>${hutool.version}</version>
             </dependency>
 
             <dependency>
