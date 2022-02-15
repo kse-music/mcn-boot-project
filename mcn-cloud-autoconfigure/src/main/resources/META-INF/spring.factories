@@ -4,4 +4,4 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
   cn.hiboot.mcn.cloud.discover.ServiceRegisterAutoConfiguration
 
 org.springframework.cloud.bootstrap.BootstrapConfiguration=\
-  cn.hiboot.mcn.cloud.encryptor.EncryptorAutoConfiguration
+  cn.hiboot.mcn.cloud.encryptor.SM4AutoConfiguration
