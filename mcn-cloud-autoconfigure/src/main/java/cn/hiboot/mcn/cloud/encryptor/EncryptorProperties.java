@@ -24,15 +24,15 @@ public class EncryptorProperties {
     }
 
     public static class SM4{
-        private boolean enable;
+        private boolean base64;
         private String key;
 
-        public boolean isEnable() {
-            return enable;
+        public boolean isBase64() {
+            return base64;
         }
 
-        public void setEnable(boolean enable) {
-            this.enable = enable;
+        public void setBase64(boolean base64) {
+            this.base64 = base64;
         }
 
         public String getKey() {

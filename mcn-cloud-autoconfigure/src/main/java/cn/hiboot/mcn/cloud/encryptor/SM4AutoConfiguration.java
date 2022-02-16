@@ -21,23 +21,25 @@ import java.nio.charset.StandardCharsets;
 @ConditionalOnClass({TextEncryptor.class,SymmetricCrypto.class})
 @EnableConfigurationProperties(EncryptorProperties.class)
 @Order(0)
-@ConditionalOnProperty(prefix = EncryptorProperties.KEY+".sm4",name = "enable",havingValue = "true",matchIfMissing = true)
+@ConditionalOnProperty(prefix = EncryptorProperties.KEY+".sm4",name = "key")
 public class SM4AutoConfiguration implements TextEncryptor {
 
+    private final boolean base64;
     private final SymmetricCrypto sm4;
 
     public SM4AutoConfiguration(EncryptorProperties encryptorProperties) {
         this.sm4 = SmUtil.sm4(encryptorProperties.getSm4().getKey().getBytes(StandardCharsets.UTF_8));
+        this.base64 = encryptorProperties.getSm4().isBase64();
     }
 
     @Override
     public String encrypt(String s) {
-        return sm4.encryptHex(s);
+        return base64 ? sm4.encryptBase64(s) : sm4.encryptHex(s);
     }
 
     @Override
     public String decrypt(String s) {
-            return sm4.decryptStr(s);
-        }
+        return sm4.decryptStr(s);
+    }
 
 }
