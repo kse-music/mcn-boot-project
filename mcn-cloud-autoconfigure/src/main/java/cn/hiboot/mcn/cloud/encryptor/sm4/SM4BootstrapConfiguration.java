@@ -1,4 +1,4 @@
-package cn.hiboot.mcn.cloud.encryptor;
+package cn.hiboot.mcn.cloud.encryptor.sm4;
 
 import cn.hutool.crypto.SmUtil;
 import cn.hutool.crypto.symmetric.SymmetricCrypto;
@@ -12,7 +12,7 @@ import org.springframework.security.crypto.encrypt.TextEncryptor;
 import java.nio.charset.StandardCharsets;
 
 /**
- * EncryptorAutoConfiguration
+ * SM4加密配置
  *
  * @author DingHao
  * @since 2022/2/15 14:01
@@ -22,24 +22,29 @@ import java.nio.charset.StandardCharsets;
 @EnableConfigurationProperties(EncryptorProperties.class)
 @Order(0)
 @ConditionalOnProperty(prefix = EncryptorProperties.KEY+".sm4",name = "key")
-public class SM4AutoConfiguration implements TextEncryptor {
+public class SM4BootstrapConfiguration {
 
-    private final boolean base64;
-    private final SymmetricCrypto sm4;
+    @Configuration(proxyBeanMethods = false)
+    private static class SM4Encryptor implements TextEncryptor {
 
-    public SM4AutoConfiguration(EncryptorProperties encryptorProperties) {
-        this.sm4 = SmUtil.sm4(encryptorProperties.getSm4().getKey().getBytes(StandardCharsets.UTF_8));
-        this.base64 = encryptorProperties.getSm4().isBase64();
-    }
+        private final boolean base64;
+        private final SymmetricCrypto sm4;
 
-    @Override
-    public String encrypt(String s) {
-        return base64 ? sm4.encryptBase64(s) : sm4.encryptHex(s);
-    }
+        public SM4Encryptor(EncryptorProperties encryptorProperties) {
+            this.sm4 = SmUtil.sm4(encryptorProperties.getSm4().getKey().getBytes(StandardCharsets.UTF_8));
+            this.base64 = encryptorProperties.getSm4().isBase64();
+        }
 
-    @Override
-    public String decrypt(String s) {
-        return sm4.decryptStr(s);
+        @Override
+        public String encrypt(String s) {
+            return base64 ? sm4.encryptBase64(s) : sm4.encryptHex(s);
+        }
+
+        @Override
+        public String decrypt(String s) {
+            return sm4.decryptStr(s);
+        }
+
     }
 
 }

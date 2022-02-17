@@ -1,4 +1,4 @@
-package cn.hiboot.mcn.cloud.encryptor;
+package cn.hiboot.mcn.cloud.encryptor.sm4;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
