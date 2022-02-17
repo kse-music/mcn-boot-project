@@ -1,6 +1,9 @@
 package cn.hiboot.mcn.cloud.encryptor.sm4;
 
+import cn.hutool.crypto.Mode;
+import cn.hutool.crypto.Padding;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
 /**
  * EncryptorProperties
@@ -25,6 +28,10 @@ public class EncryptorProperties {
 
     public static class SM4{
         private boolean base64;
+        @NestedConfigurationProperty
+        private Mode mode;
+        @NestedConfigurationProperty
+        private Padding padding;
         private String key;
 
         public boolean isBase64() {
@@ -33,6 +40,22 @@ public class EncryptorProperties {
 
         public void setBase64(boolean base64) {
             this.base64 = base64;
+        }
+
+        public Mode getMode() {
+            return mode;
+        }
+
+        public void setMode(Mode mode) {
+            this.mode = mode;
+        }
+
+        public Padding getPadding() {
+            return padding;
+        }
+
+        public void setPadding(Padding padding) {
+            this.padding = padding;
         }
 
         public String getKey() {

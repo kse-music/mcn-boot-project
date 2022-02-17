@@ -1,6 +1,7 @@
 package cn.hiboot.mcn.cloud.encryptor.sm4;
 
 import cn.hutool.crypto.SmUtil;
+import cn.hutool.crypto.symmetric.SM4;
 import cn.hutool.crypto.symmetric.SymmetricCrypto;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -31,7 +32,12 @@ public class SM4BootstrapConfiguration {
         private final SymmetricCrypto sm4;
 
         public SM4Encryptor(EncryptorProperties encryptorProperties) {
-            this.sm4 = SmUtil.sm4(encryptorProperties.getSm4().getKey().getBytes(StandardCharsets.UTF_8));
+            EncryptorProperties.SM4 sm4 = encryptorProperties.getSm4();
+            if(sm4.getMode() != null && sm4.getPadding() != null){
+                this.sm4 = new SM4(sm4.getMode(),sm4.getPadding(),sm4.getKey().getBytes(StandardCharsets.UTF_8));
+            }else {
+                this.sm4 = SmUtil.sm4(sm4.getKey().getBytes(StandardCharsets.UTF_8));
+            }
             this.base64 = encryptorProperties.getSm4().isBase64();
         }
 
