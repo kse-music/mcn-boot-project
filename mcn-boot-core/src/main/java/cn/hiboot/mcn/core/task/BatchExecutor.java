@@ -3,7 +3,6 @@ package cn.hiboot.mcn.core.task;
 import cn.hiboot.mcn.core.util.McnAssert;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -19,7 +18,6 @@ public class BatchExecutor<T> {
     private List<T> data;
     private final Consumer<List<T>> consumer;
     private final int batchSize;
-    private boolean sync;
     private boolean finish;
 
     public BatchExecutor(int batchSize,Consumer<List<T>> consumer) {
@@ -35,41 +33,37 @@ public class BatchExecutor<T> {
         this.taskThreadPool = taskThreadPool;
     }
 
-    public BatchExecutor<T> sync(){
-        this.sync = true;
-        return this;
-    }
-
     public void add(T d){
         if(finish){
             return;
         }
         data.add(d);
         if(data.size() % batchSize == 0){
-            doExecute();
+            doExecute(data);
+            data = new ArrayList<>(batchSize);
         }
     }
 
-    private void doExecute(){
+    private void doExecute(List<T> data){
         if(taskThreadPool == null){
             consumer.accept(data);
         }else {
-            List<T> d = data;
-            taskThreadPool.execute(() -> consumer.accept(d));
+            taskThreadPool.execute(() -> consumer.accept(data));
         }
         if(finish){
-            data = Collections.emptyList();
-            return;
+            this.data = null;
         }
-        data = new ArrayList<>(batchSize);
     }
 
     public void finish(){
+        finish(false);
+    }
+
+    public void finish(boolean sync){
         this.finish = true;
-        if(data.isEmpty()){
-            return;
+        if(!data.isEmpty()){
+            doExecute(data);
         }
-        doExecute();
         if(sync && taskThreadPool != null){
             taskThreadPool.closeUntilAllTaskFinish();
         }
