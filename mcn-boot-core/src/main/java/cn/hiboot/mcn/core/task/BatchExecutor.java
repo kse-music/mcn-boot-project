@@ -18,7 +18,6 @@ public class BatchExecutor<T> {
     private List<T> data;
     private final Consumer<List<T>> consumer;
     private final int batchSize;
-    private boolean finish;
 
     public BatchExecutor(int batchSize,Consumer<List<T>> consumer) {
         this(batchSize,consumer,null);
@@ -34,13 +33,13 @@ public class BatchExecutor<T> {
     }
 
     public void add(T d){
-        if(finish){
+        if(data == null){
             return;
         }
         data.add(d);
         if(data.size() % batchSize == 0){
             doExecute(data);
-            data = new ArrayList<>(batchSize);
+            this.data = new ArrayList<>(batchSize);
         }
     }
 
@@ -50,9 +49,6 @@ public class BatchExecutor<T> {
         }else {
             taskThreadPool.execute(() -> consumer.accept(data));
         }
-        if(finish){
-            this.data = null;
-        }
     }
 
     public void finish(){
@@ -60,10 +56,10 @@ public class BatchExecutor<T> {
     }
 
     public void finish(boolean sync){
-        this.finish = true;
         if(!data.isEmpty()){
             doExecute(data);
         }
+        this.data = null;
         if(sync && taskThreadPool != null){
             taskThreadPool.closeUntilAllTaskFinish();
         }
