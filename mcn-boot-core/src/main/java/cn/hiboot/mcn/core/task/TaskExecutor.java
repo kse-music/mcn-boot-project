@@ -25,7 +25,7 @@ public class TaskExecutor<T>{
     }
 
     public TaskExecutor(Iterable<T> iterable, int perBatchSize) {
-        this(iterable,new TaskThreadPool(Runtime.getRuntime().availableProcessors(), 10, "BatchTask"),perBatchSize);
+        this(iterable,new TaskThreadPool(),perBatchSize);
     }
 
     public TaskExecutor(Iterable<T> iterable, TaskThreadPool taskThreadPool, int perBatchSize) {

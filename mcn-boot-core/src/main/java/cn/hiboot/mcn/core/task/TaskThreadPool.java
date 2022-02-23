@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * description about this class
+ * TaskThreadPool
  *
  * @author DingHao
  * @since 2020/11/14 16:32
@@ -16,6 +16,9 @@ public class TaskThreadPool extends ThreadPoolExecutor {
 
     private final int workQueueSize;
 
+    public TaskThreadPool(){
+        this(Runtime.getRuntime().availableProcessors(), 10, "BatchTask");
+    }
 
     public TaskThreadPool(int corePoolSize, int workQueueSize, String namePrefix){
         this(corePoolSize,corePoolSize,workQueueSize,namePrefix);
