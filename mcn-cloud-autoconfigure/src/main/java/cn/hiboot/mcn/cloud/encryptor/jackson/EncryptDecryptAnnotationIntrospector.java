@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 
 /**
- * 在json序列化喝反序列化时加解密被注解修饰的数据
+ * 在json序列化和反序列化时加解密被注解修饰的数据
  *
  * @author DingHao
  * @since 2022/2/16 18:08
