@@ -14,7 +14,7 @@ image::http://cdn.hiboot.cn/5612db4209ee4b3cacd5993c17fd6645.jpg[]
 . 安装JDK版本1.8+
 . 使用maven(版本3.6.3+)管理包依赖
 
-:mcn-version: 2.5.13
+:mcn-version: ${最新稳定版}
 
 == 项目搭建
 
