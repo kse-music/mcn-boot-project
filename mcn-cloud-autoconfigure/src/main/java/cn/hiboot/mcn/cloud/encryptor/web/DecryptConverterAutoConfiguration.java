@@ -17,11 +17,11 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnBean(TextEncryptor.class)
+@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @Import(DecryptRequestBodyAdvice.class)
 public class DecryptConverterAutoConfiguration {
 
     @Configuration(proxyBeanMethods = false)
-    @ConditionalOnWebApplication
     private static class WebMvcConfig implements WebMvcConfigurer {
 
         private final TextEncryptor textEncryptor;
