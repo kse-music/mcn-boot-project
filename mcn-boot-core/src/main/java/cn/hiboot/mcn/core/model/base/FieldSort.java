@@ -21,7 +21,7 @@ public class FieldSort {
     /**
      * asc:升序
      * desc:降序
-     * note:忽略大小写比较
+     * 忽略大小写比较
      */
     private String sort;
 
@@ -43,11 +43,10 @@ public class FieldSort {
     }
 
     public String getSort() {
-        return sort;
+        return sort == null ? DESC: sort;
     }
 
     public void setSort(String sort) {
-        McnAssert.hasText(sort,"sort must not be empty");
         this.sort = sort;
     }
 
