@@ -33,7 +33,7 @@
         <spring-boot.version>2.5.10</spring-boot.version>
         <spring-cloud.version>2020.0.5</spring-cloud.version>
         <mybatis-spring-boot.version>2.2.1</mybatis-spring-boot.version>
-        <guava.version>31.0.1-jre</guava.version>
+        <guava.version>31.1-jre</guava.version>
         <commons-io.version>2.11.0</commons-io.version>
         <fastjson.version>1.2.79</fastjson.version>
         <boot-admin.version>2.5.5</boot-admin.version>
