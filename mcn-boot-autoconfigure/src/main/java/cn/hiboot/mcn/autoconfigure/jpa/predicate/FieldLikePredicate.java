@@ -1,12 +1,12 @@
 package cn.hiboot.mcn.autoconfigure.jpa.predicate;
 
 import cn.hiboot.mcn.autoconfigure.jpa.AbstractPredicateProvider;
+import org.springframework.util.StringUtils;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import java.util.Objects;
 
 /**
  * FieldLikePredicate
@@ -30,7 +30,7 @@ public class FieldLikePredicate<T> extends AbstractPredicateProvider<T> {
 
     @Override
     public boolean isValid() {
-        return Objects.nonNull(value);
+        return StringUtils.hasText(value);
     }
 
     @Override
