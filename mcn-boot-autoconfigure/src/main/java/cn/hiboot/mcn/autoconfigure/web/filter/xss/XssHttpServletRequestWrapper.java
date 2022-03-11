@@ -86,16 +86,14 @@ public class  XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
 
         Map<String, Object> resultMap = new HashMap<>(map.size());
 
-        for (String key : map.keySet()) {
+        map.forEach((key,value) -> {
             key = cleanParameterName(key);
-            Object value = map.get(key);
             if (value instanceof String) {
-                String val = cleanParameterValue(value.toString());
-                resultMap.put(key, val);
+                resultMap.put(key, cleanParameterValue(value.toString()));
             } else {
                 resultMap.put(key, value);
             }
-        }
+        });
 
         String str = JacksonUtils.toJson(resultMap);
 
