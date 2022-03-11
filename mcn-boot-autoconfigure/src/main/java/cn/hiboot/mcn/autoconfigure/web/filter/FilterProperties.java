@@ -2,7 +2,6 @@ package cn.hiboot.mcn.autoconfigure.web.filter;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -14,16 +13,19 @@ import java.util.List;
 @ConfigurationProperties("mcn.xss.filter")
 public class FilterProperties {
 
-    public static final List<String> DEFAULT_EXCLUDE_URL = Arrays.asList("/favicon.ico","/img/*","/js/*","/css/*");
-
     /**
      * 排除的url路径
      */
     private List<String> excludes;
     /**
      * 是否过滤富文本内容
+     * 默认过滤富文本
      */
-    private boolean includeRichText = true;
+    private boolean filterRichText = true;
+    /**
+     * 是否过滤参数名称
+     */
+    private boolean filterParameterName;
 
     public List<String> getExcludes() {
         return excludes;
@@ -33,12 +35,19 @@ public class FilterProperties {
         this.excludes = excludes;
     }
 
-    public boolean isIncludeRichText() {
-        return includeRichText;
+    public boolean isFilterRichText() {
+        return filterRichText;
     }
 
-    public void setIncludeRichText(boolean includeRichText) {
-        this.includeRichText = includeRichText;
+    public void setFilterRichText(boolean filterRichText) {
+        this.filterRichText = filterRichText;
     }
 
+    public boolean isFilterParameterName() {
+        return filterParameterName;
+    }
+
+    public void setFilterParameterName(boolean filterParameterName) {
+        this.filterParameterName = filterParameterName;
+    }
 }

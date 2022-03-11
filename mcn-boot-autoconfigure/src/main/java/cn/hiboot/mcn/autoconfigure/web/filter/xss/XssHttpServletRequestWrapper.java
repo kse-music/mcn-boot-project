@@ -1,10 +1,21 @@
 package cn.hiboot.mcn.autoconfigure.web.filter.xss;
 
 
+import cn.hiboot.mcn.autoconfigure.web.filter.FilterProperties;
+import cn.hiboot.mcn.core.util.JacksonUtils;
 import cn.hiboot.mcn.core.util.McnUtils;
+import com.fasterxml.jackson.core.type.TypeReference;
+import org.springframework.web.util.HtmlUtils;
 
+import javax.servlet.ReadListener;
+import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * prevent XSS attack
@@ -14,62 +25,122 @@ import javax.servlet.http.HttpServletRequestWrapper;
  */
 public class  XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
 
-    private final boolean isIncludeRichText;
+    private final FilterProperties filterProperties;
 
-    public XssHttpServletRequestWrapper(HttpServletRequest request, boolean isIncludeRichText) {
+    public XssHttpServletRequestWrapper(HttpServletRequest request, FilterProperties filterProperties) {
         super(request);
-        this.isIncludeRichText = isIncludeRichText;
+        this.filterProperties = filterProperties;
     }
 
-    /**
-     * 覆盖getParameter方法，将参数名和参数值都做xss过滤。
-     * 如果需要获得原始的值，则通过super.getParameterValues(name)来获取
-     * getParameterNames,getParameterValues和getParameterMap也可能需要覆盖
-     *
-     * @param name header name
-     * @return clean
-     */
     @Override
     public String getParameter(String name) {
-        if(("content".equals(name) || name.endsWith("WithHtml")) && !isIncludeRichText){
+        if(!filterProperties.isFilterRichText() && isRichTextParameterName(name)){
             return super.getParameter(name);
         }
-        name = JsoupUtil.clean(name);
-        String value = super.getParameter(name);
+        String value = super.getParameter(cleanParameterName(name));
         if (McnUtils.isNotNullAndEmpty(value)) {
-            value = JsoupUtil.clean(value);
+            value = cleanParameterValue(value);
         }
         return value;
     }
 
+    private boolean isRichTextParameterName(String name){
+        return "content".equals(name) || name.endsWith("WithHtml");
+    }
+
     @Override
     public String[] getParameterValues(String name) {
-        String[] arr = super.getParameterValues(name);
+        String[] arr = super.getParameterValues(cleanParameterName(name));
         if (arr != null) {
             for (int i = 0; i < arr.length; i++) {
-                arr[i] = JsoupUtil.clean(arr[i]);
+                arr[i] = cleanParameterValue(arr[i]);
             }
         }
         return arr;
     }
 
+    @Override
+    public Map<String, String[]> getParameterMap() {
+        Map<String, String[]> parameters = super.getParameterMap();
+        LinkedHashMap<String, String[]> map = new LinkedHashMap<>();
+        if (parameters != null) {
+            for (String key : parameters.keySet()) {
+                key = cleanParameterName(key);
+                String[] values = parameters.get(key);
+                for (int i = 0; i < values.length; i++) {
+                    String value = values[i];
+                    if (McnUtils.isNotNullAndEmpty(value)) {
+                        value = cleanParameterValue(value);
+                    }
+                    values[i] = value;
+                }
+                map.put(key, values);
+            }
+        }
+        return map;
+    }
 
-    /**
-     * 覆盖getHeader方法，将参数名和参数值都做xss过滤。
-     * 如果需要获得原始的值，则通过super.getHeaders(name)来获取
-     * getHeaderNames 也可能需要覆盖
-     *
-     * @param name header name
-     * @return clean
-     */
+    @Override
+    public ServletInputStream getInputStream() throws IOException {
+        Map<String, Object> map = JacksonUtils.getObjectMapper().readValue(super.getInputStream(),new TypeReference<Map<String, Object>>(){});
+
+        Map<String, Object> resultMap = new HashMap<>(map.size());
+
+        for (String key : map.keySet()) {
+            key = cleanParameterName(key);
+            Object value = map.get(key);
+            if (value instanceof String) {
+                String val = cleanParameterValue(value.toString());
+                resultMap.put(key, val);
+            } else {
+                resultMap.put(key, value);
+            }
+        }
+
+        String str = JacksonUtils.toJson(resultMap);
+
+        ByteArrayInputStream arrayInputStream = new ByteArrayInputStream(str.getBytes());
+        return new ServletInputStream() {
+            @Override
+            public boolean isFinished() {
+                return false;
+            }
+
+            @Override
+            public boolean isReady() {
+                return false;
+            }
+
+            @Override
+            public void setReadListener(ReadListener readListener) {
+
+            }
+
+            @Override
+            public int read() throws IOException {
+                return arrayInputStream.read();
+            }
+        };
+    }
+
     @Override
     public String getHeader(String name) {
-        name = JsoupUtil.clean(name);
-        String value = super.getHeader(name);
+        String value = super.getHeader(cleanParameterName(name));
         if (McnUtils.isNotNullAndEmpty(value)) {
-            value = JsoupUtil.clean(value);
+            value = cleanParameterValue(value);
         }
         return value;
+    }
+
+    private String cleanParameterName(String name){
+        if(filterProperties.isFilterParameterName()){
+            return HtmlUtils.htmlEscape(name);
+        }
+        return name;
+    }
+
+    private String cleanParameterValue(String value){
+        return HtmlUtils.htmlEscape(value);
     }
 
 }

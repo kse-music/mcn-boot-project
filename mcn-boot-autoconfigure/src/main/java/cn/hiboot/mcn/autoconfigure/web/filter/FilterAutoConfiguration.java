@@ -49,7 +49,6 @@ public class FilterAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnClass(name = "org.jsoup.Jsoup")
     @ConditionalOnProperty(prefix = "mcn.xss",name = "enable",havingValue = "true")
     public FilterRegistrationBean<XssFilter> xssFilter() {
         FilterRegistrationBean<XssFilter> filterRegistrationBean = new FilterRegistrationBean<>(new XssFilter(filterProperties));
