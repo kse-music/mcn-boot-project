@@ -1,6 +1,6 @@
 package cn.hiboot.mcn.cloud.encryptor.web;
 
-import cn.hiboot.mcn.cloud.encryptor.Decrypt;
+import cn.hiboot.mcn.core.encryptor.Decrypt;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;

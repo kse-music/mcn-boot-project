@@ -34,7 +34,7 @@ public class EncryptDataSerializer extends StdSerializer<Object> {
             return;
         }
         String rs = value.toString();
-        if(!BeanUtils.isSimpleProperty(value.getClass())){
+        if(!BeanUtils.isSimpleProperty(value.getClass())){//如果不是简单类型直接转json
             rs = objectMapper.writeValueAsString(value);
         }
         gen.writeString(textEncryptor.encrypt(rs));

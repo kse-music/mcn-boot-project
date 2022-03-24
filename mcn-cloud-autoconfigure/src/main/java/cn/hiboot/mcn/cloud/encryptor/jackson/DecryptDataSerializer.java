@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
+import org.springframework.util.ObjectUtils;
 
 import java.io.IOException;
 
@@ -20,23 +21,24 @@ public class DecryptDataSerializer extends StdDeserializer<Object> {
 
     private final TextEncryptor textEncryptor;
     private final ConversionService conversionService;
-    private final Class<?> type;
 
     public DecryptDataSerializer(Class<?> type) {
-        super(Object.class);
+        super(type);
         this.textEncryptor = SpringBeanUtils.getBean(TextEncryptor.class);
         this.conversionService = SpringBeanUtils.getBean(ConversionService.class);
-        this.type = type == null ? String.class : type;
     }
 
     @Override
     public Object deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JsonProcessingException {
         String currentValue = p.getText();
+        if(ObjectUtils.isEmpty(currentValue)){
+            return currentValue;
+        }
         try{
-            currentValue = textEncryptor.decrypt(p.getText());
+            currentValue = textEncryptor.decrypt(currentValue);
         }catch (Exception e){
             //
         }
-        return conversionService.convert(currentValue,type);
+        return conversionService.convert(currentValue,handledType());
     }
 }

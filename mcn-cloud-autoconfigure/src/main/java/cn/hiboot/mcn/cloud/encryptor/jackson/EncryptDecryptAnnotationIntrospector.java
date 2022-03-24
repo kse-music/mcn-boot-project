@@ -1,7 +1,7 @@
 package cn.hiboot.mcn.cloud.encryptor.jackson;
 
-import cn.hiboot.mcn.cloud.encryptor.Decrypt;
-import cn.hiboot.mcn.cloud.encryptor.Encrypt;
+import cn.hiboot.mcn.core.encryptor.Decrypt;
+import cn.hiboot.mcn.core.encryptor.Encrypt;
 import com.fasterxml.jackson.databind.introspect.Annotated;
 import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
@@ -30,7 +30,6 @@ public class EncryptDecryptAnnotationIntrospector extends JacksonAnnotationIntro
             if(am instanceof AnnotatedMethod){
                 return new DecryptDataSerializer(((AnnotatedMethod) am).getRawParameterType(0));
             }
-            return new DecryptDataSerializer(null);
         }
         return null;
     }
