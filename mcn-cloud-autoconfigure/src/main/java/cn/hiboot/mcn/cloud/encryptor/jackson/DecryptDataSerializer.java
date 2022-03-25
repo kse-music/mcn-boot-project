@@ -10,8 +10,10 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.ReflectionUtils;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * DecryptDataSerializer
@@ -36,8 +38,12 @@ public class DecryptDataSerializer extends StdDeserializer<Object> {
     public Object deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JsonProcessingException {
         if(converter != DecryptDataConverter.class){
             try {
-                DecryptDataConverter decryptDataConverter = converter.newInstance();
+                DecryptDataConverter decryptDataConverter = ReflectionUtils.accessibleConstructor(converter).newInstance();
                 return decryptDataConverter.apply(p,textEncryptor);
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                throw ServiceException.newInstance("DecryptData Converter newInstance Failed",e);
+            } catch (IOException e){
+                throw ServiceException.newInstance("Jackson deserialize Failed",e);
             } catch (Exception e){
                 throw ServiceException.newInstance("DecryptData Converter Failed",e);
             }
