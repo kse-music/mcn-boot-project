@@ -20,12 +20,11 @@ import java.util.Objects;
 public class EncryptDataSerializer extends StdSerializer<Object> {
 
     private final TextEncryptor textEncryptor;
-    private final ObjectMapper objectMapper;
+    private final static ObjectMapper objectMapper = new ObjectMapper();
 
     public EncryptDataSerializer() {
         super(Object.class);
         this.textEncryptor = SpringBeanUtils.getBean(TextEncryptor.class);
-        this.objectMapper = new ObjectMapper();
     }
 
     @Override

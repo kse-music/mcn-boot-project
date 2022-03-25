@@ -1,6 +1,6 @@
 package cn.hiboot.mcn.cloud.encryptor.web;
 
-import cn.hiboot.mcn.core.encryptor.Decrypt;
+import cn.hiboot.mcn.cloud.encryptor.Decrypt;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;

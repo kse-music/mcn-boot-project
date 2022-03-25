@@ -1,4 +1,4 @@
-package cn.hiboot.mcn.core.encryptor;
+package cn.hiboot.mcn.cloud.encryptor;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

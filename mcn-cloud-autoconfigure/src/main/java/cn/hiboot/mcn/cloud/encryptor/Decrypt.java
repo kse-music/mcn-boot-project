@@ -1,4 +1,4 @@
-package cn.hiboot.mcn.core.encryptor;
+package cn.hiboot.mcn.cloud.encryptor;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -14,4 +14,7 @@ import java.lang.annotation.Target;
 @Target({ElementType.PARAMETER,ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Decrypt {
+
+    Class<? extends DecryptDataConverter> converter() default DecryptDataConverter.class;
+
 }
