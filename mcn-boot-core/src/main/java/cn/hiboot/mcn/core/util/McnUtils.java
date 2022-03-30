@@ -123,6 +123,9 @@ public abstract class McnUtils {
     }
 
     public static String getExtName(String fileName){
+        if(fileName == null){
+            return "";
+        }
         int i = fileName.lastIndexOf(".");
         if(i == -1){
             return "";
