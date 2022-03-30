@@ -28,7 +28,7 @@ public abstract class JpaUtils {
                 jpaSort = jpaSort.and(s);
             }
         }
-        return jpaSort;
+        return jpaSort == null ? Sort.unsorted() : jpaSort;
     }
 
     public static Sort jpaSort(FieldSort fieldSort) {

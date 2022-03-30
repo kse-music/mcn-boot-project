@@ -65,7 +65,7 @@ public class PageSort {
     }
 
     public void setSort(List<FieldSort> sort) {
-        McnAssert.notNull(sort,"sort must not null");
+        McnAssert.notNull(sort,"sort must not be null!");
         this.sort = sort;
     }
 
