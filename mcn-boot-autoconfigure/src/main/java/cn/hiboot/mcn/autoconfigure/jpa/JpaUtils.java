@@ -19,18 +19,22 @@ import java.util.List;
 public abstract class JpaUtils {
 
     public static Sort jpaSort(List<FieldSort> sort){
-        Sort s = Sort.unsorted();
+        Sort jpaSort = null;
         for (FieldSort fieldSort : sort) {
-            if(s.isUnsorted()){
-                s = jpaSort(fieldSort);
-                continue;
+            Sort s = jpaSort(fieldSort);
+            if(jpaSort == null){
+                jpaSort = s;
+            }else {
+                jpaSort = jpaSort.and(s);
             }
-            s = s.and(jpaSort(fieldSort));
         }
-        return s;
+        return jpaSort;
     }
 
     public static Sort jpaSort(FieldSort fieldSort) {
+        if(fieldSort.getSort() == null){
+            return Sort.unsorted();
+        }
         if (FieldSort.ASC.equalsIgnoreCase(fieldSort.getSort())) {
             return Sort.by(fieldSort.getField()).ascending();
         }

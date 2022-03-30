@@ -43,7 +43,7 @@ public class FieldSort {
     }
 
     public String getSort() {
-        return sort == null ? DESC: sort;
+        return sort;
     }
 
     public void setSort(String sort) {
