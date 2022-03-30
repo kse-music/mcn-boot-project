@@ -123,7 +123,11 @@ public abstract class McnUtils {
     }
 
     public static String getExtName(String fileName){
-        return fileName.substring(fileName.lastIndexOf(".")+1);
+        int i = fileName.lastIndexOf(".");
+        if(i == -1){
+            return "";
+        }
+        return fileName.substring(i +1);
     }
 
     public static Properties loadProperties(String fileName){
