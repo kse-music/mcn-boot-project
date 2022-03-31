@@ -24,11 +24,11 @@ import java.util.*;
  */
 public abstract class McnUtils {
 
-    public LocalDateTime dateToLocalDateTime(Date date) {
+    public static LocalDateTime dateToLocalDateTime(Date date) {
         return LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
     }
 
-    public LocalDate dateToLocalDate(Date date) {
+    public static LocalDate dateToLocalDate(Date date) {
         return LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault()).toLocalDate();
     }
 
