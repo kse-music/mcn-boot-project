@@ -3,6 +3,7 @@ package cn.hiboot.mcn.autoconfigure.web.swagger;
 import cn.hiboot.mcn.swagger.MvcSwagger2;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -39,12 +40,13 @@ import java.util.function.Predicate;
 public class SwaggerAutoConfiguration {
 
     private final Swagger2Properties swagger2Properties;
-    private final ObjectProvider<RequestHandlerPredicate> requestHandlerPredicates;
-    private final Predicate<RequestHandler> DEFAULT_REQUEST_HANDLER = withClassAnnotation(RestController.class);
+    private final ObjectProvider<DocketCustomizer> docketCustomizers;
+    private final Predicate<RequestHandler> DEFAULT_REQUEST_HANDLER = withClassAnnotation(RestController.class)
+            .and(withClassAnnotation(IgnoreApi.class).negate()).and(RequestHandlerSelectors.withMethodAnnotation(IgnoreApi.class).negate());
 
-    public SwaggerAutoConfiguration(Swagger2Properties swagger2Properties, ObjectProvider<RequestHandlerPredicate> requestHandlerPredicates) {
+    public SwaggerAutoConfiguration(Swagger2Properties swagger2Properties, ObjectProvider<DocketCustomizer> docketCustomizers) {
         this.swagger2Properties = swagger2Properties;
-        this.requestHandlerPredicates = requestHandlerPredicates;
+        this.docketCustomizers = docketCustomizers;
     }
 
     private Predicate<RequestHandler> withClassAnnotation(Class<? extends Annotation> annotation){
@@ -52,21 +54,19 @@ public class SwaggerAutoConfiguration {
     }
 
     @Bean
-    public RequestHandlerPredicate requestHandlerPredicate(){
-        return () -> (withClassAnnotation(IgnoreApi.class).negate()).and(RequestHandlerSelectors.withMethodAnnotation(IgnoreApi.class).negate());
-    }
-
-    @Bean
+    @ConditionalOnMissingBean
     public Docket createRestApi() {
-        ApiSelectorBuilder apiSelectorBuilder = new Docket(DocumentationType.SWAGGER_2)
-                .apiInfo(apiInfo())
-                .select().apis(DEFAULT_REQUEST_HANDLER);
+        Docket docket = new Docket(DocumentationType.SWAGGER_2).apiInfo(apiInfo()).enable(swagger2Properties.isEnable());
 
-        for (RequestHandlerPredicate requestHandlerPredicate : requestHandlerPredicates) {
-            apiSelectorBuilder.apis(requestHandlerPredicate.get());
+        docketCustomizers.ifUnique(d -> d.customize(docket));
+
+        for (DocketCustomizer docketCustomizer : docketCustomizers) {
+            docketCustomizer.customize(docket);
         }
 
-        return apiSelectorBuilder.paths(PathSelectors.any()).build().enable(swagger2Properties.isEnable());
+        ApiSelectorBuilder apiSelectorBuilder = docket.select().apis(DEFAULT_REQUEST_HANDLER);
+
+        return apiSelectorBuilder.paths(PathSelectors.any()).build();
     }
 
     private ApiInfo apiInfo() {
