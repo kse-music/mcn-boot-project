@@ -1,6 +1,5 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
   cn.hiboot.mcn.cloud.feign.FeignCircuitBreakerAutoConfiguration,\
-  cn.hiboot.mcn.cloud.security.ResourceServerAutoConfiguration,\
   cn.hiboot.mcn.cloud.discover.ServiceRegisterAutoConfiguration,\
   cn.hiboot.mcn.cloud.encryptor.web.DecryptConverterAutoConfiguration,\
   cn.hiboot.mcn.cloud.encryptor.jackson.DecryptJacksonAutoConfiguration
