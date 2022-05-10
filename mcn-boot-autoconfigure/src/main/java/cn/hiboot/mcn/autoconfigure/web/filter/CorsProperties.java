@@ -18,6 +18,7 @@ public class CorsProperties {
     private String allowedHeader = CorsConfiguration.ALL;
     private String allowedMethod = CorsConfiguration.ALL;
     private Long maxAge = 3600L;
+    private int order = -1000;
 
     public String getPattern() {
         return pattern;
@@ -65,5 +66,13 @@ public class CorsProperties {
 
     public void setMaxAge(Long maxAge) {
         this.maxAge = maxAge;
+    }
+
+    public int getOrder() {
+        return order;
+    }
+
+    public void setOrder(int order) {
+        this.order = order;
     }
 }
