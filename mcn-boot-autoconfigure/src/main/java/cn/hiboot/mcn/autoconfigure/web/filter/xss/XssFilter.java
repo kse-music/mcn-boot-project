@@ -1,6 +1,5 @@
 package cn.hiboot.mcn.autoconfigure.web.filter.xss;
 
-import cn.hiboot.mcn.autoconfigure.web.filter.FilterProperties;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.CollectionUtils;
 
@@ -17,10 +16,10 @@ import java.io.IOException;
 public class XssFilter implements Filter {
 
     private final AntPathMatcher antPathMatcher = new AntPathMatcher();
-    private final FilterProperties filterProperties;
+    private final XssProperties xssProperties;
 
-    public XssFilter(FilterProperties filterProperties) {
-        this.filterProperties = filterProperties;
+    public XssFilter(XssProperties xssProperties) {
+        this.xssProperties = xssProperties;
     }
 
     @Override
@@ -30,16 +29,16 @@ public class XssFilter implements Filter {
             filterChain.doFilter(request, response);
             return;
         }
-        XssHttpServletRequestWrapper xssRequest = new XssHttpServletRequestWrapper((HttpServletRequest) request, filterProperties);
+        XssHttpServletRequestWrapper xssRequest = new XssHttpServletRequestWrapper((HttpServletRequest) request, xssProperties);
         filterChain.doFilter(xssRequest, response);
     }
 
     private boolean isExcludeURL(HttpServletRequest request) {
-        if(CollectionUtils.isEmpty(filterProperties.getExcludes())){
+        if(CollectionUtils.isEmpty(xssProperties.getExcludes())){
             return false;
         }
         String url = request.getServletPath();
-        for (String pattern : filterProperties.getExcludes()) {
+        for (String pattern : xssProperties.getExcludes()) {
             if (antPathMatcher.match(pattern,url)) {
                 return true;
             }

@@ -1,17 +1,19 @@
-package cn.hiboot.mcn.autoconfigure.web.filter;
+package cn.hiboot.mcn.autoconfigure.web.filter.xss;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.List;
 
 /**
- * describe about this class
+ * XssProperties
  *
  * @author DingHao
  * @since 2019/1/9 11:34
  */
-@ConfigurationProperties("mcn.xss.filter")
-public class FilterProperties {
+@ConfigurationProperties("mcn.xss")
+public class XssProperties {
+
+    private String[] urlPatterns = {"/*"};
 
     /**
      * 排除的url路径
@@ -26,6 +28,16 @@ public class FilterProperties {
      * 是否过滤参数名称
      */
     private boolean filterParameterName;
+
+    private int order = 2;
+
+    public String[] getUrlPatterns() {
+        return urlPatterns;
+    }
+
+    public void setUrlPatterns(String[] urlPatterns) {
+        this.urlPatterns = urlPatterns;
+    }
 
     public List<String> getExcludes() {
         return excludes;
@@ -49,5 +61,13 @@ public class FilterProperties {
 
     public void setFilterParameterName(boolean filterParameterName) {
         this.filterParameterName = filterParameterName;
+    }
+
+    public int getOrder() {
+        return order;
+    }
+
+    public void setOrder(int order) {
+        this.order = order;
     }
 }

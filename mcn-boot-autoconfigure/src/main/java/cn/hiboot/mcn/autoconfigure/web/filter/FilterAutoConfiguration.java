@@ -1,6 +1,7 @@
 package cn.hiboot.mcn.autoconfigure.web.filter;
 
 import cn.hiboot.mcn.autoconfigure.web.filter.xss.XssFilter;
+import cn.hiboot.mcn.autoconfigure.web.filter.xss.XssProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -20,25 +21,20 @@ import org.springframework.web.filter.CorsFilter;
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
-@EnableConfigurationProperties(FilterProperties.class)
+@EnableConfigurationProperties({XssProperties.class, CorsProperties.class})
 public class FilterAutoConfiguration {
-
-    private final FilterProperties filterProperties;
-
-    public FilterAutoConfiguration(FilterProperties filterProperties) {
-        this.filterProperties = filterProperties;
-    }
 
     @Bean
     @ConditionalOnProperty(prefix = "filter", name = "cross", havingValue = "true")
-    public CorsFilter corsFilter() {
+    public CorsFilter corsFilter(CorsProperties corsProperties) {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration corsConfiguration = new CorsConfiguration();
-        corsConfiguration.addAllowedOrigin(CorsConfiguration.ALL);
-        corsConfiguration.addAllowedHeader(CorsConfiguration.ALL);
-        corsConfiguration.addAllowedMethod(CorsConfiguration.ALL);
-        corsConfiguration.setMaxAge(3600L);
-        source.registerCorsConfiguration("/**", corsConfiguration);
+        corsConfiguration.setAllowCredentials(corsProperties.getAllowCredentials());
+        corsConfiguration.addAllowedOrigin(corsProperties.getAllowedOrigin());
+        corsConfiguration.addAllowedHeader(corsProperties.getAllowedHeader());
+        corsConfiguration.addAllowedMethod(corsProperties.getAllowedMethod());
+        corsConfiguration.setMaxAge(corsProperties.getMaxAge());
+        source.registerCorsConfiguration(corsProperties.getPattern(), corsConfiguration);
         return new CorsFilter(source);
     }
 
@@ -50,10 +46,10 @@ public class FilterAutoConfiguration {
 
     @Bean
     @ConditionalOnProperty(prefix = "mcn.xss",name = "enable",havingValue = "true")
-    public FilterRegistrationBean<XssFilter> xssFilter() {
-        FilterRegistrationBean<XssFilter> filterRegistrationBean = new FilterRegistrationBean<>(new XssFilter(filterProperties));
-        filterRegistrationBean.setOrder(2);
-        filterRegistrationBean.addUrlPatterns("/*");
+    public FilterRegistrationBean<XssFilter> xssFilter(XssProperties xssProperties) {
+        FilterRegistrationBean<XssFilter> filterRegistrationBean = new FilterRegistrationBean<>(new XssFilter(xssProperties));
+        filterRegistrationBean.setOrder(xssProperties.getOrder());
+        filterRegistrationBean.addUrlPatterns(xssProperties.getUrlPatterns());
         return filterRegistrationBean;
     }
 

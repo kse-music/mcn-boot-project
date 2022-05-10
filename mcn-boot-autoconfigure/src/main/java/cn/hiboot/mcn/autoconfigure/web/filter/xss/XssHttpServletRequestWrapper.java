@@ -1,7 +1,6 @@
 package cn.hiboot.mcn.autoconfigure.web.filter.xss;
 
 
-import cn.hiboot.mcn.autoconfigure.web.filter.FilterProperties;
 import cn.hiboot.mcn.core.util.JacksonUtils;
 import cn.hiboot.mcn.core.util.McnUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -25,16 +24,16 @@ import java.util.Map;
  */
 public class  XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
 
-    private final FilterProperties filterProperties;
+    private final XssProperties xssProperties;
 
-    public XssHttpServletRequestWrapper(HttpServletRequest request, FilterProperties filterProperties) {
+    public XssHttpServletRequestWrapper(HttpServletRequest request, XssProperties xssProperties) {
         super(request);
-        this.filterProperties = filterProperties;
+        this.xssProperties = xssProperties;
     }
 
     @Override
     public String getParameter(String name) {
-        if(!filterProperties.isFilterRichText() && isRichTextParameterName(name)){
+        if(!xssProperties.isFilterRichText() && isRichTextParameterName(name)){
             return super.getParameter(name);
         }
         String value = super.getParameter(cleanParameterName(name));
@@ -131,7 +130,7 @@ public class  XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
     }
 
     private String cleanParameterName(String name){
-        if(filterProperties.isFilterParameterName()){
+        if(xssProperties.isFilterParameterName()){
             return HtmlUtils.htmlEscape(name);
         }
         return name;
