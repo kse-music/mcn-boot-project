@@ -13,9 +13,14 @@
     {
       "name": "delete.default.log-file.enable",
       "type": "java.lang.Boolean",
-      "sourceType": "cn.hiboot.mcn.autoconfigure.bootstrap.LogFileChecker",
+      "sourceType": "cn.hiboot.mcn.autoconfigure.context.McnApplicationListener",
       "description": "是否默认删除默认日志文件.",
       "defaultValue": true
+    },
+    {
+      "name": "spring.security.strategy",
+      "type": "java.lang.String",
+      "description": "SecurityContextHolderStrategy模式."
     },
     {
       "name": "mcn.log.file.filter-level",
@@ -109,6 +114,21 @@
         },{
           "value": "error",
           "description": "错误级别."
+        }
+      ]
+    },
+    {
+      "name": "spring.security.strategy",
+      "values": [
+        {
+          "value": "MODE_THREADLOCAL",
+          "description": "ThreadLocal."
+        },{
+          "value": "MODE_INHERITABLETHREADLOCAL",
+          "description": "InheritableThreadLocal."
+        },{
+          "value": "MODE_GLOBAL",
+          "description": "全局共享."
         }
       ]
     }
