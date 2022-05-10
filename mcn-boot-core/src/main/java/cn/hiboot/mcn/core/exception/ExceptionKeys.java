@@ -39,6 +39,4 @@ public interface ExceptionKeys {
     int REMOTE_SERVICE_ERROR = 900002;
     int REMOTE_DATA_PARSE_ERROR = 900003;
 
-    int DEFAULT_ERROR_CODE = 999999;
-
 }

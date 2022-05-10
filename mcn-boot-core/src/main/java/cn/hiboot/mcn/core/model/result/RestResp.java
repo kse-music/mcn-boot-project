@@ -1,7 +1,7 @@
 package cn.hiboot.mcn.core.model.result;
 
+import cn.hiboot.mcn.core.exception.BaseException;
 import cn.hiboot.mcn.core.exception.ErrorMsg;
-import cn.hiboot.mcn.core.exception.ExceptionKeys;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -108,6 +108,6 @@ public class RestResp<T> {
 	}
 
 	public static RestResp<Object> error(String msg){
-		return error(ExceptionKeys.DEFAULT_ERROR_CODE, msg);
+		return error(BaseException.DEFAULT_ERROR_CODE, msg);
 	}
 }

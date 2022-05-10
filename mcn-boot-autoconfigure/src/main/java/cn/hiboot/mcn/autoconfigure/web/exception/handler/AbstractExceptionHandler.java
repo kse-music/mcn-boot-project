@@ -2,6 +2,7 @@ package cn.hiboot.mcn.autoconfigure.web.exception.handler;
 
 import cn.hiboot.mcn.autoconfigure.config.ConfigProperties;
 import cn.hiboot.mcn.autoconfigure.web.exception.error.GlobalExceptionViewResolver;
+import cn.hiboot.mcn.core.exception.BaseException;
 import cn.hiboot.mcn.core.exception.ErrorMsg;
 import cn.hiboot.mcn.core.exception.ExceptionKeys;
 import cn.hiboot.mcn.core.model.result.RestResp;
@@ -30,7 +31,8 @@ import java.util.Objects;
 public abstract class AbstractExceptionHandler implements EnvironmentAware {
 
     private final Logger log = LoggerFactory.getLogger(AbstractExceptionHandler.class);
-    private static final int DEFAULT_ERROR_CODE = ExceptionKeys.DEFAULT_ERROR_CODE;
+
+    private static final int DEFAULT_ERROR_CODE = BaseException.DEFAULT_ERROR_CODE;
 
     private GlobalExceptionViewResolver viewResolver;
     private boolean setValidatorResult;
