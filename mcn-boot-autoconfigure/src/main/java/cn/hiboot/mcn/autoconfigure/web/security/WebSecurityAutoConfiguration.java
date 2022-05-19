@@ -3,8 +3,8 @@ package cn.hiboot.mcn.autoconfigure.web.security;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 
@@ -19,7 +19,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 @ConditionalOnClass(WebSecurityConfigurerAdapter.class)
 @EnableConfigurationProperties(WebSecurityProperties.class)
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
-public class WebSecurityAutoConfiguration implements WebSecurityCustomizer {
+public class WebSecurityAutoConfiguration {
 
     private final WebSecurityProperties webSecurityProperties;
 
@@ -27,13 +27,16 @@ public class WebSecurityAutoConfiguration implements WebSecurityCustomizer {
         this.webSecurityProperties = webSecurityProperties;
     }
 
-    @Override
-    public void customize(WebSecurity web) {
-        if(webSecurityProperties.isEnableDefaultIgnore()){
-            web.ignoring().antMatchers(webSecurityProperties.getDefaultExcludeUrls());
-        }
-        if(webSecurityProperties.getExcludeUrls() != null){
-            web.ignoring().antMatchers(webSecurityProperties.getExcludeUrls());
-        }
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer(){
+        return web -> {
+            if(webSecurityProperties.isEnableDefaultIgnore()){
+                web.ignoring().antMatchers(webSecurityProperties.getDefaultExcludeUrls());
+            }
+            if(webSecurityProperties.getExcludeUrls() != null){
+                web.ignoring().antMatchers(webSecurityProperties.getExcludeUrls());
+            }
+        };
     }
+
 }
