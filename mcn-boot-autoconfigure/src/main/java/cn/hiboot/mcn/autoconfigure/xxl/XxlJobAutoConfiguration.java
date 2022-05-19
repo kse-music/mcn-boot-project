@@ -2,12 +2,12 @@ package cn.hiboot.mcn.autoconfigure.xxl;
 
 import com.xxl.job.core.executor.XxlJobExecutor;
 import com.xxl.job.core.executor.impl.XxlJobSpringExecutor;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 /**
  * XxlJobAutoConfiguration
@@ -15,7 +15,7 @@ import org.springframework.context.annotation.Configuration;
  * @author DingHao
  * @since 2021/11/8 11:28
  */
-@Configuration(proxyBeanMethods = false)
+@AutoConfiguration
 @ConditionalOnClass(XxlJobExecutor.class)
 @ConditionalOnProperty(prefix = "xxl.job",name = "enable",matchIfMissing = true)
 @EnableConfigurationProperties(XxlJobProperties.class)

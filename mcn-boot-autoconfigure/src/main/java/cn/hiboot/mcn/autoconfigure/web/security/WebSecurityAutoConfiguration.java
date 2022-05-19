@@ -1,11 +1,11 @@
 package cn.hiboot.mcn.autoconfigure.web.security;
 
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 
 /**
@@ -15,8 +15,8 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
  * @author DingHao
  * @since 2021/5/23 23:36
  */
-@Configuration(proxyBeanMethods = false)
-@ConditionalOnClass(WebSecurityConfigurerAdapter.class)
+@AutoConfiguration
+@ConditionalOnClass(WebSecurity.class)
 @EnableConfigurationProperties(WebSecurityProperties.class)
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 public class WebSecurityAutoConfiguration {

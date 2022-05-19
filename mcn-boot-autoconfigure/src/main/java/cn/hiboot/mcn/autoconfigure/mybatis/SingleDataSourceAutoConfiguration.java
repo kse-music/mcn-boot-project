@@ -9,9 +9,9 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.EnvironmentAware;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.env.Environment;
 import org.springframework.util.StringUtils;
@@ -22,7 +22,7 @@ import org.springframework.util.StringUtils;
  * @author DingHao
  * @since 2022/1/2 0:25
  */
-@Configuration(proxyBeanMethods = false)
+@AutoConfiguration
 @ConditionalOnClass({ SqlSessionFactory.class, SqlSessionFactoryBean.class })
 public class SingleDataSourceAutoConfiguration implements BeanDefinitionRegistryPostProcessor, EnvironmentAware, Ordered {
 

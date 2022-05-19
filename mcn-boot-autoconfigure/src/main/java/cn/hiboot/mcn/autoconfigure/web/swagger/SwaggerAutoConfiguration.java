@@ -2,13 +2,13 @@ package cn.hiboot.mcn.autoconfigure.web.swagger;
 
 import cn.hiboot.mcn.swagger.MvcSwagger2;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.DispatcherServlet;
 import springfox.documentation.RequestHandler;
@@ -31,7 +31,7 @@ import java.util.function.Predicate;
  * @author DingHao
  * @since 2022/1/13 22:04
  */
-@Configuration(proxyBeanMethods = false)
+@AutoConfiguration
 @EnableSwagger2
 @EnableConfigurationProperties(Swagger2Properties.class)
 @ConditionalOnClass({DispatcherServlet.class, MvcSwagger2.class})

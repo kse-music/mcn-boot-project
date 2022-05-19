@@ -6,6 +6,7 @@ import feign.codec.ErrorDecoder;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
 import io.github.resilience4j.timelimiter.TimeLimiterConfig;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.AnyNestedCondition;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -31,7 +32,7 @@ import java.util.concurrent.TimeUnit;
  * @author DingHao
  * @since 2021/9/21 13:37
  */
-@Configuration(proxyBeanMethods = false)
+@AutoConfiguration
 @ConditionalOnClass(Feign.class)
 @EnableConfigurationProperties(FeignCircuitBreakerProperties.class)
 public class FeignCircuitBreakerAutoConfiguration {

@@ -3,6 +3,7 @@ package cn.hiboot.mcn.autoconfigure.minio;
 import io.minio.MinioClient;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -30,7 +31,7 @@ import java.util.Collections;
  * @author DingHao
  * @since 2021/6/28 22:02
  */
-@Configuration(proxyBeanMethods = false)
+@AutoConfiguration
 @ConditionalOnClass(MinioClient.class)
 @EnableConfigurationProperties(MinioProperties.class)
 public class MinioAutoConfiguration {

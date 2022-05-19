@@ -1,5 +1,6 @@
 package cn.hiboot.mcn.cloud.encryptor.web;
 
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Configuration;
@@ -15,7 +16,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  * @author DingHao
  * @since 2022/2/17 11:47
  */
-@Configuration(proxyBeanMethods = false)
+@AutoConfiguration
 @ConditionalOnBean(TextEncryptor.class)
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @Import(DecryptRequestBodyAdvice.class)

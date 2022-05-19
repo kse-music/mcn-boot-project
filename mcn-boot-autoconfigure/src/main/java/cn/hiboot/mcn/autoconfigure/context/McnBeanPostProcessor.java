@@ -40,7 +40,7 @@ public class McnBeanPostProcessor implements BeanPostProcessor{
     }
 
     private void checkCustomMongoConfig(MongoProperties mongoProperties){
-        if (mongoProperties.getUri() != null || hasCustomAddress(mongoProperties) || hasCustomCredentials(mongoProperties) || hasReplicaSet(mongoProperties)) {
+        if (mongoProperties.getUri() != null) {
             return;
         }
         String mongoAddress = environment.getProperty("mongo.addrs");
@@ -56,17 +56,6 @@ public class McnBeanPostProcessor implements BeanPostProcessor{
         }
     }
 
-    private boolean hasCustomCredentials(MongoProperties properties) {
-        return properties.getUsername() != null && properties.getPassword() != null;
-    }
-
-    private boolean hasCustomAddress(MongoProperties properties) {
-        return properties.getHost() != null || properties.getPort() != null;
-    }
-
-    private boolean hasReplicaSet(MongoProperties properties) {
-        return properties.getReplicaSetName() != null;
-    }
 
     private String replace(String str){
         return str.replace(":","%3A").replace("@","%40").replace("/","%2F");

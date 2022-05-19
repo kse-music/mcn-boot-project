@@ -2,6 +2,7 @@ package cn.hiboot.mcn.autoconfigure.web.filter;
 
 import cn.hiboot.mcn.autoconfigure.web.filter.xss.XssFilter;
 import cn.hiboot.mcn.autoconfigure.web.filter.xss.XssProperties;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -9,7 +10,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplicat
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -21,7 +21,7 @@ import org.springframework.web.filter.CorsFilter;
  * @author DingHao
  * @since 2019/1/9 11:31
  */
-@Configuration(proxyBeanMethods = false)
+@AutoConfiguration
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @EnableConfigurationProperties({XssProperties.class, CorsProperties.class})
 public class FilterAutoConfiguration {

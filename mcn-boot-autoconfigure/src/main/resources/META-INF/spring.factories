@@ -4,20 +4,6 @@ org.springframework.context.ApplicationContextInitializer=\
 org.springframework.context.ApplicationListener=\
   cn.hiboot.mcn.autoconfigure.context.McnApplicationListener
 
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  cn.hiboot.mcn.autoconfigure.mybatis.SingleDataSourceAutoConfiguration,\
-  cn.hiboot.mcn.autoconfigure.mybatis.MultipleDataSourceAutoConfiguration,\
-  cn.hiboot.mcn.autoconfigure.web.groovy.GroovyWebAutoConfiguration,\
-  cn.hiboot.mcn.autoconfigure.web.filter.FilterAutoConfiguration,\
-  cn.hiboot.mcn.autoconfigure.web.mvc.SpringMvcAutoConfiguration,\
-  cn.hiboot.mcn.autoconfigure.web.swagger.SwaggerAutoConfiguration,\
-  cn.hiboot.mcn.autoconfigure.web.security.WebSecurityAutoConfiguration,\
-  cn.hiboot.mcn.autoconfigure.minio.MinioAutoConfiguration,\
-  cn.hiboot.mcn.autoconfigure.validator.ValidatorAutoConfiguration,\
-  cn.hiboot.mcn.autoconfigure.redis.RedisToolAutoConfiguration,\
-  cn.hiboot.mcn.autoconfigure.xxl.XxlJobAutoConfiguration,\
-  cn.hiboot.mcn.autoconfigure.web.flux.SpringWebFluxAutoConfiguration
-
 org.springframework.boot.BootstrapRegistryInitializer=\
   cn.hiboot.mcn.autoconfigure.bootstrap.McnBootstrapRegistryInitializer
 

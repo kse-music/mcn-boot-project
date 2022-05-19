@@ -9,7 +9,7 @@ import cn.hiboot.mcn.autoconfigure.web.mvc.resolver.StringObjectMethodArgumentRe
 import cn.hiboot.mcn.core.model.result.RestResp;
 import cn.hiboot.mcn.core.util.JacksonUtils;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.boot.autoconfigure.AutoConfigureBefore;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.*;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration;
@@ -42,9 +42,8 @@ import java.util.stream.Collectors;
  * @author DingHao
  * @since 2019/3/27 10:56
  */
-@Configuration(proxyBeanMethods = false)
+@AutoConfiguration(before = ErrorMvcAutoConfiguration.class)
 @ConditionalOnClass({DispatcherServlet.class})
-@AutoConfigureBefore(ErrorMvcAutoConfiguration.class)
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 public class SpringMvcAutoConfiguration {
 
