@@ -31,20 +31,25 @@ public class McnBeanPostProcessor implements BeanPostProcessor{
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
         if(bean instanceof ObjectMapper){
             JacksonUtils.setObjectMapper((ObjectMapper) bean);
-        }else if(bean instanceof MongoProperties){
-            checkCustomMongoConfig((MongoProperties) bean);
-        }else if(bean instanceof RedisProperties){
-            checkCustomRedisConfig((RedisProperties) bean);
+        }else {
+            mappingDbCustomConfigToStandardConfig(bean);
         }
         return bean;
     }
 
-    private void checkCustomMongoConfig(MongoProperties mongoProperties){
+    private void mappingDbCustomConfigToStandardConfig(Object bean){
+        if(bean instanceof MongoProperties){
+            mappingMongoConfig((MongoProperties) bean);
+        }else if(bean instanceof RedisProperties){
+            mappingRedisConfig((RedisProperties) bean);
+        }
+    }
+
+    private void mappingMongoConfig(MongoProperties mongoProperties){
         if (mongoProperties.getUri() != null) {
             return;
         }
         String mongoAddress = environment.getProperty("mongo.addrs");
-        //使用了自定义配置变量
         if(StringUtils.hasText(mongoAddress)){
             String username = environment.getProperty("mongo.username");
             String password = environment.getProperty("mongo.password");
@@ -56,14 +61,12 @@ public class McnBeanPostProcessor implements BeanPostProcessor{
         }
     }
 
-
     private String replace(String str){
         return str.replace(":","%3A").replace("@","%40").replace("/","%2F");
     }
 
-    private void checkCustomRedisConfig(RedisProperties redisProperties){
+    private void mappingRedisConfig(RedisProperties redisProperties){
         String redisAddress = environment.getProperty("redis.addrs");
-        //使用了自定义配置变量
         if(StringUtils.hasText(redisAddress)){
             String master = environment.getProperty("redis.sentinel");
             List<String> hosts = Arrays.asList(StringUtils.commaDelimitedListToStringArray(redisAddress));
