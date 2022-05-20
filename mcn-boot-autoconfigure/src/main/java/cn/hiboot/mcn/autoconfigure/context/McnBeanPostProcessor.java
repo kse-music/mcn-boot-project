@@ -7,6 +7,7 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.boot.autoconfigure.mongo.MongoProperties;
 import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.Arrays;
@@ -71,9 +72,15 @@ public class McnBeanPostProcessor implements BeanPostProcessor{
             String master = environment.getProperty("redis.sentinel");
             List<String> hosts = Arrays.asList(StringUtils.commaDelimitedListToStringArray(redisAddress));
             if(StringUtils.hasText(master)){//sentinel
-                RedisProperties.Sentinel sentinel = new RedisProperties.Sentinel();
+                RedisProperties.Sentinel sentinel = redisProperties.getSentinel();
+                if(sentinel == null){
+                    sentinel = new RedisProperties.Sentinel();
+                }
                 sentinel.setMaster(master);
                 sentinel.setNodes(hosts);
+                if(StringUtils.hasText(redisProperties.getPassword()) && ObjectUtils.isEmpty(sentinel)){
+                    sentinel.setPassword(redisProperties.getPassword());//normal use data pwd as sentinel pwd
+                }
                 redisProperties.setSentinel(sentinel);
             }else {
                 if(hosts.size() == 1){//standalone
@@ -81,7 +88,10 @@ public class McnBeanPostProcessor implements BeanPostProcessor{
                     redisProperties.setHost(hp[0]);
                     redisProperties.setPort(Integer.parseInt(hp[1]));
                 }else { //cluster
-                    RedisProperties.Cluster cluster = new RedisProperties.Cluster();
+                    RedisProperties.Cluster cluster = redisProperties.getCluster();
+                    if(cluster == null){
+                        cluster = new RedisProperties.Cluster();
+                    }
                     cluster.setNodes(hosts);
                     redisProperties.setCluster(cluster);
                 }
