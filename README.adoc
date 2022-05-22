@@ -316,7 +316,7 @@ public class RestResp<T> {
 . server.tomcat.basedir=/tmp/tomcat/ #内嵌tomcat根路径
 . server.compression.enabled=true #启用tomcat数据压缩
 
-https://github.com/kse-music/mcn-boot-project/blob/master/mcn-boot-autoconfigure/src/main/java/cn/hiboot/mcn/autoconfigure/web/config/mcn-default.properties[查看所有配置]
+https://github.com/kse-music/mcn-boot-project/blob/master/mcn-boot-autoconfigure/src/main/java/cn/hiboot/mcn/autoconfigure/config/mcn-default.properties[查看所有配置]
 ====
 
 [WARNING]
@@ -397,12 +397,20 @@ https://github.com/kse-music/mcn-boot-project/blob/master/mcn-boot-autoconfigure
 注意：生产环境一定要关闭跨域设置
 ====
 
+==== XSS配置
+
+====
+默认跨域不启用,可通过mcn.xss.enable=true启用,如果使用security,默认顺序在安全过滤器链后执行,可通过mcn.xss.order=-101调整到其之前执行
+
+注意：生产环境建议开启XSS设置
+====
+
 ==== WebSecurity扩展配置
 
 ====
 当使用了SpringSecurity时自动忽略以下路径：
 
-/v2/api-docs,/swagger-resources/**,/doc.html,/webjars/**,/error,/favicon.ico,/_imagePreview
+/v2/api-docs,/swagger-resources/**,/doc.html,/webjars/**,/error,/favicon.ico,/_imagePreview,/*.png,/_groovyDebug_
 
 注意：可通过web.security.enable-default-ignore=false关闭默认忽略，也可以通过web.security.exclude-urls=/a/b,/c/**添加更多放行路径
 ====
