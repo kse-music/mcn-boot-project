@@ -9,4 +9,4 @@ cn.hiboot.mcn.autoconfigure.minio.MinioAutoConfiguration
 cn.hiboot.mcn.autoconfigure.validator.ValidatorAutoConfiguration
 cn.hiboot.mcn.autoconfigure.redis.RedisToolAutoConfiguration
 cn.hiboot.mcn.autoconfigure.xxl.XxlJobAutoConfiguration
-cn.hiboot.mcn.autoconfigure.web.flux.SpringWebFluxAutoConfiguration
+cn.hiboot.mcn.autoconfigure.web.reactor.SpringWebFluxAutoConfiguration
