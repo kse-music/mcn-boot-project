@@ -1,7 +1,7 @@
 package cn.hiboot.mcn.autoconfigure.context;
 
 import cn.hiboot.mcn.autoconfigure.bootstrap.LogFileChecker;
-import cn.hiboot.mcn.autoconfigure.util.SpringBeanUtils;
+import cn.hiboot.mcn.core.util.SpringBeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.BootstrapRegistry;

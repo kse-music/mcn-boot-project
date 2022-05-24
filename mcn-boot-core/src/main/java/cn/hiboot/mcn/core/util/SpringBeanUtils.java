@@ -1,7 +1,6 @@
-package cn.hiboot.mcn.autoconfigure.util;
+package cn.hiboot.mcn.core.util;
 
 import org.springframework.context.ApplicationContext;
-import org.springframework.util.Assert;
 
 /**
  * SpringBeanUtils
@@ -33,7 +32,7 @@ public abstract class SpringBeanUtils{
 	}
 
 	public static ApplicationContext getApplicationContext() {
-		Assert.notNull(context,"applicationContext not inject yet");
+		McnAssert.notNull(context,"applicationContext not inject yet");
 		return context;
 	}
 
