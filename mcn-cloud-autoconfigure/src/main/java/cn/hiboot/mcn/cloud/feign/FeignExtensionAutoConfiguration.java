@@ -3,15 +3,20 @@ package cn.hiboot.mcn.cloud.feign;
 import cn.hiboot.mcn.cloud.security.SessionHolder;
 import feign.*;
 import feign.codec.ErrorDecoder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.AnyNestedCondition;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.cloud.circuitbreaker.resilience4j.Resilience4JCircuitBreakerFactory;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
+import org.springframework.cloud.openfeign.Targeter;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
 import org.springframework.security.authentication.DefaultAuthenticationEventPublisher;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
-
-import java.util.concurrent.TimeUnit;
 
 /**
  * 提供全局fallback机制
@@ -21,23 +26,32 @@ import java.util.concurrent.TimeUnit;
  */
 @AutoConfiguration
 @ConditionalOnClass(Feign.class)
-@EnableConfigurationProperties(FeignExtensionProperties.class)
 public class FeignExtensionAutoConfiguration {
 
-    private final FeignExtensionProperties properties;
 
-    public FeignExtensionAutoConfiguration(FeignExtensionProperties properties) {
-        this.properties = properties;
-    }
+    @Configuration(proxyBeanMethods = false)
+    @ConditionalOnClass(Resilience4JCircuitBreakerFactory.class)
+    @Conditional(BreakerCondition.class)
+    protected static class CircuitBreakerConfiguration {
 
-    @Bean
-    public Logger.Level feignLoggerLevel() {
-        return properties.getLevel();
-    }
 
-    @Bean
-    public Request.Options options(){
-        return new Request.Options(properties.getConnectTimeout().getSeconds(), TimeUnit.SECONDS, properties.getReadTimeout().getSeconds(), TimeUnit.SECONDS, properties.isFollowRedirects());
+        @ConditionalOnProperty(prefix = "feign.circuitbreaker",name = "globalfallback.enabled", havingValue = "true",matchIfMissing = true)
+        private static class GlobalFallbackConfig{
+
+            @Bean
+            @Scope("prototype")
+            public Feign.Builder circuitBreakerFeignBuilder() {
+                return FeignCircuitBreaker.builder();
+            }
+
+            @Bean
+            public Targeter circuitBreakerFeignTargeter(CircuitBreakerFactory circuitBreakerFactory,
+                                                        @Value("${feign.circuitbreaker.group.enabled:false}") boolean circuitBreakerGroupEnabled) {
+                return new FeignCircuitBreakerTargeter(circuitBreakerFactory, circuitBreakerGroupEnabled);
+            }
+
+        }
+
     }
 
     @Configuration(proxyBeanMethods = false)
@@ -62,6 +76,24 @@ public class FeignExtensionAutoConfiguration {
         @Override
         public Exception decode(String methodKey, Response response) {
             return FeignException.errorStatus(methodKey, response);
+        }
+
+    }
+
+    static class BreakerCondition extends AnyNestedCondition {
+
+        BreakerCondition() {
+            super(ConfigurationPhase.REGISTER_BEAN);
+        }
+
+        @ConditionalOnProperty(prefix = "feign.circuitbreaker",name = "enabled",havingValue = "true")
+        static class NoComponentsAvailable {
+
+        }
+
+        @ConditionalOnProperty(prefix = "feign.circuitbreaker",name = "globalfallback.enabled", havingValue = "true")
+        static class CookieHttpSessionIdResolverAvailable {
+
         }
 
     }
