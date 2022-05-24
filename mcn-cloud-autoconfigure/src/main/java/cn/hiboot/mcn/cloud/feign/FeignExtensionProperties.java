@@ -12,17 +12,8 @@ import java.time.Duration;
  * @since 2021/9/21 13:43
  */
 @ConfigurationProperties("mcn.feign")
-public class FeignCircuitBreakerProperties {
+public class FeignExtensionProperties {
 
-    /**
-     * feign断路器超时时间 默认10s
-     */
-    private Duration timeoutDuration = Duration.ofSeconds(10);
-
-    /**
-     *  当 future.get 超时时候（TimeoutException）,是否调用 future.cancel 取消异步任务  默认true
-     */
-    private boolean cancelRunningFuture = true;
 
     /**
      * feign日志打印级别默认FULL
@@ -41,22 +32,6 @@ public class FeignCircuitBreakerProperties {
     private Duration readTimeout = Duration.ofSeconds(60);
 
     private boolean followRedirects = true;
-
-    public Duration getTimeoutDuration() {
-        return timeoutDuration;
-    }
-
-    public void setTimeoutDuration(Duration timeoutDuration) {
-        this.timeoutDuration = timeoutDuration;
-    }
-
-    public boolean isCancelRunningFuture() {
-        return cancelRunningFuture;
-    }
-
-    public void setCancelRunningFuture(boolean cancelRunningFuture) {
-        this.cancelRunningFuture = cancelRunningFuture;
-    }
 
     public Logger.Level getLevel() {
         return level;

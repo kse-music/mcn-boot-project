@@ -1,4 +1,4 @@
-cn.hiboot.mcn.cloud.feign.FeignCircuitBreakerAutoConfiguration
+cn.hiboot.mcn.cloud.feign.FeignExtensionAutoConfiguration
 cn.hiboot.mcn.cloud.discover.ServiceRegisterAutoConfiguration
 cn.hiboot.mcn.cloud.encryptor.web.DecryptConverterAutoConfiguration
 cn.hiboot.mcn.cloud.encryptor.jackson.DecryptJacksonAutoConfiguration
