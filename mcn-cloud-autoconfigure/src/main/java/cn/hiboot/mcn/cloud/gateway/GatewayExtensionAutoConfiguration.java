@@ -24,7 +24,7 @@ public class GatewayExtensionAutoConfiguration {
 
     @RestController
     @ConditionalOnProperty(prefix = "gateway.fallback",name = "enabled",havingValue = "true",matchIfMissing = true)
-    protected static class FallbackController{
+    protected static class DefaultFallbackRestController{
 
         @RequestMapping("fallback")
         public RestResp<?> fallback(ServerWebExchange exchange) {
