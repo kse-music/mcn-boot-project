@@ -7,6 +7,7 @@ import java.beans.BeanInfo;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.io.*;
+import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -80,28 +81,30 @@ public abstract class McnUtils {
         return Date.from(Instant.now());
     }
 
-    public static boolean isNullOrEmpty(String value){
-        return Objects.isNull(value) || value.isEmpty();
+    public static boolean isNullOrEmpty(Object obj){
+        if(Objects.isNull(obj)){
+            return true;
+        }
+        if (obj instanceof Optional) {
+            return !((Optional<?>) obj).isPresent();
+        }
+        if (obj instanceof CharSequence) {
+            return ((CharSequence) obj).length() == 0;
+        }
+        if (obj.getClass().isArray()) {
+            return Array.getLength(obj) == 0;
+        }
+        if (obj instanceof Collection) {
+            return ((Collection<?>) obj).isEmpty();
+        }
+        if (obj instanceof Map) {
+            return ((Map<?, ?>) obj).isEmpty();
+        }
+        return false;
     }
 
-    public static boolean isNotNullAndEmpty(String value){
-        return !isNullOrEmpty(value);
-    }
-
-    public static boolean isNullOrEmpty(Collection<?> value){
-        return Objects.isNull(value) || value.isEmpty();
-    }
-
-    public static boolean isNotNullAndEmpty(Collection<?> value){
-        return !isNullOrEmpty(value);
-    }
-
-    public static boolean isNullOrEmpty(Map<?,?> value){
-        return Objects.isNull(value) || value.isEmpty();
-    }
-
-    public static boolean isNotNullAndEmpty(Map<?,?> value){
-        return !isNullOrEmpty(value);
+    public static boolean isNotNullAndEmpty(Object obj){
+        return !isNullOrEmpty(obj);
     }
 
     public static String dealUrlPath(String path) {
