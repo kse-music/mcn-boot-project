@@ -23,7 +23,7 @@ import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.C
 public class GatewayExtensionAutoConfiguration {
 
     @RestController
-    @ConditionalOnProperty(value = "gateway.fallback",name = "enabled",havingValue = "true",matchIfMissing = true)
+    @ConditionalOnProperty(prefix = "gateway.fallback",name = "enabled",havingValue = "true",matchIfMissing = true)
     protected static class FallbackController{
 
         @RequestMapping("fallback")
