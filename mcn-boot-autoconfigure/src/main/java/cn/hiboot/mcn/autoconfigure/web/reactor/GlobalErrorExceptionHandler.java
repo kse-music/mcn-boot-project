@@ -10,7 +10,6 @@ import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.autoconfigure.web.WebProperties;
 import org.springframework.boot.autoconfigure.web.reactive.WebFluxProperties;
 import org.springframework.boot.autoconfigure.web.reactive.error.DefaultErrorWebExceptionHandler;
-import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.boot.web.reactive.error.ErrorAttributes;
 import org.springframework.boot.web.reactive.error.ErrorWebExceptionHandler;
 import org.springframework.context.ApplicationContext;
@@ -71,11 +70,8 @@ public class GlobalErrorExceptionHandler extends DefaultErrorWebExceptionHandler
     }*/
 
     @Override
-    protected Mono<ServerResponse> renderErrorView(ServerRequest request) {
-        Map<String, Object> error = getErrorAttributes(request, ErrorAttributeOptions.defaults());
-        int errorStatus = getHttpStatus(error);
-        return ServerResponse.status(errorStatus).contentType(MediaType.TEXT_HTML)
-                .body(BodyInserters.fromValue(ConfigProperties.errorView(error, webFluxProperties.getBasePath())));
+    protected Mono<ServerResponse> renderDefaultErrorView(ServerResponse.BodyBuilder responseBody, Map<String, Object> error) {
+        return responseBody.bodyValue(ConfigProperties.errorView(error, webFluxProperties.getBasePath()));
     }
 
     @Override
