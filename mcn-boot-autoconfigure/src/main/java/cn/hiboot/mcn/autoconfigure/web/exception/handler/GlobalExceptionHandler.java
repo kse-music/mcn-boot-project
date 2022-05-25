@@ -51,7 +51,7 @@ public class GlobalExceptionHandler extends AbstractExceptionHandler {
                 BindException ex = (BindException) exception;
                 data = dealBindingResult(ex.getBindingResult());
             }
-        }if(exception instanceof ServletException){
+        }else if(exception instanceof ServletException){
             errorCode =  mappingCode(((ServletException) exception));
         }
         ExceptionMessageCustomizer exceptionHandler = exceptionHandlers.getIfUnique();
