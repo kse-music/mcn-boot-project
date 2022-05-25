@@ -34,10 +34,21 @@ public abstract class ServerHttpResponseUtils {
         return write(RestResp.error(msg),response);
     }
 
+    public static Mono<Void> failed(Integer code, ServerHttpResponse response) {
+        return write(RestResp.error(code),response);
+    }
+
     private static Mono<Void> write(RestResp<?> resp,ServerHttpResponse response) {
         response.setStatusCode(HttpStatus.OK);
+        return write(JacksonUtils.toJson(resp),response);
+    }
+
+    public static Mono<Void> write(String msg,ServerHttpResponse response) {
+        if(msg == null){
+            msg = "";
+        }
         response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
-        DataBuffer buffer = response.bufferFactory().wrap(JacksonUtils.toJson(resp).getBytes(StandardCharsets.UTF_8));
+        DataBuffer buffer = response.bufferFactory().wrap(msg.getBytes(StandardCharsets.UTF_8));
         return response.writeWith(Mono.just(buffer));
     }
 

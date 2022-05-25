@@ -1,13 +1,11 @@
 package cn.hiboot.mcn.autoconfigure.web.exception.error;
 
+import cn.hiboot.mcn.autoconfigure.config.ConfigProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.http.MediaType;
-import org.springframework.util.StreamUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.View;
-import org.springframework.web.util.HtmlUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -41,31 +39,7 @@ public class DefaultErrorView implements View {
         }
         response.setContentType(TEXT_HTML_UTF8.toString());
         String basePath = serverProperties.getServlet().getContextPath();
-        String blueprint = "/blueprint.png";
-        String errorHanger = "/error-hanger.png";
-        String errorPin = "/error-pin.png";
-        if(StringUtils.hasText(basePath)){
-            blueprint = basePath + blueprint;
-            errorHanger = basePath + errorHanger;
-            errorPin = basePath + errorPin;
-        }
-        String status = model.get("status").toString();
-        Object message = model.get("message");
-        if(message == null){
-            message = model.get("error");
-        }
-        String msg = message == null ? "" : message.toString();
-        String view = StreamUtils.copyToString(getClass().getClassLoader().getResourceAsStream("defaultErrorView.html"),StandardCharsets.UTF_8);
-        view = view.replace("{blueprint}",blueprint)
-                .replace("{errorHanger}",errorHanger)
-                .replace("{errorPin}",errorPin)
-                .replace("{status}",htmlEscape(status))
-                .replace("{msg}",htmlEscape(msg));
-        response.getWriter().append(view);
-    }
-
-    private String htmlEscape(Object input) {
-        return (input != null) ? HtmlUtils.htmlEscape(input.toString()) : null;
+        response.getWriter().append(ConfigProperties.errorView(model,basePath));
     }
 
     private String getMessage(Map<String, ?> model) {

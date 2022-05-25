@@ -39,4 +39,20 @@ public interface ExceptionKeys {
     int REMOTE_SERVICE_ERROR = 900002;
     int REMOTE_DATA_PARSE_ERROR = 900003;
 
+    static int mappingCode(Integer statusCode){
+        if(statusCode != null){
+            switch (statusCode){
+                case 401: return HTTP_ERROR_401;
+                case 402: return HTTP_ERROR_402;
+                case 403: return HTTP_ERROR_403;
+                case 404: return HTTP_ERROR_404;
+                case 405: return HTTP_ERROR_405;
+                case 406: return HTTP_ERROR_406;
+                case 407: return HTTP_ERROR_408;
+                case 408: return HTTP_ERROR_409;
+            }
+        }
+        return ExceptionKeys.HTTP_ERROR_500;
+    }
+
 }

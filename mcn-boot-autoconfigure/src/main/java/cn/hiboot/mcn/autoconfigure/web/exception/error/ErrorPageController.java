@@ -30,22 +30,7 @@ public class ErrorPageController extends BasicErrorController {
         ResponseEntity<Map<String, Object>> error = super.error(request);
         if(overrideHttpError){
             int statusCode = error.getStatusCodeValue();
-            int code = ExceptionKeys.HTTP_ERROR_500;
-            if(statusCode == HttpStatus.UNAUTHORIZED.value()){
-                code = ExceptionKeys.HTTP_ERROR_401;
-            }else if(statusCode == HttpStatus.FORBIDDEN.value()){
-                code = ExceptionKeys.HTTP_ERROR_403;
-            }else if(statusCode == HttpStatus.NOT_FOUND.value()){
-                code = ExceptionKeys.HTTP_ERROR_404;
-            }else if(statusCode == HttpStatus.METHOD_NOT_ALLOWED.value()){
-                code = ExceptionKeys.HTTP_ERROR_405;
-            }else if(statusCode == HttpStatus.NOT_ACCEPTABLE.value()){
-                code = ExceptionKeys.HTTP_ERROR_406;
-            }else if(statusCode == HttpStatus.REQUEST_TIMEOUT.value()){
-                code = ExceptionKeys.HTTP_ERROR_408;
-            }else if(statusCode == HttpStatus.CONFLICT.value()){
-                code = ExceptionKeys.HTTP_ERROR_409;
-            }
+            int code = ExceptionKeys.mappingCode(statusCode);
             RestResp<Object> resp = RestResp.error(code);
             Map<String, Object> rs = new HashMap<>();
             rs.put("ActionStatus",resp.getActionStatus());
