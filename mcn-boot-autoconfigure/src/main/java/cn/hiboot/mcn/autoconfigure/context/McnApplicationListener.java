@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.BootstrapRegistry;
 import org.springframework.boot.ConfigurableBootstrapContext;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.context.event.ApplicationContextInitializedEvent;
 import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.boot.context.logging.LoggingApplicationListener;
@@ -33,7 +34,7 @@ public class McnApplicationListener implements GenericApplicationListener {
 
     public static final int DEFAULT_ORDER = LoggingApplicationListener.DEFAULT_ORDER + 1;
 
-    private static final Class<?>[] EVENT_TYPES = { ApplicationEnvironmentPreparedEvent.class, ApplicationStartedEvent.class};
+    private static final Class<?>[] EVENT_TYPES = { ApplicationEnvironmentPreparedEvent.class, ApplicationContextInitializedEvent.class,ApplicationStartedEvent.class};
 
     private static final Class<?>[] SOURCE_TYPES = { SpringApplication.class };
 
@@ -42,13 +43,14 @@ public class McnApplicationListener implements GenericApplicationListener {
         if(applicationEvent instanceof ApplicationEnvironmentPreparedEvent){
             ApplicationEnvironmentPreparedEvent event = (ApplicationEnvironmentPreparedEvent) applicationEvent;
             triggerEnvironmentPreparedEvent(event.getEnvironment(),event.getBootstrapContext());
+        }else if(applicationEvent instanceof ApplicationContextInitializedEvent){
+            logPropertySource(((ApplicationContextInitializedEvent) applicationEvent).getApplicationContext().getEnvironment());
         }else if(applicationEvent instanceof ApplicationStartedEvent){
             SpringBeanUtils.setApplicationContext(((ApplicationStartedEvent) applicationEvent).getApplicationContext());
         }
     }
 
     private void triggerEnvironmentPreparedEvent(ConfigurableEnvironment environment, ConfigurableBootstrapContext context) {
-        logPropertySource(environment);
         registerLogFileChecker(environment,context);
         configSecurityContextHolderStrategyMode(environment);
     }
@@ -56,13 +58,21 @@ public class McnApplicationListener implements GenericApplicationListener {
     private void logPropertySource(ConfigurableEnvironment environment){
         if(environment.getProperty("mcn.print-env.enable",Boolean.class,false)){
             for (PropertySource<?> propertySource : environment.getPropertySources()) {
+                String name = propertySource.getName();
                 if(!(propertySource instanceof EnumerablePropertySource)){
-                    log.info("skip propertySource name = {}",propertySource.getName());
+                    System.out.println();
+                    log.info("skip propertySource name = {} because it's not enumerable", name);
+                    continue;
+                }
+                String[] propertyNames = ((EnumerablePropertySource<?>) propertySource).getPropertyNames();
+                if(propertyNames.length == 0){
+                    System.out.println();
+                    log.info("ignore propertySource name = {} because no config property",name);
                     continue;
                 }
                 System.out.println();
-                log.info("start print ------------ {} ------------ ",propertySource.getName());
-                for (String propertyName : ((EnumerablePropertySource<?>) propertySource).getPropertyNames()) {
+                log.info("start print ------------ {} ------------ ",name);
+                for (String propertyName : propertyNames) {
                     log.info("{} = {}",propertyName,propertySource.getProperty(propertyName));
                 }
             }
