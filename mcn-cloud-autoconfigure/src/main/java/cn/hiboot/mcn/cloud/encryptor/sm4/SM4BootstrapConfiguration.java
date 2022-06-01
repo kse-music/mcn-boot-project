@@ -3,6 +3,7 @@ package cn.hiboot.mcn.cloud.encryptor.sm4;
 import cn.hutool.crypto.SmUtil;
 import cn.hutool.crypto.symmetric.SM4;
 import cn.hutool.crypto.symmetric.SymmetricCrypto;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -18,7 +19,7 @@ import java.nio.charset.StandardCharsets;
  * @author DingHao
  * @since 2022/2/15 14:01
  */
-@Configuration(proxyBeanMethods = false)
+@AutoConfiguration
 @ConditionalOnClass({TextEncryptor.class,SymmetricCrypto.class})
 @EnableConfigurationProperties(EncryptorProperties.class)
 @Order(0)
