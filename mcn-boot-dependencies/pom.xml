@@ -31,7 +31,7 @@
     <properties>
         <mcn.version>${revision}</mcn.version>
         <spring-boot.version>2.7.0</spring-boot.version>
-        <spring-cloud.version>2021.0.2</spring-cloud.version>
+        <spring-cloud.version>2021.0.3</spring-cloud.version>
         <mybatis-spring-boot.version>2.2.2</mybatis-spring-boot.version>
         <guava.version>31.1-jre</guava.version>
         <commons-io.version>2.11.0</commons-io.version>
