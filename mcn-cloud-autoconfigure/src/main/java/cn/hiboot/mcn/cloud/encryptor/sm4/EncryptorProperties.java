@@ -33,6 +33,7 @@ public class EncryptorProperties {
         @NestedConfigurationProperty
         private Padding padding;
         private String key;
+        private String iv;
 
         public boolean isBase64() {
             return base64;
@@ -64,6 +65,14 @@ public class EncryptorProperties {
 
         public void setKey(String key) {
             this.key = key;
+        }
+
+        public String getIv() {
+            return iv;
+        }
+
+        public void setIv(String iv) {
+            this.iv = iv;
         }
     }
 }

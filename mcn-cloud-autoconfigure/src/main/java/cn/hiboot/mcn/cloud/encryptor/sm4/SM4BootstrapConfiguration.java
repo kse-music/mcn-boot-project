@@ -34,7 +34,11 @@ public class SM4BootstrapConfiguration {
         public SM4Encryptor(EncryptorProperties encryptorProperties) {
             EncryptorProperties.SM4 sm4 = encryptorProperties.getSm4();
             if(sm4.getMode() != null && sm4.getPadding() != null){
-                this.sm4 = new SM4(sm4.getMode(),sm4.getPadding(),sm4.getKey().getBytes(StandardCharsets.UTF_8));
+                if(sm4.getIv() == null){
+                    this.sm4 = new SM4(sm4.getMode(),sm4.getPadding(),sm4.getKey().getBytes(StandardCharsets.UTF_8));
+                }else {
+                    this.sm4 = new SM4(sm4.getMode(),sm4.getPadding(),sm4.getKey().getBytes(StandardCharsets.UTF_8),sm4.getIv().getBytes(StandardCharsets.UTF_8));
+                }
             }else {
                 this.sm4 = SmUtil.sm4(sm4.getKey().getBytes(StandardCharsets.UTF_8));
             }
