@@ -77,6 +77,13 @@
       "defaultValue": true
     },
     {
+      "name": "global.ex.handler.order",
+      "type": "java.lang.Integer",
+      "sourceType": "cn.hiboot.mcn.autoconfigure.web.exception.handler.GlobalExceptionHandler",
+      "description": "全局异常处理器顺序.",
+      "defaultValue": 1
+    },
+    {
       "name": "xxl.job.enable",
       "type": "java.lang.Boolean",
       "sourceType": "cn.hiboot.mcn.autoconfigure.xxl.XxlJobAutoConfiguration",
@@ -86,14 +93,14 @@
     {
       "name": "framework.stack.remove.enable",
       "type": "java.lang.Boolean",
-      "sourceType": "cn.hiboot.mcn.autoconfigure.web.exception.handler.AbstractExceptionHandler",
+      "sourceType": "cn.hiboot.mcn.autoconfigure.web.exception.handler.GlobalExceptionHandler",
       "description": "是否过滤框架异常栈.",
       "defaultValue": true
     },
     {
       "name": "validator.result.return.enable",
       "type": "java.lang.Boolean",
-      "sourceType": "cn.hiboot.mcn.autoconfigure.web.exception.handler.AbstractExceptionHandler",
+      "sourceType": "cn.hiboot.mcn.autoconfigure.web.exception.handler.GlobalExceptionHandler",
       "description": "是否将validator验证结果返回.",
       "defaultValue": true
     }

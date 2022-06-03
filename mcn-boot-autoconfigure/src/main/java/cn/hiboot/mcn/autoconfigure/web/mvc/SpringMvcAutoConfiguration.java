@@ -3,7 +3,6 @@ package cn.hiboot.mcn.autoconfigure.web.mvc;
 import cn.hiboot.mcn.autoconfigure.web.exception.error.DefaultErrorView;
 import cn.hiboot.mcn.autoconfigure.web.exception.error.ErrorPageController;
 import cn.hiboot.mcn.autoconfigure.web.exception.handler.GlobalExceptionHandler;
-import cn.hiboot.mcn.autoconfigure.web.exception.handler.ValidationExceptionHandler;
 import cn.hiboot.mcn.autoconfigure.web.mvc.resolver.StrToObj;
 import cn.hiboot.mcn.autoconfigure.web.mvc.resolver.StringObjectMethodArgumentResolver;
 import cn.hiboot.mcn.core.model.result.RestResp;
@@ -49,7 +48,7 @@ public class SpringMvcAutoConfiguration {
 
 
     @Configuration(proxyBeanMethods = false)
-    @Import({GlobalExceptionHandler.class, ValidationExceptionHandler.class})
+    @Import(GlobalExceptionHandler.class)
     @EnableConfigurationProperties(ServerProperties.class)
     protected static class SpringMvcExceptionHandler{
 
