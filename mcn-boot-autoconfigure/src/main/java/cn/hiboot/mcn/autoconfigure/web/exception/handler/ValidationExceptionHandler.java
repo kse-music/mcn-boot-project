@@ -1,11 +1,5 @@
 package cn.hiboot.mcn.autoconfigure.web.exception.handler;
 
-import cn.hiboot.mcn.core.exception.ExceptionKeys;
-import cn.hiboot.mcn.core.model.result.RestResp;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.ValidationException;
@@ -18,19 +12,16 @@ import java.util.stream.Collectors;
  * @author DingHao
  * @since 2022/1/13 22:00
  */
-@ConditionalOnClass(ValidationException.class)
-@RestControllerAdvice
-public class ValidationExceptionHandler extends AbstractExceptionHandler {
+class ValidationExceptionHandler{
 
-    @Override
-    public RestResp<Object> buildErrorData(HttpServletRequest request, Throwable exception) {
+    public static Object handle(Throwable exception) {
         if(exception instanceof ValidationException){
             return handleValidationException((ValidationException) exception);
         }
         return null;
     }
 
-    public RestResp<Object> handleValidationException(ValidationException exception){
+    private static Object handleValidationException(ValidationException exception){
         Object data = null;
         if (exception instanceof ConstraintViolationException) {
             ConstraintViolationException cve = (ConstraintViolationException) exception;
@@ -38,10 +29,10 @@ public class ValidationExceptionHandler extends AbstractExceptionHandler {
                     new ValidationErrorBean(violation1.getMessage(), getViolationPath(violation1), getViolationInvalidValue(violation1.getInvalidValue()))
             ).collect(Collectors.toList());
         }
-        return buildErrorMessage(ExceptionKeys.PARAM_PARSE_ERROR,data,exception);
+        return data;
     }
 
-    private String getViolationInvalidValue(Object invalidValue) {
+    private static String getViolationInvalidValue(Object invalidValue) {
         if (invalidValue == null) {
             return null;
         } else {
@@ -87,7 +78,7 @@ public class ValidationExceptionHandler extends AbstractExceptionHandler {
         }
     }
 
-    private String getViolationPath(ConstraintViolation violation) {
+    private static String getViolationPath(ConstraintViolation violation) {
         String rootBeanName = violation.getRootBean().getClass().getSimpleName();
         String propertyPath = violation.getPropertyPath().toString();
         return rootBeanName + (!"".equals(propertyPath) ? '.' + propertyPath : "");
