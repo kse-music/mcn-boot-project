@@ -29,7 +29,7 @@ public class XssProperties {
      */
     private boolean filterParameterName;
 
-    private int order = 2;
+    private int order = Integer.MAX_VALUE;
 
     public String[] getUrlPatterns() {
         return urlPatterns;

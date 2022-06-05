@@ -1,18 +1,11 @@
 package cn.hiboot.mcn.autoconfigure.web.filter.xss;
 
 
-import cn.hiboot.mcn.core.util.JacksonUtils;
 import cn.hiboot.mcn.core.util.McnUtils;
-import com.fasterxml.jackson.core.type.TypeReference;
 import org.springframework.web.util.HtmlUtils;
 
-import javax.servlet.ReadListener;
-import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -77,47 +70,6 @@ public class  XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
             }
         }
         return map;
-    }
-
-    @Override
-    public ServletInputStream getInputStream() throws IOException {
-        Map<String, Object> map = JacksonUtils.getObjectMapper().readValue(super.getInputStream(),new TypeReference<Map<String, Object>>(){});
-
-        Map<String, Object> resultMap = new HashMap<>(map.size());
-
-        map.forEach((key,value) -> {
-            key = cleanParameterName(key);
-            if (value instanceof String) {
-                resultMap.put(key, cleanParameterValue(value.toString()));
-            } else {
-                resultMap.put(key, value);
-            }
-        });
-
-        String str = JacksonUtils.toJson(resultMap);
-
-        ByteArrayInputStream arrayInputStream = new ByteArrayInputStream(str.getBytes());
-        return new ServletInputStream() {
-            @Override
-            public boolean isFinished() {
-                return false;
-            }
-
-            @Override
-            public boolean isReady() {
-                return false;
-            }
-
-            @Override
-            public void setReadListener(ReadListener readListener) {
-
-            }
-
-            @Override
-            public int read() throws IOException {
-                return arrayInputStream.read();
-            }
-        };
     }
 
     @Override
