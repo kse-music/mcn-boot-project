@@ -31,6 +31,11 @@ public class XssProperties {
 
     private int order = Integer.MAX_VALUE;
 
+    /**
+     * 是否也处理返回数据
+     */
+    private boolean escapeResponse;
+
     public String[] getUrlPatterns() {
         return urlPatterns;
     }
@@ -69,5 +74,13 @@ public class XssProperties {
 
     public void setOrder(int order) {
         this.order = order;
+    }
+
+    public boolean isEscapeResponse() {
+        return escapeResponse;
+    }
+
+    public void setEscapeResponse(boolean escapeResponse) {
+        this.escapeResponse = escapeResponse;
     }
 }
