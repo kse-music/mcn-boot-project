@@ -136,7 +136,7 @@ public class DataIntegrityFilter implements Filter, Ordered {
         }
         //获取参数，因为有的接口是没有参数的，所以要单独处理下
         String param = this.sortQueryParamString(params);
-        if(request.getContentType() != null && request.getContentType().contains(MediaType.MULTIPART_FORM_DATA_VALUE)){//maybe upload
+        if(request.getContentType() != null && request.getContentType().contains(MediaType.MULTIPART_FORM_DATA_VALUE) && dataIntegrityProperties.isCheckUpload()){//maybe upload
             param += parseUpload(request);
         }
         if(data != null){
