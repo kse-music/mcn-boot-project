@@ -1,6 +1,7 @@
 package cn.hiboot.mcn.autoconfigure.web.filter.integrity;
 
 import cn.hutool.crypto.SmUtil;
+import org.bouncycastle.crypto.digests.SM3Digest;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -16,7 +17,7 @@ import org.springframework.context.annotation.Bean;
  */
 @AutoConfiguration
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
-@ConditionalOnClass(SmUtil.class)
+@ConditionalOnClass({SmUtil.class, SM3Digest.class})
 @EnableConfigurationProperties(DataIntegrityProperties.class)
 @ConditionalOnProperty(prefix = "data.integrity",name = "check",havingValue = "true")
 public class DataIntegrityAutoConfiguration {

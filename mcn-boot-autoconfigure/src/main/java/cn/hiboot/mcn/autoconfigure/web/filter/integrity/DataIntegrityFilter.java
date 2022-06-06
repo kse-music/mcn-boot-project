@@ -3,6 +3,7 @@ package cn.hiboot.mcn.autoconfigure.web.filter.integrity;
 import cn.hiboot.mcn.core.model.result.RestResp;
 import cn.hiboot.mcn.core.util.JacksonUtils;
 import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.net.URLDecoder;
 import cn.hutool.core.text.StrBuilder;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SmUtil;
@@ -14,6 +15,7 @@ import org.springframework.util.PathMatcher;
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.Part;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
@@ -134,6 +136,9 @@ public class DataIntegrityFilter implements Filter, Ordered {
         }
         //获取参数，因为有的接口是没有参数的，所以要单独处理下
         String param = this.sortQueryParamString(params);
+        if(request.getContentType() != null && request.getContentType().contains(MediaType.MULTIPART_FORM_DATA_VALUE)){//maybe upload
+            param += parseUpload(request);
+        }
         if(data != null){
             param += data;
         }
@@ -177,4 +182,25 @@ public class DataIntegrityFilter implements Filter, Ordered {
     public int getOrder() {
         return dataIntegrityProperties.getOrder();
     }
+
+    private String parseUpload(HttpServletRequest request) {
+        String str = "";
+        try {
+            Collection<Part> parts = request.getParts();
+            for (Part part : parts) {
+                String filename = part.getSubmittedFileName();
+                if (filename != null) {
+                    if (filename.startsWith("=?") && filename.endsWith("?=")) {
+                        filename = URLDecoder.decode(filename,StandardCharsets.UTF_8);
+                    }
+                    str = str.concat(filename + part.getSize());
+                }
+            }
+        }
+        catch (Throwable ex) {
+            //
+        }
+        return str;
+    }
+
 }
