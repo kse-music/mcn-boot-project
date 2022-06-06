@@ -14,17 +14,18 @@ import java.util.List;
 @ConfigurationProperties("data.integrity")
 public class DataIntegrityProperties {
 
-    private boolean check;
+    private boolean enable;
     private List<String> includePatterns = Collections.singletonList("/**");
     private List<String> excludePatterns = Collections.emptyList();
     private int order = -1000;
+    private boolean checkUpload = true;
 
-    public boolean isCheck() {
-        return check;
+    public boolean isEnable() {
+        return enable;
     }
 
-    public void setCheck(boolean check) {
-        this.check = check;
+    public void setEnable(boolean enable) {
+        this.enable = enable;
     }
 
     public List<String> getIncludePatterns() {
@@ -49,5 +50,13 @@ public class DataIntegrityProperties {
 
     public void setOrder(int order) {
         this.order = order;
+    }
+
+    public boolean isCheckUpload() {
+        return checkUpload;
+    }
+
+    public void setCheckUpload(boolean checkUpload) {
+        this.checkUpload = checkUpload;
     }
 }
