@@ -1,20 +1,27 @@
 org.springframework.context.ApplicationContextInitializer=\
-  cn.hiboot.mcn.autoconfigure.context.McnContextInitializer
+  cn.hiboot.mcn.autoconfigure.context.McnApplicationContextInitializer
 
 org.springframework.context.ApplicationListener=\
   cn.hiboot.mcn.autoconfigure.context.McnApplicationListener
 
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  cn.hiboot.mcn.autoconfigure.db.SingleDatasourceAutoConfiguration,\
-  cn.hiboot.mcn.autoconfigure.db.MultipleMybatisAutoConfiguration,\
-  cn.hiboot.mcn.autoconfigure.web.jersey.JerseySwaggerAutoConfiguration,\
+  cn.hiboot.mcn.autoconfigure.mybatis.SingleDataSourceAutoConfiguration,\
+  cn.hiboot.mcn.autoconfigure.mybatis.MultipleDataSourceAutoConfiguration,\
+  cn.hiboot.mcn.autoconfigure.web.groovy.GroovyWebAutoConfiguration,\
   cn.hiboot.mcn.autoconfigure.web.filter.FilterAutoConfiguration,\
+  cn.hiboot.mcn.autoconfigure.web.filter.integrity.DataIntegrityAutoConfiguration,\
+  cn.hiboot.mcn.autoconfigure.web.filter.xss.XssAutoConfiguration,\
   cn.hiboot.mcn.autoconfigure.web.mvc.SpringMvcAutoConfiguration,\
-  cn.hiboot.mcn.autoconfigure.converter.VOConverterAutoConfiguration,\
-  cn.hiboot.mcn.autoconfigure.web.mvc.WebMvcConfigurerAutoConfiguration,\
+  cn.hiboot.mcn.autoconfigure.web.swagger.SwaggerAutoConfiguration,\
   cn.hiboot.mcn.autoconfigure.web.security.WebSecurityAutoConfiguration,\
   cn.hiboot.mcn.autoconfigure.minio.MinioAutoConfiguration,\
-  cn.hiboot.mcn.autoconfigure.web.validator.ValidatorAutoConfiguration
+  cn.hiboot.mcn.autoconfigure.validator.ValidatorAutoConfiguration,\
+  cn.hiboot.mcn.autoconfigure.redis.RedisToolAutoConfiguration,\
+  cn.hiboot.mcn.autoconfigure.xxl.XxlJobAutoConfiguration,\
+  cn.hiboot.mcn.autoconfigure.web.reactor.SpringWebFluxAutoConfiguration
+
+org.springframework.boot.BootstrapRegistryInitializer=\
+  cn.hiboot.mcn.autoconfigure.bootstrap.McnBootstrapRegistryInitializer
 
 org.springframework.boot.env.EnvironmentPostProcessor=\
-  cn.hiboot.mcn.autoconfigure.context.McnPropertiesPostProcessor
+  cn.hiboot.mcn.autoconfigure.context.McnEnvironmentPostProcessor

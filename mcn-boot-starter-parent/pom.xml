@@ -14,7 +14,7 @@
     <packaging>pom</packaging>
     <name>Mcn Boot Starter Parent</name>
     <description>Parent pom providing dependency and plugin management for applications built with Maven</description>
-    <url>http://www.hiboot.cn</url>
+    <url>${web.url}</url>
 
     <properties>
         <java.version>1.8</java.version>
@@ -23,6 +23,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
+        <excludeGroupIds>org.projectlombok</excludeGroupIds>
     </properties>
 
     <build>
@@ -56,6 +57,9 @@
                 <plugin>
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-maven-plugin</artifactId>
+                    <configuration>
+                        <excludeGroupIds>${excludeGroupIds}</excludeGroupIds>
+                    </configuration>
                     <executions>
                         <execution>
                             <id>repackage</id>

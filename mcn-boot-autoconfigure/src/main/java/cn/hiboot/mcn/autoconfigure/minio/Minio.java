@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -24,36 +25,95 @@ import java.util.stream.StreamSupport;
  */
 public interface Minio {
 
-    String DEFAULT_PREVIEW_PARAMETER_NAME = "image";
-
     Logger log = LoggerFactory.getLogger(DefaultMinio.class);
 
-    String getDefaultBucketName();
-    
-    MinioClient getMinioClient();
+    Map<String, String> map = Collections.singletonMap("Expect", "100-continue");
 
-    String getPreviewParameterName();
+    DefaultMinioClient getMinioClient();
 
-    default void upload(String objectName, InputStream stream){
-        upload(getDefaultBucketName(),objectName,stream);
+    MinioProperties getConfig();
+
+    default String getDefaultBucketName(){
+        return getConfig().getDefaultBucketName();
+    }
+
+    default void upload(String objectName,long objectSize,InputStream stream){
+        upload(objectName,objectSize,null,stream);
+    }
+
+    default void upload(String objectName,long objectSize,String contentType,InputStream stream){
+        upload(getDefaultBucketName(),objectName,objectSize,getConfig().getMinMultipartSize().toBytes(),contentType,stream);
     }
     /**
      * 文件上传
      *
      * @param bucketName 桶名称
      * @param objectName 文件名
-     * @param stream     文件流
+     * @param objectSize 文件大小
+     * @param partSize 分片大小
+     * @param contentType contentType
+     * @param stream   文件流
      */
-    default void upload(String bucketName, String objectName, InputStream stream) {
+    default void upload(String bucketName,String objectName,long objectSize,long partSize,String contentType, InputStream stream) {
+        if(McnUtils.isNullOrEmpty(bucketName)){
+            throw new MinioException(bucketName + " can not empty");
+        }
         try{
-            PutObjectArgs args = PutObjectArgs.builder()
+            PutObjectArgs.Builder builder = PutObjectArgs.builder()
                     .bucket(bucketName)
                     .object(objectName)
-                    .stream(stream, stream.available(), -1)
-                    .build();
-            getMinioClient().putObject(args);
+                    .headers(map)
+                    .stream(stream, objectSize, partSize);
+            if(McnUtils.isNotNullAndEmpty(contentType)){
+                builder.contentType(contentType);
+            }
+            getMinioClient().putObject(builder.build());
         }catch (Exception e){
-            throw new MinioException(e);
+            throw new MinioException(e,getConfig().isReturnPreviousExceptionMessage());
+        }
+    }
+
+    default void uploadParallel(String objectName,long objectSize,InputStream stream){
+        uploadParallel(objectName,objectSize,null,stream);
+    }
+
+    default void uploadParallel(String objectName,long objectSize,String contentType,InputStream stream){
+        uploadParallel(getDefaultBucketName(),objectName,objectSize,contentType,stream);
+    }
+
+    default void uploadParallel(String bucketName,String objectName,long objectSize,String contentType, InputStream stream){
+        try {
+            getMinioClient().upload(bucketName,objectName,objectSize,contentType,stream);
+        } catch (Exception e) {
+            throw new MinioException(e,getConfig().isReturnPreviousExceptionMessage());
+        }
+    }
+
+    default PreSignResult getPresignedObjectUrl(String objectName,int count){
+        return getPresignedObjectUrl(getDefaultBucketName(),objectName,null,count);
+    }
+
+    default PreSignResult getPresignedObjectUrl(String objectName,String contentType, int count){
+        return getPresignedObjectUrl(getDefaultBucketName(),objectName,contentType,count);
+    }
+
+    default PreSignResult getPresignedObjectUrl(String bucketName,String objectName,String contentType, int count){
+        try {
+            return getMinioClient().getPresignedObjectUrl(bucketName,objectName,contentType,count);
+        } catch (Exception e) {
+            throw new MinioException(e,getConfig().isReturnPreviousExceptionMessage());
+        }
+    }
+
+    default void mergeMultipartUpload(String objectName, String uploadId){
+        mergeMultipartUpload(getDefaultBucketName(),objectName,uploadId);
+    }
+
+    default void mergeMultipartUpload(String bucketName,String objectName, String uploadId){
+        try {
+            getMinioClient().mergeMultipartUpload(bucketName,objectName,uploadId);
+        } catch (Exception e) {
+            throw new MinioException(e,getConfig().isReturnPreviousExceptionMessage());
         }
     }
 
@@ -74,13 +134,14 @@ public interface Minio {
                     .build();
             getMinioClient().removeObject(args);
         }catch (Exception e){
-            throw new MinioException(e);
+            throw new MinioException(e,getConfig().isReturnPreviousExceptionMessage());
         }
     }
 
     default List<Item> listObjects(boolean recursive){
         return listObjects(getDefaultBucketName(),recursive);
     }
+
     /**
      * 文件列表
      *
@@ -101,7 +162,7 @@ public interface Minio {
                 return null;
             }).filter(Objects::nonNull).collect(Collectors.toList());
         }catch (Exception e){
-            throw new MinioException(e);
+            throw new MinioException(e,getConfig().isReturnPreviousExceptionMessage());
         }
     }
 
@@ -126,13 +187,14 @@ public interface Minio {
                 log.error("Error delete object {} ; {}", error.objectName(),error.message());
             }
         }catch (Exception e){
-            throw new MinioException(e);
+            throw new MinioException(e,getConfig().isReturnPreviousExceptionMessage());
         }
     }
 
     default InputStream getObject(String objectName){
         return getObject(getDefaultBucketName(),objectName);
     }
+
     /**
      * 获取文件
      *
@@ -148,7 +210,7 @@ public interface Minio {
                     .build();
             return getMinioClient().getObject(args);
         }catch (Exception e){
-            throw new MinioException(e);
+            throw new MinioException(e,getConfig().isReturnPreviousExceptionMessage());
         }
     }
 
@@ -156,8 +218,9 @@ public interface Minio {
         try {
             return getMinioClient().bucketExists(BucketExistsArgs.builder().bucket(bucketName).build());
         } catch (Exception e) {
-            throw new MinioException(e);
+            log.error("{}","check buck exist error");
         }
+        return false;
     }
 
     /**
@@ -174,7 +237,7 @@ public interface Minio {
                     .build();
             getMinioClient().makeBucket(args);
         }catch (Exception e){
-            throw new MinioException(e);
+            throw new MinioException(e,getConfig().isReturnPreviousExceptionMessage());
         }
     }
 
@@ -185,7 +248,7 @@ public interface Minio {
                 return buckets.stream().map(b -> new BucketItem(b.name(),b.creationDate())).collect(Collectors.toList());
             }
         }catch (Exception e){
-            throw new MinioException(e);
+            throw new MinioException(e,getConfig().isReturnPreviousExceptionMessage());
         }
         return Collections.emptyList();
     }
@@ -202,7 +265,7 @@ public interface Minio {
                     .build();
             getMinioClient().removeBucket(args);
         }catch (Exception e){
-            throw new MinioException(e);
+            throw new MinioException(e,getConfig().isReturnPreviousExceptionMessage());
         }
     }
 

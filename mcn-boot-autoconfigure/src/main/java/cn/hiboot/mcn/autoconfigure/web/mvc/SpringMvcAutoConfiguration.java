@@ -1,47 +1,43 @@
 package cn.hiboot.mcn.autoconfigure.web.mvc;
 
-import cn.hiboot.mcn.autoconfigure.web.exception.handler.AbstractExceptionHandler;
-import cn.hiboot.mcn.core.model.ValidationErrorBean;
+import cn.hiboot.mcn.autoconfigure.web.exception.error.DefaultErrorView;
+import cn.hiboot.mcn.autoconfigure.web.exception.error.ErrorPageController;
+import cn.hiboot.mcn.autoconfigure.web.exception.handler.GlobalExceptionHandler;
+import cn.hiboot.mcn.autoconfigure.web.exception.handler.GlobalExceptionProperties;
+import cn.hiboot.mcn.autoconfigure.web.mvc.resolver.StrToObj;
+import cn.hiboot.mcn.autoconfigure.web.mvc.resolver.StringObjectMethodArgumentResolver;
 import cn.hiboot.mcn.core.model.result.RestResp;
-import cn.hiboot.mcn.swagger.MvcSwagger2;
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
+import cn.hiboot.mcn.core.util.JacksonUtils;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.boot.autoconfigure.condition.*;
+import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration;
+import org.springframework.boot.autoconfigure.web.servlet.error.ErrorViewResolver;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.web.servlet.error.DefaultErrorAttributes;
+import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.core.MethodParameter;
+import org.springframework.http.MediaType;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.server.ServerHttpRequest;
+import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.DispatcherServlet;
-import springfox.documentation.RequestHandler;
-import springfox.documentation.builders.ApiInfoBuilder;
-import springfox.documentation.builders.PathSelectors;
-import springfox.documentation.builders.RequestHandlerSelectors;
-import springfox.documentation.service.ApiInfo;
-import springfox.documentation.service.Contact;
-import springfox.documentation.spi.DocumentationType;
-import springfox.documentation.spring.web.plugins.ApiSelectorBuilder;
-import springfox.documentation.spring.web.plugins.Docket;
-import springfox.documentation.swagger2.annotations.EnableSwagger2;
+import org.springframework.web.servlet.View;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
-import javax.validation.ValidationException;
-import java.lang.annotation.Annotation;
-import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * spring mvc swagger2 config
+ * spring mvc config
  *
  * @author DingHao
  * @since 2019/3/27 10:56
@@ -55,139 +51,57 @@ public class SpringMvcAutoConfiguration {
 
     @Configuration(proxyBeanMethods = false)
     @Import(GlobalExceptionHandler.class)
-    static class SpringMvcExceptionHandler{
+    @EnableConfigurationProperties({ServerProperties.class, GlobalExceptionProperties.class})
+    protected static class SpringMvcExceptionHandler{
 
         @Bean
         @ConditionalOnMissingBean(ErrorController.class)
-        public ErrorPageController errorController() {
-            return new ErrorPageController();
+        public ErrorPageController errorController(ErrorAttributes errorAttributes, ServerProperties serverProperties, ObjectProvider<ErrorViewResolver> errorViewResolvers) {
+            return new ErrorPageController(errorAttributes, serverProperties.getError(),errorViewResolvers.orderedStream().collect(Collectors.toList()));
+        }
+
+        @Bean(name = "error")
+        @ConditionalOnProperty(prefix = "server.error.whitelabel", name = "enabled", matchIfMissing = true)
+        @ConditionalOnMissingBean(name = "error")
+        public View defaultErrorView(ServerProperties serverProperties) {
+            return new DefaultErrorView(serverProperties);
+        }
+
+        @Bean
+        @ConditionalOnMissingBean(value = ErrorAttributes.class, search = SearchStrategy.CURRENT)
+        public DefaultErrorAttributes errorAttributes() {
+            return new DefaultErrorAttributes();
         }
 
     }
 
     @Configuration(proxyBeanMethods = false)
-    @ConditionalOnClass(ValidationException.class)
-    @RestControllerAdvice
-    static class ValidationExceptionHandler extends AbstractExceptionHandler {
+    private static class WebMvcConfig implements WebMvcConfigurer {
 
-        @ExceptionHandler(ValidationException.class)
-        public RestResp<Object> handleValidationException(ValidationException exception){
-            dealStackTraceElement(exception);
-            RestResp<Object> objectRestResp = buildErrorMessage(PARAM_PARSE_ERROR);
-            if (exception instanceof ConstraintViolationException) {
-                ConstraintViolationException cve = (ConstraintViolationException) exception;
-                objectRestResp.setData(cve.getConstraintViolations().stream().map(violation1 ->
-                        new ValidationErrorBean(violation1.getMessage(), getViolationPath(violation1), getViolationInvalidValue(violation1.getInvalidValue()))
-                ).collect(Collectors.toList()));
-            }
-            logger.error("ErrorMsg = {}",objectRestResp.getErrorInfo(),exception);
-            return objectRestResp;
-        }
-
-        private String getViolationInvalidValue(Object invalidValue) {
-            if (invalidValue == null) {
-                return null;
-            } else {
-                if (invalidValue.getClass().isArray()) {
-                    if (invalidValue instanceof Object[]) {
-                        return Arrays.toString((Object[]) invalidValue);
-                    }
-
-                    if (invalidValue instanceof boolean[]) {
-                        return Arrays.toString((boolean[]) invalidValue);
-                    }
-
-                    if (invalidValue instanceof byte[]) {
-                        return Arrays.toString((byte[]) invalidValue);
-                    }
-
-                    if (invalidValue instanceof char[]) {
-                        return Arrays.toString((char[]) invalidValue);
-                    }
-
-                    if (invalidValue instanceof double[]) {
-                        return Arrays.toString((double[]) invalidValue);
-                    }
-
-                    if (invalidValue instanceof float[]) {
-                        return Arrays.toString((float[]) invalidValue);
-                    }
-
-                    if (invalidValue instanceof int[]) {
-                        return Arrays.toString((int[]) invalidValue);
-                    }
-
-                    if (invalidValue instanceof long[]) {
-                        return Arrays.toString((long[]) invalidValue);
-                    }
-
-                    if (invalidValue instanceof short[]) {
-                        return Arrays.toString((short[]) invalidValue);
-                    }
-                }
-
-                return invalidValue.toString();
-            }
-        }
-
-        private String getViolationPath(ConstraintViolation violation) {
-            String rootBeanName = violation.getRootBean().getClass().getSimpleName();
-            String propertyPath = violation.getPropertyPath().toString();
-            return rootBeanName + (!"".equals(propertyPath) ? '.' + propertyPath : "");
+        @Override
+        public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
+            resolvers.add(new StringObjectMethodArgumentResolver());
         }
 
     }
 
+    @SuppressWarnings("all")
+    @ControllerAdvice
     @Configuration(proxyBeanMethods = false)
-    @EnableSwagger2
-    @EnableConfigurationProperties(Swagger2Properties.class)
-    @ConditionalOnClass(MvcSwagger2.class)
-    @ConditionalOnProperty(prefix = "swagger", name = {"enable"}, havingValue = "true")
-    private static class Swagger {
+    private static class RestRespDataResponseBodyAdvice implements ResponseBodyAdvice<RestResp> {
 
-        private final Swagger2Properties swagger2Properties;
-        private final ObjectProvider<RequestHandlerPredicate> requestHandlerPredicates;
-        private final Predicate<RequestHandler> DEFAULT_REQUEST_HANDLER = withClassAnnotation(RestController.class);
-
-        public Swagger(Swagger2Properties swagger2Properties, ObjectProvider<RequestHandlerPredicate> requestHandlerPredicates) {
-            this.swagger2Properties = swagger2Properties;
-            this.requestHandlerPredicates = requestHandlerPredicates;
+        @Override
+        public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
+            return returnType.getParameterType() == RestResp.class && returnType.hasMethodAnnotation(StrToObj.class);
         }
 
-        private Predicate<RequestHandler> withClassAnnotation(Class<? extends Annotation> annotation){
-            return RequestHandlerSelectors.withClassAnnotation(annotation);
-        }
-
-        @Bean
-        public RequestHandlerPredicate requestHandlerPredicate(){
-            return () -> Predicates.and(
-                        Predicates.not(withClassAnnotation(IgnoreApi.class)),
-                        Predicates.not(RequestHandlerSelectors.withMethodAnnotation(IgnoreApi.class)));
-        }
-
-        @Bean
-        public Docket createRestApi() {
-            ApiSelectorBuilder apiSelectorBuilder = new Docket(DocumentationType.SWAGGER_2)
-                    .apiInfo(apiInfo())
-                    .select().apis(DEFAULT_REQUEST_HANDLER);
-
-            for (RequestHandlerPredicate requestHandlerPredicate : requestHandlerPredicates) {
-                apiSelectorBuilder.apis(requestHandlerPredicate.get());
+        @Override
+        public RestResp beforeBodyWrite(RestResp body, MethodParameter returnType, MediaType selectedContentType, Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
+            if(body != null && body.getData() instanceof String){
+                body.setData(JacksonUtils.fromJson(body.getData().toString(),returnType.getMethodAnnotation(StrToObj.class).value()));
             }
-
-            return apiSelectorBuilder.paths(PathSelectors.any()).build().enable(swagger2Properties.isEnable());
+            return body;
         }
-
-        private ApiInfo apiInfo() {
-            return new ApiInfoBuilder()
-                    .title(swagger2Properties.getTitle())
-                    .description(swagger2Properties.getDescription())
-                    .termsOfServiceUrl(swagger2Properties.getTermsOfServiceUrl())
-                    .contact(new Contact(swagger2Properties.getName(),swagger2Properties.getUrl(),swagger2Properties.getEmail()))
-                    .version(swagger2Properties.getVersion())
-                    .build();
-        }
-
     }
 
 }

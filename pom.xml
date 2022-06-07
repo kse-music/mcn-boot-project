@@ -12,7 +12,8 @@
     <description>MCN Boot Project</description>
 
     <properties>
-        <revision>2.3.12</revision>
+        <revision>2.5.17</revision>
+        <web.url>http://www.hiboot.cn</web.url>
     </properties>
 
     <modules>
@@ -21,10 +22,9 @@
         <module>mcn-boot-core</module>
         <module>mcn-boot-autoconfigure</module>
         <module>mcn-spring-boot-starter</module>
-        <module>crud-maven-plugin</module>
-        <module>jersey-swagger2-ui</module>
         <module>mvc-swagger2</module>
         <module>mcn-boot-starter-parent</module>
+        <module>mcn-cloud-autoconfigure</module>
     </modules>
 
     <distributionManagement>

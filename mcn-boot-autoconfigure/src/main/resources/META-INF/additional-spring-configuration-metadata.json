@@ -1,18 +1,26 @@
 {
+  "groups": [
+
+  ],
   "properties": [
     {
       "name": "mcn.bootstrap.eagerLoad.enable",
       "type": "java.lang.Boolean",
-      "sourceType": "cn.hiboot.mcn.autoconfigure.context.McnPropertiesPostProcessor",
+      "sourceType": "cn.hiboot.mcn.autoconfigure.context.McnEnvironmentPostProcessor",
       "description": "是否在引导上下文中加载.",
       "defaultValue": false
     },
     {
-      "name": "mcn.log.file.eagerLoad",
+      "name": "delete.default.log-file.enable",
       "type": "java.lang.Boolean",
-      "sourceType": "cn.hiboot.mcn.autoconfigure.context.McnPropertiesPostProcessor",
-      "description": "是否早期就加载默认日志文件配置.",
-      "defaultValue": false
+      "sourceType": "cn.hiboot.mcn.autoconfigure.context.McnApplicationListener",
+      "description": "是否默认删除默认日志文件.",
+      "defaultValue": true
+    },
+    {
+      "name": "spring.security.strategy",
+      "type": "java.lang.String",
+      "description": "SecurityContextHolderStrategy模式."
     },
     {
       "name": "mcn.log.file.filter-level",
@@ -23,9 +31,22 @@
     {
       "name": "mcn.log.file.name",
       "type": "java.lang.String",
-      "sourceType": "cn.hiboot.mcn.autoconfigure.context.McnPropertiesPostProcessor",
+      "sourceType": "cn.hiboot.mcn.autoconfigure.context.McnEnvironmentPostProcessor",
       "description": "日志文件名称(仅仅文件名,不含路径).",
       "defaultValue": "error"
+    },
+    {
+      "name": "mapper.scan.additional-package",
+      "type": "java.lang.String",
+      "sourceType": "cn.hiboot.mcn.autoconfigure.mybatis.SingleDataSourceAutoConfiguration",
+      "description": "额外需要扫描的包.",
+      "defaultValue": ""
+    },
+    {
+      "name": "multiply.datasource.name",
+      "type": "java.lang.String",
+      "sourceType": "cn.hiboot.mcn.autoconfigure.mybatis.MultipleDataSourceAutoConfiguration",
+      "description": "多数据源名称."
     },
     {
       "name": "filter.cross",
@@ -49,11 +70,53 @@
       "defaultValue": false
     },
     {
-      "name": "http.code.override",
+      "name": "http.error.override",
       "type": "java.lang.Boolean",
-      "sourceType": "cn.hiboot.mcn.autoconfigure.web.mvc.ErrorPageController",
-      "description": "是否重写http状态码.",
+      "sourceType": "cn.hiboot.mcn.autoconfigure.web.exception.error.ErrorPageController",
+      "description": "是否重写http错误信息.",
       "defaultValue": true
+    },
+    {
+      "name": "xxl.job.enable",
+      "type": "java.lang.Boolean",
+      "sourceType": "cn.hiboot.mcn.autoconfigure.xxl.XxlJobAutoConfiguration",
+      "description": "是否启用调度执行器自动配置.",
+      "defaultValue": true
+    }
+  ],
+  "hints": [
+    {
+      "name": "mcn.log.file.filter-level",
+      "values": [
+        {
+          "value": "debug",
+          "description": "调试级别."
+        },{
+          "value": "info",
+          "description": "提示级别."
+        },{
+          "value": "warn",
+          "description": "警告级别."
+        },{
+          "value": "error",
+          "description": "错误级别."
+        }
+      ]
+    },
+    {
+      "name": "spring.security.strategy",
+      "values": [
+        {
+          "value": "MODE_THREADLOCAL",
+          "description": "ThreadLocal."
+        },{
+          "value": "MODE_INHERITABLETHREADLOCAL",
+          "description": "InheritableThreadLocal."
+        },{
+          "value": "MODE_GLOBAL",
+          "description": "全局共享."
+        }
+      ]
     }
   ]
 }

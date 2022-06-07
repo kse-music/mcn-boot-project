@@ -1,10 +1,19 @@
 package cn.hiboot.mcn.core.util;
 
+import cn.hiboot.mcn.core.exception.ServiceException;
+import cn.hiboot.mcn.core.tuples.Pair;
+
+import java.beans.BeanInfo;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
 import java.io.*;
+import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.Instant;
+import java.time.*;
+import java.time.temporal.Temporal;
+import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 
 /**
@@ -15,13 +24,66 @@ import java.util.*;
  */
 public abstract class McnUtils {
 
-    public static Date getTime(){
+    public static LocalDateTime dateToLocalDateTime(Date date) {
+        return LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
+    }
+
+    public static LocalDate dateToLocalDate(Date date) {
+        return LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault()).toLocalDate();
+    }
+
+    public static Date localDateToDate(LocalDate localDate) {
+        return Date.from(localDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+    }
+
+    public static Date localDateTimeToDate(LocalDateTime localDateTime) {
+        return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+    }
+
+    /**
+     * 获取一周的第一天和最后一天的日期时间
+     * @param week 0:当前周,-1:上一周,1:下一周
+     * @return firstDate endDate
+     */
+    public static Pair<Date,Date> startEndDateTimeInWeek(int week){
+        LocalDateTime now = LocalDateTime.now();
+        now = (LocalDateTime) with(now,now.getDayOfWeek(),week);
+        return Pair.with(Date.from(now.with(DayOfWeek.MONDAY).withHour(0).withMinute(0).withSecond(0).atZone(ZoneId.systemDefault()).toInstant())
+                ,Date.from(now.with(DayOfWeek.SUNDAY).withHour(23).withMinute(59).withSecond(59).atZone(ZoneId.systemDefault()).toInstant()));
+    }
+
+    private static Temporal with(Temporal temporal,DayOfWeek dayOfWeek,int week){
+        if(week > 0){//下几周的第一天和最后一天
+            for (long i = 0; i < week; i++) {
+                temporal = temporal.with(TemporalAdjusters.next(dayOfWeek));
+            }
+        }else {//上几周的第一天和最后一天
+            for (long i = 0; i < Math.abs(week); i++) {
+                temporal = temporal.with(TemporalAdjusters.previous(dayOfWeek));
+            }
+        }
+        return temporal;
+    }
+
+    /**
+     * 获取一周的第一天和最后一天的日期
+     * @param week 0:当前周,-1:上一周,1:下一周
+     * @return firstDate endDate
+     */
+    public static Pair<Date,Date> startEndDateInWeek(int week){
+        LocalDate now = LocalDate.now();
+        now = (LocalDate) with(now, now.getDayOfWeek(), week);
+        return Pair.with(Date.from(now.with(DayOfWeek.MONDAY).atStartOfDay(ZoneId.systemDefault()).toInstant()),Date.from(now.with(DayOfWeek.SUNDAY).atStartOfDay(ZoneId.systemDefault()).toInstant()));
+    }
+
+    public static Date now(){
         return Date.from(Instant.now());
     }
 
     public static boolean isNullOrEmpty(String value){
         return Objects.isNull(value) || value.isEmpty();
     }
+
     public static boolean isNotNullAndEmpty(String value){
         return !isNullOrEmpty(value);
     }
@@ -29,6 +91,7 @@ public abstract class McnUtils {
     public static boolean isNullOrEmpty(Collection<?> value){
         return Objects.isNull(value) || value.isEmpty();
     }
+
     public static boolean isNotNullAndEmpty(Collection<?> value){
         return !isNullOrEmpty(value);
     }
@@ -36,6 +99,7 @@ public abstract class McnUtils {
     public static boolean isNullOrEmpty(Map<?,?> value){
         return Objects.isNull(value) || value.isEmpty();
     }
+
     public static boolean isNotNullAndEmpty(Map<?,?> value){
         return !isNullOrEmpty(value);
     }
@@ -59,7 +123,14 @@ public abstract class McnUtils {
     }
 
     public static String getExtName(String fileName){
-        return fileName.substring(fileName.lastIndexOf(".")+1);
+        if(fileName == null){
+            return "";
+        }
+        int i = fileName.lastIndexOf(".");
+        if(i == -1){
+            return "";
+        }
+        return fileName.substring(i +1);
     }
 
     public static Properties loadProperties(String fileName){
@@ -137,48 +208,76 @@ public abstract class McnUtils {
         return true;
     }
 
-    public static List<String> readAllLine(String filePath) throws IOException {
-        return Files.readAllLines(buildPath(filePath));
-    }
-
-    public static String readLine(String path) throws IOException {
-        return readAllLine(path).get(0);
-    }
-
-    public static byte[] readAllBytes(String filePath) throws IOException {
-        return Files.readAllBytes(buildPath(filePath));
-    }
-
-    public static long copyFile(String source,String target) throws IOException {
-        checkTarget(target);
-        return Files.copy(buildPath(source),Files.newOutputStream(buildPath(target)));
-    }
-
-    public static long copyFile(File source,File target) throws IOException {
-        return copyFile(source.getAbsolutePath(),target.getAbsolutePath());
-    }
-
-    public static long copyFile(InputStream in,String target) throws IOException {
-        checkTarget(target);
-        return Files.copy(in,buildPath(target));
-    }
-
-    public static long copyFile(InputStream in,File target) throws IOException {
-        return copyFile(in,target.getAbsolutePath());
-    }
-
-    private static void checkTarget(String target){
-        File d = new File(target).getParentFile();
-        if(!d.exists()){
-            d.mkdirs();
+    public static List<String> readAllLine(String filePath) {
+        try {
+            return Files.readAllLines(Paths.get(filePath));
+        } catch (IOException e) {
+            throw ServiceException.newInstance("read "+filePath+" failed",e);
         }
     }
 
-    private static Path buildPath(String filePath){
-        return Paths.get(filePath);
+    public static String readLine(String path) {
+        List<String> list = readAllLine(path);
+        return list.isEmpty() ? null : list.get(0);
+    }
+
+    public static byte[] readAllBytes(String filePath) {
+        try {
+            return Files.readAllBytes(Paths.get(filePath));
+        } catch (IOException e) {
+            throw ServiceException.newInstance("read "+filePath+" failed",e);
+        }
+    }
+
+    public static long copyFile(InputStream in,Path target) {
+        try{
+            Path parent = target.getParent();
+            if(!Files.exists(parent)){
+                Files.createDirectories(parent);
+            }
+            return Files.copy(in,target);
+        }catch (IOException e){
+            throw ServiceException.newInstance("copy file failed",e);
+        }
     }
 
     public static String getVersion(Class<?> clazz){
         return clazz.getPackage().getImplementationVersion();
+    }
+
+    public static <T> T map2bean(Map<String,Object> map, Class<T> clz) {
+        T obj;
+        try{
+            obj = clz.newInstance();
+            BeanInfo b = Introspector.getBeanInfo(clz,Object.class);
+            PropertyDescriptor[] pds = b.getPropertyDescriptors();
+            for (PropertyDescriptor pd : pds) {
+                Method setter = pd.getWriteMethod();
+                setter.invoke(obj, map.get(pd.getName()));
+            }
+        }catch (Exception e){
+            throw ServiceException.newInstance(e);
+        }
+        return obj;
+    }
+
+    public static Map<String,Object> bean2map(Object bean){
+        Map<String,Object> map = new HashMap<>();
+        try{
+            BeanInfo b = Introspector.getBeanInfo(bean.getClass(),Object.class);
+            PropertyDescriptor[] pds = b.getPropertyDescriptors();
+            for (PropertyDescriptor pd : pds) {
+                String propertyName = pd.getName();
+                Method m = pd.getReadMethod();
+                Object properValue = m.invoke(bean);
+                if(properValue == null){
+                    continue;
+                }
+                map.put(propertyName, properValue);
+            }
+        }catch (Exception e){
+            throw ServiceException.newInstance(e);
+        }
+        return map;
     }
 }

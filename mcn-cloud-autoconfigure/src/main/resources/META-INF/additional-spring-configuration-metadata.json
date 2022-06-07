@@ -1,0 +1,16 @@
+{
+  "properties": [
+    {
+      "name": "feign.circuitbreaker.globalfallback.enabled",
+      "type": "java.lang.Boolean",
+      "description": "是否启用全局fallback.",
+      "defaultValue": "true"
+    },
+    {
+      "name": "gateway.fallback.enabled",
+      "type": "java.lang.Boolean",
+      "description": "是否启用断路器默认的fallback.",
+      "defaultValue": "true"
+    }
+  ]
+}

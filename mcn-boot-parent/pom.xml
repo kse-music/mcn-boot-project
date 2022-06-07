@@ -14,7 +14,7 @@
     <packaging>pom</packaging>
     <name>MCN Boot Parent</name>
     <description>MCN Boot Parent</description>
-    <url>http://www.hiboot.cn</url>
+    <url>${web.url}</url>
 
     <properties>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -52,6 +52,7 @@
                             <!--suppress UnresolvedMavenProperty -->
                             <Build-Timestamp>${timestamp}</Build-Timestamp>
                             <Implementation-Version>${revision}</Implementation-Version>
+                            <Created-By>DingHao</Created-By>
                         </manifestEntries>
                     </archive>
                 </configuration>

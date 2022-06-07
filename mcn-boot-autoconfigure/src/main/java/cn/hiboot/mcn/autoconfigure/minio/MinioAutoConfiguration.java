@@ -5,6 +5,7 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -43,20 +44,19 @@ public class MinioAutoConfiguration {
     }
 
     @Bean
-    public MinioClient minioClient(){
+    @ConditionalOnMissingBean
+    public DefaultMinioClient minioClient(){
         MinioClient.Builder builder = MinioClient.builder();
         for (MinioClientBuilderCustomizer customizer : customizers) {
             customizer.customize(builder);
         }
-        return builder
-                .credentials(config.getAccessKey(), config.getSecretKey())
-                .endpoint(config.getEndpoint())
-                .build();
+        return new DefaultMinioClient(config,builder);
     }
 
     @Bean
-    public Minio minio(MinioClient minioClient){
-        return new DefaultMinio(minioClient,config.getDefaultBucketName(),config.getPreviewImageParameterName());
+    @ConditionalOnMissingBean
+    public Minio minio(DefaultMinioClient minioClient){
+        return new DefaultMinio(minioClient,config);
     }
 
     @Configuration(proxyBeanMethods = false)
@@ -83,7 +83,7 @@ public class MinioAutoConfiguration {
             public void handleRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
                 OutputStream os = null;
                 try {
-                    BufferedImage image = ImageIO.read(minio.getObject(request.getParameter(minio.getPreviewParameterName())));
+                    BufferedImage image = ImageIO.read(minio.getObject(request.getParameter(minio.getConfig().getPreviewImageParameterName())));
                     response.setContentType("image/png");
                     os = response.getOutputStream();
                     if (image != null) {

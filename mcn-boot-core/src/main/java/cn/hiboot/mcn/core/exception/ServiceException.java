@@ -1,6 +1,11 @@
 package cn.hiboot.mcn.core.exception;
 
-
+/**
+ * ServiceException
+ *
+ * @author DingHao
+ * @since 2021/11/30 13:28
+ */
 public class ServiceException extends BaseException{
 	
 	private ServiceException(Integer code) {
@@ -11,10 +16,22 @@ public class ServiceException extends BaseException{
 		super(msg);
 	}
 
-	public static ServiceException newInstance(){
-		return newInstance(ExceptionKeys.SERVICE_ERROR);
+	private ServiceException(String message, Throwable cause) {
+		super(message, cause);
 	}
-	
+
+	private ServiceException(Throwable cause) {
+		super(cause);
+	}
+
+	public static ServiceException newInstance(Throwable cause){
+		return new ServiceException(cause);
+	}
+
+	public static ServiceException newInstance(String message, Throwable cause){
+		return new ServiceException(message,cause);
+	}
+
 	public static ServiceException newInstance(Integer code){
 		return new ServiceException(code);
 	}

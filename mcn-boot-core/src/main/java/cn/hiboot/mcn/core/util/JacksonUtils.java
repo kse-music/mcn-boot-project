@@ -1,6 +1,8 @@
 package cn.hiboot.mcn.core.util;
 
-import cn.hiboot.mcn.core.exception.JsonException;
+import cn.hiboot.mcn.core.exception.ErrorMsg;
+import cn.hiboot.mcn.core.exception.ExceptionKeys;
+import cn.hiboot.mcn.core.exception.ServiceException;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -37,7 +39,15 @@ public abstract class JacksonUtils {
         try {
             return getObjectMapper().readValue(content,clazz);
         } catch (JsonProcessingException e) {
-            throw JsonException.newInstance(e);
+            throw newInstance(e);
+        }
+    }
+
+    public static <T> T fromJson(String json, TypeReference<T> reference) {
+        try {
+            return JacksonUtils.getObjectMapper().readValue(json, reference);
+        } catch (Exception e) {
+            throw newInstance(e);
         }
     }
 
@@ -45,7 +55,15 @@ public abstract class JacksonUtils {
         try {
             return getObjectMapper().readValue(content,getObjectMapper().getTypeFactory().constructCollectionType(List.class, clazz));
         } catch (JsonProcessingException e) {
-            throw JsonException.newInstance(e);
+            throw newInstance(e);
+        }
+    }
+
+    public static List<Map<String,Object>> fromListMap(String content){
+        try {
+            return getObjectMapper().readValue(content,getObjectMapper().getTypeFactory().constructCollectionType(List.class,Map.class));
+        } catch (JsonProcessingException e) {
+            throw newInstance(e);
         }
     }
 
@@ -54,7 +72,7 @@ public abstract class JacksonUtils {
             return getObjectMapper().readValue(content,getObjectMapper().getTypeFactory().constructCollectionType(List.class,
                     getObjectMapper().getTypeFactory().constructMapType(Map.class,keyClass,valueClass)));
         } catch (JsonProcessingException e) {
-            throw JsonException.newInstance(e);
+            throw newInstance(e);
         }
     }
 
@@ -62,7 +80,7 @@ public abstract class JacksonUtils {
         try {
             return getObjectMapper().readValue(content,new TypeReference<Map<String, Object>>(){});
         } catch (JsonProcessingException e) {
-            throw JsonException.newInstance(e);
+            throw newInstance(e);
         }
     }
 
@@ -70,7 +88,7 @@ public abstract class JacksonUtils {
         try {
             return getObjectMapper().readValue(content,getObjectMapper().getTypeFactory().constructMapType(Map.class,keyClass,valueClass));
         } catch (JsonProcessingException e) {
-            throw JsonException.newInstance(e);
+            throw newInstance(e);
         }
     }
 
@@ -78,8 +96,14 @@ public abstract class JacksonUtils {
         try {
             return getObjectMapper().writeValueAsString(value);
         } catch (JsonProcessingException e) {
-            throw JsonException.newInstance(e);
+            throw newInstance(e);
         }
+    }
+
+    private static ServiceException newInstance(Throwable cause){
+        ServiceException jsonException = ServiceException.newInstance(ErrorMsg.getErrorMsg(ExceptionKeys.JSON_PARSE_ERROR),cause);
+        jsonException.setCode(ExceptionKeys.JSON_PARSE_ERROR);
+        return jsonException;
     }
 
 }
