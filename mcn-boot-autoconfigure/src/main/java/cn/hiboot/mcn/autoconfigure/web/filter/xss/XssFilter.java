@@ -17,9 +17,12 @@ public class XssFilter implements Filter {
 
     private final AntPathMatcher antPathMatcher = new AntPathMatcher();
     private final XssProperties xssProperties;
+    private final XssProcessor xssProcessor;
 
-    public XssFilter(XssProperties xssProperties) {
+
+    public XssFilter(XssProperties xssProperties,XssProcessor xssProcessor) {
         this.xssProperties = xssProperties;
+        this.xssProcessor = xssProcessor;
     }
 
     @Override
@@ -29,7 +32,7 @@ public class XssFilter implements Filter {
             filterChain.doFilter(request, response);
             return;
         }
-        XssHttpServletRequestWrapper xssRequest = new XssHttpServletRequestWrapper((HttpServletRequest) request, xssProperties);
+        XssHttpServletRequestWrapper xssRequest = new XssHttpServletRequestWrapper((HttpServletRequest) request, xssProperties,xssProcessor);
         filterChain.doFilter(xssRequest, response);
     }
 

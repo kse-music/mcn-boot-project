@@ -48,17 +48,16 @@ public class GlobalExceptionHandler implements EnvironmentAware, Ordered {
     private static final int DEFAULT_ERROR_CODE = BaseException.DEFAULT_ERROR_CODE;
 
     private GlobalExceptionViewResolver viewResolver;
-    private boolean setValidatorResult;
-    private boolean removeFrameworkStack;
-    private boolean overrideHttpError;
-    private int order;
     private boolean validationExceptionPresent;
+    private boolean overrideHttpError;
     private String basePackage;
-
+    private final GlobalExceptionProperties properties;
     private final ObjectProvider<ExceptionMessageCustomizer> exceptionHandlers;
 
-    public GlobalExceptionHandler(ObjectProvider<ExceptionMessageCustomizer> exceptionHandlers) {
+    public GlobalExceptionHandler(ObjectProvider<ExceptionMessageCustomizer> exceptionHandlers,GlobalExceptionProperties properties) {
         this.exceptionHandlers = exceptionHandlers;
+        this.properties = properties;
+
     }
 
     @Autowired(required = false)
@@ -80,17 +79,20 @@ public class GlobalExceptionHandler implements EnvironmentAware, Ordered {
         Object data = null;
         if(exception instanceof BaseException){
             errorCode = ((BaseException) exception).getCode();
-        }else if(exception instanceof MethodArgumentTypeMismatchException || exception instanceof ServletRequestBindingException
-                || exception instanceof BindException || validationExceptionPresent){
+        }else if(exception instanceof MethodArgumentTypeMismatchException || exception instanceof ServletRequestBindingException || exception instanceof BindException){
             errorCode = ExceptionKeys.PARAM_PARSE_ERROR;
             if(exception instanceof BindException){
                 BindException ex = (BindException) exception;
                 data = dealBindingResult(ex.getBindingResult());
-            }else if(validationExceptionPresent){
-                data = ValidationExceptionHandler.handle(exception);
             }
+        }else if(validationExceptionPresent && ValidationExceptionHandler.support(exception)){
+            errorCode = ExceptionKeys.PARAM_PARSE_ERROR;
+            data = ValidationExceptionHandler.handle(exception);
         }else if(exception instanceof ServletException){
             errorCode = mappingCode((ServletException) exception);
+        }else if(properties.isUniformExMsg()){
+            errorCode = ExceptionKeys.SERVICE_ERROR;
+            return buildErrorMessage(errorCode,ErrorMsg.getErrorMsg(errorCode),null,exception);
         }
         ExceptionMessageCustomizer exceptionHandler = exceptionHandlers.getIfUnique();
         if(Objects.nonNull(exceptionHandler)){
@@ -118,7 +120,7 @@ public class GlobalExceptionHandler implements EnvironmentAware, Ordered {
         if(code == null){
             code = DEFAULT_ERROR_CODE;
         }
-        if(removeFrameworkStack){//移除异常栈中非业务应用包下的栈信息
+        if(properties.isRemoveFrameworkStack()){//移除异常栈中非业务应用包下的栈信息
             dealCurrentStackTraceElement(t);
         }
         logError(t);//打印异常栈
@@ -132,7 +134,7 @@ public class GlobalExceptionHandler implements EnvironmentAware, Ordered {
             }
         }
         RestResp<Object> resp = RestResp.error(code, msg);
-        if(data != null && setValidatorResult){//设置参数校验具体错误数据信息
+        if(data != null && properties.isReturnValidateResult()){//设置参数校验具体错误数据信息
             resp.setData(data);
         }
         return resp;
@@ -152,10 +154,7 @@ public class GlobalExceptionHandler implements EnvironmentAware, Ordered {
     @Override
     public void setEnvironment(Environment environment) {
         this.basePackage = environment.getProperty(ConfigProperties.APP_BASE_PACKAGE);
-        this.removeFrameworkStack = environment.getProperty("framework.stack.remove.enable",Boolean.class,true);
-        this.setValidatorResult = environment.getProperty("validator.result.return.enable",Boolean.class,true);
         this.overrideHttpError = environment.getProperty("http.error.override",Boolean.class,true);
-        this.order = environment.getProperty("global.ex.handler.order",Integer.class,1);
         this.validationExceptionPresent = ClassUtils.isPresent("javax.validation.ValidationException", getClass().getClassLoader());
     }
 
@@ -178,7 +177,7 @@ public class GlobalExceptionHandler implements EnvironmentAware, Ordered {
 
     @Override
     public int getOrder() {
-        return order;
+        return properties.getOrder();
     }
 
 }

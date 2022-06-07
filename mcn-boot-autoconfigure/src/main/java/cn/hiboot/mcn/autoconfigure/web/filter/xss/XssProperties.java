@@ -36,6 +36,11 @@ public class XssProperties {
      */
     private boolean escapeResponse;
 
+    /**
+     * 存在xss攻击是否直接抛出异常
+     */
+    private boolean failFast;
+
     public String[] getUrlPatterns() {
         return urlPatterns;
     }
@@ -82,5 +87,13 @@ public class XssProperties {
 
     public void setEscapeResponse(boolean escapeResponse) {
         this.escapeResponse = escapeResponse;
+    }
+
+    public boolean isFailFast() {
+        return failFast;
+    }
+
+    public void setFailFast(boolean failFast) {
+        this.failFast = failFast;
     }
 }
