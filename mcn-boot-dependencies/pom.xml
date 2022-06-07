@@ -38,7 +38,7 @@
         <fastjson.version>1.2.83</fastjson.version>
         <boot-admin.version>2.3.1</boot-admin.version>
         <jsoup.version>1.14.3</jsoup.version>
-        <springfox-swagger.version>3.0.0</springfox-swagger.version>
+        <springfox-swagger.version>2.9.2</springfox-swagger.version>
         <swagger.version>1.6.4</swagger.version>
         <swagger-bootstrap-ui.version>1.9.6</swagger-bootstrap-ui.version>
         <knife4j.version>3.0.3</knife4j.version>

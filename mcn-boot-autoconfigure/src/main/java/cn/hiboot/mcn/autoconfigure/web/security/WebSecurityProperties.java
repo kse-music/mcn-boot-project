@@ -26,6 +26,8 @@ public class WebSecurityProperties {
      */
     private String[] excludeUrls;
 
+    private int order = -101;
+
     public boolean isEnableDefaultIgnore() {
         return enableDefaultIgnore;
     }
@@ -48,5 +50,13 @@ public class WebSecurityProperties {
 
     public void setExcludeUrls(String[] excludeUrls) {
         this.excludeUrls = excludeUrls;
+    }
+
+    public int getOrder() {
+        return order;
+    }
+
+    public void setOrder(int order) {
+        this.order = order;
     }
 }

@@ -1,6 +1,8 @@
 package cn.hiboot.mcn.autoconfigure.web.swagger;
 
 import cn.hiboot.mcn.swagger.MvcSwagger2;
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -23,7 +25,6 @@ import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 import java.lang.annotation.Annotation;
-import java.util.function.Predicate;
 
 /**
  * SwaggerAutoConfiguration
@@ -41,16 +42,15 @@ public class SwaggerAutoConfiguration {
 
     private final Swagger2Properties swagger2Properties;
     private final ObjectProvider<DocketCustomizer> docketCustomizers;
-    private final Predicate<RequestHandler> DEFAULT_REQUEST_HANDLER = withClassAnnotation(RestController.class)
-            .and(withClassAnnotation(IgnoreApi.class).negate()).and(RequestHandlerSelectors.withMethodAnnotation(IgnoreApi.class).negate());
 
     public SwaggerAutoConfiguration(Swagger2Properties swagger2Properties, ObjectProvider<DocketCustomizer> docketCustomizers) {
         this.swagger2Properties = swagger2Properties;
         this.docketCustomizers = docketCustomizers;
     }
 
-    private Predicate<RequestHandler> withClassAnnotation(Class<? extends Annotation> annotation){
-        return RequestHandlerSelectors.withClassAnnotation(annotation);
+    private Predicate<RequestHandler> selector(Class<? extends Annotation> annotation){
+        return Predicates.and(RequestHandlerSelectors.withClassAnnotation(RestController.class),Predicates.not(RequestHandlerSelectors.withClassAnnotation(annotation))
+                ,Predicates.not(RequestHandlerSelectors.withMethodAnnotation(annotation)));
     }
 
     @Bean
@@ -64,7 +64,7 @@ public class SwaggerAutoConfiguration {
             docketCustomizer.customize(docket);
         }
 
-        ApiSelectorBuilder apiSelectorBuilder = docket.select().apis(DEFAULT_REQUEST_HANDLER);
+        ApiSelectorBuilder apiSelectorBuilder = docket.select().apis(selector(IgnoreApi.class));
 
         return apiSelectorBuilder.paths(PathSelectors.any()).build();
     }
