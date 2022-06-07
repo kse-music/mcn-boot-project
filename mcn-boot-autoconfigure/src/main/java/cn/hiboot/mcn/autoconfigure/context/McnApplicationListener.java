@@ -4,8 +4,6 @@ import cn.hiboot.mcn.autoconfigure.bootstrap.LogFileChecker;
 import cn.hiboot.mcn.autoconfigure.util.SpringBeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.BootstrapRegistry;
-import org.springframework.boot.ConfigurableBootstrapContext;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.context.event.ApplicationContextInitializedEvent;
 import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
@@ -38,20 +36,26 @@ public class McnApplicationListener implements GenericApplicationListener {
 
     private static final Class<?>[] SOURCE_TYPES = { SpringApplication.class };
 
+    private LogFileChecker logFileChecker;
+
     @Override
     public void onApplicationEvent(ApplicationEvent applicationEvent) {
         if(applicationEvent instanceof ApplicationEnvironmentPreparedEvent){
             ApplicationEnvironmentPreparedEvent event = (ApplicationEnvironmentPreparedEvent) applicationEvent;
-            triggerEnvironmentPreparedEvent(event.getEnvironment(),event.getBootstrapContext());
+            triggerEnvironmentPreparedEvent(event.getEnvironment());
         }else if(applicationEvent instanceof ApplicationContextInitializedEvent){
             logPropertySource(((ApplicationContextInitializedEvent) applicationEvent).getApplicationContext().getEnvironment());
+            //invoke LogFileChecker
+            if(logFileChecker != null){
+                logFileChecker.check();
+            }
         }else if(applicationEvent instanceof ApplicationStartedEvent){
             SpringBeanUtils.setApplicationContext(((ApplicationStartedEvent) applicationEvent).getApplicationContext());
         }
     }
 
-    private void triggerEnvironmentPreparedEvent(ConfigurableEnvironment environment, ConfigurableBootstrapContext context) {
-        registerLogFileChecker(environment,context);
+    private void triggerEnvironmentPreparedEvent(ConfigurableEnvironment environment) {
+        registerLogFileChecker(environment);
         configSecurityContextHolderStrategyMode(environment);
     }
 
@@ -79,9 +83,9 @@ public class McnApplicationListener implements GenericApplicationListener {
         }
     }
 
-    private void registerLogFileChecker(ConfigurableEnvironment environment, ConfigurableBootstrapContext context){
+    private void registerLogFileChecker(ConfigurableEnvironment environment){
         if(environment.getProperty("delete.default.log-file.enable", Boolean.class, true)){
-            context.registerIfAbsent(LogFileChecker.class, BootstrapRegistry.InstanceSupplier.of(new LogFileChecker(environment)));
+            this.logFileChecker = new LogFileChecker(environment);
         }
     }
 

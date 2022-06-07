@@ -5,8 +5,18 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplicat
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.OrRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
+
+import javax.servlet.Filter;
+import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * WebSecurityAutoConfiguration
@@ -28,14 +38,21 @@ public class WebSecurityAutoConfiguration {
     }
 
     @Bean
-    public WebSecurityCustomizer webSecurityCustomizer(){
-        return web -> {
-            if(webSecurityProperties.isEnableDefaultIgnore()){
-                web.ignoring().antMatchers(webSecurityProperties.getDefaultExcludeUrls());
+    @Order(-10000)
+    public Filter webSecurityCustomizer(){
+        List<RequestMatcher> requestMatchers = new ArrayList<>();
+        if(webSecurityProperties.isEnableDefaultIgnore()){
+            requestMatchers.addAll(Arrays.stream(webSecurityProperties.getDefaultExcludeUrls()).map(AntPathRequestMatcher::new).collect(Collectors.toList()));
+        }
+        if(webSecurityProperties.getExcludeUrls() != null){
+            requestMatchers.addAll(Arrays.stream(webSecurityProperties.getExcludeUrls()).map(AntPathRequestMatcher::new).collect(Collectors.toList()));
+        }
+       RequestMatcher requestMatcher = new OrRequestMatcher(requestMatchers);
+        return (request, response,chain) -> {
+            if(requestMatcher.matches((HttpServletRequest) request)){
+                return;
             }
-            if(webSecurityProperties.getExcludeUrls() != null){
-                web.ignoring().antMatchers(webSecurityProperties.getExcludeUrls());
-            }
+            chain.doFilter(request,response);
         };
     }
 

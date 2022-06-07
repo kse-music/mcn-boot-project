@@ -1,9 +1,9 @@
 package cn.hiboot.mcn.autoconfigure.web.filter.xss;
 
 import cn.hiboot.mcn.core.exception.ServiceException;
-import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonSerializer;
@@ -93,7 +93,7 @@ public class XssAutoConfiguration {
             }
             jacksonObjectMapperBuilder.deserializers( new JsonDeserializer<String>(){
                 @Override
-                public String deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JacksonException {
+                public String deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JsonProcessingException {
                     return clean(p.getText());
                 }
                 @Override

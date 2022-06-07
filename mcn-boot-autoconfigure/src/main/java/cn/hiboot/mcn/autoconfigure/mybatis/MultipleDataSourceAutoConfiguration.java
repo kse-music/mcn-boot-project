@@ -10,6 +10,7 @@ import org.mybatis.spring.boot.autoconfigure.SpringBootVFS;
 import org.mybatis.spring.mapper.ClassPathMapperScanner;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -59,12 +60,16 @@ public class MultipleDataSourceAutoConfiguration{
                 String sqlSessionFactoryName = dsName + "SqlSessionFactory";
                 scanMapper(registry,sqlSessionFactoryName,basePackage + ".dao." + dsName);
 
-                registry.registerBeanDefinition(dsName + "sqlSessionTemplate", BeanDefinitionBuilder.genericBeanDefinition(SqlSessionTemplate.class)
-                        .setRole(BeanDefinition.ROLE_INFRASTRUCTURE).setSynthetic(true).addConstructorArgReference(sqlSessionFactoryName).getBeanDefinition());
+                AbstractBeanDefinition tplBeanDefinition = BeanDefinitionBuilder.genericBeanDefinition(SqlSessionTemplate.class)
+                        .setRole(BeanDefinition.ROLE_INFRASTRUCTURE).addConstructorArgReference(sqlSessionFactoryName).getBeanDefinition();
+                tplBeanDefinition.setSynthetic(true);
+                registry.registerBeanDefinition(dsName + "sqlSessionTemplate", tplBeanDefinition);
 
+                AbstractBeanDefinition dsBeanDefinition = BeanDefinitionBuilder.genericBeanDefinition(HikariDataSource.class,() -> createDataSource(dsName))
+                        .setRole(BeanDefinition.ROLE_INFRASTRUCTURE).getBeanDefinition();
+                dsBeanDefinition.setSynthetic(true);
                 String dataSourceName = dsName + "DataSource";
-                registry.registerBeanDefinition(dataSourceName, BeanDefinitionBuilder.genericBeanDefinition(HikariDataSource.class,() -> createDataSource(dsName))
-                        .setRole(BeanDefinition.ROLE_INFRASTRUCTURE).setSynthetic(true).getBeanDefinition());
+                registry.registerBeanDefinition(dataSourceName, dsBeanDefinition);
 
                 SqlSessionFactoryBean factoryBean = new SqlSessionFactoryBean();
                 factoryBean.setVfs(SpringBootVFS.class);

@@ -20,8 +20,5 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
   cn.hiboot.mcn.autoconfigure.xxl.XxlJobAutoConfiguration,\
   cn.hiboot.mcn.autoconfigure.web.reactor.SpringWebFluxAutoConfiguration
 
-org.springframework.boot.BootstrapRegistryInitializer=\
-  cn.hiboot.mcn.autoconfigure.bootstrap.McnBootstrapRegistryInitializer
-
 org.springframework.boot.env.EnvironmentPostProcessor=\
   cn.hiboot.mcn.autoconfigure.context.McnEnvironmentPostProcessor

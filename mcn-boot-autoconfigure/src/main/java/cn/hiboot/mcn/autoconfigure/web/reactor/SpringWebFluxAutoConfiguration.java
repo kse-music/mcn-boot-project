@@ -5,8 +5,8 @@ import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.condition.SearchStrategy;
+import org.springframework.boot.autoconfigure.web.ResourceProperties;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
-import org.springframework.boot.autoconfigure.web.WebProperties;
 import org.springframework.boot.autoconfigure.web.reactive.WebFluxProperties;
 import org.springframework.boot.autoconfigure.web.reactive.error.ErrorWebFluxAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -32,7 +32,7 @@ public class SpringWebFluxAutoConfiguration {
 
     @Configuration(proxyBeanMethods = false)
     @Import(GlobalErrorExceptionHandler.class)
-    @EnableConfigurationProperties({ ServerProperties.class, WebProperties.class, WebFluxProperties.class})
+    @EnableConfigurationProperties({ ServerProperties.class, ResourceProperties.class, WebFluxProperties.class})
     protected static class ReactiveExceptionHandler{
 
         @Bean

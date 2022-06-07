@@ -6,8 +6,8 @@ import cn.hiboot.mcn.core.model.result.RestResp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.SearchStrategy;
+import org.springframework.boot.autoconfigure.web.ResourceProperties;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
-import org.springframework.boot.autoconfigure.web.WebProperties;
 import org.springframework.boot.autoconfigure.web.reactive.WebFluxProperties;
 import org.springframework.boot.autoconfigure.web.reactive.error.DefaultErrorWebExceptionHandler;
 import org.springframework.boot.web.reactive.error.ErrorAttributes;
@@ -42,8 +42,8 @@ public class GlobalErrorExceptionHandler extends DefaultErrorWebExceptionHandler
 
     private boolean overrideHttpError;
 
-    public GlobalErrorExceptionHandler(ErrorAttributes errorAttributes, WebProperties webProperties, ServerProperties serverProperties, ApplicationContext applicationContext) {
-        super(errorAttributes, webProperties.getResources(), serverProperties.getError(), applicationContext);
+    public GlobalErrorExceptionHandler(ErrorAttributes errorAttributes, ResourceProperties resourceProperties, ServerProperties serverProperties, ApplicationContext applicationContext) {
+        super(errorAttributes, resourceProperties, serverProperties.getError(), applicationContext);
     }
 
     @Autowired
