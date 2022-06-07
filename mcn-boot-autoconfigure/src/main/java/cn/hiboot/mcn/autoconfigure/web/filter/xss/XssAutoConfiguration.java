@@ -53,7 +53,7 @@ public class XssAutoConfiguration {
     public XssProcessor defaultXssProcessor(){
         return text -> {
             String s = HtmlUtils.htmlEscape(text);
-            if(xssProperties.isFailFast() && Objects.equals(s,text)){
+            if(xssProperties.isFailFast() && !Objects.equals(s,text)){
                 throw ServiceException.newInstance("可能存在Xss攻击");
             }
             return s;
