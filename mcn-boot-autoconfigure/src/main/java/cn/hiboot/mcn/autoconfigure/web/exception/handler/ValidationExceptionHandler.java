@@ -14,11 +14,12 @@ import java.util.stream.Collectors;
  */
 class ValidationExceptionHandler{
 
+    public static boolean support(Throwable exception){
+        return exception instanceof ValidationException;
+    }
+
     public static Object handle(Throwable exception) {
-        if(exception instanceof ValidationException){
-            return handleValidationException((ValidationException) exception);
-        }
-        return null;
+        return handleValidationException((ValidationException) exception);
     }
 
     private static Object handleValidationException(ValidationException exception){

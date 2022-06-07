@@ -2,7 +2,6 @@ package cn.hiboot.mcn.autoconfigure.web.filter.xss;
 
 
 import cn.hiboot.mcn.core.util.McnUtils;
-import org.springframework.web.util.HtmlUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
@@ -18,10 +17,12 @@ import java.util.Map;
 public class  XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
 
     private final XssProperties xssProperties;
+    private final XssProcessor xssProcessor;
 
-    public XssHttpServletRequestWrapper(HttpServletRequest request, XssProperties xssProperties) {
+    public XssHttpServletRequestWrapper(HttpServletRequest request, XssProperties xssProperties,XssProcessor xssProcessor) {
         super(request);
         this.xssProperties = xssProperties;
+        this.xssProcessor = xssProcessor;
     }
 
     @Override
@@ -83,13 +84,13 @@ public class  XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
 
     private String cleanParameterName(String name){
         if(xssProperties.isFilterParameterName()){
-            return HtmlUtils.htmlEscape(name);
+            return xssProcessor.process(name);
         }
         return name;
     }
 
     private String cleanParameterValue(String value){
-        return HtmlUtils.htmlEscape(value);
+        return xssProcessor.process(value);
     }
 
 }
