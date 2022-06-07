@@ -1,12 +1,14 @@
 package cn.hiboot.mcn.autoconfigure.web.filter.xss;
 
 
+import cn.hiboot.mcn.core.exception.ServiceException;
 import cn.hiboot.mcn.core.util.McnUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * prevent XSS attack
@@ -84,13 +86,20 @@ public class  XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
 
     private String cleanParameterName(String name){
         if(xssProperties.isFilterParameterName()){
-            return xssProcessor.process(name);
+            return clean(name);
         }
         return name;
     }
 
     private String cleanParameterValue(String value){
-        return xssProcessor.process(value);
+        return clean(value);
     }
 
+    private String clean(String text){
+        String result = xssProcessor.process(text);
+        if(xssProperties.isFailFast() && !Objects.equals(result,text)){
+            throw ServiceException.newInstance("可能存在Xss攻击");
+        }
+        return result;
+    }
 }

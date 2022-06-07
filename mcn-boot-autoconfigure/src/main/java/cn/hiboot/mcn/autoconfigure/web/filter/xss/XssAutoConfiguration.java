@@ -51,37 +51,39 @@ public class XssAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(XssProcessor.class)
     public XssProcessor defaultXssProcessor(){
-        return text -> {
-            String s = HtmlUtils.htmlEscape(text);
-            if(xssProperties.isFailFast() && !Objects.equals(s,text)){
-                throw ServiceException.newInstance("可能存在Xss攻击");
-            }
-            return s;
-        };
+        return HtmlUtils::htmlEscape;
     }
 
     @Bean
     public JacksonXssConfig jacksonXssConfig(XssProcessor xssProcessor) {
-        return new JacksonXssConfig(xssProperties.isEscapeResponse(), xssProcessor);
+        return new JacksonXssConfig(xssProperties, xssProcessor);
     }
 
     protected static class JacksonXssConfig implements Jackson2ObjectMapperBuilderCustomizer {
 
-        private final boolean escapeResponse;
+        private final XssProperties xssProperties;
         private final XssProcessor xssProcessor;
 
-        public JacksonXssConfig(boolean escapeResponse, XssProcessor xssProcessor) {
-            this.escapeResponse = escapeResponse;
+        public JacksonXssConfig(XssProperties xssProperties, XssProcessor xssProcessor) {
+            this.xssProperties = xssProperties;
             this.xssProcessor = xssProcessor;
+        }
+
+        private String clean(String text){
+            String result = xssProcessor.process(text);
+            if(xssProperties.isFailFast() && !Objects.equals(result,text)){
+                throw ServiceException.newInstance("可能存在Xss攻击");
+            }
+            return result;
         }
 
         @Override
         public void customize(Jackson2ObjectMapperBuilder jacksonObjectMapperBuilder) {
-            if(escapeResponse){
+            if(xssProperties.isEscapeResponse()){
                 jacksonObjectMapperBuilder.serializers(new JsonSerializer<String>(){
                     @Override
                     public void serialize(String value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
-                        gen.writeString(xssProcessor.process(value));
+                        gen.writeString(clean(value));
                     }
                     @Override
                     public Class<String> handledType() {
@@ -92,7 +94,7 @@ public class XssAutoConfiguration {
             jacksonObjectMapperBuilder.deserializers( new JsonDeserializer<String>(){
                 @Override
                 public String deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JacksonException {
-                    return xssProcessor.process(p.getText());
+                    return clean(p.getText());
                 }
                 @Override
                 public Class<String> handledType() {
