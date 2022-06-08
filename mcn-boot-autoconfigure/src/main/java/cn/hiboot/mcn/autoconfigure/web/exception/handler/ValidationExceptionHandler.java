@@ -4,6 +4,7 @@ import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.ValidationException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -18,12 +19,12 @@ class ValidationExceptionHandler{
         return exception instanceof ValidationException;
     }
 
-    public static Object handle(Throwable exception) {
+    public static List<ValidationErrorBean> handle(Throwable exception) {
         return handleValidationException((ValidationException) exception);
     }
 
-    private static Object handleValidationException(ValidationException exception){
-        Object data = null;
+    private static List<ValidationErrorBean> handleValidationException(ValidationException exception){
+        List<ValidationErrorBean> data = null;
         if (exception instanceof ConstraintViolationException) {
             ConstraintViolationException cve = (ConstraintViolationException) exception;
             data = cve.getConstraintViolations().stream().map(violation1 ->

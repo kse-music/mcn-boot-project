@@ -2,6 +2,7 @@ package cn.hiboot.mcn.autoconfigure.web.exception.handler;
 
 import cn.hiboot.mcn.autoconfigure.config.ConfigProperties;
 import cn.hiboot.mcn.autoconfigure.web.exception.ExceptionMessageCustomizer;
+import cn.hiboot.mcn.autoconfigure.web.exception.RestRespCustomizer;
 import cn.hiboot.mcn.autoconfigure.web.exception.error.GlobalExceptionViewResolver;
 import cn.hiboot.mcn.core.exception.BaseException;
 import cn.hiboot.mcn.core.exception.ErrorMsg;
@@ -31,6 +32,7 @@ import javax.servlet.ServletException;
 import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -53,9 +55,14 @@ public class GlobalExceptionHandler implements EnvironmentAware, Ordered {
     private String basePackage;
     private final GlobalExceptionProperties properties;
     private final ObjectProvider<ExceptionMessageCustomizer> exceptionHandlers;
+    private final ObjectProvider<RestRespCustomizer<?>> restRespCustomizers;
 
-    public GlobalExceptionHandler(ObjectProvider<ExceptionMessageCustomizer> exceptionHandlers,GlobalExceptionProperties properties) {
+
+    public GlobalExceptionHandler(ObjectProvider<ExceptionMessageCustomizer> exceptionHandlers,
+                                  ObjectProvider<RestRespCustomizer<?>> restRespCustomizers,
+                                  GlobalExceptionProperties properties) {
         this.exceptionHandlers = exceptionHandlers;
+        this.restRespCustomizers = restRespCustomizers;
         this.properties = properties;
 
     }
@@ -71,12 +78,12 @@ public class GlobalExceptionHandler implements EnvironmentAware, Ordered {
             logError(exception);
             return viewResolver.view(request, exception);
         }
-        return buildErrorData(request, exception);
+        return restRespCustomizers.getIfUnique(() -> resp -> resp).custom(buildErrorData(request, exception));
     }
 
     public RestResp<Object> buildErrorData(HttpServletRequest request, Throwable exception) throws Throwable {
         Integer errorCode = null;
-        Object data = null;
+        List<ValidationErrorBean> data = null;
         if(exception instanceof BaseException){
             errorCode = ((BaseException) exception).getCode();
         }else if(exception instanceof MethodArgumentTypeMismatchException || exception instanceof ServletRequestBindingException || exception instanceof BindException){
@@ -101,7 +108,7 @@ public class GlobalExceptionHandler implements EnvironmentAware, Ordered {
         return buildErrorMessage(errorCode,data,exception);
     }
 
-    private Object dealBindingResult(BindingResult bindingResult){
+    private List<ValidationErrorBean> dealBindingResult(BindingResult bindingResult){
         return bindingResult.getAllErrors().stream().map(e -> {
             if(e instanceof FieldError){
                 FieldError fieldError = (FieldError) e;
@@ -112,11 +119,11 @@ public class GlobalExceptionHandler implements EnvironmentAware, Ordered {
         ).collect(Collectors.toList());
     }
 
-    private RestResp<Object> buildErrorMessage(Integer code,Object data,Throwable t){
+    private RestResp<Object> buildErrorMessage(Integer code,List<ValidationErrorBean> data,Throwable t){
         return buildErrorMessage(code, null,data, t);
     }
 
-    private RestResp<Object> buildErrorMessage(Integer code,String msg,Object data,Throwable t){
+    private RestResp<Object> buildErrorMessage(Integer code,String msg,List<ValidationErrorBean> data,Throwable t){
         if(code == null){
             code = DEFAULT_ERROR_CODE;
         }
