@@ -9,8 +9,11 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.DigestUtils;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -56,8 +59,10 @@ public class RepeatCommitAspect {
             if (!CollectionUtils.isEmpty(parameterMap)) {
                 requestContent.append(JacksonUtils.toJson(parameterMap));
             }
-            String plainRequestContent = requestContent.toString();
-            String hash = DigestUtils.md5DigestAsHex(plainRequestContent.getBytes(StandardCharsets.UTF_8));
+            if(isJsonRequest(request)){
+                requestContent.append(StreamUtils.copyToString(request.getInputStream(),StandardCharsets.UTF_8));
+            }
+            String hash = DigestUtils.md5DigestAsHex(requestContent.toString().getBytes(StandardCharsets.UTF_8));
             String key = REQUEST_HASH_PREFIX + hash;
             Boolean status = redisTemplate.opsForValue().setIfAbsent(key, key, repeatCommit.value(), TimeUnit.MILLISECONDS);
             if (status == null || !status) {
@@ -66,4 +71,10 @@ public class RepeatCommitAspect {
         }
         return p.proceed();
     }
+
+    private boolean isJsonRequest(HttpServletRequest request) {
+        String header = request.getHeader(HttpHeaders.CONTENT_TYPE);
+        return MediaType.APPLICATION_JSON_VALUE.equalsIgnoreCase(header) || MediaType.APPLICATION_JSON_VALUE.contains(header.toLowerCase());
+    }
+
 }

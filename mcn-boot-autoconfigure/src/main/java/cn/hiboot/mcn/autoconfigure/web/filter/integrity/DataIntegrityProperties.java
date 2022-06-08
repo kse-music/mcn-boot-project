@@ -19,6 +19,7 @@ public class DataIntegrityProperties {
     private List<String> excludePatterns = Collections.emptyList();
     private int order = -1000;
     private boolean checkUpload = true;
+    private boolean checkReplay;
 
     public boolean isEnable() {
         return enable;
@@ -58,5 +59,13 @@ public class DataIntegrityProperties {
 
     public void setCheckUpload(boolean checkUpload) {
         this.checkUpload = checkUpload;
+    }
+
+    public boolean isCheckReplay() {
+        return checkReplay;
+    }
+
+    public void setCheckReplay(boolean checkReplay) {
+        this.checkReplay = checkReplay;
     }
 }
