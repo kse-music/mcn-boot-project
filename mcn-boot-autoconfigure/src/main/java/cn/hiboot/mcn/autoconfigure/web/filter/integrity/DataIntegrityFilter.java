@@ -1,5 +1,6 @@
 package cn.hiboot.mcn.autoconfigure.web.filter.integrity;
 
+import cn.hiboot.mcn.autoconfigure.web.filter.RequestPayloadRequestWrapper;
 import cn.hiboot.mcn.core.model.result.RestResp;
 import cn.hiboot.mcn.core.util.JacksonUtils;
 import cn.hutool.core.io.IoUtil;
@@ -90,7 +91,7 @@ public class DataIntegrityFilter implements Filter, Ordered {
                     //ignore
                 }
                 if(data != null){
-                    servletRequest = new DataIntegrityRequestWrapper(request,data);
+                    servletRequest = new RequestPayloadRequestWrapper(request,data);
                 }
                 currentSignature = signature(timestamp, nonceStr, request,data);
             }else {
