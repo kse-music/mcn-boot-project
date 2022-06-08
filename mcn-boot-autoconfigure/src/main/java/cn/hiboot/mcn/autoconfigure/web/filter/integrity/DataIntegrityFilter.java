@@ -68,18 +68,13 @@ public class DataIntegrityFilter implements Filter, Ordered {
                 return;
             }
 
-//            long receiveTime = Long.parseLong(timestamp);
-//            // 判断时间是否大于 1 分钟 (防止重放攻击)
-//            long NONCE_STR_TIMEOUT_SECONDS = 1L;
-//            if ((System.currentTimeMillis() - receiveTime) / (1000 * 60) >= NONCE_STR_TIMEOUT_SECONDS) {
-//                throw new RuntimeException("验证失败,时间戳过期");
-//            }
-//
-//            // 判断该用户的nonceStr参数是否已经在redis中（防止短时间内的重放攻击）
-//            Boolean haveNonceStr = redisTemplate.hasKey(SecurityConstant.NONCE + nonceStr);
-//            if (haveNonceStr) {
-//                throw new RuntimeException("验证失败,会话被重放");
-//            }
+            if(dataIntegrityProperties.isCheckReplay()){
+                long receiveTime = Long.parseLong(timestamp);
+                long NONCE_STR_TIMEOUT_SECONDS = 1L;// 判断时间是否大于 1 分钟 (防止重放攻击)
+                if ((System.currentTimeMillis() - receiveTime) / (1000 * 60) > NONCE_STR_TIMEOUT_SECONDS) {
+                    write("验证失败,时间戳过期",(HttpServletResponse) servletResponse);
+                }
+            }
 
             String currentSignature;
             String contentType = request.getContentType();

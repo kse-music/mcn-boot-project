@@ -5,6 +5,7 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.core.RedisOperations;
@@ -28,9 +29,10 @@ public class RedisToolAutoConfiguration {
 
     @ConditionalOnBean(StringRedisTemplate.class)
     @ConditionalOnClass(Aspect.class)
-    private static class RepeatLockConfiguration{
+    protected static class RepeatLockConfiguration{
 
         @Bean
+        @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
         public RepeatCommitAspect repeatCommitAspect(ObjectProvider<Identifier> provider, StringRedisTemplate redisTemplate) {
             return new RepeatCommitAspect(provider,redisTemplate);
         }
