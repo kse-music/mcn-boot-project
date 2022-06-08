@@ -1,5 +1,6 @@
 package cn.hiboot.mcn.autoconfigure.redis;
 
+import cn.hiboot.mcn.autoconfigure.web.filter.RequestPayloadRequestWrapper;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
@@ -9,8 +10,13 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplicat
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
+
+import javax.servlet.*;
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 
 /**
  * 基于redis的相关工具
@@ -31,6 +37,7 @@ public class RedisToolAutoConfiguration {
 
     @ConditionalOnBean(StringRedisTemplate.class)
     @ConditionalOnClass(Aspect.class)
+    @Import(RepeatLockConfiguration.JsonDataConveyFilter.class)
     protected static class RepeatLockConfiguration{
 
         @Bean
@@ -44,6 +51,21 @@ public class RedisToolAutoConfiguration {
             return new DistributedLockerAspect(distributedLocker);
         }
 
+        @Configuration(proxyBeanMethods = false)
+        @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
+        static class JsonDataConveyFilter implements Filter{
+            @Override
+            public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+                HttpServletRequest httpServletRequest = (HttpServletRequest) request;
+                if(RequestPayloadRequestWrapper.isJsonRequest(httpServletRequest)){
+                    request = new RequestPayloadRequestWrapper(httpServletRequest);
+                }
+                chain.doFilter(request,response);
+            }
+        }
+
+
     }
+
 
 }
