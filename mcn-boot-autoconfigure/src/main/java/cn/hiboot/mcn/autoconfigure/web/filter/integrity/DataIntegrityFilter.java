@@ -60,6 +60,9 @@ public class DataIntegrityFilter implements Filter, Ordered {
 
         if(isMatch){//需要校验完整性的
             String timestamp = request.getHeader("TSM");// 获取时间戳
+            if(timestamp == null){
+                timestamp = request.getHeader("timestamp");
+            }
             String nonceStr = request.getHeader("nonceStr");// 获取随机字符串
             String signature = request.getHeader("signature");// 获取签名
 
@@ -73,6 +76,7 @@ public class DataIntegrityFilter implements Filter, Ordered {
                 long NONCE_STR_TIMEOUT_SECONDS = dataIntegrityProperties.getTimeout().toMillis();// 判断时间是否大于 1 分钟 (防止重放攻击)
                 if (System.currentTimeMillis() - receiveTime > NONCE_STR_TIMEOUT_SECONDS) {
                     write("验证失败,时间戳过期",(HttpServletResponse) servletResponse);
+                    return;
                 }
             }
 
