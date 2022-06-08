@@ -70,8 +70,8 @@ public class DataIntegrityFilter implements Filter, Ordered {
 
             if(dataIntegrityProperties.isCheckReplay()){
                 long receiveTime = Long.parseLong(timestamp);
-                long NONCE_STR_TIMEOUT_SECONDS = 1L;// 判断时间是否大于 1 分钟 (防止重放攻击)
-                if ((System.currentTimeMillis() - receiveTime) / (1000 * 60) > NONCE_STR_TIMEOUT_SECONDS) {
+                long NONCE_STR_TIMEOUT_SECONDS = dataIntegrityProperties.getTimeout().toMillis();// 判断时间是否大于 1 分钟 (防止重放攻击)
+                if (System.currentTimeMillis() - receiveTime > NONCE_STR_TIMEOUT_SECONDS) {
                     write("验证失败,时间戳过期",(HttpServletResponse) servletResponse);
                 }
             }
