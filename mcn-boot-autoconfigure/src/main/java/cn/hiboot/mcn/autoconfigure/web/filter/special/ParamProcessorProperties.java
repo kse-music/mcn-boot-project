@@ -1,17 +1,18 @@
-package cn.hiboot.mcn.autoconfigure.web.filter.xss;
+package cn.hiboot.mcn.autoconfigure.web.filter.special;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.List;
 
 /**
- * XssProperties
+ * SpecialProperties
  *
  * @author DingHao
- * @since 2019/1/9 11:34
+ * @since 2022/6/6 15:04
  */
-@ConfigurationProperties("mcn.xss")
-public class XssProperties {
+@ConfigurationProperties("param.processor")
+public class ParamProcessorProperties {
+    private boolean enable;
 
     /**
      * 排除的url路径
@@ -26,12 +27,15 @@ public class XssProperties {
      */
     private boolean filterParameterName;
 
-    private int order = Integer.MAX_VALUE;
+    private int order = Integer.MAX_VALUE - 1;
 
-    /**
-     * 是否也处理返回数据
-     */
-    private boolean escapeResponse;
+    public boolean isEnable() {
+        return enable;
+    }
+
+    public void setEnable(boolean enable) {
+        this.enable = enable;
+    }
 
     public List<String> getExcludeUrls() {
         return excludeUrls;
@@ -63,14 +67,6 @@ public class XssProperties {
 
     public void setOrder(int order) {
         this.order = order;
-    }
-
-    public boolean isEscapeResponse() {
-        return escapeResponse;
-    }
-
-    public void setEscapeResponse(boolean escapeResponse) {
-        this.escapeResponse = escapeResponse;
     }
 
 }

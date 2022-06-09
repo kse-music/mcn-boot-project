@@ -1,6 +1,6 @@
 package cn.hiboot.mcn.autoconfigure.web.filter.integrity;
 
-import cn.hiboot.mcn.autoconfigure.web.filter.RequestPayloadRequestWrapper;
+import cn.hiboot.mcn.autoconfigure.web.filter.common.RequestPayloadRequestWrapper;
 import cn.hiboot.mcn.core.model.result.RestResp;
 import cn.hiboot.mcn.core.util.JacksonUtils;
 import cn.hutool.core.io.IoUtil;

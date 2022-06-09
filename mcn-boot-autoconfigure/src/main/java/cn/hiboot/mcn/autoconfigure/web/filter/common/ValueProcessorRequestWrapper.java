@@ -1,35 +1,39 @@
-package cn.hiboot.mcn.autoconfigure.web.filter.xss;
+package cn.hiboot.mcn.autoconfigure.web.filter.common;
 
-
-import cn.hiboot.mcn.core.exception.ServiceException;
 import cn.hiboot.mcn.core.util.McnUtils;
+import org.springframework.util.CollectionUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 /**
- * prevent XSS attack
+ * ValueProcessorRequestWrapper
  *
  * @author DingHao
  * @since 2019/1/9 11:02
  */
-public class  XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
+public class ValueProcessorRequestWrapper extends HttpServletRequestWrapper {
 
-    private final XssProperties xssProperties;
-    private final XssProcessor xssProcessor;
+    private final List<String> excludeFields;
+    private final boolean filterParameterName;
+    private final ValueProcessor valueProcessor;
 
-    public XssHttpServletRequestWrapper(HttpServletRequest request, XssProperties xssProperties,XssProcessor xssProcessor) {
+    public ValueProcessorRequestWrapper(HttpServletRequest request,
+                                        List<String> excludeFields,
+                                        boolean filterParameterName,
+                                        ValueProcessor valueProcessor) {
         super(request);
-        this.xssProperties = xssProperties;
-        this.xssProcessor = xssProcessor;
+        this.excludeFields = excludeFields;
+        this.filterParameterName = filterParameterName;
+        this.valueProcessor = valueProcessor;
     }
 
     @Override
     public String getParameter(String name) {
-        if(!xssProperties.isFilterRichText() && isRichTextParameterName(name)){
+        if(isExcludeParameter(name)){
             return super.getParameter(name);
         }
         String value = super.getParameter(cleanParameterName(name));
@@ -39,12 +43,18 @@ public class  XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
         return value;
     }
 
-    private boolean isRichTextParameterName(String name){
-        return "content".equals(name) || name.endsWith("WithHtml");
+    private boolean isExcludeParameter(String name){
+        if(CollectionUtils.isEmpty(excludeFields)){
+            return false;
+        }
+        return excludeFields.contains(name);
     }
 
     @Override
     public String[] getParameterValues(String name) {
+        if(isExcludeParameter(name)){
+            return super.getParameterValues(name);
+        }
         String[] arr = super.getParameterValues(cleanParameterName(name));
         if (arr != null) {
             for (int i = 0; i < arr.length; i++) {
@@ -60,8 +70,13 @@ public class  XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
         LinkedHashMap<String, String[]> map = new LinkedHashMap<>();
         if (parameters != null) {
             for (String key : parameters.keySet()) {
-                key = cleanParameterName(key);
-                String[] values = parameters.get(key);
+                String currentKey = key;
+                key = cleanParameterName(currentKey);
+                String[] values = parameters.get(currentKey);
+                if(isExcludeParameter(currentKey)){
+                    map.put(currentKey, values);
+                    continue;
+                }
                 for (int i = 0; i < values.length; i++) {
                     String value = values[i];
                     if (McnUtils.isNotNullAndEmpty(value)) {
@@ -85,7 +100,7 @@ public class  XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
     }
 
     private String cleanParameterName(String name){
-        if(xssProperties.isFilterParameterName()){
+        if(filterParameterName){
             return clean(name);
         }
         return name;
@@ -96,10 +111,6 @@ public class  XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
     }
 
     private String clean(String text){
-        String result = xssProcessor.process(text);
-        if(xssProperties.isFailFast() && !Objects.equals(result,text)){
-            throw ServiceException.newInstance("可能存在Xss攻击");
-        }
-        return result;
+        return valueProcessor.process(text);
     }
 }
