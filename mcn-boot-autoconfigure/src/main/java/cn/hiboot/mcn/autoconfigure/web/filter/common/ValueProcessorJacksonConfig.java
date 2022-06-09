@@ -1,6 +1,5 @@
-package cn.hiboot.mcn.autoconfigure.web.filter.xss;
+package cn.hiboot.mcn.autoconfigure.web.filter.common;
 
-import cn.hiboot.mcn.autoconfigure.web.filter.common.ValueProcessor;
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -19,16 +18,16 @@ import java.io.IOException;
  * @author DingHao
  * @since 2022/6/9 10:47
  */
-public class JacksonXssConfig implements Jackson2ObjectMapperBuilderCustomizer {
+public class ValueProcessorJacksonConfig implements Jackson2ObjectMapperBuilderCustomizer {
 
     private final boolean escapeResponse;
     private final ValueProcessor valueProcessor;
 
-    public JacksonXssConfig(ValueProcessor valueProcessor) {
+    public ValueProcessorJacksonConfig(ValueProcessor valueProcessor) {
         this(false,valueProcessor);
     }
 
-    public JacksonXssConfig(boolean escapeResponse, ValueProcessor valueProcessor) {
+    public ValueProcessorJacksonConfig(boolean escapeResponse, ValueProcessor valueProcessor) {
         this.escapeResponse = escapeResponse;
         this.valueProcessor = valueProcessor;
     }

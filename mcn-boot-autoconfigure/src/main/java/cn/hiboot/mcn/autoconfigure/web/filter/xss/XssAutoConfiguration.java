@@ -1,5 +1,6 @@
 package cn.hiboot.mcn.autoconfigure.web.filter.xss;
 
+import cn.hiboot.mcn.autoconfigure.web.filter.common.ValueProcessorJacksonConfig;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -41,8 +42,8 @@ public class XssAutoConfiguration {
     }
 
     @Bean
-    public JacksonXssConfig xssJacksonConfig(XssProcessor xssProcessor) {
-        return new JacksonXssConfig(xssProperties.isEscapeResponse(), xssProcessor);
+    public ValueProcessorJacksonConfig xssJacksonConfig(XssProcessor xssProcessor) {
+        return new ValueProcessorJacksonConfig(xssProperties.isEscapeResponse(), xssProcessor);
     }
 
 }

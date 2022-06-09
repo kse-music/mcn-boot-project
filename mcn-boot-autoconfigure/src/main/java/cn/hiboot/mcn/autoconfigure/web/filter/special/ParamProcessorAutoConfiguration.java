@@ -1,7 +1,7 @@
 package cn.hiboot.mcn.autoconfigure.web.filter.special;
 
 
-import cn.hiboot.mcn.autoconfigure.web.filter.xss.JacksonXssConfig;
+import cn.hiboot.mcn.autoconfigure.web.filter.common.ValueProcessorJacksonConfig;
 import cn.hiboot.mcn.core.exception.ServiceException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -76,6 +76,7 @@ public class ParamProcessorAutoConfiguration {
             return value;
         };
     }
+
     private String getRule(String rule,String globalRulePattern){
         if(rule.isEmpty()){
             rule = globalRulePattern;
@@ -91,8 +92,8 @@ public class ParamProcessorAutoConfiguration {
     }
 
     @Bean
-    public JacksonXssConfig paramProcessorJacksonConfig(ParamProcessor paramProcessor) {
-        return new JacksonXssConfig(paramProcessor);
+    public ValueProcessorJacksonConfig paramProcessorJacksonConfig(ParamProcessor paramProcessor) {
+        return new ValueProcessorJacksonConfig(paramProcessor);
     }
 
     @Bean
