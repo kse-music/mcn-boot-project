@@ -1,6 +1,6 @@
 package cn.hiboot.mcn.autoconfigure.redis;
 
-import cn.hiboot.mcn.autoconfigure.web.filter.RequestPayloadRequestWrapper;
+import cn.hiboot.mcn.autoconfigure.web.filter.common.RequestPayloadRequestWrapper;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;

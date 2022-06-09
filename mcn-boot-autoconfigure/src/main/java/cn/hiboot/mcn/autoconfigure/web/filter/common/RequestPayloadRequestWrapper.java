@@ -1,4 +1,4 @@
-package cn.hiboot.mcn.autoconfigure.web.filter;
+package cn.hiboot.mcn.autoconfigure.web.filter.common;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;

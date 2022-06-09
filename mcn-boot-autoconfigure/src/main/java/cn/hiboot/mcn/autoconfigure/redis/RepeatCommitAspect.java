@@ -1,7 +1,7 @@
 package cn.hiboot.mcn.autoconfigure.redis;
 
 import cn.hiboot.mcn.autoconfigure.redis.annotation.RepeatCommit;
-import cn.hiboot.mcn.autoconfigure.web.filter.RequestPayloadRequestWrapper;
+import cn.hiboot.mcn.autoconfigure.web.filter.common.RequestPayloadRequestWrapper;
 import cn.hiboot.mcn.core.exception.ServiceException;
 import cn.hiboot.mcn.core.util.JacksonUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
