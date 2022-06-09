@@ -1,8 +1,8 @@
 package cn.hiboot.mcn.autoconfigure.web.filter.common;
 
-import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonSerializer;
@@ -52,7 +52,7 @@ public class ValueProcessorJacksonConfig implements Jackson2ObjectMapperBuilderC
         }
         jacksonObjectMapperBuilder.deserializers( new JsonDeserializer<String>(){
             @Override
-            public String deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JacksonException {
+            public String deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JsonProcessingException {
                 return clean(p.getText());
             }
             @Override
