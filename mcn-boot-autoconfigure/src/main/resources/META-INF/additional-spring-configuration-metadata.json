@@ -89,6 +89,13 @@
       "sourceType": "cn.hiboot.mcn.autoconfigure.xxl.XxlJobAutoConfiguration",
       "description": "是否启用调度执行器自动配置.",
       "defaultValue": true
+    },
+    {
+      "name": "mcn.repeat.enable",
+      "type": "java.lang.Boolean",
+      "sourceType": "cn.hiboot.mcn.autoconfigure.redis.RedisToolAutoConfiguration$RepeatCommitAspectConfiguration",
+      "description": "是否启用防重复提交.",
+      "defaultValue": false
     }
   ],
   "hints": [

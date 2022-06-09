@@ -6,6 +6,7 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -34,25 +35,33 @@ public class RedisToolAutoConfiguration {
         return new RedisDistributedLocker(redisTemplate);
     }
 
-    @ConditionalOnBean(StringRedisTemplate.class)
+    @Configuration(proxyBeanMethods = false)
     @ConditionalOnClass(Aspect.class)
-    @Import(RepeatLockConfiguration.JsonDataConveyFilter.class)
-    protected static class RepeatLockConfiguration{
+    protected static class DistributedLockerAspectConfiguration{
 
         @Bean
-        @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
-        public RepeatCommitAspect repeatCommitAspect(ObjectProvider<Identifier> provider, StringRedisTemplate redisTemplate) {
-            return new RepeatCommitAspect(provider,redisTemplate);
-        }
-
-        @Bean
+        @ConditionalOnBean(DistributedLocker.class)
         public DistributedLockerAspect distributedLockerAspect(DistributedLocker distributedLocker) {
             return new DistributedLockerAspect(distributedLocker);
         }
 
-        @Configuration(proxyBeanMethods = false)
-        @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
-        static class JsonDataConveyFilter implements Filter{
+    }
+
+    @Configuration(proxyBeanMethods = false)
+    @ConditionalOnClass(Aspect.class)
+    @Import(RepeatCommitAspectConfiguration.JsonDataConveyFilter.class)
+    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
+    @ConditionalOnProperty(prefix = "mcn.repeat", name = "enable", havingValue = "true")
+    protected static class RepeatCommitAspectConfiguration{
+
+        @Bean
+        @ConditionalOnBean(StringRedisTemplate.class)
+        public RepeatCommitAspect repeatCommitAspect(ObjectProvider<Identifier> provider, StringRedisTemplate redisTemplate) {
+            return new RepeatCommitAspect(provider,redisTemplate);
+        }
+
+        protected static class JsonDataConveyFilter implements Filter{
+
             @Override
             public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
                 HttpServletRequest httpServletRequest = (HttpServletRequest) request;
@@ -62,7 +71,6 @@ public class RedisToolAutoConfiguration {
                 chain.doFilter(request,response);
             }
         }
-
 
     }
 

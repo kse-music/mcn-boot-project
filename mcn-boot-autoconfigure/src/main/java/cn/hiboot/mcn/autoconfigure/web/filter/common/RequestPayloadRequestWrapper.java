@@ -44,6 +44,9 @@ public class RequestPayloadRequestWrapper extends HttpServletRequestWrapper {
 
     public static boolean isJsonRequest(HttpServletRequest request) {
         String header = request.getHeader(HttpHeaders.CONTENT_TYPE);
+        if(header == null){
+            return false;
+        }
         return MediaType.APPLICATION_JSON_VALUE.equalsIgnoreCase(header) || MediaType.APPLICATION_JSON_VALUE.contains(header.toLowerCase());
     }
 
