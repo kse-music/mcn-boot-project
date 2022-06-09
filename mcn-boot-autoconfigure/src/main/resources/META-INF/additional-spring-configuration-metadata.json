@@ -65,7 +65,7 @@
     {
       "name": "global.rule.pattern",
       "type": "java.lang.String",
-      "sourceType": "cn.hiboot.mcn.autoconfigure.web.filter.xss.XssAutoConfiguration",
+      "sourceType": "cn.hiboot.mcn.autoconfigure.web.filter.special.ParamProcessorAutoConfiguration",
       "description": "特殊字符规则.",
       "defaultValue": ""
     },
