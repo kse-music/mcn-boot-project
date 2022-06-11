@@ -121,7 +121,7 @@ public class GlobalExceptionHandler implements EnvironmentAware, Ordered {
         }
         ExceptionMessageCustomizer exceptionHandler = exceptionHandlers.getIfUnique();
         if(Objects.nonNull(exceptionHandler)){
-            errorInfo = exceptionHandler.handle(exception);
+            errorInfo = exceptionHandler.handle(request,exception);
         }
         return buildErrorMessage(errorCode,errorInfo,data,exception);
     }
