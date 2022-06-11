@@ -2,12 +2,13 @@ package cn.hiboot.mcn.autoconfigure.web.exception.handler;
 
 import cn.hiboot.mcn.autoconfigure.config.ConfigProperties;
 import cn.hiboot.mcn.autoconfigure.web.exception.ExceptionMessageCustomizer;
-import cn.hiboot.mcn.autoconfigure.web.exception.RestRespCustomizer;
+import cn.hiboot.mcn.autoconfigure.web.exception.ReturnDataCustomizer;
 import cn.hiboot.mcn.autoconfigure.web.exception.error.GlobalExceptionViewResolver;
 import cn.hiboot.mcn.core.exception.BaseException;
 import cn.hiboot.mcn.core.exception.ErrorMsg;
 import cn.hiboot.mcn.core.exception.ExceptionKeys;
 import cn.hiboot.mcn.core.model.result.RestResp;
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
@@ -15,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.Ordered;
 import org.springframework.core.env.Environment;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.validation.BindException;
@@ -26,6 +28,7 @@ import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
 import javax.servlet.ServletException;
@@ -55,14 +58,14 @@ public class GlobalExceptionHandler implements EnvironmentAware, Ordered {
     private String basePackage;
     private final GlobalExceptionProperties properties;
     private final ObjectProvider<ExceptionMessageCustomizer> exceptionHandlers;
-    private final ObjectProvider<RestRespCustomizer<?>> restRespCustomizers;
+    private final ObjectProvider<ReturnDataCustomizer<?>> returnDataCustomizers;
 
 
     public GlobalExceptionHandler(ObjectProvider<ExceptionMessageCustomizer> exceptionHandlers,
-                                  ObjectProvider<RestRespCustomizer<?>> restRespCustomizers,
+                                  ObjectProvider<ReturnDataCustomizer<?>> returnDataCustomizers,
                                   GlobalExceptionProperties properties) {
         this.exceptionHandlers = exceptionHandlers;
-        this.restRespCustomizers = restRespCustomizers;
+        this.returnDataCustomizers = returnDataCustomizers;
         this.properties = properties;
 
     }
@@ -78,15 +81,25 @@ public class GlobalExceptionHandler implements EnvironmentAware, Ordered {
             logError(exception);
             return viewResolver.view(request, exception);
         }
-        return restRespCustomizers.getIfUnique(() -> resp -> resp).custom(buildErrorData(request, exception));
+        RestResp<Object> restResp = buildErrorData(request, exception);
+        ReturnDataCustomizer<?> unique = returnDataCustomizers.getIfUnique();
+        if(unique == null){
+            return restResp;
+        }
+        return unique.apply(restResp.getErrorCode(),restResp.getErrorInfo());
     }
 
-    public RestResp<Object> buildErrorData(HttpServletRequest request, Throwable exception) throws Throwable {
+    protected RestResp<Object> buildErrorData(HttpServletRequest request, Throwable exception) throws Throwable {
         Integer errorCode = null;
+        String errorInfo = null;
         List<ValidationErrorBean> data = null;
         if(exception instanceof BaseException){
             errorCode = ((BaseException) exception).getCode();
-        }else if(exception instanceof MethodArgumentTypeMismatchException || exception instanceof ServletRequestBindingException || exception instanceof BindException){
+        }else if(exception instanceof MethodArgumentTypeMismatchException){
+            errorCode = ExceptionKeys.PARAM_TYPE_ERROR;
+        }else if(exception instanceof MaxUploadSizeExceededException){
+            errorCode = ExceptionKeys.UPLOAD_FILE_SIZE_ERROR;
+        }else if(exception instanceof ServletRequestBindingException || exception instanceof BindException){
             errorCode = ExceptionKeys.PARAM_PARSE_ERROR;
             if(exception instanceof BindException){
                 BindException ex = (BindException) exception;
@@ -97,15 +110,20 @@ public class GlobalExceptionHandler implements EnvironmentAware, Ordered {
             data = ValidationExceptionHandler.handle(exception);
         }else if(exception instanceof ServletException){
             errorCode =  mappingCode(((ServletException) exception));
-        }else if(properties.isUniformExMsg()){
-            errorCode = ExceptionKeys.SERVICE_ERROR;
-            return buildErrorMessage(errorCode,ErrorMsg.getErrorMsg(errorCode),null,exception);
+        }else if(exception instanceof HttpMessageNotReadableException || exception instanceof InvalidFormatException) {
+            errorCode = ExceptionKeys.JSON_PARSE_ERROR;
+        }
+        if(properties.isUniformExMsg()){
+            if(errorCode == null){
+                errorCode = ExceptionKeys.SERVICE_ERROR;
+            }
+            errorInfo = ErrorMsg.getErrorMsg(errorCode);
         }
         ExceptionMessageCustomizer exceptionHandler = exceptionHandlers.getIfUnique();
         if(Objects.nonNull(exceptionHandler)){
-            return buildErrorMessage(errorCode,exceptionHandler.handle(exception),data,exception);
+            errorInfo = exceptionHandler.handle(exception);
         }
-        return buildErrorMessage(errorCode,data,exception);
+        return buildErrorMessage(errorCode,errorInfo,data,exception);
     }
 
     private List<ValidationErrorBean> dealBindingResult(BindingResult bindingResult){
@@ -117,10 +135,6 @@ public class GlobalExceptionHandler implements EnvironmentAware, Ordered {
             return new ValidationErrorBean(e.getDefaultMessage(),e.getObjectName(), null);
            }
         ).collect(Collectors.toList());
-    }
-
-    private RestResp<Object> buildErrorMessage(Integer code,List<ValidationErrorBean> data,Throwable t){
-        return buildErrorMessage(code, null,data, t);
     }
 
     private RestResp<Object> buildErrorMessage(Integer code,String msg,List<ValidationErrorBean> data,Throwable t){
