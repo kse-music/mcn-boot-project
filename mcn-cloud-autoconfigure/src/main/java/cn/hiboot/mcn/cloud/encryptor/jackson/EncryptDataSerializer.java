@@ -1,6 +1,6 @@
 package cn.hiboot.mcn.cloud.encryptor.jackson;
 
-import cn.hiboot.mcn.autoconfigure.util.SpringBeanUtils;
+import cn.hiboot.mcn.core.util.SpringBeanUtils;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;

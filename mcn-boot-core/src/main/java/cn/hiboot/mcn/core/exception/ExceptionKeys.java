@@ -55,4 +55,5 @@ public interface ExceptionKeys {
         }
         return ExceptionKeys.HTTP_ERROR_500;
     }
+
 }

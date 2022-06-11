@@ -117,6 +117,10 @@
             <artifactId>minio</artifactId>
             <optional>true</optional>
         </dependency>
+        <dependency>
+            <groupId>cn.hiboot.mcn</groupId>
+            <artifactId>mcn-boot-core</artifactId>
+        </dependency>
 
     </dependencies>
 
