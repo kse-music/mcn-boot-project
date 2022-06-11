@@ -1,4 +1,4 @@
-package cn.hiboot.mcn.autoconfigure.web.filter;
+package cn.hiboot.mcn.autoconfigure.web.mvc;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

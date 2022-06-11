@@ -1,7 +1,6 @@
-package cn.hiboot.mcn.autoconfigure.web.filter;
+package cn.hiboot.mcn.autoconfigure.web.filter.cors;
 
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -14,7 +13,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
 /**
- * register some filter
+ * CorsFilterConfiguration
  *
  * @author DingHao
  * @since 2019/1/9 11:31
@@ -22,16 +21,16 @@ import org.springframework.web.filter.CorsFilter;
 @AutoConfiguration
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @EnableConfigurationProperties(CorsProperties.class)
-public class FilterAutoConfiguration {
+@ConditionalOnProperty(prefix = "filter", name = "cross", havingValue = "true")
+public class CorsFilterAutoConfiguration {
 
     private final CorsProperties corsProperties;
 
-    public FilterAutoConfiguration(CorsProperties corsProperties) {
+    public CorsFilterAutoConfiguration(CorsProperties corsProperties) {
         this.corsProperties = corsProperties;
     }
 
     @Bean
-    @ConditionalOnProperty(prefix = "filter", name = "cross", havingValue = "true")
     public FilterRegistrationBean<CorsFilter> corsFilterRegistration(CorsConfigurationSource corsConfigurationSource) {
         FilterRegistrationBean<CorsFilter> filterRegistrationBean = new FilterRegistrationBean<>(new CorsFilter(corsConfigurationSource));
         filterRegistrationBean.setOrder(corsProperties.getOrder());
@@ -50,12 +49,6 @@ public class FilterAutoConfiguration {
         corsConfiguration.setMaxAge(corsProperties.getMaxAge());
         source.registerCorsConfiguration(corsProperties.getPattern(), corsConfiguration);
         return source;
-    }
-
-    @Bean
-    @ConditionalOnClass(name = "org.aspectj.lang.annotation.Aspect")
-    public DurationAop durationAop() {
-        return new DurationAop();
     }
 
 }

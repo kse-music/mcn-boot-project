@@ -1,7 +1,7 @@
 cn.hiboot.mcn.autoconfigure.mybatis.SingleDataSourceAutoConfiguration
 cn.hiboot.mcn.autoconfigure.mybatis.MultipleDataSourceAutoConfiguration
 cn.hiboot.mcn.autoconfigure.web.groovy.GroovyWebAutoConfiguration
-cn.hiboot.mcn.autoconfigure.web.filter.FilterAutoConfiguration
+cn.hiboot.mcn.autoconfigure.web.filter.cors.CorsFilterAutoConfiguration
 cn.hiboot.mcn.autoconfigure.web.filter.xss.XssAutoConfiguration
 cn.hiboot.mcn.autoconfigure.web.filter.integrity.DataIntegrityAutoConfiguration
 cn.hiboot.mcn.autoconfigure.web.filter.special.ParamProcessorAutoConfiguration

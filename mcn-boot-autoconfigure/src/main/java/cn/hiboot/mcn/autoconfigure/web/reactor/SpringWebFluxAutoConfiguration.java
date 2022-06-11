@@ -1,6 +1,6 @@
 package cn.hiboot.mcn.autoconfigure.web.reactor;
 
-import cn.hiboot.mcn.autoconfigure.web.filter.CorsProperties;
+import cn.hiboot.mcn.autoconfigure.web.filter.cors.CorsProperties;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;

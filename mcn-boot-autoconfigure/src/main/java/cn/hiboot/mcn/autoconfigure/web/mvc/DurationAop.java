@@ -1,4 +1,4 @@
-package cn.hiboot.mcn.autoconfigure.web.filter;
+package cn.hiboot.mcn.autoconfigure.web.mvc;
 
 import cn.hiboot.mcn.core.model.result.RestResp;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -19,7 +19,7 @@ public class DurationAop {
     private static final Logger log = LoggerFactory.getLogger(DurationAop.class);
 
     @SuppressWarnings("rawtypes")
-    @Around("@annotation(cn.hiboot.mcn.autoconfigure.web.filter.Timing)")
+    @Around("@annotation(cn.hiboot.mcn.autoconfigure.web.mvc.Timing)")
     public Object timeRecord(ProceedingJoinPoint p) throws Throwable {
         long s = System.currentTimeMillis();
         Object o = p.proceed();

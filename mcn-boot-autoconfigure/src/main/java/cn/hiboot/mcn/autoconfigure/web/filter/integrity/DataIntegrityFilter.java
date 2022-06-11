@@ -42,8 +42,9 @@ public class DataIntegrityFilter implements Filter, Ordered {
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest request = (HttpServletRequest)servletRequest;
         boolean isMatch = false;
+        String path = request.getServletPath();
         for (String excludePattern : dataIntegrityProperties.getExcludePatterns()) {
-            isMatch = pathPattern.match(excludePattern,request.getRequestURI());
+            isMatch = pathPattern.match(excludePattern,path);
             if (isMatch) {
                 break;
             }
@@ -53,7 +54,7 @@ public class DataIntegrityFilter implements Filter, Ordered {
             return;
         }
         for (String excludePattern : dataIntegrityProperties.getIncludePatterns()) {
-            isMatch = pathPattern.match(excludePattern,request.getRequestURI());
+            isMatch = pathPattern.match(excludePattern,path);
             if (isMatch) {
                 break;
             }
