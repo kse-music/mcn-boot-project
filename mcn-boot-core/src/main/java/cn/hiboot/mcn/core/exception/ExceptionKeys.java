@@ -19,7 +19,8 @@ public interface ExceptionKeys {
     int USER_PWD_ERROR = 300004;
     int GET_MOBILE_CODE_ERROR = 300005;
     int VERIFY_MOBILE_CODE_ERROR = 300006;
-    int UPLOAD_ERROR = 300007;
+    int UPLOAD_FILE_SIZE_ERROR = 300007;
+    int PARAM_TYPE_ERROR = 300008;
 
     int UNKNOWN_ERROR = 700001;
 
