@@ -51,14 +51,14 @@
     {
       "name": "filter.cross",
       "type": "java.lang.Boolean",
-      "sourceType": "cn.hiboot.mcn.autoconfigure.web.filter.FilterAutoConfiguration",
+      "sourceType": "cn.hiboot.mcn.autoconfigure.web.filter.cors.CorsFilterAutoConfiguration",
       "description": "是否开启跨域支持.",
       "defaultValue": false
     },
     {
       "name": "mcn.xss.enable",
       "type": "java.lang.Boolean",
-      "sourceType": "cn.hiboot.mcn.autoconfigure.web.filter.FilterAutoConfiguration",
+      "sourceType": "cn.hiboot.mcn.autoconfigure.web.filter.xss.XssAutoConfiguration",
       "description": "是否开启XSS过滤.",
       "defaultValue": false
     },
