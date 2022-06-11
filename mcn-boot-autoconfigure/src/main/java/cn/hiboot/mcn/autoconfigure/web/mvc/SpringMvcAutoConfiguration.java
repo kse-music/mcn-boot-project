@@ -48,6 +48,11 @@ import java.util.stream.Collectors;
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 public class SpringMvcAutoConfiguration {
 
+    @Bean
+    @ConditionalOnClass(name = "org.aspectj.lang.annotation.Aspect")
+    public DurationAop durationAop() {
+        return new DurationAop();
+    }
 
     @Configuration(proxyBeanMethods = false)
     @Import(GlobalExceptionHandler.class)

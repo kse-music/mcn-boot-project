@@ -47,7 +47,7 @@ public class ValueProcessorFilter implements Filter {
         if(CollectionUtils.isEmpty(excludeUrls)){
             return false;
         }
-        String url = request.getRequestURI();
+        String url = request.getServletPath();
         for (String pattern : excludeUrls) {
             if (antPathMatcher.match(pattern,url)) {
                 return true;

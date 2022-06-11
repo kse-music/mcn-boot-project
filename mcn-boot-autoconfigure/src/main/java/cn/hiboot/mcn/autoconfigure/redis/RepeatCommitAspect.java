@@ -53,7 +53,7 @@ public class RepeatCommitAspect {
             StringBuilder requestContent = new StringBuilder();
             provider.ifAvailable(identifier -> requestContent.append(identifier.get()));
             requestContent.append(request.getMethod());
-            requestContent.append(request.getRequestURI());
+            requestContent.append(request.getServletPath());
             Map<String, String[]> parameterMap = request.getParameterMap();
             if (!CollectionUtils.isEmpty(parameterMap)) {
                 requestContent.append(JacksonUtils.toJson(parameterMap));

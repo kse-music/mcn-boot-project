@@ -11,7 +11,6 @@ import cn.hiboot.mcn.core.model.result.RestResp;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.Ordered;
@@ -52,27 +51,33 @@ public class GlobalExceptionHandler implements EnvironmentAware, Ordered {
 
     private static final int DEFAULT_ERROR_CODE = BaseException.DEFAULT_ERROR_CODE;
 
-    private GlobalExceptionViewResolver viewResolver;
+    private final GlobalExceptionProperties properties;
+
     private boolean validationExceptionPresent;
     private boolean overrideHttpError;
     private String basePackage;
-    private final GlobalExceptionProperties properties;
-    private final ObjectProvider<ExceptionMessageCustomizer> exceptionHandlers;
-    private final ObjectProvider<ReturnDataCustomizer<?>> returnDataCustomizers;
 
+    private GlobalExceptionViewResolver viewResolver;
+    private ExceptionMessageCustomizer exceptionMessageCustomizer;
+    private ReturnDataCustomizer<?> returnDataCustomizers;
 
-    public GlobalExceptionHandler(ObjectProvider<ExceptionMessageCustomizer> exceptionHandlers,
-                                  ObjectProvider<ReturnDataCustomizer<?>> returnDataCustomizers,
-                                  GlobalExceptionProperties properties) {
-        this.exceptionHandlers = exceptionHandlers;
-        this.returnDataCustomizers = returnDataCustomizers;
+    public GlobalExceptionHandler(GlobalExceptionProperties properties) {
         this.properties = properties;
-
     }
 
     @Autowired(required = false)
     public void setErrorView(GlobalExceptionViewResolver exceptionViewResolver) {
         this.viewResolver = exceptionViewResolver;
+    }
+
+    @Autowired(required = false)
+    public void setExceptionMessageCustomizer(ExceptionMessageCustomizer exceptionMessageCustomizer) {
+        this.exceptionMessageCustomizer = exceptionMessageCustomizer;
+    }
+
+    @Autowired(required = false)
+    public void setReturnDataCustomizers(ReturnDataCustomizer<?> returnDataCustomizers) {
+        this.returnDataCustomizers = returnDataCustomizers;
     }
 
     @ExceptionHandler(Throwable.class)
@@ -82,11 +87,10 @@ public class GlobalExceptionHandler implements EnvironmentAware, Ordered {
             return viewResolver.view(request, exception);
         }
         RestResp<Object> restResp = buildErrorData(request, exception);
-        ReturnDataCustomizer<?> unique = returnDataCustomizers.getIfUnique();
-        if(unique == null){
+        if(returnDataCustomizers == null){
             return restResp;
         }
-        return unique.apply(restResp.getErrorCode(),restResp.getErrorInfo());
+        return returnDataCustomizers.apply(restResp.getErrorCode(),restResp.getErrorInfo());
     }
 
     protected RestResp<Object> buildErrorData(HttpServletRequest request, Throwable exception) throws Throwable {
@@ -119,22 +123,10 @@ public class GlobalExceptionHandler implements EnvironmentAware, Ordered {
             }
             errorInfo = ErrorMsg.getErrorMsg(errorCode);
         }
-        ExceptionMessageCustomizer exceptionHandler = exceptionHandlers.getIfUnique();
-        if(Objects.nonNull(exceptionHandler)){
-            errorInfo = exceptionHandler.handle(request,exception);
+        if(Objects.nonNull(exceptionMessageCustomizer)){
+            errorInfo = exceptionMessageCustomizer.handle(request,exception);
         }
         return buildErrorMessage(errorCode,errorInfo,data,exception);
-    }
-
-    private List<ValidationErrorBean> dealBindingResult(BindingResult bindingResult){
-        return bindingResult.getAllErrors().stream().map(e -> {
-            if(e instanceof FieldError){
-                FieldError fieldError = (FieldError) e;
-                return new ValidationErrorBean(e.getDefaultMessage(),fieldError.getField(), fieldError.getRejectedValue() == null ? null : fieldError.getRejectedValue().toString());
-            }
-            return new ValidationErrorBean(e.getDefaultMessage(),e.getObjectName(), null);
-           }
-        ).collect(Collectors.toList());
     }
 
     private RestResp<Object> buildErrorMessage(Integer code,String msg,List<ValidationErrorBean> data,Throwable t){
@@ -165,18 +157,22 @@ public class GlobalExceptionHandler implements EnvironmentAware, Ordered {
         log.error("The exception information is as follows",t);
     }
 
+    private List<ValidationErrorBean> dealBindingResult(BindingResult bindingResult){
+        return bindingResult.getAllErrors().stream().map(e -> {
+                    if(e instanceof FieldError){
+                        FieldError fieldError = (FieldError) e;
+                        return new ValidationErrorBean(e.getDefaultMessage(),fieldError.getField(), fieldError.getRejectedValue() == null ? null : fieldError.getRejectedValue().toString());
+                    }
+                    return new ValidationErrorBean(e.getDefaultMessage(),e.getObjectName(), null);
+                }
+        ).collect(Collectors.toList());
+    }
+
     private void dealCurrentStackTraceElement(Throwable exception){
         if(Objects.isNull(exception.getCause())){//is self
             return;
         }
         exception.setStackTrace(Arrays.stream(exception.getStackTrace()).filter(s -> s.getClassName().contains(basePackage)).toArray(StackTraceElement[]::new));
-    }
-
-    @Override
-    public void setEnvironment(Environment environment) {
-        this.basePackage = environment.getProperty(ConfigProperties.APP_BASE_PACKAGE);
-        this.overrideHttpError = environment.getProperty("http.error.override",Boolean.class,true);
-        this.validationExceptionPresent = ClassUtils.isPresent("javax.validation.ValidationException", getClass().getClassLoader());
     }
 
     private int mappingCode(ServletException exception) throws ServletException {
@@ -194,6 +190,13 @@ public class GlobalExceptionHandler implements EnvironmentAware, Ordered {
             return code;
         }
         throw exception;
+    }
+
+    @Override
+    public void setEnvironment(Environment environment) {
+        this.basePackage = environment.getProperty(ConfigProperties.APP_BASE_PACKAGE);
+        this.overrideHttpError = environment.getProperty("http.error.override",Boolean.class,true);
+        this.validationExceptionPresent = ClassUtils.isPresent("javax.validation.ValidationException", getClass().getClassLoader());
     }
 
     @Override
