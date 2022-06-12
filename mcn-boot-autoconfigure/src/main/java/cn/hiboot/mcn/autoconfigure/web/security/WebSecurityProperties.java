@@ -17,12 +17,12 @@ public class WebSecurityProperties {
     private boolean enableDefaultIgnore = true;
 
     /**
-     * 默认不拦截的路径
+     * 默认不拦截的路径,不经过安全过滤器链
      */
     private String[] defaultExcludeUrls;
 
     /**
-     * 不拦截的路径
+     * 不拦截的路径,不经过安全过滤器链
      */
     private String[] excludeUrls;
 
