@@ -85,6 +85,7 @@ public class ParamProcessorAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnProperty(prefix = "param.processor",name = "use-filter",havingValue = "true",matchIfMissing = true)
     public FilterRegistrationBean<ParamProcessorFilter> paramProcessorFilterRegistration(ParamProcessor paramProcessor) {
         FilterRegistrationBean<ParamProcessorFilter> filterRegistrationBean = new FilterRegistrationBean<>(new ParamProcessorFilter(properties,paramProcessor));
         filterRegistrationBean.setOrder(properties.getOrder());
@@ -179,7 +180,7 @@ public class ParamProcessorAutoConfiguration {
 
     @Bean
     @Role(2)
-    public static BeanPostProcessor jacksonParamProcessorConfig(ParamProcessor paramProcessor, Environment environment) {
+    public static BeanPostProcessor jacksonParamProcessorConfig(ParamProcessor paramProcessor) {
         return new BeanPostProcessor() {
 
             @Override

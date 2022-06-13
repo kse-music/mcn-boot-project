@@ -5,14 +5,14 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import java.util.List;
 
 /**
- * SpecialProperties
+ * ParamProcessorProperties
  *
  * @author DingHao
  * @since 2022/6/6 15:04
  */
 @ConfigurationProperties("param.processor")
 public class ParamProcessorProperties {
-    private boolean enable;
+    private boolean useFilter;
 
     /**
      * 排除的url路径
@@ -29,12 +29,12 @@ public class ParamProcessorProperties {
 
     private int order = Integer.MAX_VALUE - 1;
 
-    public boolean isEnable() {
-        return enable;
+    public boolean isUseFilter() {
+        return useFilter;
     }
 
-    public void setEnable(boolean enable) {
-        this.enable = enable;
+    public void setUseFilter(boolean useFilter) {
+        this.useFilter = useFilter;
     }
 
     public List<String> getExcludeUrls() {
