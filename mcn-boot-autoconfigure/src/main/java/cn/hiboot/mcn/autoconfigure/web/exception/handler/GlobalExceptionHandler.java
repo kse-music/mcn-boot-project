@@ -1,8 +1,7 @@
 package cn.hiboot.mcn.autoconfigure.web.exception.handler;
 
 import cn.hiboot.mcn.autoconfigure.config.ConfigProperties;
-import cn.hiboot.mcn.autoconfigure.web.exception.ExceptionMessageCustomizer;
-import cn.hiboot.mcn.autoconfigure.web.exception.ReturnDataCustomizer;
+import cn.hiboot.mcn.autoconfigure.web.exception.ExceptionHandlerCustomizer;
 import cn.hiboot.mcn.autoconfigure.web.exception.error.GlobalExceptionViewResolver;
 import cn.hiboot.mcn.core.exception.BaseException;
 import cn.hiboot.mcn.core.exception.ErrorMsg;
@@ -59,8 +58,7 @@ public class GlobalExceptionHandler implements EnvironmentAware, Ordered {
     private String basePackage;
 
     private GlobalExceptionViewResolver viewResolver;
-    private ExceptionMessageCustomizer exceptionMessageCustomizer;
-    private ReturnDataCustomizer<?> returnDataCustomizers;
+    private ExceptionHandlerCustomizer<?> exceptionHandlerCustomizer;
 
     public GlobalExceptionHandler(GlobalExceptionProperties properties) {
         this.properties = properties;
@@ -72,35 +70,21 @@ public class GlobalExceptionHandler implements EnvironmentAware, Ordered {
     }
 
     @Autowired(required = false)
-    public void setExceptionMessageCustomizer(ExceptionMessageCustomizer exceptionMessageCustomizer) {
-        this.exceptionMessageCustomizer = exceptionMessageCustomizer;
-    }
-
-    @Autowired(required = false)
-    public void setReturnDataCustomizers(ReturnDataCustomizer<?> returnDataCustomizers) {
-        this.returnDataCustomizers = returnDataCustomizers;
+    public void setExceptionHandlerCustomizer(ExceptionHandlerCustomizer<?> exceptionHandlerCustomizer) {
+        this.exceptionHandlerCustomizer = exceptionHandlerCustomizer;
     }
 
     @ExceptionHandler(Throwable.class)
     public Object handleException(HttpServletRequest request, Throwable exception) throws Throwable{
+        if(Objects.nonNull(exceptionHandlerCustomizer)){
+            logError(exception);
+            return exceptionHandlerCustomizer.handle(request,exception);
+        }
         if(viewResolver != null && viewResolver.support(request)){
             logError(exception);
             return viewResolver.view(request, exception);
         }
-        RestResp<Object> restResp = buildErrorData(request, exception);
-        if(returnDataCustomizers == null){
-            return restResp;
-        }
-        return returnDataCustomizers.apply(restResp.getErrorCode(),restResp.getErrorInfo());
-    }
-
-    private void handleError(Error error) {
-        if(error instanceof VirtualMachineError){
-            GlobalExceptionProperties.JvmError jvm = properties.getJvmError();
-            if(jvm != null && jvm.isExit()){
-                System.exit(jvm.getStatus());
-            }
-        }
+        return buildErrorData(request, exception);
     }
 
     protected RestResp<Object> buildErrorData(HttpServletRequest request, Throwable exception) throws Throwable {
@@ -139,20 +123,23 @@ public class GlobalExceptionHandler implements EnvironmentAware, Ordered {
             }
             errorInfo = ErrorMsg.getErrorMsg(errorCode);
         }
-        if(Objects.nonNull(exceptionMessageCustomizer)){
-            errorInfo = exceptionMessageCustomizer.handle(request,exception);
-        }
         return buildErrorMessage(errorCode,errorInfo,data,exception);
+    }
+
+    private void handleError(Error error) {
+        if(error instanceof VirtualMachineError){
+            GlobalExceptionProperties.JvmError jvm = properties.getJvmError();
+            if(jvm != null && jvm.isExit()){
+                System.exit(jvm.getStatus());
+            }
+        }
     }
 
     private RestResp<Object> buildErrorMessage(Integer code,String msg,List<ValidationErrorBean> data,Throwable t){
         if(code == null){
             code = DEFAULT_ERROR_CODE;
         }
-        if(properties.isRemoveFrameworkStack()){//移除异常栈中非业务应用包下的栈信息
-            dealCurrentStackTraceElement(t);
-        }
-        logError(t);//打印异常栈
+        logError(t);
         if(ObjectUtils.isEmpty(msg)){//这里的消息可能是重写后的
             msg = t.getMessage();//1.take msg from exception
             if(ObjectUtils.isEmpty(msg)){
@@ -170,6 +157,9 @@ public class GlobalExceptionHandler implements EnvironmentAware, Ordered {
     }
 
     private void logError(Throwable t){
+        if(properties.isRemoveFrameworkStack()){//移除异常栈中非业务应用包下的栈信息
+            dealCurrentStackTraceElement(t);
+        }
         log.error("The exception information is as follows",t);
     }
 
