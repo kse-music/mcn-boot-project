@@ -96,6 +96,13 @@
       "sourceType": "cn.hiboot.mcn.autoconfigure.redis.RedisToolAutoConfiguration$RepeatCommitAspectConfiguration",
       "description": "是否启用防重复提交.",
       "defaultValue": false
+    },
+    {
+      "name": "param.processor.enable",
+      "type": "java.lang.Boolean",
+      "sourceType": "cn.hiboot.mcn.autoconfigure.web.filter.special.ParamProcessorAutoConfiguration",
+      "description": "是否启用参数处理器.",
+      "defaultValue": false
     }
   ],
   "hints": [
