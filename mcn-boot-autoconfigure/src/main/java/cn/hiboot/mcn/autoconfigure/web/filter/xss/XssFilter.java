@@ -12,7 +12,7 @@ import cn.hiboot.mcn.autoconfigure.web.filter.common.ValueProcessorFilter;
 public class XssFilter extends ValueProcessorFilter {
 
     public XssFilter(XssProperties xssProperties, ValueProcessor valueProcessor) {
-        super(xssProperties.getExcludeUrls(),xssProperties.getExcludeFields(),xssProperties.isFilterParameterName(), valueProcessor);
+        super(xssProperties, valueProcessor);
     }
 
 }

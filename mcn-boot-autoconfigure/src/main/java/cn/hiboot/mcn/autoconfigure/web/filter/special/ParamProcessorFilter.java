@@ -11,7 +11,7 @@ import cn.hiboot.mcn.autoconfigure.web.filter.common.ValueProcessorFilter;
 public class ParamProcessorFilter extends ValueProcessorFilter {
 
     public ParamProcessorFilter(ParamProcessorProperties paramProcessorProperties, ParamProcessor paramProcessor) {
-        super(paramProcessorProperties.getExcludeUrls(),paramProcessorProperties.getExcludeFields(),paramProcessorProperties.isFilterParameterName(), paramProcessor);
+        super(paramProcessorProperties, paramProcessor);
     }
 
 }

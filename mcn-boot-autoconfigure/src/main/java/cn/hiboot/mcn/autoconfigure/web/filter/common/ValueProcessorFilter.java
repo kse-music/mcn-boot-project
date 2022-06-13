@@ -6,7 +6,6 @@ import org.springframework.util.CollectionUtils;
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.util.List;
 
 /**
  * ValueProcessorFilter
@@ -17,38 +16,43 @@ import java.util.List;
 public class ValueProcessorFilter implements Filter {
 
     private final AntPathMatcher antPathMatcher = new AntPathMatcher();
-    private final List<String> excludeUrls;
-    private final List<String> excludeFields;
-    private final boolean filterParameterName;
     private final ValueProcessor valueProcessor;
+    private final ValueProcessorProperties properties;
 
-    public ValueProcessorFilter(List<String> excludeUrls,
-                                List<String> excludeFields,
-                                boolean filterParameterName,
-                                ValueProcessor valueProcessor) {
-        this.excludeUrls = excludeUrls;
-        this.excludeFields = excludeFields;
-        this.filterParameterName = filterParameterName;
+    public ValueProcessorFilter(ValueProcessorProperties properties,ValueProcessor valueProcessor) {
+        this.properties = properties;
         this.valueProcessor = valueProcessor;
     }
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest req = (HttpServletRequest) request;
-        if (isExcludeURL(req)) {
+        if (isExcludeUrl(req)) {
             filterChain.doFilter(request, response);
             return;
         }
-        ValueProcessorRequestWrapper xssRequest = new ValueProcessorRequestWrapper((HttpServletRequest) request, excludeFields,filterParameterName,valueProcessor);
-        filterChain.doFilter(xssRequest, response);
+        if (isIncludeUrl(req)) {
+            request = new ValueProcessorRequestWrapper(req, properties.getExcludeFields(),properties.isFilterParameterName(),valueProcessor);
+        }
+        filterChain.doFilter(request, response);
     }
 
-    private boolean isExcludeURL(HttpServletRequest request) {
-        if(CollectionUtils.isEmpty(excludeUrls)){
-            return false;
+    private boolean isIncludeUrl(HttpServletRequest request) {
+        if(CollectionUtils.isEmpty(properties.getIncludeUrls())){
+            return true;
         }
         String url = request.getServletPath();
-        for (String pattern : excludeUrls) {
+        for (String pattern : properties.getIncludeUrls()) {
+            if (antPathMatcher.match(pattern,url)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isExcludeUrl(HttpServletRequest request) {
+        String url = request.getServletPath();
+        for (String pattern : properties.getExcludeUrls()) {
             if (antPathMatcher.match(pattern,url)) {
                 return true;
             }
