@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.util.NestedServletException;
 
 import javax.servlet.ServletException;
 import javax.servlet.UnavailableException;
@@ -93,6 +94,15 @@ public class GlobalExceptionHandler implements EnvironmentAware, Ordered {
         return returnDataCustomizers.apply(restResp.getErrorCode(),restResp.getErrorInfo());
     }
 
+    private void handleError(Error error) {
+        if(error instanceof VirtualMachineError){
+            GlobalExceptionProperties.JvmError jvm = properties.getJvmError();
+            if(jvm != null && jvm.isExit()){
+                System.exit(jvm.getStatus());
+            }
+        }
+    }
+
     protected RestResp<Object> buildErrorData(HttpServletRequest request, Throwable exception) throws Throwable {
         Integer errorCode = null;
         String errorInfo = null;
@@ -114,8 +124,14 @@ public class GlobalExceptionHandler implements EnvironmentAware, Ordered {
             data = ValidationExceptionHandler.handle(exception);
         }else if(exception instanceof ServletException){
             errorCode = mappingCode((ServletException) exception);
+            if (exception instanceof NestedServletException && exception.getCause() instanceof Error) {
+                handleError((Error) exception.getCause());
+            }
         }else if(exception instanceof HttpMessageNotReadableException || exception instanceof InvalidFormatException) {
             errorCode = ExceptionKeys.JSON_PARSE_ERROR;
+        }else if(exception instanceof VirtualMachineError){
+            errorCode = ExceptionKeys.HTTP_ERROR_500;
+            handleError((Error) exception.getCause());
         }
         if(properties.isUniformExMsg()){
             if(errorCode == null){

@@ -8,13 +8,29 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * @author DingHao
  * @since 2022/6/7 9:44
  */
-@ConfigurationProperties("global.exception.handler")
+@ConfigurationProperties("mcn.exception.handler")
 public class GlobalExceptionProperties {
-
+    /**
+     * 是否移除非应用包名的异常栈
+     */
     private boolean removeFrameworkStack = true;
+
+    /**
+     * 是否返回参数校验失败明细
+     */
     private boolean returnValidateResult = false;
+
+    /**
+     * 指定全局异常处理的顺序
+     */
     private int order = 1;
+
+    /**
+     * 是否返回统一异常消息
+     */
     private boolean uniformExMsg;
+
+    private JvmError jvmError;
 
     public boolean isRemoveFrameworkStack() {
         return removeFrameworkStack;
@@ -46,5 +62,43 @@ public class GlobalExceptionProperties {
 
     public void setUniformExMsg(boolean uniformExMsg) {
         this.uniformExMsg = uniformExMsg;
+    }
+
+    public JvmError getJvmError() {
+        return jvmError;
+    }
+
+    public void setJvmError(JvmError jvmError) {
+        this.jvmError = jvmError;
+    }
+
+    public static class JvmError{
+        /**
+         * 发生VirtualMachineError错误是否退出JVM
+         */
+        private boolean exit;
+        /**
+         * exit status
+         * <pre>
+         * Runtime.getRuntime().exit(n)
+         * </pre>
+         */
+        private int status = 1;
+
+        public boolean isExit() {
+            return exit;
+        }
+
+        public void setExit(boolean exit) {
+            this.exit = exit;
+        }
+
+        public int getStatus() {
+            return status;
+        }
+
+        public void setStatus(int status) {
+            this.status = status;
+        }
     }
 }
