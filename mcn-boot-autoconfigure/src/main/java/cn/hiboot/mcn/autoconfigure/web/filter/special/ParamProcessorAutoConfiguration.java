@@ -1,6 +1,7 @@
 package cn.hiboot.mcn.autoconfigure.web.filter.special;
 
 
+import cn.hiboot.mcn.autoconfigure.web.filter.common.ValueProcessor;
 import cn.hiboot.mcn.autoconfigure.web.filter.common.ValueProcessorJacksonConfig;
 import cn.hiboot.mcn.core.exception.ServiceException;
 import com.fasterxml.jackson.core.JsonParser;
@@ -16,6 +17,7 @@ import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -93,8 +95,9 @@ public class ParamProcessorAutoConfiguration {
     }
 
     @Bean
-    public ValueProcessorJacksonConfig paramProcessorJacksonConfig(ParamProcessor paramProcessor) {
-        return new ValueProcessorJacksonConfig(paramProcessor);
+    @ConditionalOnMissingBean
+    public ValueProcessorJacksonConfig valueProcessorJacksonConfig(ObjectProvider<ValueProcessor> valueProcessors) {
+        return new ValueProcessorJacksonConfig(valueProcessors);
     }
 
     @Bean
