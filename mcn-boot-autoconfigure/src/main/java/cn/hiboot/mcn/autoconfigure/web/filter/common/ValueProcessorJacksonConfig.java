@@ -7,10 +7,13 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * JacksonXssConfig
@@ -21,19 +24,22 @@ import java.io.IOException;
 public class ValueProcessorJacksonConfig implements Jackson2ObjectMapperBuilderCustomizer {
 
     private final boolean escapeResponse;
-    private final ValueProcessor valueProcessor;
+    private final List<ValueProcessor> valueProcessors;
 
-    public ValueProcessorJacksonConfig(ValueProcessor valueProcessor) {
-        this(false,valueProcessor);
+    public ValueProcessorJacksonConfig(ObjectProvider<ValueProcessor> valueProcessors) {
+        this(false,valueProcessors);
     }
 
-    public ValueProcessorJacksonConfig(boolean escapeResponse, ValueProcessor valueProcessor) {
+    public ValueProcessorJacksonConfig(boolean escapeResponse, ObjectProvider<ValueProcessor> valueProcessors) {
         this.escapeResponse = escapeResponse;
-        this.valueProcessor = valueProcessor;
+        this.valueProcessors = valueProcessors.orderedStream().collect(Collectors.toList());
     }
 
     private String clean(String text){
-        return valueProcessor.process(text);
+        for (ValueProcessor valueProcessor : valueProcessors) {
+            text = valueProcessor.process(text);
+        }
+        return text;
     }
 
     @Override
