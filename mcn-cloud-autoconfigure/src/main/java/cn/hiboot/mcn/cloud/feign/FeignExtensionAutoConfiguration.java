@@ -5,7 +5,7 @@ import feign.*;
 import feign.codec.ErrorDecoder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.AnyNestedCondition;
+import org.springframework.boot.autoconfigure.condition.AllNestedConditions;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.circuitbreaker.resilience4j.Resilience4JCircuitBreakerFactory;
@@ -31,25 +31,19 @@ public class FeignExtensionAutoConfiguration {
 
     @Configuration(proxyBeanMethods = false)
     @ConditionalOnClass(Resilience4JCircuitBreakerFactory.class)
-    @Conditional(BreakerCondition.class)
+    @Conditional(GlobalFallbackCondition.class)
     protected static class CircuitBreakerConfiguration {
 
+        @Bean
+        @Scope("prototype")
+        public Feign.Builder circuitBreakerFeignBuilder() {
+            return FeignCircuitBreaker.builder();
+        }
 
-        @ConditionalOnProperty(prefix = "feign.circuitbreaker",name = "globalfallback.enabled", havingValue = "true",matchIfMissing = true)
-        private static class GlobalFallbackConfig{
-
-            @Bean
-            @Scope("prototype")
-            public Feign.Builder circuitBreakerFeignBuilder() {
-                return FeignCircuitBreaker.builder();
-            }
-
-            @Bean
-            public Targeter circuitBreakerFeignTargeter(CircuitBreakerFactory circuitBreakerFactory,
-                                                        @Value("${feign.circuitbreaker.group.enabled:false}") boolean circuitBreakerGroupEnabled) {
-                return new FeignCircuitBreakerTargeter(circuitBreakerFactory, circuitBreakerGroupEnabled);
-            }
-
+        @Bean
+        public Targeter circuitBreakerFeignTargeter(CircuitBreakerFactory circuitBreakerFactory,
+                                                    @Value("${feign.circuitbreaker.group.enabled:false}") boolean circuitBreakerGroupEnabled) {
+            return new FeignCircuitBreakerTargeter(circuitBreakerFactory, circuitBreakerGroupEnabled);
         }
 
     }
@@ -80,19 +74,19 @@ public class FeignExtensionAutoConfiguration {
 
     }
 
-    static class BreakerCondition extends AnyNestedCondition {
+    static class GlobalFallbackCondition extends AllNestedConditions {
 
-        BreakerCondition() {
+        GlobalFallbackCondition() {
             super(ConfigurationPhase.REGISTER_BEAN);
         }
 
         @ConditionalOnProperty(prefix = "feign.circuitbreaker",name = "enabled",havingValue = "true")
-        static class NoComponentsAvailable {
+        static class FeignCircuitbreakerEnabled {
 
         }
 
-        @ConditionalOnProperty(prefix = "feign.circuitbreaker",name = "globalfallback.enabled", havingValue = "true")
-        static class CookieHttpSessionIdResolverAvailable {
+        @ConditionalOnProperty(prefix = "feign.circuitbreaker",name = "globalfallback.enabled", havingValue = "true",matchIfMissing = true)
+        static class FeignGlobalCircuitbreakerEnabled {
 
         }
 
