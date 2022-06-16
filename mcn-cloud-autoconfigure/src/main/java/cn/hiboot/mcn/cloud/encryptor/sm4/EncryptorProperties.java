@@ -34,6 +34,7 @@ public class EncryptorProperties {
         private Padding padding;
         private String key;
         private String iv;
+        private boolean useDefault = true;
 
         public boolean isBase64() {
             return base64;
@@ -73,6 +74,14 @@ public class EncryptorProperties {
 
         public void setIv(String iv) {
             this.iv = iv;
+        }
+
+        public boolean isUseDefault() {
+            return useDefault;
+        }
+
+        public void setUseDefault(boolean useDefault) {
+            this.useDefault = useDefault;
         }
     }
 }
