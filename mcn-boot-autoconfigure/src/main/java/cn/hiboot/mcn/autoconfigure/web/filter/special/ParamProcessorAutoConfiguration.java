@@ -66,14 +66,14 @@ public class ParamProcessorAutoConfiguration {
     @ConditionalOnMissingBean
     public ParamProcessor defaultParamProcessor(Environment environment) {
         String globalRulePattern = environment.getProperty("global.rule.pattern","");
-        return (rule,value) -> {
+        return (rule,name,value) -> {
             String rulePattern = getRule(rule,globalRulePattern);
             if(rulePattern.isEmpty()){
                 return value;
             }
             Pattern pattern = MAP.computeIfAbsent(rule, m -> Pattern.compile(rulePattern));
             if(pattern.matcher(value).matches()){
-                throw ServiceException.newInstance("存在特殊字符");
+                throw ServiceException.newInstance("输入存在特殊字符");
             }
             return value;
         };
@@ -129,9 +129,10 @@ public class ParamProcessorAutoConfiguration {
                         }
                         BeanWrapper src = new BeanWrapperImpl(returnValue);
                         for (Field declaredField : returnValue.getClass().getDeclaredFields()) {
-                            Object propertyValue = src.getPropertyValue(declaredField.getName());
+                            String name = declaredField.getName();
+                            Object propertyValue = src.getPropertyValue(name);
                             if(propertyValue instanceof String){
-                                paramProcessor.process(getRule(classAnnotation,declaredField.getAnnotation(CheckParam.class)),propertyValue.toString());
+                                paramProcessor.process(getRule(classAnnotation,declaredField.getAnnotation(CheckParam.class)),name,propertyValue.toString());
                             }
                         }
                         return returnValue;
@@ -175,8 +176,9 @@ public class ParamProcessorAutoConfiguration {
             if(request == null){
                 return null;
             }
+            String name = parameter.getParameterName();
             String rule = parameter.getParameterAnnotation(CheckParam.class).value();
-            return paramProcessor.process(rule,request.getParameter(parameter.getParameterName()));
+            return paramProcessor.process(rule,name,request.getParameter(name));
         }
 
     }
@@ -222,7 +224,7 @@ public class ParamProcessorAutoConfiguration {
                         return new StdDeserializer<String>(String.class){
                             @Override
                             public String deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JsonProcessingException {
-                                return paramProcessor.process(rule,p.getText());
+                                return paramProcessor.process(rule,p.currentName(),p.getText());
                             }
                         };
                     }

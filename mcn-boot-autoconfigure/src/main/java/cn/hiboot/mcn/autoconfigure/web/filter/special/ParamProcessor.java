@@ -10,10 +10,12 @@ import cn.hiboot.mcn.autoconfigure.web.filter.common.ValueProcessor;
  */
 public interface ParamProcessor extends ValueProcessor {
 
-    String process(String rule,String value);
+    String process(String rule,String name,String value);
 
     @Override
-    default String process(String value) {
-        return process("",value);
+    default String process(String name, String value) {
+        //过滤器上拿不到自定义规则
+        return process("",name,value);
     }
+
 }

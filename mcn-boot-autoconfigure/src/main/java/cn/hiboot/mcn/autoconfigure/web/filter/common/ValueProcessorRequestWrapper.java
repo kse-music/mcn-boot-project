@@ -38,7 +38,7 @@ public class ValueProcessorRequestWrapper extends HttpServletRequestWrapper {
         }
         String value = super.getParameter(cleanParameterName(name));
         if (McnUtils.isNotNullAndEmpty(value)) {
-            value = cleanParameterValue(value);
+            value = cleanParameterValue(name,value);
         }
         return value;
     }
@@ -58,7 +58,7 @@ public class ValueProcessorRequestWrapper extends HttpServletRequestWrapper {
         String[] arr = super.getParameterValues(cleanParameterName(name));
         if (arr != null) {
             for (int i = 0; i < arr.length; i++) {
-                arr[i] = cleanParameterValue(arr[i]);
+                arr[i] = cleanParameterValue(name,arr[i]);
             }
         }
         return arr;
@@ -80,7 +80,7 @@ public class ValueProcessorRequestWrapper extends HttpServletRequestWrapper {
                 for (int i = 0; i < values.length; i++) {
                     String value = values[i];
                     if (McnUtils.isNotNullAndEmpty(value)) {
-                        value = cleanParameterValue(value);
+                        value = cleanParameterValue(currentKey,value);
                     }
                     values[i] = value;
                 }
@@ -94,23 +94,23 @@ public class ValueProcessorRequestWrapper extends HttpServletRequestWrapper {
     public String getHeader(String name) {
         String value = super.getHeader(cleanParameterName(name));
         if (McnUtils.isNotNullAndEmpty(value)) {
-            value = cleanParameterValue(value);
+            value = cleanParameterValue(name,value);
         }
         return value;
     }
 
     private String cleanParameterName(String name){
         if(filterParameterName){
-            return clean(name);
+            return clean(name,name);
         }
         return name;
     }
 
-    private String cleanParameterValue(String value){
-        return clean(value);
+    private String cleanParameterValue(String name,String value){
+        return clean(name,value);
     }
 
-    private String clean(String text){
-        return valueProcessor.process(text);
+    private String clean(String name,String text){
+        return valueProcessor.process(name,text);
     }
 }
