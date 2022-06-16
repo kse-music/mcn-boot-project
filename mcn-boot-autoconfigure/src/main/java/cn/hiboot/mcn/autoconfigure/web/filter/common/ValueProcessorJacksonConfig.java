@@ -35,9 +35,9 @@ public class ValueProcessorJacksonConfig implements Jackson2ObjectMapperBuilderC
         this.valueProcessors = valueProcessors.orderedStream().collect(Collectors.toList());
     }
 
-    private String clean(String text){
+    private String clean(String name,String text){
         for (ValueProcessor valueProcessor : valueProcessors) {
-            text = valueProcessor.process(text);
+            text = valueProcessor.process(name,text);
         }
         return text;
     }
@@ -48,7 +48,7 @@ public class ValueProcessorJacksonConfig implements Jackson2ObjectMapperBuilderC
             jacksonObjectMapperBuilder.serializers(new JsonSerializer<String>(){
                 @Override
                 public void serialize(String value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
-                    gen.writeString(clean(value));
+                    gen.writeString(clean(null,value));
                 }
                 @Override
                 public Class<String> handledType() {
@@ -59,7 +59,7 @@ public class ValueProcessorJacksonConfig implements Jackson2ObjectMapperBuilderC
         jacksonObjectMapperBuilder.deserializers( new JsonDeserializer<String>(){
             @Override
             public String deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JacksonException {
-                return clean(p.getText());
+                return clean(p.currentName(),p.getText());
             }
             @Override
             public Class<String> handledType() {

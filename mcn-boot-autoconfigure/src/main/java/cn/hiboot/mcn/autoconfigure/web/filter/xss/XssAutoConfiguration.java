@@ -40,7 +40,7 @@ public class XssAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public XssProcessor defaultXssProcessor(){
-        return HtmlUtils::htmlEscape;
+        return (name, value) -> HtmlUtils.htmlEscape(value);
     }
 
     @Bean
