@@ -66,53 +66,57 @@ public class SM4BootstrapConfiguration {
 
     @Configuration(proxyBeanMethods = false)
     @ConditionalOnClass(SM4Utils.class)
-    @Conditional(SM4ExtendCondition.class)
-    private static class SM4Extend extends SM4Utils implements TextEncryptor {
+    @Conditional(SM4ExtendConfig.SM4ExtendCondition.class)
+    private static class SM4ExtendConfig {
 
-        private final byte[] key;
-        private final byte[] iv;
+        private static class SM4Extend extends SM4Utils implements TextEncryptor {
 
-        public SM4Extend(EncryptorProperties encryptorProperties) {
-            this.key = generateKeyOrIV(encryptorProperties.getSm4().getKey());
-            this.iv = generateKeyOrIV(encryptorProperties.getSm4().getIv());
+            private final byte[] key;
+            private final byte[] iv;
+
+            public SM4Extend(EncryptorProperties encryptorProperties) {
+                this.key = generateKeyOrIV(encryptorProperties.getSm4().getKey());
+                this.iv = generateKeyOrIV(encryptorProperties.getSm4().getIv());
+            }
+
+            private byte[] generateKeyOrIV(String str) {
+                return Hex.encode(str.getBytes(StandardCharsets.UTF_8));
+            }
+
+            public String getHexKey(){
+                return Strings.fromByteArray(key);
+            }
+
+            public String getHexIv(){
+                return Strings.fromByteArray(iv);
+            }
+
+            @Override
+            public String encrypt(String text) {
+                return new String(Hex.encode(encryptData_CBC(Hex.decode(iv), Hex.decode(key), Strings.toUTF8ByteArray(text))));
+            }
+
+            @Override
+            public String decrypt(String encryptedText) {
+                return Strings.fromUTF8ByteArray(decryptData_CBC(Hex.decode(iv), Hex.decode(key), Hex.decode(encryptedText))).trim();
+            }
         }
 
-        private byte[] generateKeyOrIV(String str) {
-            return Hex.encode(str.getBytes(StandardCharsets.UTF_8));
-        }
+        static class SM4ExtendCondition extends AllNestedConditions {
 
-        public String getHexKey(){
-            return Strings.fromByteArray(key);
-        }
+            SM4ExtendCondition() {
+                super(ConfigurationPhase.REGISTER_BEAN);
+            }
 
-        public String getHexIv(){
-            return Strings.fromByteArray(iv);
-        }
+            @ConditionalOnProperty(prefix = EncryptorProperties.KEY+".sm4",name = "mode",havingValue = "cbc")
+            static class CBCModeEnabled {
 
-        @Override
-        public String encrypt(String text) {
-            return new String(Hex.encode(encryptData_CBC(Hex.decode(iv), Hex.decode(key), Strings.toUTF8ByteArray(text))));
-        }
+            }
 
-        @Override
-        public String decrypt(String encryptedText) {
-            return Strings.fromUTF8ByteArray(decryptData_CBC(Hex.decode(iv), Hex.decode(key), Hex.decode(encryptedText))).trim();
-        }
-    }
+            @ConditionalOnProperty(prefix = EncryptorProperties.KEY+".sm4",name = "use-default",havingValue = "false")
+            static class NotUseDefaultEnabled {
 
-    static class SM4ExtendCondition extends AllNestedConditions {
-
-        SM4ExtendCondition() {
-            super(ConfigurationPhase.REGISTER_BEAN);
-        }
-
-        @ConditionalOnProperty(prefix = EncryptorProperties.KEY+".sm4",name = "mode",havingValue = "cbc")
-        static class CBCModeEnabled {
-
-        }
-
-        @ConditionalOnProperty(prefix = EncryptorProperties.KEY+".sm4",name = "use-default",havingValue = "false")
-        static class NotUseDefaultEnabled {
+            }
 
         }
 
