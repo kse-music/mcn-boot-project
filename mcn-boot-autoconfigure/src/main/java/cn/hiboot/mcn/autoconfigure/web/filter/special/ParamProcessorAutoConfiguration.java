@@ -66,16 +66,19 @@ public class ParamProcessorAutoConfiguration {
     @ConditionalOnMissingBean
     public ParamProcessor defaultParamProcessor(Environment environment) {
         String globalRulePattern = environment.getProperty("global.rule.pattern","");
-        return (rule,name,value) -> {
-            String rulePattern = getRule(rule,globalRulePattern);
-            if(rulePattern.isEmpty()){
+        return new ParamProcessor(properties) {
+            @Override
+            public String process(String rule, String name, String value) {
+                String rulePattern = getRule(rule,globalRulePattern);
+                if(rulePattern.isEmpty()){
+                    return value;
+                }
+                Pattern pattern = MAP.computeIfAbsent(rule, m -> Pattern.compile(rulePattern));
+                if(pattern.matcher(value).matches()){
+                    throw ServiceException.newInstance("输入存在特殊字符");
+                }
                 return value;
             }
-            Pattern pattern = MAP.computeIfAbsent(rule, m -> Pattern.compile(rulePattern));
-            if(pattern.matcher(value).matches()){
-                throw ServiceException.newInstance("输入存在特殊字符");
-            }
-            return value;
         };
     }
 
