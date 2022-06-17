@@ -31,7 +31,7 @@ public class XssAutoConfiguration {
     }
 
     @Bean
-    public FilterRegistrationBean<XssFilter> xssFilterRegistration(XssProcessor xssProcessor) {
+    public FilterRegistrationBean<XssFilter> xssFilterRegistration(ValueProcessor xssProcessor) {
         FilterRegistrationBean<XssFilter> filterRegistrationBean = new FilterRegistrationBean<>(new XssFilter(xssProperties,xssProcessor));
         filterRegistrationBean.setOrder(xssProperties.getOrder());
         return filterRegistrationBean;
@@ -39,14 +39,23 @@ public class XssAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public XssProcessor defaultXssProcessor(){
-        return (name, value) -> HtmlUtils.htmlEscape(value);
+    public ValueProcessor defaultXssProcessor(){
+        return new ValueProcessor(xssProperties) {
+
+            @Override
+            public String doProcess(String name, String value) {
+                return HtmlUtils.htmlEscape(value);
+            }
+
+        };
     }
 
     @Bean
     @ConditionalOnMissingBean
     public ValueProcessorJacksonConfig valueProcessorJacksonConfig(ObjectProvider<ValueProcessor> valueProcessors) {
-        return new ValueProcessorJacksonConfig(xssProperties.isEscapeResponse(),valueProcessors);
+        ValueProcessorJacksonConfig valueProcessorJacksonConfig = new ValueProcessorJacksonConfig(valueProcessors);
+        valueProcessorJacksonConfig.setEscapeResponse(xssProperties.isEscapeResponse());
+        return valueProcessorJacksonConfig;
     }
 
 }

@@ -16,28 +16,27 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * JacksonXssConfig
+ * 处理json中数据类型为string的值
  *
  * @author DingHao
  * @since 2022/6/9 10:47
  */
 public class ValueProcessorJacksonConfig implements Jackson2ObjectMapperBuilderCustomizer {
 
-    private final boolean escapeResponse;
+    private boolean escapeResponse;
     private final List<ValueProcessor> valueProcessors;
 
     public ValueProcessorJacksonConfig(ObjectProvider<ValueProcessor> valueProcessors) {
-        this(false,valueProcessors);
-    }
-
-    public ValueProcessorJacksonConfig(boolean escapeResponse, ObjectProvider<ValueProcessor> valueProcessors) {
-        this.escapeResponse = escapeResponse;
         this.valueProcessors = valueProcessors.orderedStream().collect(Collectors.toList());
     }
 
-    private String clean(String name,String text){
+    public void setEscapeResponse(boolean escapeResponse) {
+        this.escapeResponse = escapeResponse;
+    }
+
+    private String clean(String name, String text){
         for (ValueProcessor valueProcessor : valueProcessors) {
-            text = valueProcessor.process(name,text);
+            text = valueProcessor.process(null,name,text);
         }
         return text;
     }
