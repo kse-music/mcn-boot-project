@@ -83,14 +83,6 @@ public class SM4BootstrapConfiguration {
                 return Hex.encode(str.getBytes(StandardCharsets.UTF_8));
             }
 
-            public String getHexKey(){
-                return Strings.fromByteArray(key);
-            }
-
-            public String getHexIv(){
-                return Strings.fromByteArray(iv);
-            }
-
             @Override
             public String encrypt(String text) {
                 return new String(Hex.encode(encryptData_CBC(Hex.decode(iv), Hex.decode(key), Strings.toUTF8ByteArray(text))));
