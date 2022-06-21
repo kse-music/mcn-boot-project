@@ -5,9 +5,7 @@ import cn.hiboot.mcn.core.model.result.RestResp;
 import cn.hiboot.mcn.core.util.JacksonUtils;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.net.URLDecoder;
-import cn.hutool.core.text.StrBuilder;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.crypto.SmUtil;
 import org.springframework.core.Ordered;
 import org.springframework.http.MediaType;
 import org.springframework.util.AntPathMatcher;
@@ -133,50 +131,13 @@ public class DataIntegrityFilter implements Filter, Ordered {
         while (enumeration.hasMoreElements()){
             String name = enumeration.nextElement();
             String[] parameterValues = request.getParameterValues(name);
-            params.put(name, parameterValues[parameterValues.length-1]);
+            params.put(name, parameterValues[parameterValues.length - 1]);
         }
-        //获取参数，因为有的接口是没有参数的，所以要单独处理下
-        String param = this.sortQueryParamString(params);
+        String fileInfo = null;
         if(request.getContentType() != null && request.getContentType().contains(MediaType.MULTIPART_FORM_DATA_VALUE) && dataIntegrityProperties.isCheckUpload()){//maybe upload
-            param += parseUpload(request);
+            fileInfo = parseUpload(request);
         }
-        if(data != null){
-            param += data;
-        }
-        String qs ;
-        if(StrUtil.isNotEmpty(param)){
-            qs=String.format("%s&timestamp=%s&nonceStr=%s", param, timestamp, nonceStr);
-        }else{
-            qs=String.format("timestamp=%s&nonceStr=%s", timestamp, nonceStr);
-        }
-        return SmUtil.sm3(qs);//从前端获取的nonce和后端的 进行对比，如果不一致则表示数据被篡改
-
-    }
-
-    /**
-     * 按照字母顺序进行升序排序
-     *
-     * @param params 请求参数
-     * @return 排序后结果
-     */
-    private String sortQueryParamString(Map<String, Object> params) {
-        List<String> listKeys = new ArrayList<>(params.keySet());
-        Collections.sort(listKeys);
-        StrBuilder content = StrBuilder.create();
-        for (String param : listKeys) {
-            if(param.equals("signature")){ //如果是全部作为参数传过来，也会接收到加密的签，所以需要过滤掉（下载和导出功能会出现）
-                continue;
-            }
-            Object obj = params.get(param);
-            if(obj instanceof Collection || obj instanceof Map){
-                obj = JacksonUtils.toJson(obj);
-            }
-            content.append(param).append("=").append(obj).append("&");
-        }
-        if (content.length() > 0) {
-            return content.subString(0, content.length() - 1);
-        }
-        return content.toString();
+        return DataIntegrityUtils.signature(timestamp,nonceStr,params,fileInfo,data);
     }
 
     @Override

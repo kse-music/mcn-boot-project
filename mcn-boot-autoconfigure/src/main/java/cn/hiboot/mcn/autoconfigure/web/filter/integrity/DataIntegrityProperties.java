@@ -19,7 +19,7 @@ public class DataIntegrityProperties {
     private List<String> includePatterns = Collections.singletonList("/**");
     private List<String> excludePatterns = Collections.emptyList();
     private int order = -1000;
-    private boolean checkUpload = true;
+    private boolean checkUpload;
     private boolean checkReplay;
     private Duration timeout = Duration.ofMinutes(1);
 
