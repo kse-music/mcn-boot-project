@@ -9,8 +9,16 @@
     {
       "name": "gateway.fallback.enabled",
       "type": "java.lang.Boolean",
+      "sourceType": "cn.hiboot.mcn.cloud.gateway.GatewayExtensionAutoConfiguration$DefaultFallbackRestController",
       "description": "是否启用断路器默认的fallback.",
       "defaultValue": "true"
+    },
+    {
+      "name": "data.integrity.interceptor.enable",
+      "type": "java.lang.Boolean",
+      "sourceType": "cn.hiboot.mcn.cloud.feign.DataIntegrityFeignInterceptor",
+      "description": "是否启用数据完整性feign拦截器.",
+      "defaultValue": "false"
     }
   ]
 }

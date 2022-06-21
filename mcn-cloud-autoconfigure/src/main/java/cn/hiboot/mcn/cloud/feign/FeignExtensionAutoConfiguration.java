@@ -11,10 +11,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.circuitbreaker.resilience4j.Resilience4JCircuitBreakerFactory;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.cloud.openfeign.Targeter;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Conditional;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.*;
 import org.springframework.security.authentication.DefaultAuthenticationEventPublisher;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
@@ -26,6 +23,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
  */
 @AutoConfiguration
 @ConditionalOnClass(Feign.class)
+@Import(DataIntegrityFeignInterceptor.class)
 public class FeignExtensionAutoConfiguration {
 
 
