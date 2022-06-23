@@ -1,5 +1,7 @@
 package cn.hiboot.mcn.cloud.encryptor.sm4;
 
+import cn.hutool.crypto.Mode;
+import cn.hutool.crypto.Padding;
 import cn.hutool.crypto.SmUtil;
 import cn.hutool.crypto.symmetric.SM4;
 import cn.hutool.crypto.symmetric.SymmetricCrypto;
@@ -32,7 +34,7 @@ import java.nio.charset.StandardCharsets;
 public class SM4BootstrapConfiguration {
 
     @Configuration(proxyBeanMethods = false)
-    @ConditionalOnClass(SymmetricCrypto.class)
+    @ConditionalOnClass({SymmetricCrypto.class,Hex.class})
     @ConditionalOnProperty(prefix = EncryptorProperties.KEY+".sm4",name = "use-default",havingValue = "true",matchIfMissing = true)
     private static class SM4Encryptor implements TextEncryptor {
 
@@ -42,10 +44,12 @@ public class SM4BootstrapConfiguration {
         public SM4Encryptor(EncryptorProperties encryptorProperties) {
             EncryptorProperties.SM4 sm4 = encryptorProperties.getSm4();
             if(sm4.getMode() != null && sm4.getPadding() != null){
+                Mode mode = Mode.valueOf(sm4.getMode().name());
+                Padding padding = Padding.valueOf(sm4.getPadding().name());
                 if(sm4.getIv() == null){
-                    this.sm4 = new SM4(sm4.getMode(),sm4.getPadding(),sm4.getKey().getBytes(StandardCharsets.UTF_8));
+                    this.sm4 = new SM4(mode,padding,sm4.getKey().getBytes(StandardCharsets.UTF_8));
                 }else {
-                    this.sm4 = new SM4(sm4.getMode(),sm4.getPadding(),sm4.getKey().getBytes(StandardCharsets.UTF_8),sm4.getIv().getBytes(StandardCharsets.UTF_8));
+                    this.sm4 = new SM4(mode,padding,sm4.getKey().getBytes(StandardCharsets.UTF_8),sm4.getIv().getBytes(StandardCharsets.UTF_8));
                 }
             }else {
                 this.sm4 = SmUtil.sm4(sm4.getKey().getBytes(StandardCharsets.UTF_8));
