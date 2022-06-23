@@ -14,7 +14,7 @@ public interface Specifications {
         return new ExampleSpecification<>(predicateProviders);
     }
 
-    static <S> ExampleSpecification<S> of(S t, PredicateProvider<S> predicateProviders){
+    static <S> ExampleSpecification<S> withOf(S t, PredicateProvider<S> predicateProviders){
         return new ExampleSpecification<>(t, predicateProviders);
     }
 
@@ -24,7 +24,7 @@ public interface Specifications {
     }
 
     @SafeVarargs
-    static <S> ExampleSpecification<S> and(S t, PredicateProvider<S>... predicateProviders){
+    static <S> ExampleSpecification<S> withAnd(S t, PredicateProvider<S>... predicateProviders){
         return new ExampleSpecification<>(t, Arrays.asList(predicateProviders));
     }
 
@@ -34,7 +34,7 @@ public interface Specifications {
     }
 
     @SafeVarargs
-    static <S> ExampleSpecification<S> or(S t, PredicateProvider<S>... predicateProviders){
+    static <S> ExampleSpecification<S> withOr(S t, PredicateProvider<S>... predicateProviders){
         return new ExampleSpecification<>(t, Arrays.asList(predicateProviders)).or();
     }
 
