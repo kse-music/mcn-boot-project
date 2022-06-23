@@ -14,9 +14,12 @@ import org.springframework.context.event.GenericApplicationListener;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.EnumerablePropertySource;
+import org.springframework.core.env.PropertyResolver;
 import org.springframework.core.env.PropertySource;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
+
+import java.nio.charset.StandardCharsets;
 
 /**
  * 监听器
@@ -32,11 +35,14 @@ public class McnApplicationListener implements GenericApplicationListener {
 
     public static final int DEFAULT_ORDER = LoggingApplicationListener.DEFAULT_ORDER + 1;
 
-    private static final Class<?>[] EVENT_TYPES = { ApplicationEnvironmentPreparedEvent.class, ApplicationContextInitializedEvent.class,ApplicationStartedEvent.class};
+    private static final Class<?>[] EVENT_TYPES = { ApplicationEnvironmentPreparedEvent.class,ApplicationEnvironmentPreparedEvent.class, ApplicationContextInitializedEvent.class,ApplicationStartedEvent.class};
 
     private static final Class<?>[] SOURCE_TYPES = { SpringApplication.class };
 
     private LogFileChecker logFileChecker;
+
+    private static final String CONSOLE_LOG_CHARSET = "CONSOLE_LOG_CHARSET";
+    private static final String FILE_LOG_CHARSET = "FILE_LOG_CHARSET";
 
     @Override
     public void onApplicationEvent(ApplicationEvent applicationEvent) {
@@ -57,6 +63,14 @@ public class McnApplicationListener implements GenericApplicationListener {
     private void triggerEnvironmentPreparedEvent(ConfigurableEnvironment environment) {
         registerLogFileChecker(environment);
         configSecurityContextHolderStrategyMode(environment);
+        setSystemProperty(environment, CONSOLE_LOG_CHARSET, "logging.charset.console", StandardCharsets.UTF_8.name());
+        setSystemProperty(environment, FILE_LOG_CHARSET, "logging.charset.file", StandardCharsets.UTF_8.name());
+    }
+
+    protected final void setSystemProperty(PropertyResolver resolver, String systemPropertyName, String propertyName,String defaultValue) {
+        String value = resolver.getProperty(propertyName);
+        value = (value != null) ? value : defaultValue;
+        System.setProperty(systemPropertyName, value);
     }
 
     private void logPropertySource(ConfigurableEnvironment environment){
