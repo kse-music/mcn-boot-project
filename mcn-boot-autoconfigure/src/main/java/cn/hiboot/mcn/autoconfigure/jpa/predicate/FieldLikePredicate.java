@@ -4,7 +4,7 @@ import cn.hiboot.mcn.autoconfigure.jpa.AbstractPredicateProvider;
 import org.springframework.util.StringUtils;
 
 import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
@@ -43,8 +43,8 @@ public class FieldLikePredicate<T> extends AbstractPredicateProvider<T> {
         }else {
             pattern = LIKE + value + LIKE;
         }
-        Path<String> path = root.get(getFieldName());
-        return isNot ? criteriaBuilder.notLike(path,pattern):criteriaBuilder.like(path,pattern);
+        Expression<String> as = root.get(getFieldName()).as(String.class);
+        return isNot ? criteriaBuilder.notLike(as,pattern):criteriaBuilder.like(as,pattern);
     }
 
     public FieldLikePredicate<T> not(){
