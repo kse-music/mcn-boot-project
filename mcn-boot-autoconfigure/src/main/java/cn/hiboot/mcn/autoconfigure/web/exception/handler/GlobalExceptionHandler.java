@@ -1,15 +1,18 @@
 package cn.hiboot.mcn.autoconfigure.web.exception.handler;
 
 import cn.hiboot.mcn.autoconfigure.config.ConfigProperties;
-import cn.hiboot.mcn.autoconfigure.web.exception.ExceptionHandlerCustomizer;
+import cn.hiboot.mcn.autoconfigure.web.exception.CustomExceptionHandler;
+import cn.hiboot.mcn.autoconfigure.web.exception.ExceptionResolver;
 import cn.hiboot.mcn.autoconfigure.web.exception.error.GlobalExceptionViewResolver;
 import cn.hiboot.mcn.core.exception.BaseException;
 import cn.hiboot.mcn.core.exception.ErrorMsg;
 import cn.hiboot.mcn.core.exception.ExceptionKeys;
 import cn.hiboot.mcn.core.model.result.RestResp;
+import cn.hiboot.mcn.core.util.McnUtils;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.Ordered;
@@ -58,10 +61,12 @@ public class GlobalExceptionHandler implements EnvironmentAware, Ordered {
     private String basePackage;
 
     private GlobalExceptionViewResolver viewResolver;
-    private ExceptionHandlerCustomizer<?> exceptionHandlerCustomizer;
+    private CustomExceptionHandler<?> customExceptionHandler;
+    private final ObjectProvider<ExceptionResolver> exceptionResolvers;
 
-    public GlobalExceptionHandler(GlobalExceptionProperties properties) {
+    public GlobalExceptionHandler(GlobalExceptionProperties properties, ObjectProvider<ExceptionResolver> exceptionResolvers) {
         this.properties = properties;
+        this.exceptionResolvers = exceptionResolvers;
     }
 
     @Autowired(required = false)
@@ -70,19 +75,28 @@ public class GlobalExceptionHandler implements EnvironmentAware, Ordered {
     }
 
     @Autowired(required = false)
-    public void setExceptionHandlerCustomizer(ExceptionHandlerCustomizer<?> exceptionHandlerCustomizer) {
-        this.exceptionHandlerCustomizer = exceptionHandlerCustomizer;
+    public void setCustomExceptionHandler(CustomExceptionHandler<?> customExceptionHandler) {
+        this.customExceptionHandler = customExceptionHandler;
     }
 
     @ExceptionHandler(Throwable.class)
     public Object handleException(HttpServletRequest request, Throwable exception) throws Throwable{
-        if(Objects.nonNull(exceptionHandlerCustomizer)){
+        if(Objects.nonNull(customExceptionHandler)){
             logError(exception);
-            return exceptionHandlerCustomizer.handle(request,exception);
+            return customExceptionHandler.handle(request,exception);
         }
         if(viewResolver != null && viewResolver.support(request)){
             logError(exception);
             return viewResolver.view(request, exception);
+        }
+        List<ExceptionResolver> resolvers = exceptionResolvers.orderedStream().collect(Collectors.toList());
+        if(McnUtils.isNotNullAndEmpty(resolvers)){
+            for (ExceptionResolver resolver : resolvers) {
+                if(resolver.support(request, exception)){
+                    logError(exception);
+                    return resolver.resolveException(request, exception);
+                }
+            }
         }
         return buildErrorData(request, exception);
     }
