@@ -8,8 +8,14 @@ import javax.servlet.http.HttpServletRequest;
  * @author DingHao
  * @since 2021/11/30 17:45
  */
-public interface ExceptionHandlerCustomizer<T> {
+public interface CustomExceptionHandler<T> {
 
+    /**
+     * 自定义异常处理
+     * @param request httpRequest
+     * @param t ex
+     * @return ex result
+     */
     T handle(HttpServletRequest request,Throwable t);
 
 }
