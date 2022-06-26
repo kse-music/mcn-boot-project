@@ -13,7 +13,7 @@ public class ValueProcessorProperties {
     /**
      * 处理的url路径
      */
-    private List<String> includeUrls;
+    private List<String> includeUrls = Collections.singletonList("/**");
     /**
      * 排除的url路径
      */

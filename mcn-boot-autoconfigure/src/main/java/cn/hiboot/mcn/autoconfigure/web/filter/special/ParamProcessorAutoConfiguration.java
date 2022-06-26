@@ -1,7 +1,9 @@
 package cn.hiboot.mcn.autoconfigure.web.filter.special;
 
 
+import cn.hiboot.mcn.autoconfigure.web.filter.common.RequestMatcher;
 import cn.hiboot.mcn.autoconfigure.web.filter.common.ValueProcessor;
+import cn.hiboot.mcn.autoconfigure.web.filter.common.ValueProcessorFilter;
 import cn.hiboot.mcn.autoconfigure.web.filter.common.ValueProcessorJacksonConfig;
 import cn.hiboot.mcn.core.exception.ServiceException;
 import com.fasterxml.jackson.core.JsonParser;
@@ -66,7 +68,13 @@ public class ParamProcessorAutoConfiguration {
     @ConditionalOnMissingBean
     public ParamProcessor defaultParamProcessor(Environment environment) {
         String globalRulePattern = environment.getProperty("global.rule.pattern","");
-        return new ParamProcessor(properties) {
+        return new ParamProcessor() {
+
+            @Override
+            public RequestMatcher requestMatcher() {
+                return new RequestMatcher(properties.getIncludeUrls(), properties.getExcludeUrls());
+            }
+
             @Override
             public String process(String rule, String name, String value) {
                 String rulePattern = getRule(rule,globalRulePattern);
@@ -90,10 +98,11 @@ public class ParamProcessorAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnProperty(prefix = "param.processor",name = "use-filter",havingValue = "true",matchIfMissing = true)
-    public FilterRegistrationBean<ParamProcessorFilter> paramProcessorFilterRegistration(ParamProcessor paramProcessor) {
-        FilterRegistrationBean<ParamProcessorFilter> filterRegistrationBean = new FilterRegistrationBean<>(new ParamProcessorFilter(properties,paramProcessor));
+    @ConditionalOnProperty(prefix = "param.processor",name = "use-filter",havingValue = "true", matchIfMissing = true)
+    public FilterRegistrationBean<ValueProcessorFilter> paramProcessorFilterRegistration(ParamProcessor paramProcessor) {
+        FilterRegistrationBean<ValueProcessorFilter> filterRegistrationBean = new FilterRegistrationBean<>(new ValueProcessorFilter(properties.getExcludeFields(),properties.isFilterParameterName(),paramProcessor));
         filterRegistrationBean.setOrder(properties.getOrder());
+        filterRegistrationBean.setName(properties.getName());
         return filterRegistrationBean;
     }
 
