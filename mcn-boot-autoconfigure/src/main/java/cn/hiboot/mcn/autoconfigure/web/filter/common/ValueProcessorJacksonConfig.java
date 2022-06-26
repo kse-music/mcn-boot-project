@@ -10,9 +10,13 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -24,10 +28,10 @@ import java.util.stream.Collectors;
 public class ValueProcessorJacksonConfig implements Jackson2ObjectMapperBuilderCustomizer {
 
     private boolean escapeResponse;
-    private final List<ValueProcessor> valueProcessors;
+    private final Map<ValueProcessor, RequestMatcher> valueProcessors;
 
     public ValueProcessorJacksonConfig(ObjectProvider<ValueProcessor> valueProcessors) {
-        this.valueProcessors = valueProcessors.orderedStream().collect(Collectors.toList());
+        this.valueProcessors = valueProcessors.orderedStream().collect(Collectors.toMap(Function.identity(), ValueProcessor::requestMatcher));
     }
 
     public void setEscapeResponse(boolean escapeResponse) {
@@ -35,10 +39,21 @@ public class ValueProcessorJacksonConfig implements Jackson2ObjectMapperBuilderC
     }
 
     private String clean(String name, String text){
-        for (ValueProcessor valueProcessor : valueProcessors) {
-            text = valueProcessor.process(null,name,text);
+        for (Map.Entry<ValueProcessor, RequestMatcher> entry : valueProcessors.entrySet()) {
+            HttpServletRequest httpRequest = getHttpRequest();
+            if(httpRequest == null || entry.getValue().matches(httpRequest)){
+                text = entry.getKey().process(name,text);
+            }
         }
         return text;
+    }
+
+    private HttpServletRequest getHttpRequest(){
+        ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        if(requestAttributes == null){
+            return null;
+        }
+        return requestAttributes.getRequest();
     }
 
     @Override

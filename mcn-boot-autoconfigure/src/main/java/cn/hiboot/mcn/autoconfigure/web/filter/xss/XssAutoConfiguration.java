@@ -1,6 +1,8 @@
 package cn.hiboot.mcn.autoconfigure.web.filter.xss;
 
+import cn.hiboot.mcn.autoconfigure.web.filter.common.RequestMatcher;
 import cn.hiboot.mcn.autoconfigure.web.filter.common.ValueProcessor;
+import cn.hiboot.mcn.autoconfigure.web.filter.common.ValueProcessorFilter;
 import cn.hiboot.mcn.autoconfigure.web.filter.common.ValueProcessorJacksonConfig;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -31,19 +33,25 @@ public class XssAutoConfiguration {
     }
 
     @Bean
-    public FilterRegistrationBean<XssFilter> xssFilterRegistration(ValueProcessor xssProcessor) {
-        FilterRegistrationBean<XssFilter> filterRegistrationBean = new FilterRegistrationBean<>(new XssFilter(xssProperties,xssProcessor));
+    public FilterRegistrationBean<ValueProcessorFilter> xssFilterRegistration(XssProcessor xssProcessor) {
+        FilterRegistrationBean<ValueProcessorFilter> filterRegistrationBean = new FilterRegistrationBean<>(new ValueProcessorFilter(xssProperties.getExcludeFields(),xssProperties.isFilterParameterName(),xssProcessor));
         filterRegistrationBean.setOrder(xssProperties.getOrder());
+        filterRegistrationBean.setName(xssProperties.getName());
         return filterRegistrationBean;
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public ValueProcessor defaultXssProcessor(){
-        return new ValueProcessor(xssProperties) {
+    public XssProcessor defaultXssProcessor(){
+        return new XssProcessor() {
 
             @Override
-            public String doProcess(String name, String value) {
+            public RequestMatcher requestMatcher() {
+                return new RequestMatcher(xssProperties.getIncludeUrls(), xssProperties.getExcludeUrls());
+            }
+
+            @Override
+            public String process(String name, String value) {
                 return HtmlUtils.htmlEscape(value);
             }
 

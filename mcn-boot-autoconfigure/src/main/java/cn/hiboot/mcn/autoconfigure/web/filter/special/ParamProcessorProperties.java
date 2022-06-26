@@ -12,6 +12,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties("param.processor")
 public class ParamProcessorProperties extends ValueProcessorProperties {
     /**
+     * 过滤器名
+     */
+    private String name = "defaultParamProcessorFilter";
+
+    /**
      * 使用过滤器处理参数
      */
     private boolean useFilter;
@@ -20,6 +25,14 @@ public class ParamProcessorProperties extends ValueProcessorProperties {
      * 参数处理过滤器顺序默认Integer.MAX_VALUE - 1
      */
     private int order = Integer.MAX_VALUE - 1;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public boolean isUseFilter() {
         return useFilter;

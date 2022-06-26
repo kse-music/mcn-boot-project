@@ -1,9 +1,10 @@
 package cn.hiboot.mcn.autoconfigure.web.filter.common;
 
+import cn.hiboot.mcn.core.util.McnAssert;
 import org.springframework.util.AntPathMatcher;
-import org.springframework.util.CollectionUtils;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -14,27 +15,33 @@ import java.util.List;
  */
 public class RequestMatcher {
 
-    private final AntPathMatcher antPathMatcher = new AntPathMatcher();
-    private final ValueProcessorProperties properties;
+    static RequestMatcher requestMatcher = new RequestMatcher();
 
-    public RequestMatcher(ValueProcessorProperties properties) {
-        this.properties = properties;
+    private final AntPathMatcher antPathMatcher = new AntPathMatcher();
+
+    private List<String> includeUrls = Collections.emptyList();
+    private List<String> excludeUrls = Collections.emptyList();
+
+    public RequestMatcher() {
+    }
+
+    public RequestMatcher(List<String> excludeUrls) {
+        this.excludeUrls = excludeUrls;
+    }
+
+    public RequestMatcher(List<String> includeUrls, List<String> excludeUrls) {
+        McnAssert.notNull(includeUrls,"includeUrls must be not null");
+        McnAssert.notNull(excludeUrls,"includeUrls must be not null");
+        this.includeUrls = includeUrls;
+        this.excludeUrls = excludeUrls;
     }
 
     public boolean matches(HttpServletRequest request){
         String url = request.getServletPath();
-        if (isExcludeUrl(url)) {
+        if (doMatch(url,excludeUrls)) {
             return false;
         }
-        return isIncludeUrl(url);
-    }
-
-    private boolean isIncludeUrl(String url) {
-        return CollectionUtils.isEmpty(properties.getIncludeUrls()) || doMatch(url,properties.getIncludeUrls());
-    }
-
-    private boolean isExcludeUrl(String url) {
-        return doMatch(url,properties.getExcludeUrls());
+        return doMatch(url,includeUrls);
     }
 
     private boolean doMatch(String url, List<String> urls) {

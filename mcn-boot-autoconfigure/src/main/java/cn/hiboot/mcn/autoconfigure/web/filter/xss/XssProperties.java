@@ -13,6 +13,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class XssProperties extends ValueProcessorProperties {
 
     /**
+     * 过滤器名
+     */
+    private String name = "defaultXxsFilter";
+
+    /**
      * XssFilter过滤器顺序默认Integer.MAX_VALUE
      */
     private int order = Integer.MAX_VALUE;
@@ -21,6 +26,14 @@ public class XssProperties extends ValueProcessorProperties {
      * 是否也处理返回数据
      */
     private boolean escapeResponse;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public int getOrder() {
         return order;
