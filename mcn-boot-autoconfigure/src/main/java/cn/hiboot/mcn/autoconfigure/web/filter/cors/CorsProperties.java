@@ -12,6 +12,7 @@ import org.springframework.web.cors.CorsConfiguration;
 @ConfigurationProperties("mcn.cors")
 public class CorsProperties {
 
+    private String name = "defaultCorsFilter";
     private String pattern = "/**";
     private Boolean allowCredentials;
     private String allowedOrigin = CorsConfiguration.ALL;
@@ -19,6 +20,14 @@ public class CorsProperties {
     private String allowedMethod = CorsConfiguration.ALL;
     private Long maxAge = 3600L;
     private int order = -1000;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public String getPattern() {
         return pattern;
