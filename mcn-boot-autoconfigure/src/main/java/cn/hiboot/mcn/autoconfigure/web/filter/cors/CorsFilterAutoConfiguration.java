@@ -34,6 +34,7 @@ public class CorsFilterAutoConfiguration {
     public FilterRegistrationBean<CorsFilter> corsFilterRegistration(CorsConfigurationSource corsConfigurationSource) {
         FilterRegistrationBean<CorsFilter> filterRegistrationBean = new FilterRegistrationBean<>(new CorsFilter(corsConfigurationSource));
         filterRegistrationBean.setOrder(corsProperties.getOrder());
+        filterRegistrationBean.setName(corsProperties.getName());
         return filterRegistrationBean;
     }
 
