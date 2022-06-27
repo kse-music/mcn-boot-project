@@ -23,7 +23,7 @@ public class GlobalExceptionProperties {
     /**
      * 指定全局异常处理的顺序
      */
-    private int order = 1;
+    private int order = Integer.MAX_VALUE;
 
     /**
      * 是否返回统一异常消息
