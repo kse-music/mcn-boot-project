@@ -32,6 +32,9 @@ public interface ExceptionKeys {
     int HTTP_ERROR_406 = 800406;
     int HTTP_ERROR_408 = 800408;
     int HTTP_ERROR_409 = 800409;
+    int HTTP_ERROR_413 = 800413;
+    int HTTP_ERROR_415 = 800415;
+    int HTTP_ERROR_421 = 800421;
     int HTTP_ERROR_500 = 800500;
     int HTTP_ERROR_503 = 800503;
 
@@ -49,8 +52,11 @@ public interface ExceptionKeys {
                 case 404: return HTTP_ERROR_404;
                 case 405: return HTTP_ERROR_405;
                 case 406: return HTTP_ERROR_406;
-                case 407: return HTTP_ERROR_408;
-                case 408: return HTTP_ERROR_409;
+                case 408: return HTTP_ERROR_408;
+                case 409: return HTTP_ERROR_409;
+                case 413: return HTTP_ERROR_413;
+                case 415: return HTTP_ERROR_415;
+                case 421: return HTTP_ERROR_421;
             }
         }
         return ExceptionKeys.HTTP_ERROR_500;
