@@ -2,7 +2,7 @@ package cn.hiboot.mcn.autoconfigure.web.security;
 
 import cn.hiboot.mcn.core.util.McnUtils;
 import org.springframework.core.Ordered;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
@@ -23,11 +23,12 @@ public class IgnoreUrlWebSecurityConfigurer extends WebSecurityConfigurerAdapter
     private final WebSecurityProperties webSecurityProperties;
 
     public IgnoreUrlWebSecurityConfigurer(WebSecurityProperties webSecurityProperties){
+        super(true);
         this.webSecurityProperties = webSecurityProperties;
     }
 
     @Override
-    public void configure(WebSecurity web) throws Exception {
+    protected void configure(HttpSecurity http) throws Exception {
         List<String> urls = new ArrayList<>();
         if(webSecurityProperties.isEnableDefaultIgnore()){
             Collections.addAll(urls,webSecurityProperties.getDefaultExcludeUrls());
@@ -36,7 +37,7 @@ public class IgnoreUrlWebSecurityConfigurer extends WebSecurityConfigurerAdapter
             Collections.addAll(urls,webSecurityProperties.getExcludeUrls());
         }
         if(McnUtils.isNotNullAndEmpty(urls)){
-            web.ignoring().requestMatchers(new OrRequestMatcher(urls.stream().map(AntPathRequestMatcher::new).collect(Collectors.toList())));
+            http.requestMatcher(new OrRequestMatcher(urls.stream().map(AntPathRequestMatcher::new).collect(Collectors.toList())));
         }
     }
 
