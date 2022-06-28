@@ -93,8 +93,12 @@ public class GlobalExceptionHandler implements EnvironmentAware, Ordered {
         if(McnUtils.isNotNullAndEmpty(resolvers)){
             for (ExceptionResolver resolver : resolvers) {
                 if(resolver.support(request, exception)){
+                    RestResp<Object> rs = resolver.resolveException(request, exception);
+                    if(rs == null){
+                        continue;
+                    }
                     logError(exception);
-                    return resolver.resolveException(request, exception);
+                    return rs;
                 }
             }
         }

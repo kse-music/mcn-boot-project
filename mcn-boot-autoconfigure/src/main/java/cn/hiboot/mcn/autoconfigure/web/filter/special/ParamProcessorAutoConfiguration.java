@@ -1,11 +1,14 @@
 package cn.hiboot.mcn.autoconfigure.web.filter.special;
 
 
+import cn.hiboot.mcn.autoconfigure.web.exception.ExceptionResolver;
 import cn.hiboot.mcn.autoconfigure.web.filter.common.RequestMatcher;
 import cn.hiboot.mcn.autoconfigure.web.filter.common.ValueProcessor;
 import cn.hiboot.mcn.autoconfigure.web.filter.common.ValueProcessorFilter;
 import cn.hiboot.mcn.autoconfigure.web.filter.common.ValueProcessorJacksonConfig;
+import cn.hiboot.mcn.core.exception.ExceptionKeys;
 import cn.hiboot.mcn.core.exception.ServiceException;
+import cn.hiboot.mcn.core.model.result.RestResp;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.AnnotationIntrospector;
@@ -30,6 +33,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Role;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.env.Environment;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -83,7 +87,7 @@ public class ParamProcessorAutoConfiguration {
                 }
                 Pattern pattern = MAP.computeIfAbsent(rule, m -> Pattern.compile(rulePattern));
                 if(pattern.matcher(value).matches()){
-                    throw ServiceException.newInstance("输入存在特殊字符");
+                    throw ServiceException.newInstance(ExceptionKeys.SPECIAL_SYMBOL_ERROR);
                 }
                 return value;
             }
@@ -95,6 +99,32 @@ public class ParamProcessorAutoConfiguration {
             rule = globalRulePattern;
         }
         return rule;
+    }
+
+    @Bean
+    public ExceptionResolver specialSymbolExceptionResolver() {
+        return new ExceptionResolver(){
+
+            @Override
+            public boolean support(Throwable t) {
+                return t instanceof HttpMessageNotReadableException;
+            }
+
+            @Override
+            public String resolveException(Throwable t) {
+                return null;
+            }
+
+            @Override
+            public RestResp<Object> resolveException(HttpServletRequest request, Throwable t) {
+                ServiceException serviceException = ServiceException.find(t);
+                if(serviceException == null || serviceException.getCode() != ExceptionKeys.SPECIAL_SYMBOL_ERROR){
+                    return null;
+                }
+                return RestResp.error(serviceException.getCode(),serviceException.getMessage());
+            }
+
+        };
     }
 
     @Bean

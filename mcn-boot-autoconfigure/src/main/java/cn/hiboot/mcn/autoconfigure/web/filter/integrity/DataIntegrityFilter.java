@@ -81,8 +81,7 @@ public class DataIntegrityFilter implements Filter, Ordered {
             }
 
             String currentSignature;
-            String contentType = request.getContentType();
-            if(contentType != null && contentType.contains(MediaType.APPLICATION_JSON_VALUE)){//json请求
+            if(RequestPayloadRequestWrapper.isJsonRequest(request)){//json请求
                 String data = null;
                 try{
                     data = IoUtil.read(request.getInputStream(),StandardCharsets.UTF_8);

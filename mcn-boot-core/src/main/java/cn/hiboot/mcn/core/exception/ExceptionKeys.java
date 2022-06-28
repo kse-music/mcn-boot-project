@@ -21,6 +21,8 @@ public interface ExceptionKeys {
     int VERIFY_MOBILE_CODE_ERROR = 300006;
     int UPLOAD_FILE_SIZE_ERROR = 300007;
     int PARAM_TYPE_ERROR = 300008;
+    int SPECIAL_SYMBOL_ERROR = 300009;
+
 
     int UNKNOWN_ERROR = 700001;
 
