@@ -47,7 +47,7 @@ public class RequestPayloadRequestWrapper extends HttpServletRequestWrapper {
         if(header == null){
             return false;
         }
-        return MediaType.APPLICATION_JSON_VALUE.equalsIgnoreCase(header) || MediaType.APPLICATION_JSON_VALUE.contains(header.toLowerCase());
+        return header.contains(MediaType.APPLICATION_JSON_VALUE);
     }
 
     @Override
