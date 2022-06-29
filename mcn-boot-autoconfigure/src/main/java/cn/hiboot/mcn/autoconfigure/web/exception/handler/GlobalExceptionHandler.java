@@ -1,19 +1,18 @@
 package cn.hiboot.mcn.autoconfigure.web.exception.handler;
 
 import cn.hiboot.mcn.autoconfigure.config.ConfigProperties;
-import cn.hiboot.mcn.autoconfigure.web.exception.CustomExceptionHandler;
+import cn.hiboot.mcn.autoconfigure.web.exception.ExceptionMessageProcessor;
+import cn.hiboot.mcn.autoconfigure.web.exception.ExceptionPostProcessor;
 import cn.hiboot.mcn.autoconfigure.web.exception.ExceptionResolver;
 import cn.hiboot.mcn.autoconfigure.web.exception.error.GlobalExceptionViewResolver;
 import cn.hiboot.mcn.core.exception.BaseException;
 import cn.hiboot.mcn.core.exception.ErrorMsg;
 import cn.hiboot.mcn.core.exception.ExceptionKeys;
 import cn.hiboot.mcn.core.model.result.RestResp;
-import cn.hiboot.mcn.core.util.McnUtils;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.Ordered;
 import org.springframework.core.env.Environment;
@@ -60,52 +59,66 @@ public class GlobalExceptionHandler implements EnvironmentAware, Ordered {
     private boolean overrideHttpError;
     private String basePackage;
 
-    private GlobalExceptionViewResolver viewResolver;
-    private CustomExceptionHandler<?> customExceptionHandler;
-    private final ObjectProvider<ExceptionResolver> exceptionResolvers;
+    private final GlobalExceptionViewResolver viewResolver;
+    private final ExceptionPostProcessor<?> exceptionPostProcessor;
+    private final List<ExceptionResolver> exceptionResolvers;
+    private final ExceptionMessageProcessor exceptionMessageProcessor;
 
-    public GlobalExceptionHandler(GlobalExceptionProperties properties, ObjectProvider<ExceptionResolver> exceptionResolvers) {
+    public GlobalExceptionHandler(GlobalExceptionProperties properties,
+                                  ObjectProvider<ExceptionPostProcessor<?>> exceptionPostProcessors,
+                                  ObjectProvider<ExceptionResolver> exceptionResolver,
+                                  ObjectProvider<ExceptionMessageProcessor> exceptionMessageProcessor,
+                                  ObjectProvider<GlobalExceptionViewResolver> globalExceptionViewResolvers) {
         this.properties = properties;
-        this.exceptionResolvers = exceptionResolvers;
-    }
-
-    @Autowired(required = false)
-    public void setErrorView(GlobalExceptionViewResolver exceptionViewResolver) {
-        this.viewResolver = exceptionViewResolver;
-    }
-
-    @Autowired(required = false)
-    public void setCustomExceptionHandler(CustomExceptionHandler<?> customExceptionHandler) {
-        this.customExceptionHandler = customExceptionHandler;
+        this.exceptionPostProcessor = exceptionPostProcessors.getIfUnique();
+        this.exceptionResolvers = exceptionResolver.orderedStream().collect(Collectors.toList());
+        this.exceptionMessageProcessor = exceptionMessageProcessor.getIfUnique();
+        this.viewResolver = globalExceptionViewResolvers.getIfUnique();
     }
 
     @ExceptionHandler(Throwable.class)
     public Object handleException(HttpServletRequest request, Throwable exception) throws Throwable{
-        if(Objects.nonNull(customExceptionHandler)){
-            logError(exception);
-            return customExceptionHandler.handle(request,exception);
-        }
-        if(viewResolver != null && viewResolver.support(request)){
+        if(Objects.nonNull(viewResolver) && viewResolver.support(request)){
             logError(exception);
             return viewResolver.view(request, exception);
         }
-        List<ExceptionResolver> resolvers = exceptionResolvers.orderedStream().collect(Collectors.toList());
-        if(McnUtils.isNotNullAndEmpty(resolvers)){
-            for (ExceptionResolver resolver : resolvers) {
-                if(resolver.support(request, exception)){
-                    RestResp<Object> rs = resolver.resolveException(request, exception);
-                    if(rs == null){
-                        continue;
-                    }
-                    logError(exception);
-                    return rs;
-                }
+        if(Objects.nonNull(exceptionPostProcessor)){
+            Object o = exceptionPostProcessor.beforeHandle(request, exception);
+            if(Objects.nonNull(o)){
+                logError(exception);
+                return o;
             }
         }
-        return buildErrorData(request, exception);
+        RestResp<Object> resp = null;
+        for (ExceptionResolver resolver : exceptionResolvers) {
+            if(resolver.support(request, exception)){
+                RestResp<Object> rs = resolver.resolveException(request, exception);
+                if(Objects.isNull(rs)){
+                    continue;
+                }
+                resp = rs;
+            }
+        }
+        if(Objects.isNull(resp)){
+            resp = doHandleException(request, exception);
+        }
+        if(properties.isOverrideExMsg() && exceptionMessageProcessor != null){
+            String message = exceptionMessageProcessor.process(resp.getErrorCode());
+            if(Objects.nonNull(message)){
+                resp.setErrorInfo(message);
+            }
+        }
+        logError(exception);
+        if(Objects.nonNull(exceptionPostProcessor)){
+            Object o = exceptionPostProcessor.afterHandle(request, exception, resp);
+            if(Objects.nonNull(o)){
+                return o;
+            }
+        }
+        return resp;
     }
 
-    protected RestResp<Object> buildErrorData(HttpServletRequest request, Throwable exception) throws Throwable {
+    protected RestResp<Object> doHandleException(HttpServletRequest request, Throwable exception) throws Throwable {
         Integer errorCode = null;
         String errorInfo = null;
         List<ValidationErrorBean> data = null;
@@ -157,7 +170,6 @@ public class GlobalExceptionHandler implements EnvironmentAware, Ordered {
         if(code == null){
             code = DEFAULT_ERROR_CODE;
         }
-        logError(t);
         if(ObjectUtils.isEmpty(msg)){//这里的消息可能是重写后的
             msg = t.getMessage();//1.take msg from exception
             if(ObjectUtils.isEmpty(msg)){
