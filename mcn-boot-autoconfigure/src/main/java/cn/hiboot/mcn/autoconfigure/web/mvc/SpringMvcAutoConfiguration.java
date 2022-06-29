@@ -1,5 +1,6 @@
 package cn.hiboot.mcn.autoconfigure.web.mvc;
 
+import cn.hiboot.mcn.autoconfigure.web.exception.ExceptionMessageProcessor;
 import cn.hiboot.mcn.autoconfigure.web.exception.error.DefaultErrorView;
 import cn.hiboot.mcn.autoconfigure.web.exception.error.ErrorPageController;
 import cn.hiboot.mcn.autoconfigure.web.exception.handler.GlobalExceptionHandler;
@@ -78,6 +79,26 @@ public class SpringMvcAutoConfiguration {
             return new DefaultErrorAttributes();
         }
 
+        @Bean
+        @ConditionalOnMissingBean
+        @ConditionalOnProperty(prefix = "mcn.exception.handler",name = "override-ex-msg",havingValue = "true")
+        public ExceptionMessageProcessor exceptionMessageProcessor() {
+            return errorCode -> {
+                switch (errorCode){
+                    case 300001:
+                    case 300002:
+                    case 300008:
+                    case 300009:
+                        return "您输入的数据有误，请重新输入";
+                    case 800500:
+                    case 800503:
+                    case 900000:
+                        return "系统繁忙，请稍候再试";
+                    default:
+                        return null;
+                }
+            };
+        }
     }
 
     @Configuration(proxyBeanMethods = false)
