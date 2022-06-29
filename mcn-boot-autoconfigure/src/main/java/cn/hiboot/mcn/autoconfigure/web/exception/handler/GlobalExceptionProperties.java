@@ -29,6 +29,10 @@ public class GlobalExceptionProperties {
      * 是否返回统一异常消息
      */
     private boolean uniformExMsg;
+    /**
+     * 是否允许重写内部异常消息
+     */
+    private boolean overrideExMsg;
 
     private JvmError jvmError;
 
@@ -62,6 +66,14 @@ public class GlobalExceptionProperties {
 
     public void setUniformExMsg(boolean uniformExMsg) {
         this.uniformExMsg = uniformExMsg;
+    }
+
+    public boolean isOverrideExMsg() {
+        return overrideExMsg;
+    }
+
+    public void setOverrideExMsg(boolean overrideExMsg) {
+        this.overrideExMsg = overrideExMsg;
     }
 
     public JvmError getJvmError() {

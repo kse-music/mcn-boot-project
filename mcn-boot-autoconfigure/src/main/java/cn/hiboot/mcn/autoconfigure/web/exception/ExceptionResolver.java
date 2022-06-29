@@ -12,16 +12,8 @@ import javax.servlet.http.HttpServletRequest;
  */
 public interface ExceptionResolver {
 
-    boolean support(Throwable t);
+    boolean support(HttpServletRequest request, Throwable t);
 
-    default boolean support(HttpServletRequest request, Throwable t){
-        return support(t);
-    }
-
-    String resolveException(Throwable t);
-
-    default RestResp<Object> resolveException(HttpServletRequest request, Throwable t){
-        return RestResp.error(resolveException(t));
-    }
+    RestResp<Object> resolveException(HttpServletRequest request, Throwable t);
 
 }

@@ -106,13 +106,8 @@ public class ParamProcessorAutoConfiguration {
         return new ExceptionResolver(){
 
             @Override
-            public boolean support(Throwable t) {
+            public boolean support(HttpServletRequest request,Throwable t) {
                 return t instanceof HttpMessageNotReadableException;
-            }
-
-            @Override
-            public String resolveException(Throwable t) {
-                return null;
             }
 
             @Override
