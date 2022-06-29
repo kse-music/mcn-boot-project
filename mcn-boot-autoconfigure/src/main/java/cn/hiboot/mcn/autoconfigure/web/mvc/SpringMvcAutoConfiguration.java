@@ -7,6 +7,8 @@ import cn.hiboot.mcn.autoconfigure.web.exception.handler.GlobalExceptionHandler;
 import cn.hiboot.mcn.autoconfigure.web.exception.handler.GlobalExceptionProperties;
 import cn.hiboot.mcn.autoconfigure.web.mvc.resolver.StrToObj;
 import cn.hiboot.mcn.autoconfigure.web.mvc.resolver.StringObjectMethodArgumentResolver;
+import cn.hiboot.mcn.core.exception.BaseException;
+import cn.hiboot.mcn.core.exception.ExceptionKeys;
 import cn.hiboot.mcn.core.model.result.RestResp;
 import cn.hiboot.mcn.core.util.JacksonUtils;
 import org.springframework.beans.factory.ObjectProvider;
@@ -85,14 +87,15 @@ public class SpringMvcAutoConfiguration {
         public ExceptionMessageProcessor exceptionMessageProcessor() {
             return errorCode -> {
                 switch (errorCode){
-                    case 300001:
-                    case 300002:
-                    case 300008:
-                    case 300009:
+                    case ExceptionKeys.PARAM_PARSE_ERROR:
+                    case ExceptionKeys.JSON_PARSE_ERROR:
+                    case ExceptionKeys.PARAM_TYPE_ERROR:
+                    case ExceptionKeys.SPECIAL_SYMBOL_ERROR:
                         return "您输入的数据有误，请重新输入";
-                    case 800500:
-                    case 800503:
-                    case 900000:
+                    case ExceptionKeys.HTTP_ERROR_500:
+                    case ExceptionKeys.HTTP_ERROR_503:
+                    case ExceptionKeys.SERVICE_ERROR:
+                    case BaseException.DEFAULT_ERROR_CODE:
                         return "系统繁忙，请稍候再试";
                     default:
                         return null;
