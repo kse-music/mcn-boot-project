@@ -25,6 +25,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.HttpMediaTypeException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -115,10 +116,13 @@ public class GlobalExceptionHandler implements EnvironmentAware, Ordered {
             errorCode = ExceptionKeys.PARAM_TYPE_ERROR;
         }else if(exception instanceof MaxUploadSizeExceededException){
             errorCode = ExceptionKeys.UPLOAD_FILE_SIZE_ERROR;
-        }else if(exception instanceof ServletRequestBindingException || exception instanceof BindException){
+        }else if(exception instanceof ServletRequestBindingException || exception instanceof BindException || exception instanceof MethodArgumentNotValidException){
             errorCode = ExceptionKeys.PARAM_PARSE_ERROR;
             if(exception instanceof BindException){
                 BindException ex = (BindException) exception;
+                data = dealBindingResult(ex.getBindingResult());
+            }else if(exception instanceof MethodArgumentNotValidException){
+                MethodArgumentNotValidException ex = (MethodArgumentNotValidException) exception;
                 data = dealBindingResult(ex.getBindingResult());
             }
         }else if(validationExceptionPresent && ValidationExceptionHandler.support(exception)){
