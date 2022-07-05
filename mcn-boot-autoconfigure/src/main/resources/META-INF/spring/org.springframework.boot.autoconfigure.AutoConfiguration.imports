@@ -9,6 +9,7 @@ cn.hiboot.mcn.autoconfigure.web.mvc.SpringMvcAutoConfiguration
 cn.hiboot.mcn.autoconfigure.web.swagger.SwaggerAutoConfiguration
 cn.hiboot.mcn.autoconfigure.web.security.WebSecurityAutoConfiguration
 cn.hiboot.mcn.autoconfigure.minio.MinioAutoConfiguration
+cn.hiboot.mcn.autoconfigure.mongo.MongoExtensionAutoConfiguration
 cn.hiboot.mcn.autoconfigure.validator.ValidatorAutoConfiguration
 cn.hiboot.mcn.autoconfigure.redis.RedisToolAutoConfiguration
 cn.hiboot.mcn.autoconfigure.xxl.XxlJobAutoConfiguration
