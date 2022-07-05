@@ -37,7 +37,7 @@
         <commons-io.version>2.11.0</commons-io.version>
         <fastjson.version>1.2.83</fastjson.version>
         <fastjson2.version>2.0.4</fastjson2.version>
-        <boot-admin.version>2.6.7</boot-admin.version>
+        <boot-admin.version>2.7.2</boot-admin.version>
         <jsoup.version>1.14.3</jsoup.version>
         <springfox-swagger.version>3.0.0</springfox-swagger.version>
         <swagger.version>1.6.4</swagger.version>
@@ -47,7 +47,7 @@
         <spring-cloud-alibaba.version>2021.1</spring-cloud-alibaba.version>
         <minio.version>8.3.9</minio.version>
         <xxl-job.version>2.3.1</xxl-job.version>
-        <hutool.version>5.8.1</hutool.version>
+        <hutool.version>5.8.4</hutool.version>
     </properties>
 
     <dependencyManagement>
