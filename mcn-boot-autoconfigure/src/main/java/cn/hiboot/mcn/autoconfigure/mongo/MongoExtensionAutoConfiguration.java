@@ -5,7 +5,6 @@ import com.mongodb.client.MongoClient;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.boot.autoconfigure.mongo.MongoClientSettingsBuilderCustomizer;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -18,7 +17,7 @@ import java.util.concurrent.TimeUnit;
  * @author DingHao
  * @since 2022/7/5 13:08
  */
-@AutoConfiguration(before = MongoAutoConfiguration.class)
+@AutoConfiguration
 @EnableConfigurationProperties(MongoExtensionProperties.class)
 @ConditionalOnClass(MongoClient.class)
 @ConditionalOnMissingBean(type = "org.springframework.data.mongodb.MongoDatabaseFactory")
