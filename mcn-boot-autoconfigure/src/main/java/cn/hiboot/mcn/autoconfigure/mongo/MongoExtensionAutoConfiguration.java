@@ -38,6 +38,7 @@ public class MongoExtensionAutoConfiguration {
 
             builder.applyToSocketSettings(socket -> {
                 socket.connectTimeout(mongo.getConnectTimeout(),TimeUnit.MILLISECONDS);
+                socket.readTimeout(mongo.getReadTimeout(),TimeUnit.MILLISECONDS);
             });
 
         };

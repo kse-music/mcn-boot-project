@@ -15,22 +15,31 @@ public class MongoExtensionProperties {
      * 读取偏好设置
      */
     private ReadPreference readPreference = ReadPreference.primary;
+
     /**
      * 线程池允许的最大连接数,空闲时保存在池中
      */
     private int maxSize = 100;
+
     /**
      * 空闲时保存在池中最小连接数
      */
     private int minSize = 0;
+
     /**
-     * socket连接超时时间
-     */
-    private int connectTimeout = 10000;
-    /**
-     * 等待一个可用连接最大等待时间
+     * 等待一个可用连接最大等待时间,单位ms
      */
     private long maxWaitTime = 120000;
+
+    /**
+     * socket连接超时时间,单位ms
+     */
+    private int connectTimeout = 10000;
+
+    /**
+     * socket读取超时时间,单位ms
+     */
+    private int readTimeout;
 
     public ReadPreference getReadPreference() {
         return readPreference;
@@ -56,6 +65,14 @@ public class MongoExtensionProperties {
         this.minSize = minSize;
     }
 
+    public long getMaxWaitTime() {
+        return maxWaitTime;
+    }
+
+    public void setMaxWaitTime(long maxWaitTime) {
+        this.maxWaitTime = maxWaitTime;
+    }
+
     public int getConnectTimeout() {
         return connectTimeout;
     }
@@ -64,12 +81,12 @@ public class MongoExtensionProperties {
         this.connectTimeout = connectTimeout;
     }
 
-    public long getMaxWaitTime() {
-        return maxWaitTime;
+    public int getReadTimeout() {
+        return readTimeout;
     }
 
-    public void setMaxWaitTime(long maxWaitTime) {
-        this.maxWaitTime = maxWaitTime;
+    public void setReadTimeout(int readTimeout) {
+        this.readTimeout = readTimeout;
     }
 
     public enum ReadPreference {
@@ -79,4 +96,5 @@ public class MongoExtensionProperties {
         primaryPreferred,
         nearest
     }
+
 }
