@@ -7,7 +7,6 @@ import cn.hiboot.mcn.autoconfigure.web.exception.handler.GlobalExceptionHandler;
 import cn.hiboot.mcn.autoconfigure.web.exception.handler.GlobalExceptionProperties;
 import cn.hiboot.mcn.autoconfigure.web.mvc.resolver.StrToObj;
 import cn.hiboot.mcn.autoconfigure.web.mvc.resolver.StringObjectMethodArgumentResolver;
-import cn.hiboot.mcn.core.exception.BaseException;
 import cn.hiboot.mcn.core.exception.ExceptionKeys;
 import cn.hiboot.mcn.core.model.result.RestResp;
 import cn.hiboot.mcn.core.util.JacksonUtils;
@@ -94,7 +93,7 @@ public class SpringMvcAutoConfiguration {
                     case ExceptionKeys.HTTP_ERROR_500:
                     case ExceptionKeys.HTTP_ERROR_503:
                     case ExceptionKeys.SERVICE_ERROR:
-                    case BaseException.DEFAULT_ERROR_CODE:
+                    case GlobalExceptionHandler.DEFAULT_ERROR_CODE:
                         return "系统繁忙，请稍候再试";
                     default:
                         return null;
