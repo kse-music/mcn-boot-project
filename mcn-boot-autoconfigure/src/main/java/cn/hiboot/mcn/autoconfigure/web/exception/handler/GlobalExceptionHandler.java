@@ -52,7 +52,10 @@ public class GlobalExceptionHandler implements EnvironmentAware, Ordered {
 
     private final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-    private static final int DEFAULT_ERROR_CODE = BaseException.DEFAULT_ERROR_CODE;
+    /**
+     * 非BaseException的默认code码
+     */
+    public static final int DEFAULT_ERROR_CODE = 999998;
 
     private final GlobalExceptionProperties properties;
 
@@ -120,8 +123,7 @@ public class GlobalExceptionHandler implements EnvironmentAware, Ordered {
     }
 
     protected RestResp<Object> doHandleException(HttpServletRequest request, Throwable exception) throws Throwable {
-        Integer errorCode = null;
-        String errorInfo = null;
+        Integer errorCode = DEFAULT_ERROR_CODE;
         List<ValidationErrorBean> data = null;
         if(exception instanceof BaseException){
             errorCode = ((BaseException) exception).getCode();
@@ -152,8 +154,9 @@ public class GlobalExceptionHandler implements EnvironmentAware, Ordered {
             errorCode = ExceptionKeys.HTTP_ERROR_500;
             handleError((Error) exception.getCause());
         }
+        String errorInfo = null;
         if(properties.isUniformExMsg()){
-            if(errorCode == null){
+            if(errorCode == DEFAULT_ERROR_CODE){
                 errorCode = ExceptionKeys.SERVICE_ERROR;
             }
             errorInfo = ErrorMsg.getErrorMsg(errorCode);
@@ -171,14 +174,11 @@ public class GlobalExceptionHandler implements EnvironmentAware, Ordered {
     }
 
     private RestResp<Object> buildErrorMessage(Integer code,String msg,List<ValidationErrorBean> data,Throwable t){
-        if(code == null){
-            code = DEFAULT_ERROR_CODE;
-        }
         if(ObjectUtils.isEmpty(msg)){//这里的消息可能是重写后的
             msg = t.getMessage();//1.take msg from exception
             if(ObjectUtils.isEmpty(msg)){
                 msg = ErrorMsg.getErrorMsg(code);//2.take msg from code
-                if(ObjectUtils.isEmpty(msg) && code != DEFAULT_ERROR_CODE){
+                if(ObjectUtils.isEmpty(msg) && code != DEFAULT_ERROR_CODE && code != BaseException.DEFAULT_ERROR_CODE){
                     log.warn("please set code = {} exception message", code);//3.log no exception message
                 }
             }
