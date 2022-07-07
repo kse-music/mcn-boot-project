@@ -43,6 +43,12 @@
             <optional>true</optional>
         </dependency>
 
+        <dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongodb-driver-sync</artifactId>
+            <optional>true</optional>
+        </dependency>
+
         <!-- Optional -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
