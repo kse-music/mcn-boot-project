@@ -3,7 +3,6 @@ package cn.hiboot.mcn.autoconfigure.web.filter.common;
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.util.List;
 
 /**
  * ValueProcessorFilter
@@ -13,19 +12,12 @@ import java.util.List;
  */
 public class ValueProcessorFilter implements Filter {
 
-    private final List<String> excludeFields;
-    private final boolean filterParameterName;
-
+    private final ValueProcessorProperties properties;
     private final ValueProcessor valueProcessor;
     private final RequestMatcher requestMatcher;
 
-    public ValueProcessorFilter(ValueProcessor valueProcessor) {
-        this(null,false,valueProcessor);
-    }
-
-    public ValueProcessorFilter(List<String> excludeFields, boolean filterParameterName, ValueProcessor valueProcessor) {
-        this.excludeFields = excludeFields;
-        this.filterParameterName = filterParameterName;
+    public ValueProcessorFilter(ValueProcessorProperties properties,ValueProcessor valueProcessor) {
+        this.properties = properties;
         this.valueProcessor = valueProcessor;
         this.requestMatcher = valueProcessor.requestMatcher();
     }
@@ -34,7 +26,10 @@ public class ValueProcessorFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest req = (HttpServletRequest) request;
         if (requestMatcher.matches(req)) {
-            request = new ValueProcessorRequestWrapper(req,excludeFields,filterParameterName,valueProcessor);
+            request = new ValueProcessorRequestWrapper(req,valueProcessor)
+                    .filterHeaderValue(properties.isFilterHeaderValue())
+                    .filterParameterName(properties.isFilterParameterName())
+                    .excludeFields(properties.getExcludeFields());
         }
         filterChain.doFilter(request, response);
     }

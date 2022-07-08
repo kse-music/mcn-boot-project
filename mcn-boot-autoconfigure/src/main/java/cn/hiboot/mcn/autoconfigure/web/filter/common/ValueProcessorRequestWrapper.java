@@ -17,18 +17,29 @@ import java.util.Map;
  */
 public class ValueProcessorRequestWrapper extends HttpServletRequestWrapper {
 
-    private final List<String> excludeFields;
-    private final boolean filterParameterName;
+    private List<String> excludeFields;
+    private boolean filterParameterName;
+    private boolean filterHeaderValue;
     private final ValueProcessor valueProcessor;
 
-    public ValueProcessorRequestWrapper(HttpServletRequest request,
-                                        List<String> excludeFields,
-                                        boolean filterParameterName,
-                                        ValueProcessor valueProcessor) {
+    public ValueProcessorRequestWrapper(HttpServletRequest request,ValueProcessor valueProcessor) {
         super(request);
-        this.excludeFields = excludeFields;
-        this.filterParameterName = filterParameterName;
         this.valueProcessor = valueProcessor;
+    }
+
+    public ValueProcessorRequestWrapper excludeFields(List<String> excludeFields) {
+        this.excludeFields = excludeFields;
+        return this;
+    }
+
+    public ValueProcessorRequestWrapper filterParameterName(boolean filterParameterName) {
+        this.filterParameterName = filterParameterName;
+        return this;
+    }
+
+    public ValueProcessorRequestWrapper filterHeaderValue(boolean filterHeaderValue) {
+        this.filterHeaderValue = filterHeaderValue;
+        return this;
     }
 
     @Override
@@ -93,7 +104,7 @@ public class ValueProcessorRequestWrapper extends HttpServletRequestWrapper {
     @Override
     public String getHeader(String name) {
         String value = super.getHeader(cleanParameterName(name));
-        if (McnUtils.isNotNullAndEmpty(value)) {
+        if (filterHeaderValue && McnUtils.isNotNullAndEmpty(value)) {
             value = cleanParameterValue(name,value);
         }
         return value;

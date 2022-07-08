@@ -125,7 +125,7 @@ public class ParamProcessorAutoConfiguration {
     @Bean
     @ConditionalOnProperty(prefix = "param.processor",name = "use-filter",havingValue = "true", matchIfMissing = true)
     public FilterRegistrationBean<ValueProcessorFilter> paramProcessorFilterRegistration(ParamProcessor paramProcessor) {
-        FilterRegistrationBean<ValueProcessorFilter> filterRegistrationBean = new FilterRegistrationBean<>(new ValueProcessorFilter(properties.getExcludeFields(),properties.isFilterParameterName(),paramProcessor));
+        FilterRegistrationBean<ValueProcessorFilter> filterRegistrationBean = new FilterRegistrationBean<>(new ValueProcessorFilter(properties,paramProcessor));
         filterRegistrationBean.setOrder(properties.getOrder());
         filterRegistrationBean.setName(properties.getName());
         return filterRegistrationBean;
