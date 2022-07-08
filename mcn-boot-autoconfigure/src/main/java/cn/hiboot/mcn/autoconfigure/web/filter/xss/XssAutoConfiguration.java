@@ -34,7 +34,7 @@ public class XssAutoConfiguration {
 
     @Bean
     public FilterRegistrationBean<ValueProcessorFilter> xssFilterRegistration(XssProcessor xssProcessor) {
-        FilterRegistrationBean<ValueProcessorFilter> filterRegistrationBean = new FilterRegistrationBean<>(new ValueProcessorFilter(xssProperties.getExcludeFields(),xssProperties.isFilterParameterName(),xssProcessor));
+        FilterRegistrationBean<ValueProcessorFilter> filterRegistrationBean = new FilterRegistrationBean<>(new ValueProcessorFilter(xssProperties,xssProcessor));
         filterRegistrationBean.setOrder(xssProperties.getOrder());
         filterRegistrationBean.setName(xssProperties.getName());
         return filterRegistrationBean;

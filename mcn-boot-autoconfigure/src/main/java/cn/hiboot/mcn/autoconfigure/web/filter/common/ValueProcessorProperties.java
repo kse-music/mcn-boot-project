@@ -23,9 +23,13 @@ public class ValueProcessorProperties {
      */
     private List<String> excludeFields;
     /**
-     * 是否过滤参数名称,仅对非json编码有效
+     * 是否过滤字段名称,仅对非json编码有效
      */
     private boolean filterParameterName;
+    /**
+     * 是否过滤header字段值
+     */
+    private boolean filterHeaderValue;
 
     public List<String> getIncludeUrls() {
         return includeUrls;
@@ -57,5 +61,13 @@ public class ValueProcessorProperties {
 
     public void setFilterParameterName(boolean filterParameterName) {
         this.filterParameterName = filterParameterName;
+    }
+
+    public boolean isFilterHeaderValue() {
+        return filterHeaderValue;
+    }
+
+    public void setFilterHeaderValue(boolean filterHeaderValue) {
+        this.filterHeaderValue = filterHeaderValue;
     }
 }
