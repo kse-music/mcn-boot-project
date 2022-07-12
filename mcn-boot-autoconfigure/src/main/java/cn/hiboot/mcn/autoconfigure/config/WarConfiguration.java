@@ -1,11 +1,11 @@
 package cn.hiboot.mcn.autoconfigure.config;
 
+import cn.hiboot.mcn.core.util.McnUtils;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
-import org.springframework.core.io.support.ResourcePropertySource;
 import org.springframework.util.ClassUtils;
 
-import java.io.IOException;
+import java.util.Properties;
 
 /**
  * WarConfiguration
@@ -15,23 +15,23 @@ import java.io.IOException;
  */
 public class WarConfiguration extends SpringBootServletInitializer {
 
-    private static String className;
+    private static final String className;
 
     static {
-        try {
-           Object obj = new ResourcePropertySource("classpath:config/mcn.properties",WarConfiguration.class.getClassLoader()).getProperty("main.class");
-           className = obj == null ? null : obj.toString();
-        } catch (IOException e) {
-            //ignore file not exist
-        }
+        Properties properties = McnUtils.loadProperties("config/mcn.properties");
+        className = properties.getProperty("main.class");
     }
 
     @Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
         if(ClassUtils.isPresent(className,null)){
-            builder.sources(ClassUtils.resolveClassName(className,null));
+            return builder.sources(ClassUtils.resolveClassName(className,null));
         }
-        return builder;
+        return builder.sources(EmptyConfiguration.class);
+    }
+
+    private static class EmptyConfiguration{
+
     }
 
 }

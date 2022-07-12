@@ -161,19 +161,17 @@ public abstract class McnUtils {
         try {
             in = new FileInputStream(fileName);
         } catch (FileNotFoundException e) {
-            File file = new File(fileName);
-            in = cls.getResourceAsStream(file.getName());
+            in = cls.getResourceAsStream(fileName);
         }
         return in;
     }
 
-    private static Properties loadProperties(String fileName,ClassLoader cls){
+    public static Properties loadProperties(String fileName,ClassLoader cls){
         Properties properties = new Properties();
         try(InputStream in = getInputStream(fileName,cls)){
             properties.load(in);
         }catch (Exception e) {
             //ignore not found file
-
         }
         return properties;
     }
