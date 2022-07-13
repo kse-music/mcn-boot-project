@@ -35,20 +35,20 @@
         <boot-admin.version>2.7.2</boot-admin.version>
         <commons-io.version>2.11.0</commons-io.version>
         <fastjson.version>1.2.83</fastjson.version>
-        <fastjson2.version>2.0.4</fastjson2.version>
+        <fastjson2.version>2.0.9</fastjson2.version>
         <guava.version>31.1-jre</guava.version>
         <hutool.version>5.8.4</hutool.version>
-        <jsoup.version>1.14.3</jsoup.version>
+        <jsoup.version>1.15.2</jsoup.version>
         <knife4j.version>3.0.3</knife4j.version>
-        <mapstruct.version>1.4.2.Final</mapstruct.version>
+        <mapstruct.version>1.5.2.Final</mapstruct.version>
         <mybatis-spring-boot.version>2.2.2</mybatis-spring-boot.version>
         <minio.version>8.3.9</minio.version>
-        <springfox-swagger.version>3.0.0</springfox-swagger.version>
-        <swagger.version>1.6.4</swagger.version>
-        <swagger-bootstrap-ui.version>1.9.6</swagger-bootstrap-ui.version>
         <spring-boot.version>2.7.1</spring-boot.version>
         <spring-cloud.version>2021.0.3</spring-cloud.version>
         <spring-cloud-alibaba.version>2021.1</spring-cloud-alibaba.version>
+        <springfox-swagger.version>3.0.0</springfox-swagger.version>
+        <swagger.version>1.6.4</swagger.version>
+        <swagger-bootstrap-ui.version>1.9.6</swagger-bootstrap-ui.version>
         <xxl-job.version>2.3.1</xxl-job.version>
     </properties>
 
