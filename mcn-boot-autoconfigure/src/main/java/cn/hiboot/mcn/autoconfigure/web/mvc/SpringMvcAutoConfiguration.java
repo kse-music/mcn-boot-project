@@ -47,13 +47,8 @@ import java.util.stream.Collectors;
 @AutoConfiguration(before = ErrorMvcAutoConfiguration.class)
 @ConditionalOnClass({DispatcherServlet.class})
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
+@Import(DurationAop.class)
 public class SpringMvcAutoConfiguration {
-
-    @Bean
-    @ConditionalOnClass(name = "org.aspectj.lang.annotation.Aspect")
-    public DurationAop durationAop() {
-        return new DurationAop();
-    }
 
     @Configuration(proxyBeanMethods = false)
     @Import(GlobalExceptionHandler.class)

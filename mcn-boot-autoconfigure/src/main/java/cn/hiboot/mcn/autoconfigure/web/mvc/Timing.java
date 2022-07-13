@@ -12,6 +12,6 @@ import java.lang.annotation.Target;
  * @since 2019/7/12 13:44
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
+@Target({ElementType.TYPE,ElementType.METHOD})
 public @interface Timing {
 }

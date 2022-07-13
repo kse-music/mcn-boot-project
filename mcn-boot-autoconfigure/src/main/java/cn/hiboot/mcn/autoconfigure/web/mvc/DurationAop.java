@@ -1,35 +1,49 @@
 package cn.hiboot.mcn.autoconfigure.web.mvc;
 
 import cn.hiboot.mcn.core.model.result.RestResp;
-import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.Around;
-import org.aspectj.lang.annotation.Aspect;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.aopalliance.aop.Advice;
+import org.aopalliance.intercept.MethodInterceptor;
+import org.springframework.aop.Advisor;
+import org.springframework.aop.Pointcut;
+import org.springframework.aop.support.AbstractPointcutAdvisor;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Role;
 
 /**
- * 设置并打印接口执行时间
+ * 设置并返回接口执行时间
  *
  * @author DingHao
  * @since 2019/7/13 11:06
  */
-@Aspect
 public class DurationAop {
 
-    private static final Logger log = LoggerFactory.getLogger(DurationAop.class);
+    @Bean
+    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
+    Advisor timeAdvisor(){
+        return new TimeRecordAdvisor();
+    }
 
-    @SuppressWarnings("rawtypes")
-    @Around("@annotation(cn.hiboot.mcn.autoconfigure.web.mvc.Timing)")
-    public Object timeRecord(ProceedingJoinPoint p) throws Throwable {
-        long s = System.currentTimeMillis();
-        Object o = p.proceed();
-        long duration = System.currentTimeMillis() - s;
-        if(o instanceof RestResp){
-            RestResp r = (RestResp) o;
-            r.setDuration(duration);
+    private static class TimeRecordAdvisor extends AbstractPointcutAdvisor {
+
+        @Override
+        public Pointcut getPointcut() {
+            return new ClassOrMethodAnnotationMatchingPointcut(Timing.class);
         }
-        log.info("execute took {} ms",duration);
-        return o;
+
+        @Override
+        public Advice getAdvice() {
+            return (MethodInterceptor) invocation -> {
+                long start = System.currentTimeMillis();
+                Object o = invocation.proceed();
+                long duration = System.currentTimeMillis() - start;
+                if (o instanceof RestResp) {
+                    RestResp r = (RestResp) o;
+                    r.setDuration(duration);
+                }
+                return o;
+            };
+        }
     }
 
 }
