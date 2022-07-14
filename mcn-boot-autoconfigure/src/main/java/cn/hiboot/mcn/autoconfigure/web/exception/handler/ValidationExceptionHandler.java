@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
  * @author DingHao
  * @since 2022/1/13 22:00
  */
-class ValidationExceptionHandler{
+public class ValidationExceptionHandler{
 
     public static boolean support(Throwable exception){
         return exception instanceof ValidationException;

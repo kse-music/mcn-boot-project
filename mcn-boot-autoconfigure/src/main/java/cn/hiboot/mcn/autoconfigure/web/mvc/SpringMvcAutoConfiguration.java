@@ -1,5 +1,6 @@
 package cn.hiboot.mcn.autoconfigure.web.mvc;
 
+import cn.hiboot.mcn.autoconfigure.web.exception.ExceptionHelper;
 import cn.hiboot.mcn.autoconfigure.web.exception.ExceptionMessageProcessor;
 import cn.hiboot.mcn.autoconfigure.web.exception.error.DefaultErrorView;
 import cn.hiboot.mcn.autoconfigure.web.exception.error.ErrorPageController;
@@ -88,7 +89,7 @@ public class SpringMvcAutoConfiguration {
                     case ExceptionKeys.HTTP_ERROR_500:
                     case ExceptionKeys.HTTP_ERROR_503:
                     case ExceptionKeys.SERVICE_ERROR:
-                    case GlobalExceptionHandler.DEFAULT_ERROR_CODE:
+                    case ExceptionHelper.DEFAULT_ERROR_CODE:
                         return "系统繁忙，请稍候再试";
                     default:
                         return null;
