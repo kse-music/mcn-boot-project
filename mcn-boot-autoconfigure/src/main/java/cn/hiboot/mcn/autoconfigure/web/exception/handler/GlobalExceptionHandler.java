@@ -7,8 +7,6 @@ import cn.hiboot.mcn.autoconfigure.web.exception.ExceptionResolver;
 import cn.hiboot.mcn.autoconfigure.web.exception.error.GlobalExceptionViewResolver;
 import cn.hiboot.mcn.core.exception.ExceptionKeys;
 import cn.hiboot.mcn.core.model.result.RestResp;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.Ordered;
@@ -36,8 +34,6 @@ import java.util.stream.Collectors;
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler implements EnvironmentAware, Ordered {
-
-    private final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     private final GlobalExceptionProperties properties;
 
@@ -131,7 +127,7 @@ public class GlobalExceptionHandler implements EnvironmentAware, Ordered {
 
     @Override
     public void setEnvironment(Environment environment) {
-        this.exceptionHelper = new ExceptionHelper(properties,environment,log);
+        this.exceptionHelper = new ExceptionHelper(properties,environment);
     }
 
     @Override

@@ -5,8 +5,6 @@ import cn.hiboot.mcn.autoconfigure.web.exception.ExceptionHelper;
 import cn.hiboot.mcn.autoconfigure.web.exception.handler.GlobalExceptionProperties;
 import cn.hiboot.mcn.core.exception.ExceptionKeys;
 import cn.hiboot.mcn.core.model.result.RestResp;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.SearchStrategy;
@@ -29,7 +27,6 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 
-import javax.annotation.PostConstruct;
 import java.util.Map;
 
 /**
@@ -42,15 +39,12 @@ import java.util.Map;
 @ConditionalOnMissingBean(value = ErrorWebExceptionHandler.class, search = SearchStrategy.CURRENT)
 public class GlobalErrorExceptionHandler extends DefaultErrorWebExceptionHandler implements EnvironmentAware, Ordered {
 
-    private final Logger log = LoggerFactory.getLogger(GlobalErrorExceptionHandler.class);
-
     @Autowired
     private WebFluxProperties webFluxProperties;
 
     @Autowired
     private GlobalExceptionProperties properties;
 
-    private Environment environment;
     private ExceptionHelper exceptionHelper;
 
     public GlobalErrorExceptionHandler(ErrorAttributes errorAttributes, WebProperties webProperties, ServerProperties serverProperties, ApplicationContext applicationContext) {
@@ -61,11 +55,6 @@ public class GlobalErrorExceptionHandler extends DefaultErrorWebExceptionHandler
     public void setServerCodecConfigurer(ServerCodecConfigurer serverCodecConfigurer) {
         setMessageWriters(serverCodecConfigurer.getWriters());
         setMessageReaders(serverCodecConfigurer.getReaders());
-    }
-
-    @PostConstruct
-    private void init(){
-        exceptionHelper = new ExceptionHelper(properties,environment,log);
     }
 
     @Override
@@ -84,16 +73,22 @@ public class GlobalErrorExceptionHandler extends DefaultErrorWebExceptionHandler
                         .body(BodyInserters.fromValue(RestResp.error(ExceptionKeys.mappingCode(statusCode))));
             }
         }else {
-            exceptionHelper.logError(ex);
-            return ServerResponse.status(HttpStatus.OK.value()).contentType(MediaType.APPLICATION_JSON)
-                    .body(BodyInserters.fromValue(exceptionHelper.doHandleException(ex)));
+            RestResp<Object> resp;
+            try {
+                resp = exceptionHelper.doHandleException(ex);
+            } catch (Throwable e) {
+                resp = RestResp.error(ExceptionKeys.SERVICE_ERROR);
+            }finally {
+                exceptionHelper.logError(ex);
+            }
+            return ServerResponse.status(HttpStatus.OK.value()).contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(resp));
         }
         return super.renderErrorResponse(request);
     }
 
     @Override
     public void setEnvironment(Environment environment) {
-        this.environment = environment;
+        this.exceptionHelper = new ExceptionHelper(properties,environment);
     }
 
     @Override

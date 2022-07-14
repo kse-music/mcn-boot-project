@@ -10,6 +10,7 @@ import cn.hiboot.mcn.core.exception.ExceptionKeys;
 import cn.hiboot.mcn.core.model.result.RestResp;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.util.ClassUtils;
@@ -41,15 +42,15 @@ public class ExceptionHelper {
     private final Logger log;
     private final GlobalExceptionProperties properties;
     private final boolean validationExceptionPresent;
-    private final boolean overrideHttpError;
     private final String basePackage;
+    private final boolean overrideHttpError;
 
-    public ExceptionHelper(GlobalExceptionProperties properties, Environment environment,Logger log) {
+    public ExceptionHelper(GlobalExceptionProperties properties, Environment environment) {
         this.properties = properties;
-        this.log = log;
+        this.log = LoggerFactory.getLogger(getClass());
         this.basePackage = environment.getProperty(ConfigProperties.APP_BASE_PACKAGE);
-        this.overrideHttpError = environment.getProperty("http.error.override",Boolean.class,true);
         this.validationExceptionPresent = ClassUtils.isPresent("javax.validation.ValidationException", getClass().getClassLoader());
+        this.overrideHttpError = environment.getProperty("http.error.override",Boolean.class,true);
     }
 
     public void handleError(Error error) {
@@ -64,6 +65,12 @@ public class ExceptionHelper {
     public void logError(Throwable t){
         if(properties.isRemoveFrameworkStack()){
             dealCurrentStackTraceElement(t);
+            Throwable[] suppressed = t.getSuppressed();
+            if(suppressed.length != 0){
+                for (Throwable throwable : suppressed) {
+                    dealCurrentStackTraceElement(throwable);
+                }
+            }
         }
         log.error("The exception information is as follows",t);
     }
@@ -75,13 +82,10 @@ public class ExceptionHelper {
         exception.setStackTrace(Arrays.stream(exception.getStackTrace()).filter(s -> s.getClassName().contains(basePackage)).toArray(StackTraceElement[]::new));
     }
 
-    public RestResp<Object> doHandleException(Throwable exception){
-        try {
-            return doHandleException(null,exception);
-        } catch (Throwable e) {
-            throw new RuntimeException(e);
-        }
+    public RestResp<Object> doHandleException(Throwable exception) throws Throwable {
+        return doHandleException(null,exception);
     }
+
     public RestResp<Object> doHandleException(CustomHandler customHandler, Throwable exception) throws Throwable {
         Integer errorCode = DEFAULT_ERROR_CODE;
         List<ValidationErrorBean> data = null;
@@ -146,7 +150,6 @@ public class ExceptionHelper {
                 }
         ).collect(Collectors.toList());
     }
-
 
     public boolean isOverrideHttpError() {
         return overrideHttpError;
