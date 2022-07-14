@@ -22,6 +22,7 @@ public interface SessionHolder {
             if(authentication instanceof JwtAuthenticationToken){
                 JwtAuthenticationToken jwtAuthenticationToken = (JwtAuthenticationToken) authentication;
                 Map<String, Object> tokenAttributes = jwtAuthenticationToken.getTokenAttributes();
+                @SuppressWarnings("unchecked")
                 Map<String,Object> user = (Map<String,Object>)tokenAttributes.get("user_name");
                 return user.get(IDENTIFY).toString();
             }

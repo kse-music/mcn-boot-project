@@ -1,5 +1,6 @@
 package cn.hiboot.mcn.autoconfigure.context;
 
+import cn.hiboot.mcn.autoconfigure.config.ComponentScanPackageCheck;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -24,7 +25,7 @@ public class McnBeanFactoryRegistryPostProcessor implements BeanDefinitionRegist
 
     @Override
     public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
-
+        new ComponentScanPackageCheck().check(registry);
     }
 
     @Override

@@ -43,7 +43,7 @@ public class SpringWebFluxAutoConfiguration {
 
     }
 
-    @EnableConfigurationProperties({CorsProperties.class})
+    @EnableConfigurationProperties(CorsProperties.class)
     @Configuration(proxyBeanMethods = false)
     protected static class FilterAutoConfiguration{
 

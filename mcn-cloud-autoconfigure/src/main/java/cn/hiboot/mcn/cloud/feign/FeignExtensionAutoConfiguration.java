@@ -63,6 +63,7 @@ public class FeignExtensionAutoConfiguration {
     }
 
     @Configuration(proxyBeanMethods = false)
+    @ConditionalOnClass(ErrorDecoder.class)
     protected static class FeignErrorDecoder implements ErrorDecoder {
 
         @Override
