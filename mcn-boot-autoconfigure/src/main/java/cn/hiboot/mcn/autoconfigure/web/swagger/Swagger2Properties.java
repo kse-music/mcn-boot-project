@@ -22,6 +22,8 @@ public class Swagger2Properties {
     private String url;
     private String email;
 
+    private boolean csrf;
+
     public boolean isEnable() {
         return enable;
     }
@@ -86,4 +88,11 @@ public class Swagger2Properties {
         this.email = email;
     }
 
+    public boolean isCsrf() {
+        return csrf;
+    }
+
+    public void setCsrf(boolean csrf) {
+        this.csrf = csrf;
+    }
 }

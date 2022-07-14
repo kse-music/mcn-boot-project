@@ -11,20 +11,28 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplicat
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.DispatcherServlet;
 import springfox.documentation.RequestHandler;
 import springfox.documentation.builders.ApiInfoBuilder;
+import springfox.documentation.builders.ParameterBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
+import springfox.documentation.schema.ModelRef;
 import springfox.documentation.service.ApiInfo;
+import springfox.documentation.service.ApiKey;
 import springfox.documentation.service.Contact;
+import springfox.documentation.service.Parameter;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.ApiSelectorBuilder;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * SwaggerAutoConfiguration
@@ -55,10 +63,12 @@ public class SwaggerAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public Docket createRestApi() {
+    public Docket createRestApi(Environment environment) {
         Docket docket = new Docket(DocumentationType.SWAGGER_2).apiInfo(apiInfo()).enable(swagger2Properties.isEnable());
 
         docketCustomizers.ifUnique(d -> d.customize(docket));
+
+        configRequestParameters(docket,environment);
 
         for (DocketCustomizer docketCustomizer : docketCustomizers) {
             docketCustomizer.customize(docket);
@@ -67,6 +77,22 @@ public class SwaggerAutoConfiguration {
         ApiSelectorBuilder apiSelectorBuilder = docket.select().apis(selector(IgnoreApi.class));
 
         return apiSelectorBuilder.paths(PathSelectors.any()).build();
+    }
+
+    private void configRequestParameters(Docket docket,Environment environment) {
+        docket.securitySchemes(Collections.singletonList(new ApiKey("BearerToken", "Authorization", "header")));
+        List<Parameter> pars = new ArrayList<>();
+        //csrf
+        if(swagger2Properties.isCsrf()){
+            pars.add(new ParameterBuilder().name("X-XSRF-TOKEN").description("csrf token").modelRef(new ModelRef("string")).parameterType("header").required(true).build());
+        }
+        //enable data integrity
+        if(environment.getProperty("data.integrity.enable", Boolean.class, false)){
+            pars.add(new ParameterBuilder().name("TSM").description("时间戳").parameterType("header").modelRef(new ModelRef("long")).required(true).build());
+            pars.add(new ParameterBuilder().name("nonceStr").description("随机字符串").parameterType("header").modelRef(new ModelRef("string")).required(true).build());
+            pars.add(new ParameterBuilder().name("signature").description("签名").parameterType("header").modelRef(new ModelRef("string")).required(true).build());
+        }
+        docket.globalOperationParameters(pars);
     }
 
     private ApiInfo apiInfo() {
