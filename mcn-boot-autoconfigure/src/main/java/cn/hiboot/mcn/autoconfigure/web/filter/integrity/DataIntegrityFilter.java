@@ -1,6 +1,8 @@
 package cn.hiboot.mcn.autoconfigure.web.filter.integrity;
 
+import cn.hiboot.mcn.autoconfigure.web.filter.common.RequestMatcher;
 import cn.hiboot.mcn.autoconfigure.web.filter.common.RequestPayloadRequestWrapper;
+import cn.hiboot.mcn.autoconfigure.web.security.WebSecurityProperties;
 import cn.hiboot.mcn.core.model.result.RestResp;
 import cn.hiboot.mcn.core.util.JacksonUtils;
 import cn.hutool.core.io.IoUtil;
@@ -8,8 +10,6 @@ import cn.hutool.core.net.URLDecoder;
 import cn.hutool.core.util.StrUtil;
 import org.springframework.core.Ordered;
 import org.springframework.http.MediaType;
-import org.springframework.util.AntPathMatcher;
-import org.springframework.util.PathMatcher;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
@@ -29,36 +29,21 @@ import java.util.*;
 public class DataIntegrityFilter implements Filter, Ordered {
 
     private final DataIntegrityProperties dataIntegrityProperties;
-    private final PathMatcher pathPattern;
+    private final RequestMatcher requestMatcher;
 
-    public DataIntegrityFilter(DataIntegrityProperties dataIntegrityProperties) {
+    public DataIntegrityFilter(DataIntegrityProperties dataIntegrityProperties,WebSecurityProperties webSecurityProperties) {
         this.dataIntegrityProperties = dataIntegrityProperties;
-        this.pathPattern = new AntPathMatcher();
+        List<String> excludePatterns = new ArrayList<>(dataIntegrityProperties.getExcludePatterns());
+        if(webSecurityProperties.isEnableDefaultIgnore()){
+            Collections.addAll(excludePatterns,webSecurityProperties.getDefaultExcludeUrls());
+        }
+        this.requestMatcher = new RequestMatcher(dataIntegrityProperties.getIncludePatterns(),excludePatterns);
     }
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest request = (HttpServletRequest)servletRequest;
-        boolean isMatch = false;
-        String path = request.getServletPath();
-        for (String excludePattern : dataIntegrityProperties.getExcludePatterns()) {
-            isMatch = pathPattern.match(excludePattern,path);
-            if (isMatch) {
-                break;
-            }
-        }
-        if (isMatch) {//不需要校验完整性的
-            filterChain.doFilter(servletRequest,servletResponse);
-            return;
-        }
-        for (String excludePattern : dataIntegrityProperties.getIncludePatterns()) {
-            isMatch = pathPattern.match(excludePattern,path);
-            if (isMatch) {
-                break;
-            }
-        }
-
-        if(isMatch){//需要校验完整性的
+        if(requestMatcher.matches(request)){//需要校验完整性的
             String timestamp = request.getHeader("TSM");// 获取时间戳
             if(timestamp == null){
                 timestamp = request.getHeader("timestamp");

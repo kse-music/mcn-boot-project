@@ -19,14 +19,10 @@ public class RequestMatcher {
 
     private final AntPathMatcher antPathMatcher = new AntPathMatcher();
 
-    private List<String> includeUrls = Collections.emptyList();
+    private List<String> includeUrls = Collections.singletonList("/**");
     private List<String> excludeUrls = Collections.emptyList();
 
-    public RequestMatcher() {
-    }
-
-    public RequestMatcher(List<String> excludeUrls) {
-        this.excludeUrls = excludeUrls;
+    private RequestMatcher() {
     }
 
     public RequestMatcher(List<String> includeUrls, List<String> excludeUrls) {
