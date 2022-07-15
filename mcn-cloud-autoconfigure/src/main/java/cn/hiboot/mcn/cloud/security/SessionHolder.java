@@ -2,6 +2,7 @@ package cn.hiboot.mcn.cloud.security;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
 import java.util.Collections;
@@ -15,21 +16,42 @@ import java.util.Map;
  */
 public interface SessionHolder {
 
-    String IDENTIFY = "userId";
-
     static String getUserId() {
-        JwtAuthenticationToken jwtAuthenticationToken = getJwtAuthenticationToken();
-        return jwtAuthenticationToken == null ? null : jwtAuthenticationToken.getToken().getClaimAsMap("user_name").get(IDENTIFY).toString();
+        return getUserId("userId");
+    }
+
+    static String getUserId(String userIdKey) {
+        Object userId = getUserName().get(userIdKey);
+        return userId == null ? null : userId.toString();
+    }
+
+    static Map<String, Object> getUserName() {
+        return getUserName("user_name");
+    }
+
+    static Map<String, Object> getUserName(String userNameKey) {
+        Jwt jwt = getJwtToken();
+        return jwt == null ? Collections.emptyMap() : jwt.getClaimAsMap(userNameKey);
     }
 
     static Map<String, Object> getClaims() {
-        JwtAuthenticationToken jwtAuthenticationToken = getJwtAuthenticationToken();
-        return jwtAuthenticationToken == null ? Collections.emptyMap() : jwtAuthenticationToken.getToken().getClaims();
+        Jwt jwt = getJwtToken();
+        return jwt == null ? Collections.emptyMap() : jwt.getClaims();
+    }
+
+    static String getBearerToken() {
+        String token = getToken();
+        return token == null ? null : "Bearer ".concat(token);
     }
 
     static String getToken() {
+        Jwt jwt = getJwtToken();
+        return jwt == null ? null : jwt.getTokenValue();
+    }
+
+    static Jwt getJwtToken() {
         JwtAuthenticationToken jwtAuthenticationToken = getJwtAuthenticationToken();
-        return jwtAuthenticationToken == null ? null : jwtAuthenticationToken.getToken().getTokenValue();
+        return jwtAuthenticationToken == null ? null : jwtAuthenticationToken.getToken();
     }
 
     static JwtAuthenticationToken getJwtAuthenticationToken() {
