@@ -39,12 +39,8 @@ import java.util.Map;
 @ConditionalOnMissingBean(value = ErrorWebExceptionHandler.class, search = SearchStrategy.CURRENT)
 public class GlobalErrorExceptionHandler extends DefaultErrorWebExceptionHandler implements EnvironmentAware, Ordered {
 
-    @Autowired
     private WebFluxProperties webFluxProperties;
-
-    @Autowired
     private GlobalExceptionProperties properties;
-
     private ExceptionHelper exceptionHelper;
 
     public GlobalErrorExceptionHandler(ErrorAttributes errorAttributes, WebProperties webProperties, ServerProperties serverProperties, ApplicationContext applicationContext) {
@@ -52,9 +48,11 @@ public class GlobalErrorExceptionHandler extends DefaultErrorWebExceptionHandler
     }
 
     @Autowired
-    public void setServerCodecConfigurer(ServerCodecConfigurer serverCodecConfigurer) {
+    public void configGlobalErrorExceptionHandler(ServerCodecConfigurer serverCodecConfigurer,WebFluxProperties webFluxProperties,GlobalExceptionProperties properties) {
         setMessageWriters(serverCodecConfigurer.getWriters());
         setMessageReaders(serverCodecConfigurer.getReaders());
+        this.webFluxProperties = webFluxProperties;
+        this.properties = properties;
     }
 
     @Override
