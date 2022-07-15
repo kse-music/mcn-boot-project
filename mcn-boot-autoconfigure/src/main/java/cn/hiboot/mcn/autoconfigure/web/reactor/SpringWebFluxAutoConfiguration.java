@@ -1,5 +1,6 @@
 package cn.hiboot.mcn.autoconfigure.web.reactor;
 
+import cn.hiboot.mcn.autoconfigure.web.exception.handler.GlobalExceptionProperties;
 import cn.hiboot.mcn.autoconfigure.web.filter.cors.CorsProperties;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -32,7 +33,7 @@ public class SpringWebFluxAutoConfiguration {
 
     @Configuration(proxyBeanMethods = false)
     @Import(GlobalErrorExceptionHandler.class)
-    @EnableConfigurationProperties({ ServerProperties.class, ResourceProperties.class, WebFluxProperties.class})
+    @EnableConfigurationProperties({ ServerProperties.class, ResourceProperties.class, WebFluxProperties.class, GlobalExceptionProperties.class})
     protected static class ReactiveExceptionHandler{
 
         @Bean

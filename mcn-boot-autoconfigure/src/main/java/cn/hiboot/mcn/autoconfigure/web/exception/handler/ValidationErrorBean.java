@@ -3,7 +3,7 @@ package cn.hiboot.mcn.autoconfigure.web.exception.handler;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-class ValidationErrorBean {
+public class ValidationErrorBean {
 
     private String message;
 
