@@ -1,9 +1,11 @@
 package cn.hiboot.mcn.autoconfigure.web.mvc;
 
 import org.springframework.aop.MethodMatcher;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.annotation.AnnotationClassFilter;
 import org.springframework.aop.support.annotation.AnnotationMatchingPointcut;
 import org.springframework.aop.support.annotation.AnnotationMethodMatcher;
+import org.springframework.util.ClassUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -24,7 +26,14 @@ public class ClassOrMethodAnnotationMatchingPointcut extends AnnotationMatchingP
         this.methodMatcher = new AnnotationMethodMatcher(annotationType){
             @Override
             public boolean matches(Method method, Class<?> targetClass) {
-                return annotationClassFilter.matches(targetClass) || super.matches(method, targetClass);
+                if(super.matches(method, targetClass)){
+                    return true;
+                }
+                if(annotationClassFilter.matches(ClassUtils.getUserClass(targetClass))){
+                    return true;
+                }
+                Method specificMethod = AopUtils.getMostSpecificMethod(method, targetClass);
+                return specificMethod != method && annotationClassFilter.matches(specificMethod.getDeclaringClass());
             }
         };
     }
