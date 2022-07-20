@@ -17,7 +17,7 @@ public class ValueProcessorProperties {
     /**
      * 排除的url路径
      */
-    private List<String> excludeUrls = Collections.emptyList();;
+    private List<String> excludeUrls = Collections.emptyList();
     /**
      * 不处理的字段,仅对非json编码有效
      */

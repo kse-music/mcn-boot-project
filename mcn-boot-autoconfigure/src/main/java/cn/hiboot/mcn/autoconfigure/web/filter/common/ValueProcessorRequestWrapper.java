@@ -121,7 +121,7 @@ public class ValueProcessorRequestWrapper extends HttpServletRequestWrapper {
         return clean(name,value);
     }
 
-    private String clean(String name,String text){
+    public String clean(String name,String text){
         return valueProcessor.process(name,text);
     }
 }

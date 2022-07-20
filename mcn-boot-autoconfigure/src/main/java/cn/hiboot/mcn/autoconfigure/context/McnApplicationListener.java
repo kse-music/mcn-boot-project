@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.context.event.ApplicationContextInitializedEvent;
 import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
-import org.springframework.boot.context.event.ApplicationStartedEvent;
+import org.springframework.boot.context.event.ApplicationPreparedEvent;
 import org.springframework.boot.context.logging.LoggingApplicationListener;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.event.GenericApplicationListener;
@@ -35,7 +35,7 @@ public class McnApplicationListener implements GenericApplicationListener {
 
     public static final int DEFAULT_ORDER = LoggingApplicationListener.DEFAULT_ORDER + 1;
 
-    private static final Class<?>[] EVENT_TYPES = { ApplicationEnvironmentPreparedEvent.class,ApplicationEnvironmentPreparedEvent.class, ApplicationContextInitializedEvent.class,ApplicationStartedEvent.class};
+    private static final Class<?>[] EVENT_TYPES = { ApplicationEnvironmentPreparedEvent.class, ApplicationContextInitializedEvent.class, ApplicationPreparedEvent.class};
 
     private static final Class<?>[] SOURCE_TYPES = { SpringApplication.class };
 
@@ -55,8 +55,8 @@ public class McnApplicationListener implements GenericApplicationListener {
             if(logFileChecker != null){
                 logFileChecker.check();
             }
-        }else if(applicationEvent instanceof ApplicationStartedEvent){
-            SpringBeanUtils.setApplicationContext(((ApplicationStartedEvent) applicationEvent).getApplicationContext());
+        }else if(applicationEvent instanceof ApplicationPreparedEvent){
+            SpringBeanUtils.setApplicationContext(((ApplicationPreparedEvent) applicationEvent).getApplicationContext());
         }
     }
 
