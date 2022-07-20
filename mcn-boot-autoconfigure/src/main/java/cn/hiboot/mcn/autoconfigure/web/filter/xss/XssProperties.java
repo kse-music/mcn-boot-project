@@ -1,6 +1,6 @@
 package cn.hiboot.mcn.autoconfigure.web.filter.xss;
 
-import cn.hiboot.mcn.autoconfigure.web.filter.common.ValueProcessorProperties;
+import cn.hiboot.mcn.autoconfigure.web.filter.common.NameValueProcessorProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
@@ -10,7 +10,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * @since 2019/1/9 11:34
  */
 @ConfigurationProperties("mcn.xss")
-public class XssProperties extends ValueProcessorProperties {
+public class XssProperties extends NameValueProcessorProperties {
 
     /**
      * 过滤器名

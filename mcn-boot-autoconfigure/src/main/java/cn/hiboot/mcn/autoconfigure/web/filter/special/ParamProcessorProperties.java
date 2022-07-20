@@ -1,6 +1,6 @@
 package cn.hiboot.mcn.autoconfigure.web.filter.special;
 
-import cn.hiboot.mcn.autoconfigure.web.filter.common.ValueProcessorProperties;
+import cn.hiboot.mcn.autoconfigure.web.filter.common.NameValueProcessorProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
@@ -10,7 +10,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * @since 2022/6/6 15:04
  */
 @ConfigurationProperties("param.processor")
-public class ParamProcessorProperties extends ValueProcessorProperties {
+public class ParamProcessorProperties extends NameValueProcessorProperties {
     /**
      * 过滤器名
      */

@@ -4,12 +4,12 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * ValueProcessorProperties
+ * NameValueProcessorProperties
  *
  * @author DingHao
  * @since 2022/6/13 12:30
  */
-public class ValueProcessorProperties {
+public class NameValueProcessorProperties {
     /**
      * 处理的url路径
      */

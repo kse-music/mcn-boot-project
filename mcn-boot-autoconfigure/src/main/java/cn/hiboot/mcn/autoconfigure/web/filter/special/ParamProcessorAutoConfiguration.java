@@ -2,9 +2,9 @@ package cn.hiboot.mcn.autoconfigure.web.filter.special;
 
 
 import cn.hiboot.mcn.autoconfigure.web.exception.ExceptionResolver;
-import cn.hiboot.mcn.autoconfigure.web.filter.common.ValueProcessor;
-import cn.hiboot.mcn.autoconfigure.web.filter.common.ValueProcessorFilter;
-import cn.hiboot.mcn.autoconfigure.web.filter.common.ValueProcessorJacksonConfig;
+import cn.hiboot.mcn.autoconfigure.web.filter.common.NameValueProcessor;
+import cn.hiboot.mcn.autoconfigure.web.filter.common.NameValueProcessorFilter;
+import cn.hiboot.mcn.autoconfigure.web.filter.common.NameValueProcessorJacksonConfig;
 import cn.hiboot.mcn.core.exception.ExceptionKeys;
 import cn.hiboot.mcn.core.exception.ServiceException;
 import cn.hiboot.mcn.core.model.result.RestResp;
@@ -114,8 +114,8 @@ public class ParamProcessorAutoConfiguration {
 
     @Bean
     @ConditionalOnProperty(prefix = "param.processor",name = "use-filter",havingValue = "true", matchIfMissing = true)
-    public FilterRegistrationBean<ValueProcessorFilter> paramProcessorFilterRegistration(ParamProcessor paramProcessor) {
-        FilterRegistrationBean<ValueProcessorFilter> filterRegistrationBean = new FilterRegistrationBean<>(new ValueProcessorFilter(properties,paramProcessor));
+    public FilterRegistrationBean<NameValueProcessorFilter> paramProcessorFilterRegistration(ParamProcessor paramProcessor) {
+        FilterRegistrationBean<NameValueProcessorFilter> filterRegistrationBean = new FilterRegistrationBean<>(new NameValueProcessorFilter(properties,paramProcessor));
         filterRegistrationBean.setOrder(properties.getOrder());
         filterRegistrationBean.setName(properties.getName());
         return filterRegistrationBean;
@@ -123,8 +123,8 @@ public class ParamProcessorAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ValueProcessorJacksonConfig valueProcessorJacksonConfig(ObjectProvider<ValueProcessor> valueProcessors) {
-        return new ValueProcessorJacksonConfig(valueProcessors);
+    public NameValueProcessorJacksonConfig valueProcessorJacksonConfig(ObjectProvider<NameValueProcessor> valueProcessors) {
+        return new NameValueProcessorJacksonConfig(valueProcessors);
     }
 
     @Bean

@@ -1,8 +1,8 @@
 package cn.hiboot.mcn.autoconfigure.web.filter.xss;
 
-import cn.hiboot.mcn.autoconfigure.web.filter.common.ValueProcessor;
-import cn.hiboot.mcn.autoconfigure.web.filter.common.ValueProcessorFilter;
-import cn.hiboot.mcn.autoconfigure.web.filter.common.ValueProcessorJacksonConfig;
+import cn.hiboot.mcn.autoconfigure.web.filter.common.NameValueProcessor;
+import cn.hiboot.mcn.autoconfigure.web.filter.common.NameValueProcessorFilter;
+import cn.hiboot.mcn.autoconfigure.web.filter.common.NameValueProcessorJacksonConfig;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -32,8 +32,8 @@ public class XssAutoConfiguration {
     }
 
     @Bean
-    public FilterRegistrationBean<ValueProcessorFilter> xssFilterRegistration(XssProcessor xssProcessor) {
-        FilterRegistrationBean<ValueProcessorFilter> filterRegistrationBean = new FilterRegistrationBean<>(new ValueProcessorFilter(xssProperties,xssProcessor));
+    public FilterRegistrationBean<NameValueProcessorFilter> xssFilterRegistration(XssProcessor xssProcessor) {
+        FilterRegistrationBean<NameValueProcessorFilter> filterRegistrationBean = new FilterRegistrationBean<>(new NameValueProcessorFilter(xssProperties,xssProcessor));
         filterRegistrationBean.setOrder(xssProperties.getOrder());
         filterRegistrationBean.setName(xssProperties.getName());
         return filterRegistrationBean;
@@ -47,8 +47,8 @@ public class XssAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ValueProcessorJacksonConfig valueProcessorJacksonConfig(ObjectProvider<ValueProcessor> valueProcessors) {
-        ValueProcessorJacksonConfig valueProcessorJacksonConfig = new ValueProcessorJacksonConfig(valueProcessors);
+    public NameValueProcessorJacksonConfig valueProcessorJacksonConfig(ObjectProvider<NameValueProcessor> valueProcessors) {
+        NameValueProcessorJacksonConfig valueProcessorJacksonConfig = new NameValueProcessorJacksonConfig(valueProcessors);
         valueProcessorJacksonConfig.setEscapeResponse(xssProperties.isEscapeResponse());
         return valueProcessorJacksonConfig;
     }

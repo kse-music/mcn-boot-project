@@ -10,34 +10,34 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * ValueProcessorRequestWrapper
+ * NameValueProcessorRequestWrapper
  *
  * @author DingHao
  * @since 2019/1/9 11:02
  */
-public class ValueProcessorRequestWrapper extends HttpServletRequestWrapper {
+public class NameValueProcessorRequestWrapper extends HttpServletRequestWrapper {
 
     private List<String> excludeFields;
     private boolean filterParameterName;
     private boolean filterHeaderValue;
-    private final ValueProcessor valueProcessor;
+    private final NameValueProcessor valueProcessor;
 
-    public ValueProcessorRequestWrapper(HttpServletRequest request,ValueProcessor valueProcessor) {
+    public NameValueProcessorRequestWrapper(HttpServletRequest request, NameValueProcessor valueProcessor) {
         super(request);
         this.valueProcessor = valueProcessor;
     }
 
-    public ValueProcessorRequestWrapper excludeFields(List<String> excludeFields) {
+    public NameValueProcessorRequestWrapper excludeFields(List<String> excludeFields) {
         this.excludeFields = excludeFields;
         return this;
     }
 
-    public ValueProcessorRequestWrapper filterParameterName(boolean filterParameterName) {
+    public NameValueProcessorRequestWrapper filterParameterName(boolean filterParameterName) {
         this.filterParameterName = filterParameterName;
         return this;
     }
 
-    public ValueProcessorRequestWrapper filterHeaderValue(boolean filterHeaderValue) {
+    public NameValueProcessorRequestWrapper filterHeaderValue(boolean filterHeaderValue) {
         this.filterHeaderValue = filterHeaderValue;
         return this;
     }

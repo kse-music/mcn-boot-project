@@ -1,6 +1,6 @@
 package cn.hiboot.mcn.cloud.feign;
 
-import cn.hiboot.mcn.autoconfigure.web.filter.common.ValueProcessorJacksonConfig;
+import cn.hiboot.mcn.autoconfigure.web.filter.common.NameValueProcessorJacksonConfig;
 import feign.Feign;
 import feign.FeignException;
 import feign.Response;
@@ -72,6 +72,7 @@ public class FeignExtensionAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    @ConditionalOnProperty(prefix = "param.processor",name = "enable",havingValue = "true")
     public Decoder feignDecoder(ObjectProvider<HttpMessageConverterCustomizer> customizers, ObjectFactory<HttpMessageConverters> messageConverters) {
         return new OptionalDecoder(new ResponseEntityDecoder(new FeignClientResponseInterceptor(messageConverters, customizers)));
     }
@@ -87,7 +88,7 @@ public class FeignExtensionAutoConfiguration {
             try{
                 return super.decode(response,type);
             } finally {
-                ValueProcessorJacksonConfig.removeFeignRequest();
+                NameValueProcessorJacksonConfig.removeFeignRequest();
             }
         }
 

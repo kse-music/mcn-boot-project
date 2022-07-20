@@ -1,10 +1,5 @@
 package cn.hiboot.mcn.autoconfigure.web.filter.common;
 
-import cn.hiboot.mcn.autoconfigure.web.filter.special.ParamProcessor;
-import cn.hiboot.mcn.autoconfigure.web.filter.special.ParamProcessorProperties;
-import cn.hiboot.mcn.autoconfigure.web.filter.xss.XssProcessor;
-import cn.hiboot.mcn.autoconfigure.web.filter.xss.XssProperties;
-import cn.hiboot.mcn.core.util.SpringBeanUtils;
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -15,14 +10,8 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * 处理json中数据类型为string的值
@@ -30,25 +19,15 @@ import java.util.stream.Collectors;
  * @author DingHao
  * @since 2022/6/9 10:47
  */
-public class ValueProcessorJacksonConfig implements Jackson2ObjectMapperBuilderCustomizer {
+public class NameValueProcessorJacksonConfig implements Jackson2ObjectMapperBuilderCustomizer {
+
     private static final ThreadLocal<Boolean> feignRequest = ThreadLocal.withInitial(() -> false);
 
     private boolean escapeResponse;
-    private final Map<ValueProcessor, RequestMatcher> valueProcessors;
+    private final DelegateNameValueProcessor delegateValueProcessor;
 
-    public ValueProcessorJacksonConfig(ObjectProvider<ValueProcessor> valueProcessors) {
-        this.valueProcessors = valueProcessors.orderedStream().collect(Collectors.toMap(Function.identity(), v -> {
-            ValueProcessorProperties properties = null;
-            if(v instanceof ParamProcessor){
-                properties = SpringBeanUtils.getBean(ParamProcessorProperties.class);
-            }else if(v instanceof XssProcessor){
-                properties = SpringBeanUtils.getBean(XssProperties.class);
-            }
-            if(properties == null){
-                return RequestMatcher.DEFAULT_REQUEST_MATCHER;
-            }
-            return new RequestMatcher(properties.getIncludeUrls(), properties.getExcludeUrls());
-        }));
+    public NameValueProcessorJacksonConfig(ObjectProvider<NameValueProcessor> valueProcessors) {
+        this.delegateValueProcessor = new DelegateNameValueProcessor(valueProcessors);
     }
 
     public void setEscapeResponse(boolean escapeResponse) {
@@ -67,21 +46,7 @@ public class ValueProcessorJacksonConfig implements Jackson2ObjectMapperBuilderC
         if(feignRequest.get()){//don't deal feign request
             return text;
         }
-        for (Map.Entry<ValueProcessor, RequestMatcher> entry : valueProcessors.entrySet()) {
-            HttpServletRequest httpRequest = getHttpRequest();
-            if(httpRequest == null || entry.getValue().matches(httpRequest)){
-                text = entry.getKey().process(name,text);
-            }
-        }
-        return text;
-    }
-
-    private HttpServletRequest getHttpRequest(){
-        ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-        if(requestAttributes == null){
-            return null;
-        }
-        return requestAttributes.getRequest();
+        return delegateValueProcessor.process(name, text);
     }
 
     @Override
@@ -109,4 +74,5 @@ public class ValueProcessorJacksonConfig implements Jackson2ObjectMapperBuilderC
             }
         });
     }
+
 }
