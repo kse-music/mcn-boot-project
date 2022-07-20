@@ -2,7 +2,6 @@ package cn.hiboot.mcn.autoconfigure.web.filter.special;
 
 
 import cn.hiboot.mcn.autoconfigure.web.exception.ExceptionResolver;
-import cn.hiboot.mcn.autoconfigure.web.filter.common.RequestMatcher;
 import cn.hiboot.mcn.autoconfigure.web.filter.common.ValueProcessor;
 import cn.hiboot.mcn.autoconfigure.web.filter.common.ValueProcessorFilter;
 import cn.hiboot.mcn.autoconfigure.web.filter.common.ValueProcessorJacksonConfig;
@@ -72,25 +71,16 @@ public class ParamProcessorAutoConfiguration {
     @ConditionalOnMissingBean
     public ParamProcessor defaultParamProcessor(Environment environment) {
         String globalRulePattern = environment.getProperty("global.rule.pattern","");
-        return new ParamProcessor() {
-
-            @Override
-            public RequestMatcher requestMatcher() {
-                return new RequestMatcher(properties.getIncludeUrls(), properties.getExcludeUrls());
-            }
-
-            @Override
-            public String process(String rule, String name, String value) {
-                String rulePattern = getRule(rule,globalRulePattern);
-                if(rulePattern.isEmpty()){
-                    return value;
-                }
-                Pattern pattern = MAP.computeIfAbsent(rule, m -> Pattern.compile(rulePattern));
-                if(pattern.matcher(value).matches()){
-                    throw ServiceException.newInstance(ExceptionKeys.SPECIAL_SYMBOL_ERROR);
-                }
+        return (rule, name, value) -> {
+            String rulePattern = getRule(rule,globalRulePattern);
+            if(rulePattern.isEmpty()){
                 return value;
             }
+            Pattern pattern = MAP.computeIfAbsent(rulePattern, m -> Pattern.compile(rulePattern));
+            if(pattern.matcher(value).matches()){
+                throw ServiceException.newInstance(ExceptionKeys.SPECIAL_SYMBOL_ERROR);
+            }
+            return value;
         };
     }
 

@@ -9,10 +9,6 @@ package cn.hiboot.mcn.autoconfigure.web.filter.common;
  */
 public interface ValueProcessor {
 
-    default RequestMatcher requestMatcher(){
-        return RequestMatcher.requestMatcher;
-    }
-
     String process(String name, String value);
 
 }

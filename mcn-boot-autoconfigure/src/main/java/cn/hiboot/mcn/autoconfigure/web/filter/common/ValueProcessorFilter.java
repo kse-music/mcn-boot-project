@@ -19,7 +19,7 @@ public class ValueProcessorFilter implements Filter {
     public ValueProcessorFilter(ValueProcessorProperties properties,ValueProcessor valueProcessor) {
         this.properties = properties;
         this.valueProcessor = valueProcessor;
-        this.requestMatcher = valueProcessor.requestMatcher();
+        this.requestMatcher = new RequestMatcher(properties.getIncludeUrls(), properties.getExcludeUrls());
     }
 
     @Override

@@ -1,6 +1,5 @@
 package cn.hiboot.mcn.autoconfigure.web.filter.xss;
 
-import cn.hiboot.mcn.autoconfigure.web.filter.common.RequestMatcher;
 import cn.hiboot.mcn.autoconfigure.web.filter.common.ValueProcessor;
 import cn.hiboot.mcn.autoconfigure.web.filter.common.ValueProcessorFilter;
 import cn.hiboot.mcn.autoconfigure.web.filter.common.ValueProcessorJacksonConfig;
@@ -43,19 +42,7 @@ public class XssAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public XssProcessor defaultXssProcessor(){
-        return new XssProcessor() {
-
-            @Override
-            public RequestMatcher requestMatcher() {
-                return new RequestMatcher(xssProperties.getIncludeUrls(), xssProperties.getExcludeUrls());
-            }
-
-            @Override
-            public String process(String name, String value) {
-                return HtmlUtils.htmlEscape(value);
-            }
-
-        };
+        return (name, value) -> HtmlUtils.htmlEscape(value);
     }
 
     @Bean

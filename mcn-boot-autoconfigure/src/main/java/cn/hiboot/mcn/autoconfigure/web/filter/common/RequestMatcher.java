@@ -15,7 +15,7 @@ import java.util.List;
  */
 public class RequestMatcher {
 
-    static RequestMatcher requestMatcher = new RequestMatcher();
+    static RequestMatcher DEFAULT_REQUEST_MATCHER = new RequestMatcher();
 
     private final AntPathMatcher antPathMatcher = new AntPathMatcher();
 
