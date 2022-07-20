@@ -1,6 +1,6 @@
 package cn.hiboot.mcn.autoconfigure.web.filter.special;
 
-import cn.hiboot.mcn.autoconfigure.web.filter.common.ValueProcessor;
+import cn.hiboot.mcn.autoconfigure.web.filter.common.NameValueProcessor;
 
 /**
  * ParamProcessor
@@ -8,7 +8,7 @@ import cn.hiboot.mcn.autoconfigure.web.filter.common.ValueProcessor;
  * @author DingHao
  * @since 2022/6/6 15:11
  */
-public interface ParamProcessor extends ValueProcessor {
+public interface ParamProcessor extends NameValueProcessor {
 
     /**
      * 使用CheckParam注解时不受黑白名单限制

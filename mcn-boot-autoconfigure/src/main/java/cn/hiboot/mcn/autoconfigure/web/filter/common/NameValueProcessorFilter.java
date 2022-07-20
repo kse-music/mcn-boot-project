@@ -5,18 +5,18 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
 /**
- * ValueProcessorFilter
+ * NameValueProcessorFilter
  *
  * @author DingHao
  * @since 2019/1/9 11:11
  */
-public class ValueProcessorFilter implements Filter {
+public class NameValueProcessorFilter implements Filter {
 
-    private final ValueProcessorProperties properties;
-    private final ValueProcessor valueProcessor;
+    private final NameValueProcessorProperties properties;
+    private final NameValueProcessor valueProcessor;
     private final RequestMatcher requestMatcher;
 
-    public ValueProcessorFilter(ValueProcessorProperties properties,ValueProcessor valueProcessor) {
+    public NameValueProcessorFilter(NameValueProcessorProperties properties, NameValueProcessor valueProcessor) {
         this.properties = properties;
         this.valueProcessor = valueProcessor;
         this.requestMatcher = new RequestMatcher(properties.getIncludeUrls(), properties.getExcludeUrls());
@@ -26,7 +26,7 @@ public class ValueProcessorFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest req = (HttpServletRequest) request;
         if (requestMatcher.matches(req)) {
-            request = new ValueProcessorRequestWrapper(req,valueProcessor)
+            request = new NameValueProcessorRequestWrapper(req,valueProcessor)
                     .filterHeaderValue(properties.isFilterHeaderValue())
                     .filterParameterName(properties.isFilterParameterName())
                     .excludeFields(properties.getExcludeFields());

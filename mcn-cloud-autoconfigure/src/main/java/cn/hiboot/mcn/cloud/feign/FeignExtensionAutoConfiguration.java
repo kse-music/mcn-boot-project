@@ -1,6 +1,6 @@
 package cn.hiboot.mcn.cloud.feign;
 
-import cn.hiboot.mcn.autoconfigure.web.filter.common.ValueProcessorJacksonConfig;
+import cn.hiboot.mcn.autoconfigure.web.filter.common.NameValueProcessorJacksonConfig;
 import cn.hiboot.mcn.cloud.security.SessionHolder;
 import feign.*;
 import feign.codec.Decoder;
@@ -9,6 +9,7 @@ import feign.optionals.OptionalDecoder;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
 import org.springframework.cloud.openfeign.support.ResponseEntityDecoder;
 import org.springframework.cloud.openfeign.support.SpringDecoder;
@@ -63,6 +64,7 @@ public class FeignExtensionAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    @ConditionalOnProperty(prefix = "param.processor",name = "enable",havingValue = "true")
     public Decoder feignDecoder(ObjectFactory<HttpMessageConverters> messageConverters) {
         return new OptionalDecoder(new ResponseEntityDecoder(new FeignClientResponseInterceptor(messageConverters)));
     }
@@ -78,7 +80,7 @@ public class FeignExtensionAutoConfiguration {
             try{
                 return super.decode(response,type);
             } finally {
-                ValueProcessorJacksonConfig.removeFeignRequest();
+                NameValueProcessorJacksonConfig.removeFeignRequest();
             }
         }
 

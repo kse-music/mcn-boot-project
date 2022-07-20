@@ -1,6 +1,6 @@
 package cn.hiboot.mcn.cloud.feign;
 
-import cn.hiboot.mcn.autoconfigure.web.filter.common.ValueProcessorJacksonConfig;
+import cn.hiboot.mcn.autoconfigure.web.filter.common.NameValueProcessorJacksonConfig;
 import cn.hiboot.mcn.autoconfigure.web.filter.integrity.DataIntegrityUtils;
 import cn.hiboot.mcn.cloud.security.SessionHolder;
 import cn.hiboot.mcn.core.tuples.Triplet;
@@ -61,7 +61,7 @@ public class FeignInterceptorConfiguration  {
 
         @Override
         public void apply(RequestTemplate template) {
-            ValueProcessorJacksonConfig.setFeignRequest();
+            NameValueProcessorJacksonConfig.setFeignRequest();
         }
 
     }
