@@ -18,6 +18,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
@@ -95,10 +96,15 @@ public class ExceptionHelper {
             errorCode = ExceptionKeys.PARAM_TYPE_ERROR;
         }else if(exception instanceof MaxUploadSizeExceededException){
             errorCode = ExceptionKeys.UPLOAD_FILE_SIZE_ERROR;
-        }else if(exception instanceof BindException){
+        }else if(exception instanceof MethodArgumentNotValidException || exception instanceof BindException){
             errorCode = ExceptionKeys.PARAM_PARSE_ERROR;
-            BindException ex = (BindException) exception;
-            data = dealBindingResult(ex.getBindingResult());
+            BindingResult bindingResult;
+            if(exception instanceof BindException){
+                bindingResult = ((BindException) exception).getBindingResult();
+            }else {
+                bindingResult = ((MethodArgumentNotValidException) exception).getBindingResult();
+            }
+            data = dealBindingResult(bindingResult);
         }else if(validationExceptionPresent && ValidationExceptionHandler.support(exception)){
             errorCode = ExceptionKeys.PARAM_PARSE_ERROR;
             data = ValidationExceptionHandler.handle(exception);
