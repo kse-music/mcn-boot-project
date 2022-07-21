@@ -8,8 +8,8 @@ import cn.hiboot.mcn.autoconfigure.web.filter.common.NameValueProcessorJacksonCo
 import cn.hiboot.mcn.core.exception.ExceptionKeys;
 import cn.hiboot.mcn.core.exception.ServiceException;
 import cn.hiboot.mcn.core.model.result.RestResp;
+import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.AnnotationIntrospector;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,6 +22,7 @@ import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -211,7 +212,7 @@ public class ParamProcessorAutoConfiguration {
     }
 
     @Bean
-    @Role(2)
+    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
     public static BeanPostProcessor jacksonParamProcessorConfig(ParamProcessor paramProcessor) {
         return new BeanPostProcessor() {
 
@@ -250,7 +251,7 @@ public class ParamProcessorAutoConfiguration {
                         String rule = getRule(classAnnotation,annotation);
                         return new StdDeserializer<String>(String.class){
                             @Override
-                            public String deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+                            public String deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JacksonException {
                                 return paramProcessor.process(rule,p.currentName(),p.getText());
                             }
                         };
