@@ -15,6 +15,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -57,7 +58,7 @@ public class MongoExtensionAutoConfiguration {
 
             builder.readPreference(ReadPreference.valueOf(mongo.getReadPreference().name()));
             builder.writeConcern(WriteConcern.valueOf(mongo.getWriteConcern().name()));
-            builder.readConcern(NAMED_CONCERNS.getOrDefault(mongo.getReadConcern().name(),ReadConcern.DEFAULT));
+            builder.readConcern(Objects.isNull(mongo.getReadConcern()) ? ReadConcern.DEFAULT : NAMED_CONCERNS.get(mongo.getReadConcern().name()));
 
             builder.applyToSocketSettings(socket -> {
                 socket.connectTimeout(mongo.getSocket().getConnectTimeout(),TimeUnit.MILLISECONDS);
