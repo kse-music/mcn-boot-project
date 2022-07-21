@@ -7,7 +7,6 @@ import feign.codec.Decoder;
 import feign.codec.ErrorDecoder;
 import feign.optionals.OptionalDecoder;
 import org.springframework.beans.factory.ObjectFactory;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
 import org.springframework.cloud.openfeign.support.ResponseEntityDecoder;
@@ -62,14 +61,14 @@ public class FeignExtensionAutoConfiguration {
 
 
     @Bean
-    public Decoder feignDecoder(ObjectProvider<HttpMessageConverterCustomizer> customizers, ObjectFactory<HttpMessageConverters> messageConverters) {
-        return new OptionalDecoder(new ResponseEntityDecoder(new FeignClientResponseInterceptor(messageConverters, customizers)));
+    public Decoder feignDecoder(ObjectFactory<HttpMessageConverters> messageConverters) {
+        return new OptionalDecoder(new ResponseEntityDecoder(new FeignClientResponseInterceptor(messageConverters)));
     }
 
     static class FeignClientResponseInterceptor extends SpringDecoder {
 
-        public FeignClientResponseInterceptor(ObjectFactory<HttpMessageConverters> messageConverters, ObjectProvider<HttpMessageConverterCustomizer> customizers) {
-            super(messageConverters, customizers);
+        public FeignClientResponseInterceptor(ObjectFactory<HttpMessageConverters> messageConverters) {
+            super(messageConverters);
         }
 
         @Override
