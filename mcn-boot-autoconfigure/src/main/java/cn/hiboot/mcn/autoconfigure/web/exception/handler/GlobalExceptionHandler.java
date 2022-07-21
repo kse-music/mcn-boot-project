@@ -72,11 +72,8 @@ public class GlobalExceptionHandler implements EnvironmentAware, Ordered {
         RestResp<Object> resp = null;
         for (ExceptionResolver resolver : exceptionResolvers) {
             if(resolver.support(request, exception)){
-                RestResp<Object> rs = resolver.resolveException(request, exception);
-                if(Objects.isNull(rs)){
-                    continue;
-                }
-                resp = rs;
+                resp = resolver.resolveException(request, exception);
+                break;
             }
         }
         if(Objects.isNull(resp)){
