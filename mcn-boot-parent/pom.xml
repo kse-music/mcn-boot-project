@@ -41,6 +41,7 @@
                 <configuration>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
+                    <compilerArgs>-parameters</compilerArgs>
                 </configuration>
             </plugin>
             <plugin>

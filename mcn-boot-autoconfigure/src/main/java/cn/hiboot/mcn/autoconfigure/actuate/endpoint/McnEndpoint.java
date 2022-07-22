@@ -21,7 +21,7 @@ public class McnEndpoint {
     }
 
     @ReadOperation
-    public RestResp<String> mcn() {
+    public RestResp<String> version() {
         return new RestResp<>(environment.getProperty("mcn.version","UN_KNOW"));
     }
 
@@ -31,7 +31,7 @@ public class McnEndpoint {
     }
 
     @WriteOperation
-    public RestResp<?> put(String name,Object value) {
+    public RestResp<?> add(String name,Object value) {
         MapPropertySource mapPropertySource = (MapPropertySource) environment.getPropertySources().get("mcn-map");
         mapPropertySource.getSource().put(name,value);
         return new RestResp<>();
