@@ -103,6 +103,12 @@
       "sourceType": "cn.hiboot.mcn.autoconfigure.web.filter.special.ParamProcessorAutoConfiguration",
       "description": "是否启用参数处理器.",
       "defaultValue": false
+    },
+    {
+      "name": "management.health.mcn.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Whether to enable mcn health check.",
+      "defaultValue": true
     }
   ],
   "hints": [
