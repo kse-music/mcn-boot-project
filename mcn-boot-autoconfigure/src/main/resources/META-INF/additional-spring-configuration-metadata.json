@@ -103,6 +103,16 @@
       "sourceType": "cn.hiboot.mcn.autoconfigure.web.filter.special.ParamProcessorAutoConfiguration",
       "description": "是否启用参数处理器.",
       "defaultValue": false
+    },
+    {
+      "name": "logging.charset.console",
+      "type": "java.nio.charset.Charset",
+      "description": "Charset to use for console output."
+    },
+    {
+      "name": "logging.charset.file",
+      "type": "java.nio.charset.Charset",
+      "description": "Charset to use for file output."
     }
   ],
   "hints": [

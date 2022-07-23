@@ -5,15 +5,13 @@ import cn.hiboot.mcn.core.util.McnUtils;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.env.EnvironmentPostProcessor;
 import org.springframework.core.Ordered;
-import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.env.MapPropertySource;
-import org.springframework.core.env.MutablePropertySources;
-import org.springframework.core.env.PropertySource;
+import org.springframework.core.env.*;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePropertySource;
 import org.springframework.util.ClassUtils;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -30,6 +28,8 @@ import java.util.Objects;
  * @since 2021/1/16 16:46
  */
 public class McnEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
+    private static final String CONSOLE_LOG_CHARSET = "CONSOLE_LOG_CHARSET";
+    private static final String FILE_LOG_CHARSET = "FILE_LOG_CHARSET";
 
     private static final String BOOTSTRAP_EAGER_LOAD = "mcn.bootstrap.eagerLoad.enable";
     private static final String MCN_SOURCE_NAME = "mcn-global-unique";
@@ -49,6 +49,15 @@ public class McnEnvironmentPostProcessor implements EnvironmentPostProcessor, Or
         //加载默认配置
         loadDefaultConfig(environment, application.getMainApplicationClass());
 
+        //兼容低版本
+        setSystemProperty(environment, CONSOLE_LOG_CHARSET, "logging.charset.console", StandardCharsets.UTF_8.name());
+        setSystemProperty(environment, FILE_LOG_CHARSET, "logging.charset.file", StandardCharsets.UTF_8.name());
+    }
+
+    private void setSystemProperty(PropertyResolver resolver, String systemPropertyName, String propertyName, String defaultValue) {
+        String value = resolver.getProperty(propertyName);
+        value = (value != null) ? value : defaultValue;
+        System.setProperty(systemPropertyName, value);
     }
 
     /**
