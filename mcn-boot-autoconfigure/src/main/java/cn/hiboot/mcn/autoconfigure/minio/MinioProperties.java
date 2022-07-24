@@ -46,10 +46,6 @@ public class MinioProperties {
      * 上传方法
      */
     private String method = "PUT";
-    /**
-     * 是否返回前序异常信息
-     */
-    private boolean returnPreviousExceptionMessage = true;
 
     private Pool pool = new Pool();
 
@@ -117,14 +113,6 @@ public class MinioProperties {
 
     public void setMethod(String method) {
         this.method = method;
-    }
-
-    public boolean isReturnPreviousExceptionMessage() {
-        return returnPreviousExceptionMessage;
-    }
-
-    public void setReturnPreviousExceptionMessage(boolean returnPreviousExceptionMessage) {
-        this.returnPreviousExceptionMessage = returnPreviousExceptionMessage;
     }
 
     public Pool getPool() {

@@ -1,5 +1,6 @@
 package cn.hiboot.mcn.cloud.gateway;
 
+import cn.hiboot.mcn.autoconfigure.web.exception.ExceptionHelper;
 import cn.hiboot.mcn.core.exception.ExceptionKeys;
 import cn.hiboot.mcn.core.model.result.RestResp;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -30,7 +31,7 @@ public class GatewayExtensionAutoConfiguration {
         public RestResp<?> fallback(ServerWebExchange exchange) {
             Throwable o = exchange.getAttribute(CIRCUITBREAKER_EXECUTION_EXCEPTION_ATTR);
             if(o != null){
-                return RestResp.error(o.getMessage());
+                return ExceptionHelper.error(o.getMessage());
             }
             return RestResp.error(ExceptionKeys.REMOTE_SERVICE_ERROR);
         }

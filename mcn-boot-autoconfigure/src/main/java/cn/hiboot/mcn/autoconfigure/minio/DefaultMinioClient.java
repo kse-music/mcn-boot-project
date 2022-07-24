@@ -106,7 +106,7 @@ public class DefaultMinioClient extends MinioAsyncClient {
         if(count == 1){
             preSignResult.getUploadUrls().add(getPresignedObjectUrl(bucketName,objectName,null));
         }else {
-            CreateMultipartUploadResponse response = this.createMultipartUpload(bucketName, region, objectName, headers, null);
+            CreateMultipartUploadResponse response = createMultipartUploadAsync(bucketName, region, objectName, headers, null).get();
             String uploadId = response.result().uploadId();
 
             Map<String, String> reqParams = new HashMap<>();

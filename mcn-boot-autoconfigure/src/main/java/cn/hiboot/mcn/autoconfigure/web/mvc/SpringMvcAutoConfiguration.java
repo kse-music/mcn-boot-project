@@ -1,7 +1,9 @@
 package cn.hiboot.mcn.autoconfigure.web.mvc;
 
+import cn.hiboot.mcn.autoconfigure.minio.MinioException;
 import cn.hiboot.mcn.autoconfigure.web.exception.ExceptionHelper;
 import cn.hiboot.mcn.autoconfigure.web.exception.ExceptionMessageProcessor;
+import cn.hiboot.mcn.autoconfigure.web.exception.ExceptionResolver;
 import cn.hiboot.mcn.autoconfigure.web.exception.error.DefaultErrorView;
 import cn.hiboot.mcn.autoconfigure.web.exception.error.ErrorPageController;
 import cn.hiboot.mcn.autoconfigure.web.exception.handler.GlobalExceptionHandler;
@@ -11,6 +13,7 @@ import cn.hiboot.mcn.autoconfigure.web.mvc.resolver.StringObjectMethodArgumentRe
 import cn.hiboot.mcn.core.exception.ExceptionKeys;
 import cn.hiboot.mcn.core.model.result.RestResp;
 import cn.hiboot.mcn.core.util.JacksonUtils;
+import io.minio.MinioClient;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.*;
@@ -36,6 +39,7 @@ import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -96,6 +100,28 @@ public class SpringMvcAutoConfiguration {
                 }
             };
         }
+    }
+
+    @Configuration(proxyBeanMethods = false)
+    @ConditionalOnClass(MinioClient.class)
+    private static class MinioExceptionResolverConfig{
+
+        @Bean
+        @ConditionalOnMissingBean(name = "minioExceptionResolver")
+        ExceptionResolver minioExceptionResolver(){
+            return new ExceptionResolver() {
+                @Override
+                public boolean support(HttpServletRequest request, Throwable t) {
+                    return t instanceof MinioException;
+                }
+
+                @Override
+                public RestResp<Object> resolveException(HttpServletRequest request, Throwable t) {
+                    return RestResp.error(ExceptionKeys.INVOKE_MINIO_ERROR,t.getCause().getMessage());
+                }
+            };
+        }
+
     }
 
     @Configuration(proxyBeanMethods = false)

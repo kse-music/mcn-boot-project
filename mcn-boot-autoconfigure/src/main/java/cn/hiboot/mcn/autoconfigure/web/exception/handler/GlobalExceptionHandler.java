@@ -5,8 +5,10 @@ import cn.hiboot.mcn.autoconfigure.web.exception.ExceptionMessageProcessor;
 import cn.hiboot.mcn.autoconfigure.web.exception.ExceptionPostProcessor;
 import cn.hiboot.mcn.autoconfigure.web.exception.ExceptionResolver;
 import cn.hiboot.mcn.autoconfigure.web.exception.error.GlobalExceptionViewResolver;
+import cn.hiboot.mcn.core.exception.ErrorMsg;
 import cn.hiboot.mcn.core.exception.ExceptionKeys;
 import cn.hiboot.mcn.core.model.result.RestResp;
+import cn.hiboot.mcn.core.util.McnUtils;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.Ordered;
@@ -73,6 +75,12 @@ public class GlobalExceptionHandler implements EnvironmentAware, Ordered {
         for (ExceptionResolver resolver : exceptionResolvers) {
             if(resolver.support(request, exception)){
                 resp = resolver.resolveException(request, exception);
+                if(properties.isUniformExMsg()){
+                    String errorMsg = ErrorMsg.getErrorMsg(resp.getErrorCode());
+                    if(McnUtils.isNotNullAndEmpty(errorMsg)){
+                        resp.setErrorInfo(errorMsg);
+                    }
+                }
                 break;
             }
         }

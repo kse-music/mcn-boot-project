@@ -78,9 +78,9 @@ public interface Minio {
             if(McnUtils.isNotNullAndEmpty(contentType)){
                 builder.contentType(contentType);
             }
-            minioClient.putObject(builder.build());
+            minioClient.putObject(builder.build()).get();
         }catch (Exception e){
-            throw new MinioException(e,minioClient.getConfig());
+            throw new MinioException(e);
         }
     }
 
@@ -97,7 +97,7 @@ public interface Minio {
         try {
             getMinioClient().upload(bucketName,objectName,objectSize,contentType,stream);
         } catch (Exception e) {
-            throw new MinioException(e,getMinioClient().getConfig());
+            throw new MinioException(e);
         }
     }
 
@@ -114,7 +114,7 @@ public interface Minio {
         try {
             return getMinioClient().getPresignedObjectUrl(bucketName,objectName,contentType,count);
         } catch (Exception e) {
-            throw new MinioException(e,getMinioClient().getConfig());
+            throw new MinioException(e);
         }
     }
 
@@ -129,7 +129,7 @@ public interface Minio {
         } catch (MinioException e) {
             throw e;
         }catch (Exception e) {
-            throw new MinioException(e,getMinioClient().getConfig());
+            throw new MinioException(e);
         }
     }
 
@@ -152,7 +152,7 @@ public interface Minio {
                     .build();
             getMinioClient().removeObject(args).get();
         }catch (Exception e){
-            throw new MinioException(e,getMinioClient().getConfig());
+            throw new MinioException(e);
         }
     }
 
@@ -189,7 +189,7 @@ public interface Minio {
                 return null;
             }).filter(Objects::nonNull).collect(Collectors.toList());
         }catch (Exception e){
-            throw new MinioException(e,getMinioClient().getConfig());
+            throw new MinioException(e);
         }
     }
 
@@ -215,7 +215,7 @@ public interface Minio {
                 log.error("Error delete object {} ; Reason is {}", error.objectName(),error.message());
             }
         }catch (Exception e){
-            throw new MinioException(e,getMinioClient().getConfig());
+            throw new MinioException(e);
         }
     }
 
@@ -239,7 +239,7 @@ public interface Minio {
                     .build();
             return getMinioClient().getObject(args).get();
         }catch (Exception e){
-            throw new MinioException(e,getMinioClient().getConfig());
+            throw new MinioException(e);
         }
     }
 
@@ -266,7 +266,7 @@ public interface Minio {
                     .build();
             getMinioClient().makeBucket(args).get();
         }catch (Exception e){
-            throw new MinioException(e,getMinioClient().getConfig());
+            throw new MinioException(e);
         }
     }
 
@@ -277,7 +277,7 @@ public interface Minio {
                 return buckets.stream().map(b -> new BucketItem(b.name(),b.creationDate())).collect(Collectors.toList());
             }
         }catch (Exception e){
-            throw new MinioException(e,getMinioClient().getConfig());
+            throw new MinioException(e);
         }
         return Collections.emptyList();
     }
@@ -294,7 +294,7 @@ public interface Minio {
                     .build();
             getMinioClient().removeBucket(args).get();
         }catch (Exception e){
-            throw new MinioException(e,getMinioClient().getConfig());
+            throw new MinioException(e);
         }
     }
 

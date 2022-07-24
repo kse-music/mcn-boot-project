@@ -155,6 +155,10 @@ public class ExceptionHelper {
         return overrideHttpError;
     }
 
+    public static RestResp<Object> error(String msg){
+        return RestResp.error(DEFAULT_ERROR_CODE, msg);
+    }
+
     public interface CustomHandler{
         Integer handle(Throwable ex) throws Throwable;
     }

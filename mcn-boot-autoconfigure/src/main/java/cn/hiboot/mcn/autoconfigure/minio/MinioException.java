@@ -1,5 +1,7 @@
 package cn.hiboot.mcn.autoconfigure.minio;
 
+import java.util.concurrent.ExecutionException;
+
 /**
  * MinioException
  *
@@ -9,14 +11,21 @@ package cn.hiboot.mcn.autoconfigure.minio;
 public class MinioException extends RuntimeException {
 
     public MinioException(String message) {
-        super(message);
+        super(message);//swallow underlying ex
     }
 
     public MinioException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public MinioException(Throwable cause,MinioProperties config) {
-        this(config.isReturnPreviousExceptionMessage() ? cause.getMessage() : "Invoke Minio Exception",cause);
+    public MinioException(Throwable cause) {
+        super(extractException(cause));
+    }
+
+    private static Throwable extractException(Throwable cause){
+        if(cause instanceof ExecutionException){
+            return cause.getCause();
+        }
+        return cause;
     }
 }
