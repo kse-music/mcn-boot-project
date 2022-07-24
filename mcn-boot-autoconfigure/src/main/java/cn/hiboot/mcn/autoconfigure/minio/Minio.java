@@ -25,16 +25,24 @@ import java.util.stream.StreamSupport;
  */
 public interface Minio {
 
-    Logger log = LoggerFactory.getLogger(DefaultMinio.class);
+    Logger log = LoggerFactory.getLogger(Minio.class);
 
     Map<String, String> map = Collections.singletonMap("Expect", "100-continue");
 
     DefaultMinioClient getMinioClient();
 
-    MinioProperties getConfig();
-
     default String getDefaultBucketName(){
-        return getConfig().getDefaultBucketName();
+        return getMinioClient().getConfig().getDefaultBucketName();
+    }
+
+    default String getOrDefaultBucket(String bucketName){
+        if(McnUtils.isNullOrEmpty(bucketName)){
+            bucketName = getDefaultBucketName();
+        }
+        if(McnUtils.isNullOrEmpty(bucketName)){
+            throw new MinioException(bucketName + " must not be null or empty");
+        }
+        return bucketName;
     }
 
     default void upload(String objectName,long objectSize,InputStream stream){
@@ -42,8 +50,9 @@ public interface Minio {
     }
 
     default void upload(String objectName,long objectSize,String contentType,InputStream stream){
-        upload(getDefaultBucketName(),objectName,objectSize,getConfig().getMinMultipartSize().toBytes(),contentType,stream);
+        upload(null,objectName,objectSize,0,contentType,stream);
     }
+
     /**
      * 文件上传
      *
@@ -55,8 +64,10 @@ public interface Minio {
      * @param stream   文件流
      */
     default void upload(String bucketName,String objectName,long objectSize,long partSize,String contentType, InputStream stream) {
-        if(McnUtils.isNullOrEmpty(bucketName)){
-            throw new MinioException(bucketName + " can not empty");
+        bucketName = getOrDefaultBucket(bucketName);
+        DefaultMinioClient minioClient = getMinioClient();
+        if(partSize == 0){
+            partSize = minioClient.getConfig().getMinMultipartSize().toBytes();
         }
         try{
             PutObjectArgs.Builder builder = PutObjectArgs.builder()
@@ -67,9 +78,9 @@ public interface Minio {
             if(McnUtils.isNotNullAndEmpty(contentType)){
                 builder.contentType(contentType);
             }
-            getMinioClient().putObject(builder.build());
+            minioClient.putObject(builder.build());
         }catch (Exception e){
-            throw new MinioException(e,getConfig().isReturnPreviousExceptionMessage());
+            throw new MinioException(e,minioClient.getConfig());
         }
     }
 
@@ -78,48 +89,54 @@ public interface Minio {
     }
 
     default void uploadParallel(String objectName,long objectSize,String contentType,InputStream stream){
-        uploadParallel(getDefaultBucketName(),objectName,objectSize,contentType,stream);
+        uploadParallel(null,objectName,objectSize,contentType,stream);
     }
 
     default void uploadParallel(String bucketName,String objectName,long objectSize,String contentType, InputStream stream){
+        bucketName = getOrDefaultBucket(bucketName);
         try {
             getMinioClient().upload(bucketName,objectName,objectSize,contentType,stream);
         } catch (Exception e) {
-            throw new MinioException(e,getConfig().isReturnPreviousExceptionMessage());
+            throw new MinioException(e,getMinioClient().getConfig());
         }
     }
 
     default PreSignResult getPresignedObjectUrl(String objectName,int count){
-        return getPresignedObjectUrl(getDefaultBucketName(),objectName,null,count);
+        return getPresignedObjectUrl(null,objectName,null,count);
     }
 
     default PreSignResult getPresignedObjectUrl(String objectName,String contentType, int count){
-        return getPresignedObjectUrl(getDefaultBucketName(),objectName,contentType,count);
+        return getPresignedObjectUrl(null,objectName,contentType,count);
     }
 
     default PreSignResult getPresignedObjectUrl(String bucketName,String objectName,String contentType, int count){
+        bucketName = getOrDefaultBucket(bucketName);
         try {
             return getMinioClient().getPresignedObjectUrl(bucketName,objectName,contentType,count);
         } catch (Exception e) {
-            throw new MinioException(e,getConfig().isReturnPreviousExceptionMessage());
+            throw new MinioException(e,getMinioClient().getConfig());
         }
     }
 
     default void mergeMultipartUpload(String objectName, String uploadId){
-        mergeMultipartUpload(getDefaultBucketName(),objectName,uploadId);
+        mergeMultipartUpload(null,objectName,uploadId);
     }
 
     default void mergeMultipartUpload(String bucketName,String objectName, String uploadId){
+        bucketName = getOrDefaultBucket(bucketName);
         try {
             getMinioClient().mergeMultipartUpload(bucketName,objectName,uploadId);
-        } catch (Exception e) {
-            throw new MinioException(e,getConfig().isReturnPreviousExceptionMessage());
+        } catch (MinioException e) {
+            throw e;
+        }catch (Exception e) {
+            throw new MinioException(e,getMinioClient().getConfig());
         }
     }
 
     default void delete(String objectName){
-        delete(getDefaultBucketName(),objectName);
+        delete(null,objectName);
     }
+
     /**
      * 刪除文件
      *
@@ -127,19 +144,28 @@ public interface Minio {
      * @param objectName 文件名
      */
     default void delete(String bucketName, String objectName) {
+        bucketName = getOrDefaultBucket(bucketName);
         try{
             RemoveObjectArgs args = RemoveObjectArgs.builder()
                     .bucket(bucketName)
                     .object(objectName)
                     .build();
-            getMinioClient().removeObject(args);
+            getMinioClient().removeObject(args).get();
         }catch (Exception e){
-            throw new MinioException(e,getConfig().isReturnPreviousExceptionMessage());
+            throw new MinioException(e,getMinioClient().getConfig());
         }
     }
 
+    default List<Item> listObjects(){
+        return listObjects(null,false);
+    }
+
     default List<Item> listObjects(boolean recursive){
-        return listObjects(getDefaultBucketName(),recursive);
+        return listObjects(null,recursive);
+    }
+
+    default List<Item> listObjects(String bucketName) {
+        return listObjects(bucketName,false);
     }
 
     /**
@@ -150,6 +176,7 @@ public interface Minio {
      * @return item
      */
     default List<Item> listObjects(String bucketName,boolean recursive) {
+        bucketName = getOrDefaultBucket(bucketName);
         try{
             ListObjectsArgs args = ListObjectsArgs.builder().bucket(bucketName).recursive(recursive).build();
             Iterable<Result<Item>> list = getMinioClient().listObjects(args);
@@ -162,15 +189,16 @@ public interface Minio {
                 return null;
             }).filter(Objects::nonNull).collect(Collectors.toList());
         }catch (Exception e){
-            throw new MinioException(e,getConfig().isReturnPreviousExceptionMessage());
+            throw new MinioException(e,getMinioClient().getConfig());
         }
     }
 
     default void deleteAll(){
-        deleteAll(getDefaultBucketName());
+        deleteAll(null);
     }
 
     default void deleteAll(String bucketName) {
+        bucketName = getOrDefaultBucket(bucketName);
         try{
             ListObjectsArgs args = ListObjectsArgs.builder().bucket(bucketName).recursive(true).build();
             Iterable<Result<Item>> list = getMinioClient().listObjects(args);
@@ -184,15 +212,15 @@ public interface Minio {
             }).filter(Objects::nonNull).collect(Collectors.toList());
             for (Result<DeleteError> errorResult : getMinioClient().removeObjects(RemoveObjectsArgs.builder().bucket(bucketName).objects(objectList).build())) {
                 DeleteError error = errorResult.get();
-                log.error("Error delete object {} ; {}", error.objectName(),error.message());
+                log.error("Error delete object {} ; Reason is {}", error.objectName(),error.message());
             }
         }catch (Exception e){
-            throw new MinioException(e,getConfig().isReturnPreviousExceptionMessage());
+            throw new MinioException(e,getMinioClient().getConfig());
         }
     }
 
     default InputStream getObject(String objectName){
-        return getObject(getDefaultBucketName(),objectName);
+        return getObject(null,objectName);
     }
 
     /**
@@ -203,22 +231,23 @@ public interface Minio {
      * @return 二进制流
      */
     default InputStream getObject(String bucketName, String objectName) {
+        bucketName = getOrDefaultBucket(bucketName);
         try{
             GetObjectArgs args = GetObjectArgs.builder()
                     .bucket(bucketName)
                     .object(objectName)
                     .build();
-            return getMinioClient().getObject(args);
+            return getMinioClient().getObject(args).get();
         }catch (Exception e){
-            throw new MinioException(e,getConfig().isReturnPreviousExceptionMessage());
+            throw new MinioException(e,getMinioClient().getConfig());
         }
     }
 
     default boolean buckExist(String bucketName){
         try {
-            return getMinioClient().bucketExists(BucketExistsArgs.builder().bucket(bucketName).build());
+            return getMinioClient().bucketExists(BucketExistsArgs.builder().bucket(bucketName).build()).get();
         } catch (Exception e) {
-            log.error("{}","check buck exist error");
+            log.error("check buck exist error : {}",e.getMessage());
         }
         return false;
     }
@@ -235,20 +264,20 @@ public interface Minio {
             MakeBucketArgs args = MakeBucketArgs.builder()
                     .bucket(bucketName)
                     .build();
-            getMinioClient().makeBucket(args);
+            getMinioClient().makeBucket(args).get();
         }catch (Exception e){
-            throw new MinioException(e,getConfig().isReturnPreviousExceptionMessage());
+            throw new MinioException(e,getMinioClient().getConfig());
         }
     }
 
     default List<BucketItem> listBuckets() {
         try{
-            List<Bucket> buckets = getMinioClient().listBuckets();
+            List<Bucket> buckets = getMinioClient().listBuckets().get();
             if(McnUtils.isNotNullAndEmpty(buckets)){
                 return buckets.stream().map(b -> new BucketItem(b.name(),b.creationDate())).collect(Collectors.toList());
             }
         }catch (Exception e){
-            throw new MinioException(e,getConfig().isReturnPreviousExceptionMessage());
+            throw new MinioException(e,getMinioClient().getConfig());
         }
         return Collections.emptyList();
     }
@@ -263,9 +292,9 @@ public interface Minio {
             RemoveBucketArgs args = RemoveBucketArgs.builder()
                     .bucket(bucketName)
                     .build();
-            getMinioClient().removeBucket(args);
+            getMinioClient().removeBucket(args).get();
         }catch (Exception e){
-            throw new MinioException(e,getConfig().isReturnPreviousExceptionMessage());
+            throw new MinioException(e,getMinioClient().getConfig());
         }
     }
 

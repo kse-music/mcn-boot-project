@@ -12,13 +12,12 @@ public class DefaultMinio implements Minio{
 
     private final DefaultMinioClient minioClient;
 
-    private final MinioProperties config;
-
-    public DefaultMinio(DefaultMinioClient minioClient, MinioProperties config) {
+    public DefaultMinio(DefaultMinioClient minioClient) {
         this.minioClient = minioClient;
-        this.config = config;
-        String defaultBucketName = config.getDefaultBucketName();
-        if(McnUtils.isNotNullAndEmpty(defaultBucketName)){
+        String defaultBucketName = minioClient.getConfig().getDefaultBucketName();
+        if(McnUtils.isNullOrEmpty(defaultBucketName)){
+            log.warn("It is recommended to set the default bucket name via minio.default-bucket-name");
+        }else {
             //自动创建默认bucketName
             createBucket(defaultBucketName);
         }
@@ -27,11 +26,6 @@ public class DefaultMinio implements Minio{
     @Override
     public DefaultMinioClient getMinioClient() {
         return minioClient;
-    }
-
-    @Override
-    public MinioProperties getConfig() {
-        return config;
     }
 
 }

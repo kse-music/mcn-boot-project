@@ -26,7 +26,7 @@ import java.util.Map;
  * @author DingHao
  * @since 2021/11/8 17:31
  */
-public class DefaultMinioClient extends MinioClient {
+public class DefaultMinioClient extends MinioAsyncClient {
 
     private static final Logger log = LoggerFactory.getLogger(DefaultMinioClient.class);
 
@@ -42,11 +42,14 @@ public class DefaultMinioClient extends MinioClient {
 
     private Method method;
 
-    public DefaultMinioClient(MinioProperties minioProperties,MinioClient.Builder builder) {
+    private MinioProperties minioProperties;
+
+    public DefaultMinioClient(MinioProperties minioProperties,MinioAsyncClient.Builder builder) {
         this(builder.credentials(minioProperties.getAccessKey(),minioProperties.getSecretKey())
                 .endpoint(minioProperties.getEndpoint())
                 .httpClient(minioProperties.getClient().okHttpClient())
                 .build());
+        this.minioProperties = minioProperties;
         this.okHttpClient = minioProperties.getClient().okHttpClient();
         this.pool = new TaskThreadPool(minioProperties.getPool().getCore(),minioProperties.getPool().getMax(),minioProperties.getPool().getQueueSize(),minioProperties.getPool().getThreadName());
         this.size = minioProperties.getMinMultipartSize().toBytes();
@@ -54,11 +57,15 @@ public class DefaultMinioClient extends MinioClient {
         this.method = Method.valueOf(minioProperties.getMethod());
     }
 
-    private DefaultMinioClient(MinioClient client) {
+    private DefaultMinioClient(MinioAsyncClient client) {
         super(client);
     }
 
-    public void upload(String bucketName,String objectName,long length,String contentType,InputStream inputStream) throws Exception{
+    public MinioProperties getConfig() {
+        return minioProperties;
+    }
+
+    public void upload(String bucketName, String objectName, long length, String contentType, InputStream inputStream) throws Exception{
         int intSize = (int)size;
         int count = (int) ((length / size) + 1);
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream(intSize);
@@ -126,7 +133,7 @@ public class DefaultMinioClient extends MinioClient {
 
     public void mergeMultipartUpload(String bucketName,String objectName, String uploadId) throws Exception{
         Part[] parts = new Part[MAX_PART];
-        ListPartsResponse partResult = listParts(bucketName, null, objectName, MAX_PART, 0, uploadId, null, null);
+        ListPartsResponse partResult = listPartsAsync(bucketName, null, objectName, MAX_PART, 0, uploadId, null, null).get();
         int partNumber = 1;
         for (Part part : partResult.result().partList()) {
             parts[partNumber - 1] = new Part(partNumber, part.etag());
@@ -135,7 +142,7 @@ public class DefaultMinioClient extends MinioClient {
         if(partNumber == 1){
             throw new MinioException("未找到需要合并的块");
         }
-        completeMultipartUpload(bucketName, region, objectName, uploadId, parts, null, null);
+        completeMultipartUploadAsync(bucketName, region, objectName, uploadId, parts, null, null).get();
     }
 
 }

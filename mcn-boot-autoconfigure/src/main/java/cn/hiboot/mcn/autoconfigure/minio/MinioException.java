@@ -16,8 +16,7 @@ public class MinioException extends RuntimeException {
         super(message, cause);
     }
 
-    public MinioException(Throwable cause,boolean returnPreviousExceptionMessage) {
-        this(returnPreviousExceptionMessage ? cause.getMessage() : "Invoke Minio Exception",cause);
+    public MinioException(Throwable cause,MinioProperties config) {
+        this(config.isReturnPreviousExceptionMessage() ? cause.getMessage() : "Invoke Minio Exception",cause);
     }
-
 }

@@ -1,6 +1,6 @@
 package cn.hiboot.mcn.autoconfigure.minio;
 
-import io.minio.MinioClient;
+import io.minio.MinioAsyncClient;
 
 /**
  * 自定义minio客户端
@@ -9,5 +9,5 @@ import io.minio.MinioClient;
  * @since 2021/6/28 22:09
  */
 public interface MinioClientBuilderCustomizer {
-    void customize(MinioClient.Builder builder);
+    void customize(MinioAsyncClient.Builder builder);
 }

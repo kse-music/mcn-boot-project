@@ -1,5 +1,6 @@
 package cn.hiboot.mcn.autoconfigure.minio;
 
+import io.minio.MinioAsyncClient;
 import io.minio.MinioClient;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +48,7 @@ public class MinioAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public DefaultMinioClient minioClient(){
-        MinioClient.Builder builder = MinioClient.builder();
+        MinioAsyncClient.Builder builder = MinioAsyncClient.builder();
         for (MinioClientBuilderCustomizer customizer : customizers) {
             customizer.customize(builder);
         }
@@ -57,7 +58,7 @@ public class MinioAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public Minio minio(DefaultMinioClient minioClient){
-        return new DefaultMinio(minioClient,config);
+        return new DefaultMinio(minioClient);
     }
 
     @Configuration(proxyBeanMethods = false)
@@ -84,7 +85,7 @@ public class MinioAutoConfiguration {
             public void handleRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
                 OutputStream os = null;
                 try {
-                    BufferedImage image = ImageIO.read(minio.getObject(request.getParameter(minio.getConfig().getPreviewImageParameterName())));
+                    BufferedImage image = ImageIO.read(minio.getObject(request.getParameter(minio.getMinioClient().getConfig().getPreviewImageParameterName())));
                     response.setContentType("image/png");
                     os = response.getOutputStream();
                     if (image != null) {
