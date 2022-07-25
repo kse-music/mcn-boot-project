@@ -1,6 +1,5 @@
 package cn.hiboot.mcn.autoconfigure.mybatis;
 
-import cn.hiboot.mcn.autoconfigure.condition.ConditionalOnPropertyValueNumber;
 import cn.hiboot.mcn.autoconfigure.config.ConfigProperties;
 import com.zaxxer.hikari.HikariDataSource;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -15,7 +14,6 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
-import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.ResourceLoaderAware;
@@ -39,11 +37,10 @@ import java.io.IOException;
  */
 @AutoConfiguration
 @ConditionalOnClass({SqlSessionFactory.class, SqlSessionFactoryBean.class,HikariDataSource.class})
-@ConditionalOnPropertyValueNumber(prefix = MultipleDataSourceAutoConfiguration.MULTIPLY_DATASOURCE_PREFIX , name = "name")
 @Import(MultipleDataSourceAutoConfiguration.MultipleDataSourceConfig.class)
 public class MultipleDataSourceAutoConfiguration{
 
-   protected static final String MULTIPLY_DATASOURCE_PREFIX = "multiply.datasource";
+   private static final String MULTIPLY_DATASOURCE_PREFIX = "multiply";
 
     protected static class MultipleDataSourceConfig implements ImportBeanDefinitionRegistrar, EnvironmentAware, ResourceLoaderAware {
         private ResourceLoader resourceLoader;
@@ -51,11 +48,13 @@ public class MultipleDataSourceAutoConfiguration{
 
         @Override
         public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry){
-            String[] dbs = environment.getProperty(MULTIPLY_DATASOURCE_PREFIX + ".name", String[].class,new String[0]);
             String basePackage = environment.getProperty(ConfigProperties.APP_BASE_PACKAGE);
             ResourcePatternResolver pathResolver = new PathMatchingResourcePatternResolver();
-
-            for (String dsName : dbs) {
+            MultipleDataSourceProperties properties = Binder.get(environment).bind(MULTIPLY_DATASOURCE_PREFIX,MultipleDataSourceProperties.class).orElse(null);
+            if(properties == null){
+                return;
+            }
+            properties.getDatasource().forEach((dsName,ds) -> {
                 String sqlSessionFactoryName = dsName + "SqlSessionFactory";
                 scanMapper(registry,sqlSessionFactoryName,basePackage + ".dao." + dsName);
 
@@ -63,7 +62,7 @@ public class MultipleDataSourceAutoConfiguration{
                         .setRole(BeanDefinition.ROLE_INFRASTRUCTURE).setSynthetic(true).addConstructorArgReference(sqlSessionFactoryName).getBeanDefinition());
 
                 String dataSourceName = dsName + "DataSource";
-                registry.registerBeanDefinition(dataSourceName, BeanDefinitionBuilder.genericBeanDefinition(HikariDataSource.class,() -> createDataSource(dsName))
+                registry.registerBeanDefinition(dataSourceName, BeanDefinitionBuilder.genericBeanDefinition(HikariDataSource.class,() -> createDataSource(ds))
                         .setRole(BeanDefinition.ROLE_INFRASTRUCTURE).setSynthetic(true).getBeanDefinition());
 
                 SqlSessionFactoryBean factoryBean = new SqlSessionFactoryBean();
@@ -77,7 +76,7 @@ public class MultipleDataSourceAutoConfiguration{
                                 .addPropertyValue("typeHandlersPackage", basePackage + ".dao.handler" + dsName)
                                 .addPropertyValue("configuration", conf).getBeanDefinition());
 
-            }
+            });
         }
 
         private BeanDefinitionBuilder loadMapper(ResourcePatternResolver pathResolver, String dsName){
@@ -106,8 +105,7 @@ public class MultipleDataSourceAutoConfiguration{
             scanner.doScan(pkg);
         }
 
-        private HikariDataSource createDataSource(String dsName) {
-            DataSourceProperties dataSourceProperties = Binder.get(environment).bind("spring.datasource." + dsName, Bindable.of(DataSourceProperties.class)).get();
+        private HikariDataSource createDataSource(DataSourceProperties dataSourceProperties) {
             return dataSourceProperties.initializeDataSourceBuilder().type(HikariDataSource.class).build();
         }
 
