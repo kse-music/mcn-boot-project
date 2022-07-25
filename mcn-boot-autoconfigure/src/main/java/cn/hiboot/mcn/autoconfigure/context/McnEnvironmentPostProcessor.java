@@ -30,6 +30,7 @@ import java.util.Objects;
  * @since 2021/1/16 16:46
  */
 public class McnEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
+    private static final boolean PRESENT = ClassUtils.isPresent("ch.qos.logback.classic.LoggerContext",McnEnvironmentPostProcessor.class.getClassLoader());
 
     private static final String BOOTSTRAP_EAGER_LOAD = "mcn.bootstrap.eagerLoad.enable";
     private static final String MCN_SOURCE_NAME = "mcn-global-unique";
@@ -101,7 +102,12 @@ public class McnEnvironmentPostProcessor implements EnvironmentPostProcessor, Or
         mapProp.put("mcn.version", "v" + McnUtils.getVersion(this.getClass()));
         addLast(propertySources, new MapPropertySource("mcn-map", mapProp));
 
-        addLast(propertySources, loadResourcePropertySource(MCN_DEFAULT_PROPERTY_SOURCE_NAME, ConfigProperties.mcnDefault()));
+        ResourcePropertySource propertySource = loadResourcePropertySource(MCN_DEFAULT_PROPERTY_SOURCE_NAME, ConfigProperties.mcnDefault());
+        if(!PRESENT && propertySource != null){
+            propertySource.getSource().remove("logging.pattern.console");
+            propertySource.getSource().remove("logging.pattern.file");
+        }
+        addLast(propertySources, propertySource);
 
     }
 
