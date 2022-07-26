@@ -38,15 +38,28 @@
     {
       "name": "mapper.scan.additional-package",
       "type": "java.lang.String",
-      "sourceType": "cn.hiboot.mcn.autoconfigure.mybatis.SingleDataSourceAutoConfiguration",
+      "sourceType": "cn.hiboot.mcn.autoconfigure.mybatis.MybatisSingleDataSourceAutoConfiguration",
       "description": "额外需要扫描的包.",
       "defaultValue": ""
     },
     {
-      "name": "multiply.datasource",
+      "name": "multiple.datasource",
       "type": "java.util.Map<java.lang.String,org.springframework.boot.autoconfigure.jdbc.DataSourceProperties>",
-      "sourceType": "cn.hiboot.mcn.autoconfigure.mybatis.MultipleDataSourceProperties",
       "description": "多数据源配置."
+    },
+    {
+      "name": "mybatis.multiple.datasource.enable",
+      "type": "java.lang.Boolean",
+      "sourceType": "cn.hiboot.mcn.autoconfigure.mybatis.MybatisMultipleDataSourceAutoConfiguration",
+      "description": "是否启用mybatis多数据源自动配置.",
+      "defaultValue": false
+    },
+    {
+      "name": "jpa.multiple.datasource.enable",
+      "type": "java.lang.Boolean",
+      "sourceType": "cn.hiboot.mcn.autoconfigure.jpa.JpaMultipleDataSourceAutoConfiguration",
+      "description": "是否启用jpa多数据源自动配置.",
+      "defaultValue": false
     },
     {
       "name": "filter.cross",

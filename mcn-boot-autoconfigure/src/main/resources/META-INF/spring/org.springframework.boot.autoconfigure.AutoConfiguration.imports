@@ -1,8 +1,9 @@
 cn.hiboot.mcn.autoconfigure.actuate.ActuateAutoConfiguration
+cn.hiboot.mcn.autoconfigure.jpa.JpaMultipleDataSourceAutoConfiguration
 cn.hiboot.mcn.autoconfigure.minio.MinioAutoConfiguration
 cn.hiboot.mcn.autoconfigure.mongo.MongoExtensionAutoConfiguration
-cn.hiboot.mcn.autoconfigure.mybatis.SingleDataSourceAutoConfiguration
-cn.hiboot.mcn.autoconfigure.mybatis.MultipleDataSourceAutoConfiguration
+cn.hiboot.mcn.autoconfigure.mybatis.MybatisSingleDataSourceAutoConfiguration
+cn.hiboot.mcn.autoconfigure.mybatis.MybatisMultipleDataSourceAutoConfiguration
 cn.hiboot.mcn.autoconfigure.redis.RedisToolAutoConfiguration
 cn.hiboot.mcn.autoconfigure.validator.ValidatorAutoConfiguration
 cn.hiboot.mcn.autoconfigure.web.groovy.GroovyWebAutoConfiguration

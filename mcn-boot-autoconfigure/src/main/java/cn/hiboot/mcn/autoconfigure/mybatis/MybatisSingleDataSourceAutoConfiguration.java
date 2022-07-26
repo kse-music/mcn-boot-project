@@ -24,7 +24,7 @@ import org.springframework.util.StringUtils;
  */
 @AutoConfiguration
 @ConditionalOnClass({ SqlSessionFactory.class, SqlSessionFactoryBean.class })
-public class SingleDataSourceAutoConfiguration implements BeanDefinitionRegistryPostProcessor, EnvironmentAware, Ordered {
+public class MybatisSingleDataSourceAutoConfiguration implements BeanDefinitionRegistryPostProcessor, EnvironmentAware, Ordered {
 
     private Environment environment;
 

@@ -13,7 +13,9 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
+import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.ResourceLoaderAware;
@@ -28,6 +30,7 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.core.type.AnnotationMetadata;
 
 import java.io.IOException;
+import java.util.Map;
 
 /**
  * MultipleDataSourceAutoConfiguration
@@ -37,10 +40,11 @@ import java.io.IOException;
  */
 @AutoConfiguration
 @ConditionalOnClass({SqlSessionFactory.class, SqlSessionFactoryBean.class,HikariDataSource.class})
-@Import(MultipleDataSourceAutoConfiguration.MultipleDataSourceConfig.class)
-public class MultipleDataSourceAutoConfiguration{
+@ConditionalOnProperty(prefix = "mybatis."+MybatisMultipleDataSourceAutoConfiguration.MULTIPLE_DATASOURCE_PREFIX,name = "enable",havingValue = "true")
+@Import(MybatisMultipleDataSourceAutoConfiguration.MultipleDataSourceConfig.class)
+public class MybatisMultipleDataSourceAutoConfiguration {
 
-   private static final String MULTIPLY_DATASOURCE_PREFIX = "multiply";
+    public static final String MULTIPLE_DATASOURCE_PREFIX = "multiple.datasource";
 
     protected static class MultipleDataSourceConfig implements ImportBeanDefinitionRegistrar, EnvironmentAware, ResourceLoaderAware {
         private ResourceLoader resourceLoader;
@@ -50,11 +54,11 @@ public class MultipleDataSourceAutoConfiguration{
         public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry){
             String basePackage = environment.getProperty(ConfigProperties.APP_BASE_PACKAGE);
             ResourcePatternResolver pathResolver = new PathMatchingResourcePatternResolver();
-            MultipleDataSourceProperties properties = Binder.get(environment).bind(MULTIPLY_DATASOURCE_PREFIX,MultipleDataSourceProperties.class).orElse(null);
+            Map<String, DataSourceProperties> properties = Binder.get(environment).bind(MULTIPLE_DATASOURCE_PREFIX, Bindable.mapOf(String.class, DataSourceProperties.class)).orElse(null);
             if(properties == null){
                 return;
             }
-            properties.getDatasource().forEach((dsName,ds) -> {
+            properties.forEach((dsName,ds) -> {
                 String sqlSessionFactoryName = dsName + "SqlSessionFactory";
                 scanMapper(registry,sqlSessionFactoryName,basePackage + ".dao." + dsName);
 
@@ -105,10 +109,6 @@ public class MultipleDataSourceAutoConfiguration{
             scanner.doScan(pkg);
         }
 
-        private HikariDataSource createDataSource(DataSourceProperties dataSourceProperties) {
-            return dataSourceProperties.initializeDataSourceBuilder().type(HikariDataSource.class).build();
-        }
-
         @Override
         public void setEnvironment(Environment environment) {
             this.environment = environment;
@@ -120,5 +120,10 @@ public class MultipleDataSourceAutoConfiguration{
         }
 
     }
+
+    public static HikariDataSource createDataSource(DataSourceProperties dataSourceProperties) {
+        return dataSourceProperties.initializeDataSourceBuilder().type(HikariDataSource.class).build();
+    }
+
 
 }
