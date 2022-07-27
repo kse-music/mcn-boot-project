@@ -19,6 +19,7 @@ import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.boot.autoconfigure.task.TaskExecutionAutoConfiguration;
 import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.context.annotation.FullyQualifiedAnnotationBeanNameGenerator;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.env.Environment;
@@ -42,11 +43,13 @@ import java.util.Map;
  * @since 2022/7/26 14:45
  */
 @AutoConfiguration(before = { HibernateJpaAutoConfiguration.class, TaskExecutionAutoConfiguration.class })
-@ConditionalOnProperty(prefix = "jpa."+MybatisMultipleDataSourceAutoConfiguration.MULTIPLE_DATASOURCE_PREFIX,name = "enable",havingValue = "true")
+@ConditionalOnProperty(prefix = JpaMultipleDataSourceAutoConfiguration.JPA_PREFIX,name = "enable",havingValue = "true")
 @ConditionalOnClass(JpaRepository.class)
 @ConditionalOnMissingBean({ JpaRepositoryFactoryBean.class, JpaRepositoryConfigExtension.class })
 @Import(JpaMultipleDataSourceAutoConfiguration.JpaRepositoriesRegistrar.class)
 public class JpaMultipleDataSourceAutoConfiguration {
+
+    static final String JPA_PREFIX = "jpa."+MybatisMultipleDataSourceAutoConfiguration.MULTIPLE_DATASOURCE_PREFIX;
 
     static class JpaRepositoriesRegistrar extends RepositoryBeanDefinitionRegistrarSupport {
         private Environment environment;
@@ -62,7 +65,9 @@ public class JpaMultipleDataSourceAutoConfiguration {
 
             McnAssert.notNull(registry, "BeanDefinitionRegistry must not be null");
             McnAssert.notNull(resourceLoader, "ResourceLoader must not be null");
-
+            if(Binder.get(environment).bind(JPA_PREFIX+".full-name.enable",Boolean.class).orElse(false)){
+                generator = new FullyQualifiedAnnotationBeanNameGenerator();
+            }
             AnnotationMetadata metadata = AnnotationMetadata.introspect(EnableJpaRepositoriesConfiguration.class);
             AnnotationRepositoryConfigurationSource configurationSource = new AnnotationRepositoryConfigurationSource(metadata,
                     getAnnotation(), resourceLoader, environment, registry, generator);
@@ -161,10 +166,11 @@ public class JpaMultipleDataSourceAutoConfiguration {
             super.setResourceLoader(resourceLoader);
         }
 
-        @EnableJpaRepositories
-        private static class EnableJpaRepositoriesConfiguration {
+    }
 
-        }
+    @EnableJpaRepositories
+    private static class EnableJpaRepositoriesConfiguration {
+
     }
 
 }
