@@ -1,9 +1,11 @@
 package cn.hiboot.mcn.autoconfigure.jpa;
 
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.orm.jpa.EntityManagerFactoryBuilderCustomizer;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
+import org.springframework.context.annotation.Bean;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -21,6 +23,7 @@ import javax.sql.DataSource;
  * @since 2022/7/26 23:13
  */
 class JpaConfiguration {
+
     private DataSource dataSource;
     private String packages;
     private String persistenceUnit;
@@ -54,6 +57,8 @@ class JpaConfiguration {
         return new JpaTransactionManager(localContainerEntityManagerFactoryBean.getObject());
     }
 
+    @Bean
+    @ConditionalOnMissingBean
     public JpaVendorAdapter jpaVendorAdapter() {
         AbstractJpaVendorAdapter adapter = new HibernateJpaVendorAdapter();
         adapter.setShowSql(this.properties.isShowSql());
@@ -67,6 +72,8 @@ class JpaConfiguration {
         return adapter;
     }
 
+    @Bean
+    @ConditionalOnMissingBean
     public EntityManagerFactoryBuilder entityManagerFactoryBuilder(JpaVendorAdapter jpaVendorAdapter,
                                                                    ObjectProvider<PersistenceUnitManager> persistenceUnitManager,
                                                                    ObjectProvider<EntityManagerFactoryBuilderCustomizer> customizers) {

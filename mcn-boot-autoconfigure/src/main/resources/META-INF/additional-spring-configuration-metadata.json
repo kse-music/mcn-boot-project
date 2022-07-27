@@ -62,13 +62,6 @@
       "defaultValue": false
     },
     {
-      "name": "jpa.multiple.datasource.full-name.enable",
-      "type": "java.lang.Boolean",
-      "sourceType": "cn.hiboot.mcn.autoconfigure.jpa.JpaMultipleDataSourceAutoConfiguration",
-      "description": "是否启用fullBeanName生成器.",
-      "defaultValue": false
-    },
-    {
       "name": "filter.cross",
       "type": "java.lang.Boolean",
       "sourceType": "cn.hiboot.mcn.autoconfigure.web.filter.cors.CorsFilterAutoConfiguration",

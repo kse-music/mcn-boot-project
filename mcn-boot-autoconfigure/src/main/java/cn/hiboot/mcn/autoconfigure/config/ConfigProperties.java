@@ -20,6 +20,8 @@ public abstract class ConfigProperties {
     public static final String APP_BASE_PACKAGE = "app.base-package";
     public static final String DEFAULT_PROPERTY_SOURCE_NAME = "mcn-default";
 
+    public static final String MULTIPLE_DATASOURCE_PREFIX = "multiple.datasource";
+
     public static ClassPathResource mcnDefault() {
         return createResource("mcn-default.properties");
     }

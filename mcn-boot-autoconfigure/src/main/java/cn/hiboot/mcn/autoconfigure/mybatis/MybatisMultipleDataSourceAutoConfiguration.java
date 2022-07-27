@@ -7,7 +7,6 @@ import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.mybatis.spring.boot.autoconfigure.SpringBootVFS;
 import org.mybatis.spring.mapper.ClassPathMapperScanner;
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -40,11 +39,9 @@ import java.util.Map;
  */
 @AutoConfiguration
 @ConditionalOnClass({SqlSessionFactory.class, SqlSessionFactoryBean.class,HikariDataSource.class})
-@ConditionalOnProperty(prefix = "mybatis."+MybatisMultipleDataSourceAutoConfiguration.MULTIPLE_DATASOURCE_PREFIX,name = "enable",havingValue = "true")
+@ConditionalOnProperty(prefix = "mybatis."+ConfigProperties.MULTIPLE_DATASOURCE_PREFIX,name = "enable",havingValue = "true")
 @Import(MybatisMultipleDataSourceAutoConfiguration.MultipleDataSourceConfig.class)
 public class MybatisMultipleDataSourceAutoConfiguration {
-
-    public static final String MULTIPLE_DATASOURCE_PREFIX = "multiple.datasource";
 
     protected static class MultipleDataSourceConfig implements ImportBeanDefinitionRegistrar, EnvironmentAware, ResourceLoaderAware {
         private ResourceLoader resourceLoader;
@@ -54,7 +51,7 @@ public class MybatisMultipleDataSourceAutoConfiguration {
         public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry){
             String basePackage = environment.getProperty(ConfigProperties.APP_BASE_PACKAGE);
             ResourcePatternResolver pathResolver = new PathMatchingResourcePatternResolver();
-            Map<String, DataSourceProperties> properties = Binder.get(environment).bind(MULTIPLE_DATASOURCE_PREFIX, Bindable.mapOf(String.class, DataSourceProperties.class)).orElse(null);
+            Map<String, DataSourceProperties> properties = Binder.get(environment).bind(ConfigProperties.MULTIPLE_DATASOURCE_PREFIX, Bindable.mapOf(String.class, DataSourceProperties.class)).orElse(null);
             if(properties == null){
                 return;
             }
@@ -63,11 +60,11 @@ public class MybatisMultipleDataSourceAutoConfiguration {
                 scanMapper(registry,sqlSessionFactoryName,basePackage + ".dao." + dsName);
 
                 registry.registerBeanDefinition(dsName + "sqlSessionTemplate", BeanDefinitionBuilder.genericBeanDefinition(SqlSessionTemplate.class)
-                        .setRole(BeanDefinition.ROLE_INFRASTRUCTURE).setSynthetic(true).addConstructorArgReference(sqlSessionFactoryName).getBeanDefinition());
+                        .addConstructorArgReference(sqlSessionFactoryName)
+                        .getBeanDefinition());
 
                 String dataSourceName = dsName + "DataSource";
-                registry.registerBeanDefinition(dataSourceName, BeanDefinitionBuilder.genericBeanDefinition(HikariDataSource.class,() -> createDataSource(ds))
-                        .setRole(BeanDefinition.ROLE_INFRASTRUCTURE).setSynthetic(true).getBeanDefinition());
+                registry.registerBeanDefinition(dataSourceName, BeanDefinitionBuilder.genericBeanDefinition(HikariDataSource.class,() -> createDataSource(ds)).getBeanDefinition());
 
                 SqlSessionFactoryBean factoryBean = new SqlSessionFactoryBean();
                 factoryBean.setVfs(SpringBootVFS.class);
@@ -84,8 +81,7 @@ public class MybatisMultipleDataSourceAutoConfiguration {
         }
 
         private BeanDefinitionBuilder loadMapper(ResourcePatternResolver pathResolver, String dsName){
-            BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.rootBeanDefinition(SqlSessionFactoryBean.class)
-                    .setRole(BeanDefinition.ROLE_INFRASTRUCTURE).addPropertyValue("vfs", SpringBootVFS.class);
+            BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(SqlSessionFactoryBean.class).addPropertyValue("vfs", SpringBootVFS.class);
             Resource[] resources = null;
             try {
                 resources = pathResolver.getResources("classpath:mapper/" + dsName + "/*.xml");

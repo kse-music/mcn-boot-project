@@ -5,7 +5,6 @@ import cn.hiboot.mcn.autoconfigure.mybatis.MybatisMultipleDataSourceAutoConfigur
 import cn.hiboot.mcn.core.util.McnAssert;
 import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
@@ -43,13 +42,11 @@ import java.util.Map;
  * @since 2022/7/26 14:45
  */
 @AutoConfiguration(before = { HibernateJpaAutoConfiguration.class, TaskExecutionAutoConfiguration.class })
-@ConditionalOnProperty(prefix = JpaMultipleDataSourceAutoConfiguration.JPA_PREFIX,name = "enable",havingValue = "true")
+@ConditionalOnProperty(prefix = "jpa."+ConfigProperties.MULTIPLE_DATASOURCE_PREFIX,name = "enable",havingValue = "true")
 @ConditionalOnClass(JpaRepository.class)
 @ConditionalOnMissingBean({ JpaRepositoryFactoryBean.class, JpaRepositoryConfigExtension.class })
 @Import(JpaMultipleDataSourceAutoConfiguration.JpaRepositoriesRegistrar.class)
 public class JpaMultipleDataSourceAutoConfiguration {
-
-    static final String JPA_PREFIX = "jpa."+MybatisMultipleDataSourceAutoConfiguration.MULTIPLE_DATASOURCE_PREFIX;
 
     static class JpaRepositoriesRegistrar extends RepositoryBeanDefinitionRegistrarSupport {
         private Environment environment;
@@ -58,19 +55,15 @@ public class JpaMultipleDataSourceAutoConfiguration {
         @Override
         public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry, BeanNameGenerator generator) {
             String basePackage = environment.getProperty(ConfigProperties.APP_BASE_PACKAGE);
-            Map<String, DataSourceProperties> properties = Binder.get(environment).bind(MybatisMultipleDataSourceAutoConfiguration.MULTIPLE_DATASOURCE_PREFIX, Bindable.mapOf(String.class, DataSourceProperties.class)).orElse(null);
+            Map<String, DataSourceProperties> properties = Binder.get(environment).bind(ConfigProperties.MULTIPLE_DATASOURCE_PREFIX, Bindable.mapOf(String.class, DataSourceProperties.class)).orElse(null);
             if(properties == null){
                 return;
             }
-
             McnAssert.notNull(registry, "BeanDefinitionRegistry must not be null");
             McnAssert.notNull(resourceLoader, "ResourceLoader must not be null");
-            if(Binder.get(environment).bind(JPA_PREFIX+".full-name.enable",Boolean.class).orElse(false)){
-                generator = new FullyQualifiedAnnotationBeanNameGenerator();
-            }
+            generator = new FullyQualifiedAnnotationBeanNameGenerator();//支持同名接口
             AnnotationMetadata metadata = AnnotationMetadata.introspect(EnableJpaRepositoriesConfiguration.class);
-            AnnotationRepositoryConfigurationSource configurationSource = new AnnotationRepositoryConfigurationSource(metadata,
-                    getAnnotation(), resourceLoader, environment, registry, generator);
+            AnnotationRepositoryConfigurationSource configurationSource = new AnnotationRepositoryConfigurationSource(metadata,getAnnotation(), resourceLoader, environment, registry, generator);
             AnnotationAttributes annotationAttributes = getAnnotationAttributes(configurationSource);
             if(annotationAttributes == null){
                 return;
@@ -95,35 +88,19 @@ public class JpaMultipleDataSourceAutoConfiguration {
 
                 //JpaConfiguration
                 String configBeanName = dsName + "JpaConfiguration";
-                registry.registerBeanDefinition(configBeanName,BeanDefinitionBuilder.rootBeanDefinition(JpaConfiguration.class)
+                registry.registerBeanDefinition(configBeanName,BeanDefinitionBuilder.genericBeanDefinition(JpaConfiguration.class)
                                 .addPropertyReference("dataSource",dataSourceName)
                                 .addPropertyValue("packages",basePackage + ".bean")
                                 .addPropertyValue("persistenceUnit",dsName)
                                 .addPropertyValue("jpaProperties",jpaProperties)
                                 .getBeanDefinition());
 
-                //JpaVendorAdapter
-                String jpaVendorAdapter = "jpaVendorAdapter";
-                if(!registry.containsBeanDefinition(jpaVendorAdapter)){
-                    registry.registerBeanDefinition(jpaVendorAdapter,BeanDefinitionBuilder.rootBeanDefinition(JpaConfiguration.class)
-                            .setFactoryMethodOnBean("jpaVendorAdapter",configBeanName).getBeanDefinition());
-                }
-                //entityManagerFactoryBuilder
-                String entityManagerFactoryBuilder = "entityManagerFactoryBuilder";
-                if(!registry.containsBeanDefinition(entityManagerFactoryBuilder)){
-                    registry.registerBeanDefinition(entityManagerFactoryBuilder,BeanDefinitionBuilder.rootBeanDefinition(JpaConfiguration.class)
-                            .setFactoryMethodOnBean("entityManagerFactoryBuilder",configBeanName)
-                            .addConstructorArgReference(jpaVendorAdapter)
-                            .setAutowireMode(AbstractBeanDefinition.AUTOWIRE_CONSTRUCTOR)
-                            .getBeanDefinition());
-                }
-
-                registry.registerBeanDefinition(entityManagerFactoryRef,BeanDefinitionBuilder.rootBeanDefinition(JpaConfiguration.class)
+                registry.registerBeanDefinition(entityManagerFactoryRef,BeanDefinitionBuilder.genericBeanDefinition(JpaConfiguration.class)
                                 .setFactoryMethodOnBean("localContainerEntityManagerFactoryBean",configBeanName)
-                                .addConstructorArgReference(entityManagerFactoryBuilder)
+                                .addConstructorArgReference("entityManagerFactoryBuilder")
                                 .getBeanDefinition());
 
-                registry.registerBeanDefinition(transactionManagerRef,BeanDefinitionBuilder.rootBeanDefinition(JpaConfiguration.class)
+                registry.registerBeanDefinition(transactionManagerRef,BeanDefinitionBuilder.genericBeanDefinition(JpaConfiguration.class)
                         .setFactoryMethodOnBean("transactionManager",configBeanName)
                         .addConstructorArgReference(BeanFactory.FACTORY_BEAN_PREFIX+entityManagerFactoryRef)
                         .getBeanDefinition());
