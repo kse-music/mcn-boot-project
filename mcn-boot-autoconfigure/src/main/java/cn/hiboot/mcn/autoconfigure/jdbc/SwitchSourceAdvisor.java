@@ -38,6 +38,9 @@ public class SwitchSourceAdvisor extends AbstractPointcutAdvisor {
     public Advice getAdvice() {
         return (MethodInterceptor) invocation -> {
             SwitchSource annotation = invocation.getMethod().getAnnotation(SwitchSource.class);
+            if(annotation == null){
+                annotation = invocation.getMethod().getDeclaringClass().getAnnotation(SwitchSource.class);
+            }
             DataSourceHolder.setDataSource(annotation.value());
             Object o = invocation.proceed();
             DataSourceHolder.clearDataSource();
