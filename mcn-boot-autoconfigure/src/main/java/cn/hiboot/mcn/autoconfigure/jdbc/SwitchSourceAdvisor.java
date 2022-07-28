@@ -10,6 +10,10 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Role;
 
+import java.lang.reflect.Method;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
  * SwitchSourceConfiguration
  *
@@ -19,6 +23,8 @@ import org.springframework.context.annotation.Role;
 @Configuration(proxyBeanMethods = false)
 @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 public class SwitchSourceAdvisor extends AbstractPointcutAdvisor {
+
+    private static final Map<Method,String> cache = new ConcurrentHashMap<>();
 
     private final Pointcut pointcut;
 
@@ -37,11 +43,14 @@ public class SwitchSourceAdvisor extends AbstractPointcutAdvisor {
     @Override
     public Advice getAdvice() {
         return (MethodInterceptor) invocation -> {
-            SwitchSource annotation = invocation.getMethod().getAnnotation(SwitchSource.class);
-            if(annotation == null){
-                annotation = invocation.getMethod().getDeclaringClass().getAnnotation(SwitchSource.class);
-            }
-            DataSourceHolder.setDataSource(annotation.value());
+            String ds = cache.computeIfAbsent(invocation.getMethod(),m -> {
+                SwitchSource annotation = invocation.getMethod().getAnnotation(SwitchSource.class);
+                if(annotation == null){
+                    annotation = invocation.getMethod().getDeclaringClass().getAnnotation(SwitchSource.class);
+                }
+                return annotation.value();
+            });
+            DataSourceHolder.setDataSource(ds);
             Object o = invocation.proceed();
             DataSourceHolder.clearDataSource();
             return o;
