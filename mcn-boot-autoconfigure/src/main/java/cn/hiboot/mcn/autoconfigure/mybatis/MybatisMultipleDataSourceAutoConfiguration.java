@@ -1,21 +1,23 @@
 package cn.hiboot.mcn.autoconfigure.mybatis;
 
 import cn.hiboot.mcn.autoconfigure.config.ConfigProperties;
+import cn.hiboot.mcn.autoconfigure.jdbc.MultipleDataSourceAutoConfiguration;
+import cn.hiboot.mcn.autoconfigure.jdbc.MultipleDataSourceMarker;
 import com.zaxxer.hikari.HikariDataSource;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.mybatis.spring.boot.autoconfigure.SpringBootVFS;
 import org.mybatis.spring.mapper.ClassPathMapperScanner;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
-import org.springframework.boot.context.properties.bind.Bindable;
-import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.annotation.FullyQualifiedAnnotationBeanNameGenerator;
@@ -37,9 +39,10 @@ import java.util.Map;
  * @author DingHao
  * @since 2022/1/2 22:21
  */
-@AutoConfiguration
+@AutoConfiguration(after = MultipleDataSourceAutoConfiguration.class)
 @ConditionalOnClass({SqlSessionFactory.class, SqlSessionFactoryBean.class,HikariDataSource.class})
-@ConditionalOnProperty(prefix = "mybatis."+ConfigProperties.MULTIPLE_DATASOURCE_PREFIX,name = "enable",havingValue = "true")
+@ConditionalOnProperty(prefix = ConfigProperties.MYBATIS_MULTIPLE_DATASOURCE_PREFIX,name = "enable",havingValue = "true")
+@ConditionalOnBean(MultipleDataSourceMarker.class)
 @Import(MybatisMultipleDataSourceAutoConfiguration.MultipleDataSourceConfig.class)
 public class MybatisMultipleDataSourceAutoConfiguration {
 
@@ -47,14 +50,17 @@ public class MybatisMultipleDataSourceAutoConfiguration {
         private ResourceLoader resourceLoader;
         private Environment environment;
 
+        private final MultipleDataSourceMarker multipleDataSourceMarker;
+
+        public MultipleDataSourceConfig(BeanFactory beanFactory) {
+            this.multipleDataSourceMarker = beanFactory.getBean(MultipleDataSourceMarker.class);
+        }
+
         @Override
         public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry){
             String basePackage = environment.getProperty(ConfigProperties.APP_BASE_PACKAGE);
             ResourcePatternResolver pathResolver = new PathMatchingResourcePatternResolver();
-            Map<String, DataSourceProperties> properties = Binder.get(environment).bind(ConfigProperties.MULTIPLE_DATASOURCE_PREFIX, Bindable.mapOf(String.class, DataSourceProperties.class)).orElse(null);
-            if(properties == null){
-                return;
-            }
+            Map<String, DataSourceProperties> properties = multipleDataSourceMarker.getProperties();
             properties.forEach((dsName,ds) -> {
                 String sqlSessionFactoryName = dsName + "SqlSessionFactory";
                 scanMapper(registry,sqlSessionFactoryName,basePackage + ".dao." + dsName);
@@ -64,7 +70,7 @@ public class MybatisMultipleDataSourceAutoConfiguration {
                         .getBeanDefinition());
 
                 String dataSourceName = dsName + "DataSource";
-                registry.registerBeanDefinition(dataSourceName, BeanDefinitionBuilder.genericBeanDefinition(HikariDataSource.class,() -> createDataSource(ds)).getBeanDefinition());
+//                registry.registerBeanDefinition(dataSourceName, BeanDefinitionBuilder.genericBeanDefinition(HikariDataSource.class,() -> createDataSource(ds)).getBeanDefinition());
 
                 SqlSessionFactoryBean factoryBean = new SqlSessionFactoryBean();
                 factoryBean.setVfs(SpringBootVFS.class);
@@ -116,10 +122,5 @@ public class MybatisMultipleDataSourceAutoConfiguration {
         }
 
     }
-
-    public static HikariDataSource createDataSource(DataSourceProperties dataSourceProperties) {
-        return dataSourceProperties.initializeDataSourceBuilder().type(HikariDataSource.class).build();
-    }
-
 
 }

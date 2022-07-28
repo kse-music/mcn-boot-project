@@ -1,14 +1,15 @@
 package cn.hiboot.mcn.autoconfigure.jpa;
 
 import cn.hiboot.mcn.autoconfigure.config.ConfigProperties;
-import cn.hiboot.mcn.autoconfigure.mybatis.MybatisMultipleDataSourceAutoConfiguration;
+import cn.hiboot.mcn.autoconfigure.jdbc.MultipleDataSourceAutoConfiguration;
+import cn.hiboot.mcn.autoconfigure.jdbc.MultipleDataSourceMarker;
 import cn.hiboot.mcn.core.util.McnAssert;
-import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -16,7 +17,6 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.boot.autoconfigure.task.TaskExecutionAutoConfiguration;
-import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.context.annotation.FullyQualifiedAnnotationBeanNameGenerator;
 import org.springframework.context.annotation.Import;
@@ -41,9 +41,10 @@ import java.util.Map;
  * @author DingHao
  * @since 2022/7/26 14:45
  */
-@AutoConfiguration(before = { HibernateJpaAutoConfiguration.class, TaskExecutionAutoConfiguration.class })
-@ConditionalOnProperty(prefix = "jpa."+ConfigProperties.MULTIPLE_DATASOURCE_PREFIX,name = "enable",havingValue = "true")
+@AutoConfiguration(before = { HibernateJpaAutoConfiguration.class, TaskExecutionAutoConfiguration.class },after = MultipleDataSourceAutoConfiguration.class)
+@ConditionalOnProperty(prefix = ConfigProperties.JPA_MULTIPLE_DATASOURCE_PREFIX,name = "enable",havingValue = "true")
 @ConditionalOnClass(JpaRepository.class)
+@ConditionalOnBean(MultipleDataSourceMarker.class)
 @ConditionalOnMissingBean({ JpaRepositoryFactoryBean.class, JpaRepositoryConfigExtension.class })
 @Import(JpaMultipleDataSourceAutoConfiguration.JpaRepositoriesRegistrar.class)
 public class JpaMultipleDataSourceAutoConfiguration {
@@ -51,14 +52,17 @@ public class JpaMultipleDataSourceAutoConfiguration {
     static class JpaRepositoriesRegistrar extends RepositoryBeanDefinitionRegistrarSupport {
         private Environment environment;
         private ResourceLoader resourceLoader;
+        private final MultipleDataSourceMarker multipleDataSourceMarker;
+
+        public JpaRepositoriesRegistrar(BeanFactory beanFactory) {
+            this.multipleDataSourceMarker = beanFactory.getBean(MultipleDataSourceMarker.class);
+        }
 
         @Override
         public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry, BeanNameGenerator generator) {
             String basePackage = environment.getProperty(ConfigProperties.APP_BASE_PACKAGE);
-            Map<String, DataSourceProperties> properties = Binder.get(environment).bind(ConfigProperties.MULTIPLE_DATASOURCE_PREFIX, Bindable.mapOf(String.class, DataSourceProperties.class)).orElse(null);
-            if(properties == null){
-                return;
-            }
+            Map<String, DataSourceProperties> properties = multipleDataSourceMarker.getProperties();
+
             McnAssert.notNull(registry, "BeanDefinitionRegistry must not be null");
             McnAssert.notNull(resourceLoader, "ResourceLoader must not be null");
             generator = new FullyQualifiedAnnotationBeanNameGenerator();//支持同名接口
@@ -84,7 +88,7 @@ public class JpaMultipleDataSourceAutoConfiguration {
 
                 //数据源
                 String dataSourceName = dsName + "DataSource";
-                registry.registerBeanDefinition(dataSourceName, BeanDefinitionBuilder.genericBeanDefinition(HikariDataSource.class,() ->  MybatisMultipleDataSourceAutoConfiguration.createDataSource(ds)).getBeanDefinition());
+//                registry.registerBeanDefinition(dataSourceName, BeanDefinitionBuilder.genericBeanDefinition(HikariDataSource.class,() ->  MybatisMultipleDataSourceAutoConfiguration.createDataSource(ds)).getBeanDefinition());
 
                 //JpaConfiguration
                 String configBeanName = dsName + "JpaConfiguration";

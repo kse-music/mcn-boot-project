@@ -1,4 +1,5 @@
 cn.hiboot.mcn.autoconfigure.actuate.ActuateAutoConfiguration
+cn.hiboot.mcn.autoconfigure.jdbc.MultipleDataSourceAutoConfiguration
 cn.hiboot.mcn.autoconfigure.jpa.JpaMultipleDataSourceAutoConfiguration
 cn.hiboot.mcn.autoconfigure.minio.MinioAutoConfiguration
 cn.hiboot.mcn.autoconfigure.mongo.MongoExtensionAutoConfiguration

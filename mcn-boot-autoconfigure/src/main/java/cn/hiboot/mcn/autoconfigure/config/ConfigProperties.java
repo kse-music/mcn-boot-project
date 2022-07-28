@@ -21,6 +21,9 @@ public abstract class ConfigProperties {
     public static final String DEFAULT_PROPERTY_SOURCE_NAME = "mcn-default";
 
     public static final String MULTIPLE_DATASOURCE_PREFIX = "multiple.datasource";
+    public static final String JPA_MULTIPLE_DATASOURCE_PREFIX = "jpa." + MULTIPLE_DATASOURCE_PREFIX;
+    public static final String MYBATIS_MULTIPLE_DATASOURCE_PREFIX = "mybatis." + MULTIPLE_DATASOURCE_PREFIX;
+    public static final String DYNAMIC_DATASOURCE_PREFIX = "dynamic.datasource";
 
     public static ClassPathResource mcnDefault() {
         return createResource("mcn-default.properties");
