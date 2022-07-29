@@ -2,7 +2,7 @@ package cn.hiboot.mcn.autoconfigure.mybatis;
 
 import cn.hiboot.mcn.autoconfigure.config.ConfigProperties;
 import cn.hiboot.mcn.autoconfigure.jdbc.MultipleDataSourceAutoConfiguration;
-import cn.hiboot.mcn.autoconfigure.jdbc.MultipleDataSourceMarker;
+import cn.hiboot.mcn.autoconfigure.jdbc.MultipleDataSourceConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionFactoryBean;
@@ -17,9 +17,6 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
-import org.springframework.context.EnvironmentAware;
-import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.annotation.FullyQualifiedAnnotationBeanNameGenerator;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
@@ -31,7 +28,6 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.core.type.AnnotationMetadata;
 
 import java.io.IOException;
-import java.util.Map;
 
 /**
  * MultipleDataSourceAutoConfiguration
@@ -42,26 +38,26 @@ import java.util.Map;
 @AutoConfiguration(after = MultipleDataSourceAutoConfiguration.class)
 @ConditionalOnClass({SqlSessionFactory.class, SqlSessionFactoryBean.class,HikariDataSource.class})
 @ConditionalOnProperty(prefix = ConfigProperties.MYBATIS_MULTIPLE_DATASOURCE_PREFIX,name = "enable",havingValue = "true")
-@ConditionalOnBean(MultipleDataSourceMarker.class)
-@Import(MybatisMultipleDataSourceAutoConfiguration.MultipleDataSourceConfig.class)
+@ConditionalOnBean(MultipleDataSourceConfig.class)
+@Import(MybatisMultipleDataSourceAutoConfiguration.MybatisMultipleDataSourceConfig.class)
 public class MybatisMultipleDataSourceAutoConfiguration {
 
-    protected static class MultipleDataSourceConfig implements ImportBeanDefinitionRegistrar, EnvironmentAware, ResourceLoaderAware {
-        private ResourceLoader resourceLoader;
-        private Environment environment;
+    protected static class MybatisMultipleDataSourceConfig implements ImportBeanDefinitionRegistrar {
+        private final ResourceLoader resourceLoader;
+        private final Environment environment;
+        private final MultipleDataSourceConfig multipleDataSourceConfig;
 
-        private final MultipleDataSourceMarker multipleDataSourceMarker;
-
-        public MultipleDataSourceConfig(BeanFactory beanFactory) {
-            this.multipleDataSourceMarker = beanFactory.getBean(MultipleDataSourceMarker.class);
+        public MybatisMultipleDataSourceConfig(ResourceLoader resourceLoader, Environment environment, BeanFactory beanFactory) {
+            this.resourceLoader = resourceLoader;
+            this.environment = environment;
+            this.multipleDataSourceConfig = beanFactory.getBean(MultipleDataSourceConfig.class);
         }
 
         @Override
         public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry){
             String basePackage = environment.getProperty(ConfigProperties.APP_BASE_PACKAGE);
             ResourcePatternResolver pathResolver = new PathMatchingResourcePatternResolver();
-            Map<String, DataSourceProperties> properties = multipleDataSourceMarker.getProperties();
-            properties.forEach((dsName,ds) -> {
+            multipleDataSourceConfig.getProperties().forEach((dsName,ds) -> {
                 String sqlSessionFactoryName = dsName + "SqlSessionFactory";
                 scanMapper(registry,sqlSessionFactoryName,basePackage + ".dao." + dsName);
 
@@ -106,16 +102,6 @@ public class MybatisMultipleDataSourceAutoConfiguration {
             scanner.setSqlSessionFactoryBeanName(sqlSessionFactoryName);
             scanner.registerFilters();
             scanner.doScan(pkg);
-        }
-
-        @Override
-        public void setEnvironment(Environment environment) {
-            this.environment = environment;
-        }
-
-        @Override
-        public void setResourceLoader(ResourceLoader resourceLoader) {
-            this.resourceLoader = resourceLoader;
         }
 
     }

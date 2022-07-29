@@ -5,11 +5,8 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.*;
+import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
 import org.springframework.jdbc.datasource.lookup.BeanFactoryDataSourceLookup;
 
@@ -22,8 +19,7 @@ import java.util.Map;
  * @author DingHao
  * @since 2022/7/28 17:08
  */
-@Configuration(proxyBeanMethods = false)
-@ConditionalOnProperty(prefix = ConfigProperties.DYNAMIC_DATASOURCE_PREFIX,name = "enable",havingValue = "true")
+@Conditional(DynamicDataSourceConfiguration.OnDefaultEnable.class)
 @Import(SwitchSourceAdvisor.class)
 public class DynamicDataSourceConfiguration implements BeanFactoryAware {
 
@@ -31,8 +27,8 @@ public class DynamicDataSourceConfiguration implements BeanFactoryAware {
 
     @Bean
     @Primary
-    @ConditionalOnBean(MultipleDataSourceMarker.class)
-    AbstractRoutingDataSource dynamicDataSource(MultipleDataSourceMarker multipleDataSourceMarker){
+    @ConditionalOnBean(MultipleDataSourceConfig.class)
+    AbstractRoutingDataSource dynamicDataSource(MultipleDataSourceConfig multipleDataSourceMarker){
         AbstractRoutingDataSource dataSource = new AbstractRoutingDataSource() {
             @Override
             protected Object determineCurrentLookupKey() {
@@ -57,5 +53,19 @@ public class DynamicDataSourceConfiguration implements BeanFactoryAware {
     @Override
     public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
         this.beanFactory = beanFactory;
+    }
+
+    static class OnDefaultEnable implements ConfigurationCondition{
+
+        @Override
+        public ConfigurationPhase getConfigurationPhase() {
+            return ConfigurationPhase.PARSE_CONFIGURATION;
+        }
+
+        @Override
+        public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+            return context.getBeanFactory().getBean(MultipleDataSourceConfig.class).enableDynamicDatasource();
+        }
+
     }
 }

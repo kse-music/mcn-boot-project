@@ -102,7 +102,7 @@ public class SM4BootstrapConfiguration {
         static class SM4ExtendCondition extends AllNestedConditions {
 
             SM4ExtendCondition() {
-                super(ConfigurationPhase.REGISTER_BEAN);
+                super(ConfigurationPhase.PARSE_CONFIGURATION);
             }
 
             @ConditionalOnProperty(prefix = EncryptorProperties.KEY+".sm4",name = "mode",havingValue = "cbc")

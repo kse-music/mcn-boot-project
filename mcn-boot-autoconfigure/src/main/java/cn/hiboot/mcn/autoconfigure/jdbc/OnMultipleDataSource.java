@@ -1,7 +1,7 @@
 package cn.hiboot.mcn.autoconfigure.jdbc;
 
 import cn.hiboot.mcn.autoconfigure.config.ConfigProperties;
-import cn.hiboot.mcn.core.util.McnAssert;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.bind.Bindable;
@@ -28,24 +28,9 @@ class OnMultipleDataSource implements ConfigurationCondition {
         if(properties == null){
             return false;
         }
-        checkConfig(environment);
-        context.getRegistry().registerBeanDefinition("MultipleDataSourceMarker",
-                BeanDefinitionBuilder.genericBeanDefinition(MultipleDataSourceMarker.class,() -> new MultipleDataSourceMarker(properties)).getBeanDefinition());
+        context.getRegistry().registerBeanDefinition(MultipleDataSourceConfig.class.getName(),
+                BeanDefinitionBuilder.genericBeanDefinition(MultipleDataSourceConfig.class,() -> new MultipleDataSourceConfig(properties, environment)).setRole(BeanDefinition.ROLE_INFRASTRUCTURE).getBeanDefinition());
         return true;
-    }
-
-    private void checkConfig(Environment environment) {
-        int vote = 0;
-        if(environment.getProperty(ConfigProperties.JPA_MULTIPLE_DATASOURCE_PREFIX+".enable",Boolean.class,false)){
-            vote++;
-        }
-        if(environment.getProperty(ConfigProperties.MYBATIS_MULTIPLE_DATASOURCE_PREFIX+".enable",Boolean.class,false)){
-            vote++;
-        }
-        if(environment.getProperty(ConfigProperties.DYNAMIC_DATASOURCE_PREFIX+".enable",Boolean.class,false)){
-            vote++;
-        }
-        McnAssert.state(vote == 1,"mybatis and jpa multiple datasource and dynamic datasource only config one!");
     }
 
     @Override

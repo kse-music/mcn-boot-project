@@ -2,9 +2,9 @@ package cn.hiboot.mcn.autoconfigure.jpa;
 
 import cn.hiboot.mcn.autoconfigure.config.ConfigProperties;
 import cn.hiboot.mcn.autoconfigure.jdbc.MultipleDataSourceAutoConfiguration;
-import cn.hiboot.mcn.autoconfigure.jdbc.MultipleDataSourceMarker;
-import cn.hiboot.mcn.core.util.McnAssert;
+import cn.hiboot.mcn.autoconfigure.jdbc.MultipleDataSourceConfig;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
@@ -13,7 +13,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.boot.autoconfigure.task.TaskExecutionAutoConfiguration;
@@ -33,7 +32,6 @@ import org.springframework.util.ReflectionUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.util.Map;
 
 /**
  * JpaMultipleDataSourceAutoConfiguration
@@ -44,28 +42,26 @@ import java.util.Map;
 @AutoConfiguration(before = { HibernateJpaAutoConfiguration.class, TaskExecutionAutoConfiguration.class },after = MultipleDataSourceAutoConfiguration.class)
 @ConditionalOnProperty(prefix = ConfigProperties.JPA_MULTIPLE_DATASOURCE_PREFIX,name = "enable",havingValue = "true")
 @ConditionalOnClass(JpaRepository.class)
-@ConditionalOnBean(MultipleDataSourceMarker.class)
+@ConditionalOnBean(MultipleDataSourceConfig.class)
 @ConditionalOnMissingBean({ JpaRepositoryFactoryBean.class, JpaRepositoryConfigExtension.class })
 @Import(JpaMultipleDataSourceAutoConfiguration.JpaRepositoriesRegistrar.class)
 public class JpaMultipleDataSourceAutoConfiguration {
 
     static class JpaRepositoriesRegistrar extends RepositoryBeanDefinitionRegistrarSupport {
-        private Environment environment;
-        private ResourceLoader resourceLoader;
-        private final MultipleDataSourceMarker multipleDataSourceMarker;
 
-        public JpaRepositoriesRegistrar(BeanFactory beanFactory) {
-            this.multipleDataSourceMarker = beanFactory.getBean(MultipleDataSourceMarker.class);
+        private final Environment environment;
+        private final ResourceLoader resourceLoader;
+        private final MultipleDataSourceConfig multipleDataSourceConfig;
+
+        public JpaRepositoriesRegistrar(Environment environment, ResourceLoader resourceLoader, BeanFactory beanFactory) {
+            this.environment = environment;
+            this.resourceLoader = resourceLoader;
+            this.multipleDataSourceConfig = beanFactory.getBean(MultipleDataSourceConfig.class);
         }
 
         @Override
         public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry, BeanNameGenerator generator) {
             String basePackage = environment.getProperty(ConfigProperties.APP_BASE_PACKAGE);
-            Map<String, DataSourceProperties> properties = multipleDataSourceMarker.getProperties();
-
-            McnAssert.notNull(registry, "BeanDefinitionRegistry must not be null");
-            McnAssert.notNull(resourceLoader, "ResourceLoader must not be null");
-
             generator = new FullyQualifiedAnnotationBeanNameGenerator();//支持同名接口
             AnnotationMetadata metadata = AnnotationMetadata.introspect(EnableJpaRepositoriesConfiguration.class);
             AnnotationRepositoryConfigurationSource configurationSource = new AnnotationRepositoryConfigurationSource(metadata,getAnnotation(), resourceLoader, environment, registry, generator);
@@ -74,11 +70,10 @@ public class JpaMultipleDataSourceAutoConfiguration {
                 return;
             }
             JpaProperties jpaProperties = Binder.get(environment).bind("spring.jpa", JpaProperties.class).orElse(new JpaProperties());
-
             RepositoryConfigurationExtension extension = getExtension();
             RepositoryConfigurationUtils.exposeRegistration(extension, registry, configurationSource);
             RepositoryConfigurationDelegate delegate = new RepositoryConfigurationDelegate(configurationSource, resourceLoader, environment);
-            properties.forEach((dsName,ds) -> {
+            multipleDataSourceConfig.getProperties().forEach((dsName,ds) -> {
                 String entityManagerFactoryRef = dsName + "EntityManagerFactory";
                 String transactionManagerRef = dsName + "TransactionManager";
 
@@ -94,6 +89,7 @@ public class JpaMultipleDataSourceAutoConfiguration {
                                 .addPropertyValue("packages",basePackage + ".bean")
                                 .addPropertyValue("persistenceUnit",dsName)
                                 .addPropertyValue("jpaProperties",jpaProperties)
+                                .setRole(BeanDefinition.ROLE_INFRASTRUCTURE)
                                 .getBeanDefinition());
 
                 registry.registerBeanDefinition(entityManagerFactoryRef,BeanDefinitionBuilder.genericBeanDefinition(JpaConfiguration.class)
@@ -130,18 +126,6 @@ public class JpaMultipleDataSourceAutoConfiguration {
         @Override
         protected RepositoryConfigurationExtension getExtension() {
             return new JpaRepositoryConfigExtension();
-        }
-
-        @Override
-        public void setEnvironment(Environment environment) {
-            this.environment = environment;
-            super.setEnvironment(environment);
-        }
-
-        @Override
-        public void setResourceLoader(ResourceLoader resourceLoader) {
-            this.resourceLoader = resourceLoader;
-            super.setResourceLoader(resourceLoader);
         }
 
     }
