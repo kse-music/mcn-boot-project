@@ -7,7 +7,7 @@ import org.springframework.core.env.Environment;
 import java.util.Map;
 
 /**
- * MultipleDataSourceMarker
+ * MultipleDataSourceConfig
  *
  * @author DingHao
  * @since 2022/7/28 17:41
