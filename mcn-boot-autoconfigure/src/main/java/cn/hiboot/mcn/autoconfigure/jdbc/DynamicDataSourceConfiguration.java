@@ -19,7 +19,7 @@ import java.util.Map;
  * @author DingHao
  * @since 2022/7/28 17:08
  */
-@Conditional(DynamicDataSourceConfiguration.OnDefaultEnable.class)
+@Conditional(DynamicDataSourceConfiguration.OnEnableDynamicDatasource.class)
 @Import(SwitchSourceAdvisor.class)
 public class DynamicDataSourceConfiguration implements BeanFactoryAware {
 
@@ -55,7 +55,7 @@ public class DynamicDataSourceConfiguration implements BeanFactoryAware {
         this.beanFactory = beanFactory;
     }
 
-    static class OnDefaultEnable implements ConfigurationCondition{
+    static class OnEnableDynamicDatasource implements ConfigurationCondition{
 
         @Override
         public ConfigurationPhase getConfigurationPhase() {
