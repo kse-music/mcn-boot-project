@@ -7,8 +7,8 @@ import java.beans.BeanInfo;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.io.*;
-import java.lang.reflect.Array;
-import java.lang.reflect.Method;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -281,4 +281,22 @@ public abstract class McnUtils {
         }
         return map;
     }
+
+    public static void replaceAnnotationValue(Object proxy, Map<String,Object> map){
+        McnAssert.state(proxy instanceof Annotation,"proxy must be an annotationType");
+        InvocationHandler invocationHandler = Proxy.getInvocationHandler(proxy);
+        try {
+            Field declaredField = invocationHandler.getClass().getDeclaredField("memberValues");
+            declaredField.setAccessible(true);
+            Map memberValues = (Map) declaredField.get(invocationHandler);
+            memberValues.putAll(map);
+        } catch (Exception e) {
+            //ignore
+        }
+    }
+
+    public static void replaceAnnotationValue(Object proxy, String name,Object value){
+        replaceAnnotationValue(proxy, Collections.singletonMap(name, value));
+    }
+
 }

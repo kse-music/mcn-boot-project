@@ -1,5 +1,6 @@
 package cn.hiboot.mcn.autoconfigure.jdbc;
 
+import cn.hiboot.mcn.autoconfigure.config.ConfigProperties;
 import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
@@ -28,8 +29,6 @@ import java.util.Map;
 @Import(MultipleDataSourceAutoConfiguration.MultipleDataSourceRegister.class)
 public class MultipleDataSourceAutoConfiguration {
 
-    static final String DATA_SOURCE = "DataSource";
-
     @Import(DynamicDataSourceConfiguration.class)
     static class MultipleDataSourceRegister implements ImportBeanDefinitionRegistrar, BeanFactoryAware {
         private BeanFactory beanFactory;
@@ -38,7 +37,7 @@ public class MultipleDataSourceAutoConfiguration {
         public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
             Map<String, DataSourceProperties> properties = beanFactory.getBean(MultipleDataSourceMarker.class).getProperties();
             properties.forEach((dsName, ds) -> {
-                String dataSourceName = dsName + DATA_SOURCE;
+                String dataSourceName = ConfigProperties.getDataSourceBeanName(dsName);
                 registry.registerBeanDefinition(dataSourceName, BeanDefinitionBuilder.genericBeanDefinition(HikariDataSource.class, () -> createDataSource(ds)).getBeanDefinition());
             });
         }

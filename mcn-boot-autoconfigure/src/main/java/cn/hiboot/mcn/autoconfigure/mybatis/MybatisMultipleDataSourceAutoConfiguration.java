@@ -69,16 +69,13 @@ public class MybatisMultipleDataSourceAutoConfiguration {
                         .addConstructorArgReference(sqlSessionFactoryName)
                         .getBeanDefinition());
 
-                String dataSourceName = dsName + "DataSource";
-//                registry.registerBeanDefinition(dataSourceName, BeanDefinitionBuilder.genericBeanDefinition(HikariDataSource.class,() -> createDataSource(ds)).getBeanDefinition());
-
                 SqlSessionFactoryBean factoryBean = new SqlSessionFactoryBean();
                 factoryBean.setVfs(SpringBootVFS.class);
                 org.apache.ibatis.session.Configuration conf = new org.apache.ibatis.session.Configuration();
                 conf.setMapUnderscoreToCamelCase(true);
                 registry.registerBeanDefinition(sqlSessionFactoryName,
                         loadMapper(pathResolver, dsName)
-                                .addPropertyValue("dataSource", new RuntimeBeanReference(dataSourceName))
+                                .addPropertyValue("dataSource", new RuntimeBeanReference(ConfigProperties.getDataSourceBeanName(dsName)))
                                 .addPropertyValue("typeAliasesPackage", basePackage + ".bean" + dsName)
                                 .addPropertyValue("typeHandlersPackage", basePackage + ".dao.handler" + dsName)
                                 .addPropertyValue("configuration", conf).getBeanDefinition());

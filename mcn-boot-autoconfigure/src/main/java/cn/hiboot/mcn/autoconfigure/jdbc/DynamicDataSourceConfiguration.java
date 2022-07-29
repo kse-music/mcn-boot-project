@@ -43,7 +43,7 @@ public class DynamicDataSourceConfiguration implements BeanFactoryAware {
         String defaultDataSource = null;
         Map<Object, Object> dataSourceMap = new HashMap<>();
         for (String s : multipleDataSourceMarker.getProperties().keySet()) {
-            String beanName = s + MultipleDataSourceAutoConfiguration.DATA_SOURCE;
+            String beanName = ConfigProperties.getDataSourceBeanName(s);
             if(defaultDataSource == null){
                 defaultDataSource = beanName;
             }

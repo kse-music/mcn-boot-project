@@ -65,6 +65,7 @@ public class JpaMultipleDataSourceAutoConfiguration {
 
             McnAssert.notNull(registry, "BeanDefinitionRegistry must not be null");
             McnAssert.notNull(resourceLoader, "ResourceLoader must not be null");
+
             generator = new FullyQualifiedAnnotationBeanNameGenerator();//支持同名接口
             AnnotationMetadata metadata = AnnotationMetadata.introspect(EnableJpaRepositoriesConfiguration.class);
             AnnotationRepositoryConfigurationSource configurationSource = new AnnotationRepositoryConfigurationSource(metadata,getAnnotation(), resourceLoader, environment, registry, generator);
@@ -86,14 +87,10 @@ public class JpaMultipleDataSourceAutoConfiguration {
                 annotationAttributes.put("entityManagerFactoryRef",entityManagerFactoryRef);
                 annotationAttributes.put("transactionManagerRef",transactionManagerRef);
 
-                //数据源
-                String dataSourceName = dsName + "DataSource";
-//                registry.registerBeanDefinition(dataSourceName, BeanDefinitionBuilder.genericBeanDefinition(HikariDataSource.class,() ->  MybatisMultipleDataSourceAutoConfiguration.createDataSource(ds)).getBeanDefinition());
-
                 //JpaConfiguration
                 String configBeanName = dsName + "JpaConfiguration";
                 registry.registerBeanDefinition(configBeanName,BeanDefinitionBuilder.genericBeanDefinition(JpaConfiguration.class)
-                                .addPropertyReference("dataSource",dataSourceName)
+                                .addPropertyReference("dataSource",ConfigProperties.getDataSourceBeanName(dsName))
                                 .addPropertyValue("packages",basePackage + ".bean")
                                 .addPropertyValue("persistenceUnit",dsName)
                                 .addPropertyValue("jpaProperties",jpaProperties)

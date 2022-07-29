@@ -16,6 +16,7 @@ import java.util.Map;
  * @since 2020/7/22 23:57
  */
 public abstract class ConfigProperties {
+    private static final String DATA_SOURCE = "DataSource";
 
     public static final String APP_BASE_PACKAGE = "app.base-package";
     public static final String DEFAULT_PROPERTY_SOURCE_NAME = "mcn-default";
@@ -65,4 +66,7 @@ public abstract class ConfigProperties {
         return (input != null) ? HtmlUtils.htmlEscape(input.toString()) : null;
     }
 
+    public static String getDataSourceBeanName(String dsName){
+        return dsName + DATA_SOURCE;
+    }
 }
