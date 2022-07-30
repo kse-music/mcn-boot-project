@@ -92,12 +92,12 @@ public class JpaMultipleDataSourceAutoConfiguration {
                                 .setRole(BeanDefinition.ROLE_INFRASTRUCTURE)
                                 .getBeanDefinition());
 
-                registry.registerBeanDefinition(entityManagerFactoryRef,BeanDefinitionBuilder.genericBeanDefinition(JpaConfiguration.class)
+                registry.registerBeanDefinition(entityManagerFactoryRef,BeanDefinitionBuilder.genericBeanDefinition()
                                 .setFactoryMethodOnBean("localContainerEntityManagerFactoryBean",configBeanName)
                                 .addConstructorArgReference("entityManagerFactoryBuilder")
                                 .getBeanDefinition());
 
-                registry.registerBeanDefinition(transactionManagerRef,BeanDefinitionBuilder.genericBeanDefinition(JpaConfiguration.class)
+                registry.registerBeanDefinition(transactionManagerRef,BeanDefinitionBuilder.genericBeanDefinition()
                         .setFactoryMethodOnBean("transactionManager",configBeanName)
                         .addConstructorArgReference(BeanFactory.FACTORY_BEAN_PREFIX+entityManagerFactoryRef)
                         .getBeanDefinition());
