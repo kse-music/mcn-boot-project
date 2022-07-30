@@ -6,9 +6,6 @@ import org.springframework.aop.Pointcut;
 import org.springframework.aop.support.AbstractPointcutAdvisor;
 import org.springframework.aop.support.ComposablePointcut;
 import org.springframework.aop.support.annotation.AnnotationMatchingPointcut;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Role;
 
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -20,9 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author DingHao
  * @since 2022/7/28 17:05
  */
-@Configuration(proxyBeanMethods = false)
-@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
-public class SwitchSourceAdvisor extends AbstractPointcutAdvisor {
+class SwitchSourceAdvisor extends AbstractPointcutAdvisor {
 
     private static final Map<Method,String> cache = new ConcurrentHashMap<>();
 
