@@ -10,6 +10,7 @@ import org.mybatis.spring.SqlSessionTemplate;
 import org.mybatis.spring.boot.autoconfigure.SpringBootVFS;
 import org.mybatis.spring.mapper.ClassPathMapperScanner;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -44,53 +45,52 @@ public class MybatisMultipleDataSourceAutoConfiguration {
 
     protected static class MybatisMultipleDataSourceConfig implements ImportBeanDefinitionRegistrar {
         private final ResourceLoader resourceLoader;
-        private final Environment environment;
+        private final String basePackage;
         private final MultipleDataSourceConfig multipleDataSourceConfig;
 
         public MybatisMultipleDataSourceConfig(ResourceLoader resourceLoader, Environment environment, BeanFactory beanFactory) {
             this.resourceLoader = resourceLoader;
-            this.environment = environment;
+            this.basePackage = environment.getProperty(ConfigProperties.APP_BASE_PACKAGE);
             this.multipleDataSourceConfig = beanFactory.getBean(MultipleDataSourceConfig.class);
         }
 
         @Override
         public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry){
-            String basePackage = environment.getProperty(ConfigProperties.APP_BASE_PACKAGE);
             ResourcePatternResolver pathResolver = new PathMatchingResourcePatternResolver();
             multipleDataSourceConfig.getProperties().forEach((dsName,ds) -> {
                 String sqlSessionFactoryName = dsName + "SqlSessionFactory";
                 scanMapper(registry,sqlSessionFactoryName,basePackage + ".dao." + dsName);
-
-                registry.registerBeanDefinition(dsName + "sqlSessionTemplate", BeanDefinitionBuilder.genericBeanDefinition(SqlSessionTemplate.class)
+                registry.registerBeanDefinition(dsName + "SqlSessionTemplate", BeanDefinitionBuilder.genericBeanDefinition(SqlSessionTemplate.class)
                         .addConstructorArgReference(sqlSessionFactoryName)
                         .getBeanDefinition());
-
-                SqlSessionFactoryBean factoryBean = new SqlSessionFactoryBean();
-                factoryBean.setVfs(SpringBootVFS.class);
-                org.apache.ibatis.session.Configuration conf = new org.apache.ibatis.session.Configuration();
-                conf.setMapUnderscoreToCamelCase(true);
-                registry.registerBeanDefinition(sqlSessionFactoryName,
-                        loadMapper(pathResolver, dsName)
-                                .addPropertyValue("dataSource", new RuntimeBeanReference(ConfigProperties.getDataSourceBeanName(dsName)))
-                                .addPropertyValue("typeAliasesPackage", basePackage + ".bean" + dsName)
-                                .addPropertyValue("typeHandlersPackage", basePackage + ".dao.handler" + dsName)
-                                .addPropertyValue("configuration", conf).getBeanDefinition());
+                registry.registerBeanDefinition(sqlSessionFactoryName,buildDefinition(pathResolver, dsName));
 
             });
         }
 
-        private BeanDefinitionBuilder loadMapper(ResourcePatternResolver pathResolver, String dsName){
-            BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(SqlSessionFactoryBean.class).addPropertyValue("vfs", SpringBootVFS.class);
-            Resource[] resources = null;
-            try {
-                resources = pathResolver.getResources("classpath:mapper/" + dsName + "/*.xml");
-            } catch (IOException e) {
-                //ignore not exist
-            }
+        private BeanDefinition buildDefinition(ResourcePatternResolver pathResolver, String dsName){
+            BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(SqlSessionFactoryBean.class);
+            Resource[] resources = getResources(pathResolver, dsName);
             if(resources != null){
                 beanDefinitionBuilder.addPropertyValue("mapperLocations", resources);
             }
-            return beanDefinitionBuilder;
+            org.apache.ibatis.session.Configuration conf = new org.apache.ibatis.session.Configuration();
+            conf.setMapUnderscoreToCamelCase(true);
+            beanDefinitionBuilder
+                    .addPropertyValue("dataSource", new RuntimeBeanReference(ConfigProperties.getDataSourceBeanName(dsName)))
+                    .addPropertyValue("vfs", SpringBootVFS.class)
+                    .addPropertyValue("typeAliasesPackage", basePackage + ".bean." + dsName)
+                    .addPropertyValue("typeHandlersPackage", basePackage + ".dao.handler." + dsName)
+                    .addPropertyValue("configuration", conf);
+            return beanDefinitionBuilder.getBeanDefinition();
+        }
+
+        private Resource[] getResources(ResourcePatternResolver pathResolver, String dsName){
+            try {
+                return pathResolver.getResources("classpath:mapper/" + dsName + "/*.xml");
+            } catch (IOException e) {
+                return null;
+            }
         }
 
         private void scanMapper(BeanDefinitionRegistry registry, String sqlSessionFactoryName, String pkg){
