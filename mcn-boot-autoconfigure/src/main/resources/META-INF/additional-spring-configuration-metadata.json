@@ -64,7 +64,7 @@
     {
       "name": "dynamic.datasource.enable",
       "type": "java.lang.Boolean",
-      "sourceType": "cn.hiboot.mcn.autoconfigure.jdbc.DynamicDataSourceConfiguration",
+      "sourceType": "cn.hiboot.mcn.autoconfigure.jdbc.MultipleDataSourceConfig",
       "description": "是否启用动态数据源配置.",
       "defaultValue": false
     },
