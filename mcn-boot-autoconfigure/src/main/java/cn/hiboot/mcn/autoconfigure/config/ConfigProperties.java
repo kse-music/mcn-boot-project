@@ -16,9 +16,15 @@ import java.util.Map;
  * @since 2020/7/22 23:57
  */
 public abstract class ConfigProperties {
+    private static final String DATA_SOURCE = "DataSource";
 
     public static final String APP_BASE_PACKAGE = "app.base-package";
     public static final String DEFAULT_PROPERTY_SOURCE_NAME = "mcn-default";
+
+    public static final String MULTIPLE_DATASOURCE_PREFIX = "multiple.datasource";
+    public static final String JPA_MULTIPLE_DATASOURCE_PREFIX = "jpa." + MULTIPLE_DATASOURCE_PREFIX;
+    public static final String MYBATIS_MULTIPLE_DATASOURCE_PREFIX = "mybatis." + MULTIPLE_DATASOURCE_PREFIX;
+    public static final String DYNAMIC_DATASOURCE_PREFIX = "dynamic.datasource";
 
     public static ClassPathResource mcnDefault() {
         return createResource("mcn-default.properties");
@@ -60,4 +66,7 @@ public abstract class ConfigProperties {
         return (input != null) ? HtmlUtils.htmlEscape(input.toString()) : null;
     }
 
+    public static String getDataSourceBeanName(String dsName){
+        return dsName + DATA_SOURCE;
+    }
 }
