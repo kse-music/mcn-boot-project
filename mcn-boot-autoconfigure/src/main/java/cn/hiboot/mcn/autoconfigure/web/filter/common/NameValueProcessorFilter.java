@@ -29,6 +29,7 @@ public class NameValueProcessorFilter implements Filter {
             request = new NameValueProcessorRequestWrapper(req,valueProcessor)
                     .filterHeaderValue(properties.isFilterHeaderValue())
                     .filterParameterName(properties.isFilterParameterName())
+                    .processPayload(properties.isProcessPayload())
                     .excludeFields(properties.getExcludeFields());
         }
         filterChain.doFilter(request, response);

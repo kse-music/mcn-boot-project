@@ -9,7 +9,7 @@ import java.util.List;
  * @author DingHao
  * @since 2022/6/13 12:30
  */
-public class NameValueProcessorProperties {
+public abstract class NameValueProcessorProperties {
     /**
      * 处理的url路径
      */
@@ -30,6 +30,10 @@ public class NameValueProcessorProperties {
      * 是否过滤header字段值
      */
     private boolean filterHeaderValue;
+    /**
+     * 是否处理请求体
+     */
+    private boolean processPayload;
 
     public List<String> getIncludeUrls() {
         return includeUrls;
@@ -69,5 +73,13 @@ public class NameValueProcessorProperties {
 
     public void setFilterHeaderValue(boolean filterHeaderValue) {
         this.filterHeaderValue = filterHeaderValue;
+    }
+
+    public boolean isProcessPayload() {
+        return processPayload;
+    }
+
+    public void setProcessPayload(boolean processPayload) {
+        this.processPayload = processPayload;
     }
 }
