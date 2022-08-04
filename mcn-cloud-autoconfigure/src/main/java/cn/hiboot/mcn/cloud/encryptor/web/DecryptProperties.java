@@ -16,7 +16,7 @@ public class DecryptProperties extends NameValueProcessorProperties {
      */
     private String name = "defaultDecryptFilter";
 
-    private int order = Integer.MIN_VALUE;
+    private int order = Integer.MIN_VALUE + 1;
 
     public String getName() {
         return name;
