@@ -34,7 +34,7 @@ public class RequestPayloadRequestWrapper extends HttpServletRequestWrapper {
         this.data = data;
     }
 
-    private String getData(HttpServletRequest request){
+    public static String getData(HttpServletRequest request){
         try{
             return StreamUtils.copyToString(request.getInputStream(),StandardCharsets.UTF_8);
         }catch (IOException e){
@@ -50,11 +50,7 @@ public class RequestPayloadRequestWrapper extends HttpServletRequestWrapper {
         return header.contains(MediaType.APPLICATION_JSON_VALUE);
     }
 
-    @Override
-    public ServletInputStream getInputStream() throws IOException {
-        if(!isJsonRequest((HttpServletRequest)getRequest())){
-            return super.getInputStream();
-        }
+    public static ServletInputStream createInputStream(String data) {
         ByteArrayInputStream arrayInputStream = new ByteArrayInputStream(data.getBytes(StandardCharsets.UTF_8));
         return new ServletInputStream() {
             @Override
@@ -77,5 +73,13 @@ public class RequestPayloadRequestWrapper extends HttpServletRequestWrapper {
                 return arrayInputStream.read();
             }
         };
+    }
+
+    @Override
+    public ServletInputStream getInputStream() throws IOException {
+        if(isJsonRequest((HttpServletRequest)getRequest())){
+            return createInputStream(data);
+        }
+        return super.getInputStream();
     }
 }

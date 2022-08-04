@@ -1,7 +1,13 @@
 package cn.hiboot.mcn.cloud.encryptor.web;
 
+import cn.hiboot.mcn.autoconfigure.web.filter.common.NameValueProcessor;
+import cn.hiboot.mcn.autoconfigure.web.filter.common.NameValueProcessorFilter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.convert.ConversionService;
@@ -17,9 +23,23 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnBean(TextEncryptor.class)
+@EnableConfigurationProperties(DecryptProperties.class)
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @Import(DecryptRequestBodyAdvice.class)
 public class DecryptConverterAutoConfiguration {
+
+    @Bean
+    @ConditionalOnProperty(prefix = "mcn.decrypt",name = "process-payload",havingValue = "true")
+    FilterRegistrationBean<NameValueProcessorFilter> xssFilterRegistration(DecryptProperties decryptProperties,TextEncryptor textEncryptor) {
+        FilterRegistrationBean<NameValueProcessorFilter> filterRegistrationBean = new FilterRegistrationBean<>(new NameValueProcessorFilter(decryptProperties,nameValueProcessor(textEncryptor)));
+        filterRegistrationBean.setOrder(decryptProperties.getOrder());
+        filterRegistrationBean.setName(decryptProperties.getName());
+        return filterRegistrationBean;
+    }
+
+   private NameValueProcessor nameValueProcessor(TextEncryptor textEncryptor){
+        return (name, value) -> textEncryptor.decrypt(value);
+    }
 
     @Configuration(proxyBeanMethods = false)
     private static class WebMvcConfig implements WebMvcConfigurer {

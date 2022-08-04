@@ -47,7 +47,7 @@ public class XssAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public NameValueProcessorJacksonConfig valueProcessorJacksonConfig(ObjectProvider<NameValueProcessor> valueProcessors) {
+    public NameValueProcessorJacksonConfig nameValueProcessorJacksonConfig(ObjectProvider<NameValueProcessor> valueProcessors) {
         NameValueProcessorJacksonConfig valueProcessorJacksonConfig = new NameValueProcessorJacksonConfig(valueProcessors);
         valueProcessorJacksonConfig.setEscapeResponse(xssProperties.isEscapeResponse());
         return valueProcessorJacksonConfig;

@@ -3,8 +3,10 @@ package cn.hiboot.mcn.autoconfigure.web.filter.common;
 import cn.hiboot.mcn.core.util.McnUtils;
 import org.springframework.util.CollectionUtils;
 
+import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
+import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +21,7 @@ public class NameValueProcessorRequestWrapper extends HttpServletRequestWrapper 
 
     private List<String> excludeFields;
     private boolean filterParameterName;
+    private boolean processPayload;
     private boolean filterHeaderValue;
     private final NameValueProcessor valueProcessor;
 
@@ -40,6 +43,21 @@ public class NameValueProcessorRequestWrapper extends HttpServletRequestWrapper 
     public NameValueProcessorRequestWrapper filterHeaderValue(boolean filterHeaderValue) {
         this.filterHeaderValue = filterHeaderValue;
         return this;
+    }
+
+    public NameValueProcessorRequestWrapper processPayload(boolean processPayload) {
+        this.processPayload = processPayload;
+        return this;
+    }
+
+    @Override
+    public ServletInputStream getInputStream() throws IOException {
+        if(processPayload){
+            String data = RequestPayloadRequestWrapper.getData((HttpServletRequest) getRequest());
+            data = clean(null,data);
+            return RequestPayloadRequestWrapper.createInputStream(data);
+        }
+        return super.getInputStream();
     }
 
     @Override
@@ -121,7 +139,7 @@ public class NameValueProcessorRequestWrapper extends HttpServletRequestWrapper 
         return clean(name,value);
     }
 
-    public String clean(String name,String text){
+    private String clean(String name,String text){
         return valueProcessor.process(name,text);
     }
 }

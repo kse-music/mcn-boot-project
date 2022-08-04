@@ -123,7 +123,7 @@ public class ParamProcessorAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public NameValueProcessorJacksonConfig valueProcessorJacksonConfig(ObjectProvider<NameValueProcessor> valueProcessors) {
+    public NameValueProcessorJacksonConfig nameValueProcessorJacksonConfig(ObjectProvider<NameValueProcessor> valueProcessors) {
         return new NameValueProcessorJacksonConfig(valueProcessors);
     }
 
