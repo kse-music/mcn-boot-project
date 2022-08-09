@@ -5,6 +5,7 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnSingleCandidate;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWarDeployment;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.cloud.client.serviceregistry.AbstractAutoServiceRegistration;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -20,6 +21,7 @@ import org.springframework.core.Ordered;
 @ConditionalOnSingleCandidate(AbstractAutoServiceRegistration.class)
 @AutoConfigureOrder(Ordered.LOWEST_PRECEDENCE)
 @ConditionalOnWarDeployment
+@ConditionalOnWebApplication
 public class ServiceRegisterAutoConfiguration implements ApplicationListener<ContextRefreshedEvent> {
 
     @Autowired(required = false)

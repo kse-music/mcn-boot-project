@@ -21,6 +21,7 @@ import org.springframework.security.crypto.encrypt.TextEncryptor;
 @ConditionalOnClass(ObjectMapper.class)
 public class DecryptJacksonAutoConfiguration {
 
+    @ConditionalOnClass(Jackson2ObjectMapperBuilder.class)
     static class JacksonBuilderCustomizer implements Jackson2ObjectMapperBuilderCustomizer {
 
         @Override
