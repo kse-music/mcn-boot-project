@@ -32,14 +32,23 @@ public class DecryptConverterAutoConfiguration {
     @Bean
     @ConditionalOnProperty(prefix = "mcn.decrypt",name = "process-payload",havingValue = "true")
     FilterRegistrationBean<NameValueProcessorFilter> xssFilterRegistration(DecryptProperties decryptProperties,TextEncryptor textEncryptor) {
-        FilterRegistrationBean<NameValueProcessorFilter> filterRegistrationBean = new FilterRegistrationBean<>(new NameValueProcessorFilter(decryptProperties,nameValueProcessor(textEncryptor)));
+        FilterRegistrationBean<NameValueProcessorFilter> filterRegistrationBean = new FilterRegistrationBean<>(new NameValueProcessorFilter(decryptProperties,nameValueProcessor(decryptProperties,textEncryptor)));
         filterRegistrationBean.setOrder(decryptProperties.getOrder());
         filterRegistrationBean.setName(decryptProperties.getName());
         return filterRegistrationBean;
     }
 
-   private NameValueProcessor nameValueProcessor(TextEncryptor textEncryptor){
-        return (name, value) -> textEncryptor.decrypt(value);
+   private NameValueProcessor nameValueProcessor(DecryptProperties decryptProperties,TextEncryptor textEncryptor){
+        return (name, value) -> {
+            try {
+                return textEncryptor.decrypt(value);
+            }catch (Exception e){
+                if(!decryptProperties.isContinueOnError()){
+                    throw e;
+                }
+            }
+            return value;
+        };
     }
 
     @Configuration(proxyBeanMethods = false)
