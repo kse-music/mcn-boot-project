@@ -44,9 +44,27 @@ public class EncryptorProperties {
     }
 
     public static class SM2{
+        private boolean base64;
+        private boolean lowerCase;
         private String privateKey;
         private String publicKey;
         private Mode mode = Mode.C1C3C2;
+
+        public boolean isBase64() {
+            return base64;
+        }
+
+        public void setBase64(boolean base64) {
+            this.base64 = base64;
+        }
+
+        public boolean isLowerCase() {
+            return lowerCase;
+        }
+
+        public void setLowerCase(boolean lowerCase) {
+            this.lowerCase = lowerCase;
+        }
 
         public String getPrivateKey() {
             return privateKey;
