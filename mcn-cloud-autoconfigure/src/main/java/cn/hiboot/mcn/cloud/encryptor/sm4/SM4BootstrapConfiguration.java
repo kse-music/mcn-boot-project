@@ -40,8 +40,10 @@ public class SM4BootstrapConfiguration {
 
         private final boolean base64;
         private final SymmetricCrypto sm4;
+        private final boolean continueOnError;
 
         public SM4Encryptor(EncryptorProperties encryptorProperties) {
+            this.continueOnError = encryptorProperties.isContinueOnError();
             EncryptorProperties.SM4 sm4 = encryptorProperties.getSm4();
             if(sm4.getMode() != null && sm4.getPadding() != null){
                 Mode mode = Mode.valueOf(sm4.getMode().name());
@@ -59,12 +61,26 @@ public class SM4BootstrapConfiguration {
 
         @Override
         public String encrypt(String s) {
-            return base64 ? sm4.encryptBase64(s) : sm4.encryptHex(s);
+            try {
+                return base64 ? sm4.encryptBase64(s) : sm4.encryptHex(s);
+            }catch (Exception e){
+                if(!continueOnError){
+                    throw e;
+                }
+            }
+            return s;
         }
 
         @Override
         public String decrypt(String s) {
-            return sm4.decryptStr(s);
+            try {
+                return sm4.decryptStr(s);
+            }catch (Exception e){
+                if(!continueOnError){
+                    throw e;
+                }
+            }
+            return s;
         }
 
     }
@@ -75,11 +91,12 @@ public class SM4BootstrapConfiguration {
     private static class SM4ExtendConfig {
 
         private static class SM4Extend extends SM4Utils implements TextEncryptor {
-
+            private final boolean continueOnError;
             private final byte[] key;
             private final byte[] iv;
 
             public SM4Extend(EncryptorProperties encryptorProperties) {
+                this.continueOnError = encryptorProperties.isContinueOnError();
                 this.key = generateKeyOrIV(encryptorProperties.getSm4().getKey());
                 this.iv = generateKeyOrIV(encryptorProperties.getSm4().getIv());
             }
@@ -90,12 +107,26 @@ public class SM4BootstrapConfiguration {
 
             @Override
             public String encrypt(String text) {
-                return new String(Hex.encode(encryptData_CBC(Hex.decode(iv), Hex.decode(key), Strings.toUTF8ByteArray(text))));
+                try {
+                    return new String(Hex.encode(encryptData_CBC(Hex.decode(iv), Hex.decode(key), Strings.toUTF8ByteArray(text))));
+                }catch (Exception e){
+                    if(!continueOnError){
+                        throw e;
+                    }
+                }
+                return text;
             }
 
             @Override
             public String decrypt(String encryptedText) {
-                return Strings.fromUTF8ByteArray(decryptData_CBC(Hex.decode(iv), Hex.decode(key), Hex.decode(encryptedText))).trim();
+                try {
+                    return Strings.fromUTF8ByteArray(decryptData_CBC(Hex.decode(iv), Hex.decode(key), Hex.decode(encryptedText))).trim();
+                }catch (Exception e){
+                    if(!continueOnError){
+                        throw e;
+                    }
+                }
+                return encryptedText;
             }
         }
 

@@ -1,5 +1,6 @@
 package cn.hiboot.mcn.autoconfigure.web.groovy;
 
+import cn.hiboot.mcn.autoconfigure.web.swagger.IgnoreApi;
 import groovy.lang.Binding;
 import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyObject;
@@ -71,6 +72,7 @@ public class GroovyWebAutoConfiguration {
     }
 
     @RestController
+    @IgnoreApi
     static class GroovyWebController {
 
         GroovyShell groovyShell;

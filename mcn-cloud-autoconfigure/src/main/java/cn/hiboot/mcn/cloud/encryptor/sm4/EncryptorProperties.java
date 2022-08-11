@@ -13,7 +13,27 @@ public class EncryptorProperties {
 
     public static final String KEY = "encryptor";
 
+    private boolean continueOnError;
+
+    private SM2 sm2;
+
     private SM4 sm4;
+
+    public boolean isContinueOnError() {
+        return continueOnError;
+    }
+
+    public void setContinueOnError(boolean continueOnError) {
+        this.continueOnError = continueOnError;
+    }
+
+    public SM2 getSm2() {
+        return sm2;
+    }
+
+    public void setSm2(SM2 sm2) {
+        this.sm2 = sm2;
+    }
 
     public SM4 getSm4() {
         return sm4;
@@ -21,6 +41,41 @@ public class EncryptorProperties {
 
     public void setSm4(SM4 sm4) {
         this.sm4 = sm4;
+    }
+
+    public static class SM2{
+        private String privateKey;
+        private String publicKey;
+        private Mode mode = Mode.C1C3C2;
+
+        public String getPrivateKey() {
+            return privateKey;
+        }
+
+        public void setPrivateKey(String privateKey) {
+            this.privateKey = privateKey;
+        }
+
+        public String getPublicKey() {
+            return publicKey;
+        }
+
+        public void setPublicKey(String publicKey) {
+            this.publicKey = publicKey;
+        }
+
+        public Mode getMode() {
+            return mode;
+        }
+
+        public void setMode(Mode mode) {
+            this.mode = mode;
+        }
+
+        public enum Mode {
+            C1C2C3,
+            C1C3C2;
+        }
     }
 
     public static class SM4{
@@ -78,26 +133,27 @@ public class EncryptorProperties {
         public void setUseDefault(boolean useDefault) {
             this.useDefault = useDefault;
         }
-    }
 
-    public enum Mode {
-        NONE,
-        CBC,
-        CFB,
-        CTR,
-        CTS,
-        ECB,
-        OFB,
-        PCBC;
-    }
+        public enum Mode {
+            NONE,
+            CBC,
+            CFB,
+            CTR,
+            CTS,
+            ECB,
+            OFB,
+            PCBC;
+        }
 
-    public enum Padding {
-        NoPadding,
-        ZeroPadding,
-        ISO10126Padding,
-        OAEPPadding,
-        PKCS1Padding,
-        PKCS5Padding,
-        SSL3Padding;
+        public enum Padding {
+            NoPadding,
+            ZeroPadding,
+            ISO10126Padding,
+            OAEPPadding,
+            PKCS1Padding,
+            PKCS5Padding,
+            SSL3Padding;
+        }
+
     }
 }

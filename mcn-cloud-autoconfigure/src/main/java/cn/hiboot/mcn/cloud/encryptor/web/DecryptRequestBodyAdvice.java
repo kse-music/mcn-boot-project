@@ -1,11 +1,11 @@
 package cn.hiboot.mcn.cloud.encryptor.web;
 
 import cn.hiboot.mcn.cloud.encryptor.Decrypt;
+import cn.hiboot.mcn.cloud.encryptor.sm2.TextEncryptor;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.security.crypto.encrypt.TextEncryptor;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.RequestBodyAdvice;

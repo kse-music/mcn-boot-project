@@ -1,12 +1,12 @@
 package cn.hiboot.mcn.cloud.encryptor.jackson;
 
+import cn.hiboot.mcn.cloud.encryptor.sm2.TextEncryptor;
 import cn.hiboot.mcn.core.util.SpringBeanUtils;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import org.springframework.beans.BeanUtils;
-import org.springframework.security.crypto.encrypt.TextEncryptor;
 
 import java.io.IOException;
 import java.util.Objects;

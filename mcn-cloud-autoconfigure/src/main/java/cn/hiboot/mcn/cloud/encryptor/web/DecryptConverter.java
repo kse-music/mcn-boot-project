@@ -1,10 +1,10 @@
 package cn.hiboot.mcn.cloud.encryptor.web;
 
 import cn.hiboot.mcn.cloud.encryptor.Decrypt;
+import cn.hiboot.mcn.cloud.encryptor.sm2.TextEncryptor;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
-import org.springframework.security.crypto.encrypt.TextEncryptor;
 
 import java.util.HashSet;
 import java.util.Set;

@@ -18,8 +18,6 @@ public class DecryptProperties extends NameValueProcessorProperties {
 
     private int order = Integer.MIN_VALUE + 1;
 
-    private boolean continueOnError;
-
     public String getName() {
         return name;
     }
@@ -36,11 +34,4 @@ public class DecryptProperties extends NameValueProcessorProperties {
         this.order = order;
     }
 
-    public boolean isContinueOnError() {
-        return continueOnError;
-    }
-
-    public void setContinueOnError(boolean continueOnError) {
-        this.continueOnError = continueOnError;
-    }
 }
