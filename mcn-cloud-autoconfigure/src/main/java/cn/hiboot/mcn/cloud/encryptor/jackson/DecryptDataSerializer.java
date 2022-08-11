@@ -1,6 +1,7 @@
 package cn.hiboot.mcn.cloud.encryptor.jackson;
 
 import cn.hiboot.mcn.cloud.encryptor.DecryptDataConverter;
+import cn.hiboot.mcn.cloud.encryptor.sm2.TextEncryptor;
 import cn.hiboot.mcn.core.exception.ServiceException;
 import cn.hiboot.mcn.core.util.SpringBeanUtils;
 import com.fasterxml.jackson.core.JsonParser;
@@ -8,7 +9,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.security.crypto.encrypt.TextEncryptor;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 

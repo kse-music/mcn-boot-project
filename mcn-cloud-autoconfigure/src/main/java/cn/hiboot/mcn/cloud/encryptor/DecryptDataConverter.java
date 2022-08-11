@@ -1,7 +1,7 @@
 package cn.hiboot.mcn.cloud.encryptor;
 
+import cn.hiboot.mcn.cloud.encryptor.sm2.TextEncryptor;
 import com.fasterxml.jackson.core.JsonParser;
-import org.springframework.security.crypto.encrypt.TextEncryptor;
 
 import java.io.IOException;
 

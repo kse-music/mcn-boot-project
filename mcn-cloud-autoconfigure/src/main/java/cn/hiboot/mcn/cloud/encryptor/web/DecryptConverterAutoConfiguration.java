@@ -2,6 +2,9 @@ package cn.hiboot.mcn.cloud.encryptor.web;
 
 import cn.hiboot.mcn.autoconfigure.web.filter.common.NameValueProcessor;
 import cn.hiboot.mcn.autoconfigure.web.filter.common.NameValueProcessorFilter;
+import cn.hiboot.mcn.cloud.encryptor.sm2.SM2AutoConfiguration;
+import cn.hiboot.mcn.cloud.encryptor.sm2.TextEncryptor;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -12,7 +15,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.format.FormatterRegistry;
-import org.springframework.security.crypto.encrypt.TextEncryptor;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
@@ -22,6 +24,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  * @since 2022/2/17 11:47
  */
 @Configuration(proxyBeanMethods = false)
+@AutoConfigureAfter(SM2AutoConfiguration.class)
 @ConditionalOnBean(TextEncryptor.class)
 @EnableConfigurationProperties(DecryptProperties.class)
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
@@ -31,23 +34,14 @@ public class DecryptConverterAutoConfiguration {
     @Bean
     @ConditionalOnProperty(prefix = "mcn.decrypt",name = "process-payload",havingValue = "true")
     FilterRegistrationBean<NameValueProcessorFilter> xssFilterRegistration(DecryptProperties decryptProperties,TextEncryptor textEncryptor) {
-        FilterRegistrationBean<NameValueProcessorFilter> filterRegistrationBean = new FilterRegistrationBean<>(new NameValueProcessorFilter(decryptProperties,nameValueProcessor(decryptProperties,textEncryptor)));
+        FilterRegistrationBean<NameValueProcessorFilter> filterRegistrationBean = new FilterRegistrationBean<>(new NameValueProcessorFilter(decryptProperties,nameValueProcessor(textEncryptor)));
         filterRegistrationBean.setOrder(decryptProperties.getOrder());
         filterRegistrationBean.setName(decryptProperties.getName());
         return filterRegistrationBean;
     }
 
-   private NameValueProcessor nameValueProcessor(DecryptProperties decryptProperties,TextEncryptor textEncryptor){
-        return (name, value) -> {
-            try {
-                return textEncryptor.decrypt(value);
-            }catch (Exception e){
-                if(!decryptProperties.isContinueOnError()){
-                    throw e;
-                }
-            }
-            return value;
-        };
+   private NameValueProcessor nameValueProcessor(TextEncryptor textEncryptor){
+        return (name, value) -> textEncryptor.decrypt(value);
     }
 
     @Configuration(proxyBeanMethods = false)
