@@ -2,11 +2,11 @@ package cn.hiboot.mcn.cloud.encryptor.sm2;
 
 import cn.hiboot.mcn.cloud.encryptor.sm4.EncryptorProperties;
 import cn.hutool.core.codec.Base64;
+import cn.hutool.core.util.HexUtil;
 import cn.hutool.crypto.SmUtil;
 import cn.hutool.crypto.asymmetric.KeyType;
 import cn.hutool.crypto.asymmetric.SM2;
 import org.bouncycastle.crypto.engines.SM2Engine;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 
 /**
  * SM2Encryptor
@@ -14,7 +14,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
  * @author DingHao
  * @since 2022/8/11 14:14
  */
-@ConditionalOnProperty(prefix = EncryptorProperties.KEY+".sm2",name = "public-key")
 public class SM2Encryptor implements TextEncryptor {
     private final EncryptorProperties.SM2 config;
     private final boolean continueOnError;
@@ -26,10 +25,6 @@ public class SM2Encryptor implements TextEncryptor {
         SM2 sm2 = SmUtil.sm2(config.getPrivateKey(),config.getPublicKey());
         sm2.setMode(SM2Engine.Mode.valueOf(config.getMode().name()));
         this.sm2 = sm2;
-    }
-
-    SM2 getSm2() {
-        return sm2;
     }
 
     @Override
@@ -59,6 +54,16 @@ public class SM2Encryptor implements TextEncryptor {
             }
         }
         return text;
+    }
+
+    @Override
+    public String publicKey() {
+        return HexUtil.encodeHexStr(sm2.getQ(false));
+    }
+
+    @Override
+    public String privateKey() {
+        return sm2.getDHex();
     }
 
 }

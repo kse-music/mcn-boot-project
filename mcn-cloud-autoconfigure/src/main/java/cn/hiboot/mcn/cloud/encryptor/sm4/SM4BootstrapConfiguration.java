@@ -11,6 +11,7 @@ import org.bouncycastle.util.encoders.Hex;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.AllNestedConditions;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Conditional;
@@ -36,6 +37,7 @@ public class SM4BootstrapConfiguration {
     @Configuration(proxyBeanMethods = false)
     @ConditionalOnClass({SymmetricCrypto.class,Hex.class})
     @ConditionalOnProperty(prefix = EncryptorProperties.KEY+".sm4",name = "use-default",havingValue = "true",matchIfMissing = true)
+    @ConditionalOnMissingBean(TextEncryptor.class)
     private static class SM4Encryptor implements TextEncryptor {
 
         private final boolean base64;
@@ -88,14 +90,14 @@ public class SM4BootstrapConfiguration {
     @Configuration(proxyBeanMethods = false)
     @ConditionalOnClass(SM4Utils.class)
     @Conditional(SM4ExtendConfig.SM4ExtendCondition.class)
-    private static class SM4ExtendConfig {
+    @ConditionalOnMissingBean(TextEncryptor.class)
+    private static class SM4ExtendConfig extends SM4Utils implements TextEncryptor {
 
-        private static class SM4Extend extends SM4Utils implements TextEncryptor {
             private final boolean continueOnError;
             private final byte[] key;
             private final byte[] iv;
 
-            public SM4Extend(EncryptorProperties encryptorProperties) {
+            public SM4ExtendConfig(EncryptorProperties encryptorProperties) {
                 this.continueOnError = encryptorProperties.isContinueOnError();
                 this.key = generateKeyOrIV(encryptorProperties.getSm4().getKey());
                 this.iv = generateKeyOrIV(encryptorProperties.getSm4().getIv());
@@ -128,7 +130,7 @@ public class SM4BootstrapConfiguration {
                 }
                 return encryptedText;
             }
-        }
+
 
         static class SM4ExtendCondition extends AllNestedConditions {
 
@@ -138,6 +140,11 @@ public class SM4BootstrapConfiguration {
 
             @ConditionalOnProperty(prefix = EncryptorProperties.KEY+".sm4",name = "mode",havingValue = "cbc")
             static class CBCModeEnabled {
+
+            }
+
+            @ConditionalOnProperty(prefix = EncryptorProperties.KEY+".sm4",name = "iv")
+            static class IVHasValue {
 
             }
 

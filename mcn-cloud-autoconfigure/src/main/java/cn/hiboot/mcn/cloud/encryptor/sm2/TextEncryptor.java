@@ -23,4 +23,7 @@ public interface TextEncryptor {
      */
     String decrypt(String encryptedText);
 
+    String publicKey();
+    String privateKey();
+
 }
