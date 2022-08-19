@@ -41,22 +41,26 @@ class DelegateNameValueProcessor implements NameValueProcessor{
     public String process(String name, String value) {
         for (ValueProcessor valueProcessor : valueProcessors) {
             if(valueProcessor.match(name)){
-                value = valueProcessor.nameValueProcessor.process(name, value);
+                value = valueProcessor.process(name, value);
             }
         }
         return value;
     }
 
-    private static class ValueProcessor{
+    private static class ValueProcessor implements NameValueProcessor{
 
         NameValueProcessor nameValueProcessor;
         RequestMatcher requestMatcher;
         List<String> excludeFields;
+        boolean escapeResponse;
 
         public ValueProcessor(NameValueProcessor nameValueProcessor, NameValueProcessorProperties properties) {
             this.nameValueProcessor = nameValueProcessor;
             this.requestMatcher = new RequestMatcher(properties.getIncludeUrls(), properties.getExcludeUrls());
             this.excludeFields = properties.getExcludeFields();
+            if(properties instanceof XssProperties){
+                this.escapeResponse = ((XssProperties) properties).isEscapeResponse();
+            }
         }
 
         boolean match(String name){
@@ -76,6 +80,14 @@ class DelegateNameValueProcessor implements NameValueProcessor{
                 return null;
             }
             return requestAttributes.getRequest();
+        }
+
+        @Override
+        public String process(String name, String value) {
+            if(name == null && !escapeResponse){//serializers
+                return value;
+            }
+            return nameValueProcessor.process(name, value);
         }
     }
 
