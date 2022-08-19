@@ -53,9 +53,9 @@ public class NameValueProcessorRequestWrapper extends HttpServletRequestWrapper 
     @Override
     public ServletInputStream getInputStream() throws IOException {
         if(processPayload){
-            String data = RequestPayloadRequestWrapper.getData((HttpServletRequest) getRequest());
+            String data = JsonRequestHelper.getData((HttpServletRequest) getRequest());
             data = clean(null,data);
-            return RequestPayloadRequestWrapper.createInputStream(data);
+            return JsonRequestHelper.createInputStream(data);
         }
         return super.getInputStream();
     }

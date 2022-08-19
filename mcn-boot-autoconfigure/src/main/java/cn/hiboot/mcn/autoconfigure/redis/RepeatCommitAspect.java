@@ -1,14 +1,13 @@
 package cn.hiboot.mcn.autoconfigure.redis;
 
 import cn.hiboot.mcn.autoconfigure.redis.annotation.RepeatCommit;
-import cn.hiboot.mcn.autoconfigure.web.filter.common.RequestPayloadRequestWrapper;
+import cn.hiboot.mcn.autoconfigure.web.filter.common.JsonRequestHelper;
 import cn.hiboot.mcn.core.exception.ServiceException;
 import cn.hiboot.mcn.core.util.JacksonUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.DigestUtils;
@@ -32,12 +31,9 @@ public class RepeatCommitAspect {
 
     private final static String REQUEST_HASH_PREFIX = "request:hash:";
 
-    private final ObjectProvider<Identifier> provider;
-
     private final StringRedisTemplate redisTemplate;
 
-    public RepeatCommitAspect(ObjectProvider<Identifier> provider,StringRedisTemplate redisTemplate) {
-        this.provider = provider;
+    public RepeatCommitAspect(StringRedisTemplate redisTemplate) {
         this.redisTemplate = redisTemplate;
     }
 
@@ -51,14 +47,13 @@ public class RepeatCommitAspect {
         if(requestAttributes != null){
             HttpServletRequest request = requestAttributes.getRequest();
             StringBuilder requestContent = new StringBuilder();
-            provider.ifAvailable(identifier -> requestContent.append(identifier.get()));
             requestContent.append(request.getMethod());
             requestContent.append(request.getServletPath());
             Map<String, String[]> parameterMap = request.getParameterMap();
             if (!CollectionUtils.isEmpty(parameterMap)) {
                 requestContent.append(JacksonUtils.toJson(parameterMap));
             }
-            if(RequestPayloadRequestWrapper.isJsonRequest(request)){
+            if(JsonRequestHelper.isJsonRequest(request)){
                 requestContent.append(StreamUtils.copyToString(request.getInputStream(),StandardCharsets.UTF_8));
             }
             String hash = DigestUtils.md5DigestAsHex(requestContent.toString().getBytes(StandardCharsets.UTF_8));

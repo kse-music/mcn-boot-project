@@ -6,6 +6,7 @@ import cn.hiboot.mcn.core.util.McnUtils;
 import cn.hutool.core.text.StrBuilder;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SmUtil;
+import org.springframework.util.StringUtils;
 
 import java.util.*;
 
@@ -33,7 +34,7 @@ public abstract class DataIntegrityUtils {
         if(fileInfo != null){
             param += fileInfo;
         }
-        if(payload != null){
+        if(StringUtils.hasText(payload)){
             param += payload;
         }
         String qs ;

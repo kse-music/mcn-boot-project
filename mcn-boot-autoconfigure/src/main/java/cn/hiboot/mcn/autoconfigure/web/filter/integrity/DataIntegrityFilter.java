@@ -1,11 +1,10 @@
 package cn.hiboot.mcn.autoconfigure.web.filter.integrity;
 
+import cn.hiboot.mcn.autoconfigure.web.filter.common.JsonRequestHelper;
 import cn.hiboot.mcn.autoconfigure.web.filter.common.RequestMatcher;
 import cn.hiboot.mcn.autoconfigure.web.filter.common.RequestPayloadRequestWrapper;
-import cn.hiboot.mcn.autoconfigure.web.security.WebSecurityProperties;
 import cn.hiboot.mcn.core.model.result.RestResp;
 import cn.hiboot.mcn.core.util.JacksonUtils;
-import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.net.URLDecoder;
 import cn.hutool.core.util.StrUtil;
 import org.springframework.core.Ordered;
@@ -31,13 +30,9 @@ public class DataIntegrityFilter implements Filter, Ordered {
     private final DataIntegrityProperties dataIntegrityProperties;
     private final RequestMatcher requestMatcher;
 
-    public DataIntegrityFilter(DataIntegrityProperties dataIntegrityProperties,WebSecurityProperties webSecurityProperties) {
+    public DataIntegrityFilter(DataIntegrityProperties dataIntegrityProperties) {
         this.dataIntegrityProperties = dataIntegrityProperties;
-        List<String> excludePatterns = new ArrayList<>(dataIntegrityProperties.getExcludePatterns());
-        if(webSecurityProperties.isEnableDefaultIgnore()){
-            Collections.addAll(excludePatterns,webSecurityProperties.getDefaultExcludeUrls());
-        }
-        this.requestMatcher = new RequestMatcher(dataIntegrityProperties.getIncludePatterns(),excludePatterns);
+        this.requestMatcher = new RequestMatcher(dataIntegrityProperties.getIncludePatterns(),dataIntegrityProperties.getExcludePatterns()).enableDefaultExclude();
     }
 
     @Override
@@ -65,24 +60,17 @@ public class DataIntegrityFilter implements Filter, Ordered {
                 }
             }
 
-            String currentSignature;
-            if(RequestPayloadRequestWrapper.isJsonRequest(request)){//json请求
-                String data = null;
-                try{
-                    data = IoUtil.read(request.getInputStream(),StandardCharsets.UTF_8);
-                }catch (Exception e){//兼容
-                    //ignore
+            String payload = null;
+            if(JsonRequestHelper.isJsonRequest(request)){//json请求
+                RequestPayloadRequestWrapper wrapper = new RequestPayloadRequestWrapper(request);
+                payload = wrapper.getPayload();
+                if(!payload.isEmpty()){
+                    servletRequest = wrapper;
                 }
-                if(data != null){
-                    servletRequest = new RequestPayloadRequestWrapper(request,data);
-                }
-                currentSignature = signature(timestamp, nonceStr, request,data);
-            }else {
-                currentSignature = signature(timestamp, nonceStr, request,null);
             }
 
             // 对请求头参数进行签名
-            if (StrUtil.isEmpty(signature) || !Objects.equals(signature, currentSignature)) {
+            if (StrUtil.isEmpty(signature) || !Objects.equals(signature, signature(timestamp, nonceStr, request, payload))) {
                 write("验证失败,数据被篡改",(HttpServletResponse)servletResponse);
                 return;
             }
@@ -107,9 +95,10 @@ public class DataIntegrityFilter implements Filter, Ordered {
      * @param timestamp 时间戳
      * @param nonceStr 随机数
      * @param request 参数
+     * @param payload json请求体
      * @return signature
      */
-    private String signature(String timestamp, String nonceStr, HttpServletRequest request,String data) {
+    private String signature(String timestamp, String nonceStr, HttpServletRequest request,String payload) {
         Map<String, Object> params = new HashMap<>();
         Enumeration<String> enumeration = request.getParameterNames();
         while (enumeration.hasMoreElements()){
@@ -121,7 +110,7 @@ public class DataIntegrityFilter implements Filter, Ordered {
         if(request.getContentType() != null && request.getContentType().contains(MediaType.MULTIPART_FORM_DATA_VALUE) && dataIntegrityProperties.isCheckUpload()){//maybe upload
             fileInfo = parseUpload(request);
         }
-        return DataIntegrityUtils.signature(timestamp,nonceStr,params,fileInfo,data);
+        return DataIntegrityUtils.signature(timestamp,nonceStr,params,fileInfo,payload);
     }
 
     @Override

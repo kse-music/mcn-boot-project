@@ -19,7 +19,7 @@ public class NameValueProcessorFilter implements Filter {
     public NameValueProcessorFilter(NameValueProcessorProperties properties, NameValueProcessor valueProcessor) {
         this.properties = properties;
         this.valueProcessor = valueProcessor;
-        this.requestMatcher = new RequestMatcher(properties.getIncludeUrls(), properties.getExcludeUrls());
+        this.requestMatcher = new RequestMatcher(properties.getIncludeUrls(), properties.getExcludeUrls()).enableDefaultExclude();
     }
 
     @Override

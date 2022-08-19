@@ -11,6 +11,7 @@ import cn.hiboot.mcn.autoconfigure.web.exception.handler.GlobalExceptionProperti
 import cn.hiboot.mcn.autoconfigure.web.filter.common.NameValueProcessorJacksonConfig;
 import cn.hiboot.mcn.autoconfigure.web.mvc.resolver.StrToObj;
 import cn.hiboot.mcn.autoconfigure.web.mvc.resolver.StringObjectMethodArgumentResolver;
+import cn.hiboot.mcn.autoconfigure.web.security.WebSecurityProperties;
 import cn.hiboot.mcn.core.exception.ExceptionKeys;
 import cn.hiboot.mcn.core.model.result.RestResp;
 import cn.hiboot.mcn.core.util.JacksonUtils;
@@ -54,6 +55,7 @@ import java.util.stream.Collectors;
 @ConditionalOnClass({DispatcherServlet.class})
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @Import({DurationAop.class, NameValueProcessorJacksonConfig.class})
+@EnableConfigurationProperties(WebSecurityProperties.class)
 public class SpringMvcAutoConfiguration {
 
     @Configuration(proxyBeanMethods = false)

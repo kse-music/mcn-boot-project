@@ -56,7 +56,7 @@ class DelegateNameValueProcessor implements NameValueProcessor{
 
         public ValueProcessor(NameValueProcessor nameValueProcessor, NameValueProcessorProperties properties) {
             this.nameValueProcessor = nameValueProcessor;
-            this.requestMatcher = new RequestMatcher(properties.getIncludeUrls(), properties.getExcludeUrls());
+            this.requestMatcher = new RequestMatcher(properties.getIncludeUrls(), properties.getExcludeUrls()).enableDefaultExclude();
             this.excludeFields = properties.getExcludeFields();
             if(properties instanceof XssProperties){
                 this.escapeResponse = ((XssProperties) properties).isEscapeResponse();

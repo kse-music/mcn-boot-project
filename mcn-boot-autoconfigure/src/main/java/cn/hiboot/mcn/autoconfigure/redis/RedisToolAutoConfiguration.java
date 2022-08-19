@@ -1,8 +1,8 @@
 package cn.hiboot.mcn.autoconfigure.redis;
 
+import cn.hiboot.mcn.autoconfigure.web.filter.common.JsonRequestHelper;
 import cn.hiboot.mcn.autoconfigure.web.filter.common.RequestPayloadRequestWrapper;
 import org.aspectj.lang.annotation.Aspect;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -56,8 +56,8 @@ public class RedisToolAutoConfiguration {
 
         @Bean
         @ConditionalOnBean(StringRedisTemplate.class)
-        public RepeatCommitAspect repeatCommitAspect(ObjectProvider<Identifier> provider, StringRedisTemplate redisTemplate) {
-            return new RepeatCommitAspect(provider,redisTemplate);
+        public RepeatCommitAspect repeatCommitAspect( StringRedisTemplate redisTemplate) {
+            return new RepeatCommitAspect(redisTemplate);
         }
 
         protected static class JsonDataConveyFilter implements Filter{
@@ -65,7 +65,7 @@ public class RedisToolAutoConfiguration {
             @Override
             public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
                 HttpServletRequest httpServletRequest = (HttpServletRequest) request;
-                if(RequestPayloadRequestWrapper.isJsonRequest(httpServletRequest)){
+                if(JsonRequestHelper.isJsonRequest(httpServletRequest)){
                     request = new RequestPayloadRequestWrapper(httpServletRequest);
                 }
                 chain.doFilter(request,response);
