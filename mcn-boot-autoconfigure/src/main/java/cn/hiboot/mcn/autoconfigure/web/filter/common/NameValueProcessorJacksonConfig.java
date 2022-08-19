@@ -13,6 +13,7 @@ import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
 import java.io.IOException;
 
+
 /**
  * 处理json中数据类型为string的值
  *
@@ -23,15 +24,10 @@ public class NameValueProcessorJacksonConfig implements Jackson2ObjectMapperBuil
 
     private static final ThreadLocal<Boolean> feignRequest = ThreadLocal.withInitial(() -> false);
 
-    private boolean escapeResponse;
     private final DelegateNameValueProcessor delegateValueProcessor;
 
     public NameValueProcessorJacksonConfig(ObjectProvider<NameValueProcessor> valueProcessors) {
         this.delegateValueProcessor = new DelegateNameValueProcessor(valueProcessors);
-    }
-
-    public void setEscapeResponse(boolean escapeResponse) {
-        this.escapeResponse = escapeResponse;
     }
 
     public static void setFeignRequest(){
@@ -51,18 +47,16 @@ public class NameValueProcessorJacksonConfig implements Jackson2ObjectMapperBuil
 
     @Override
     public void customize(Jackson2ObjectMapperBuilder jacksonObjectMapperBuilder) {
-        if(escapeResponse){
-            jacksonObjectMapperBuilder.serializers(new JsonSerializer<String>(){
-                @Override
-                public void serialize(String value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
-                    gen.writeString(clean(null,value));
-                }
-                @Override
-                public Class<String> handledType() {
-                    return String.class;
-                }
-            });
-        }
+        jacksonObjectMapperBuilder.serializers(new JsonSerializer<String>(){
+            @Override
+            public void serialize(String value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+                gen.writeString(clean(null,value));
+            }
+            @Override
+            public Class<String> handledType() {
+                return String.class;
+            }
+        });
         jacksonObjectMapperBuilder.deserializers( new JsonDeserializer<String>(){
             @Override
             public String deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JacksonException {

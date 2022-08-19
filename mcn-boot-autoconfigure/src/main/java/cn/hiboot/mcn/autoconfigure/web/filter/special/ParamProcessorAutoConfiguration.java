@@ -2,9 +2,7 @@ package cn.hiboot.mcn.autoconfigure.web.filter.special;
 
 
 import cn.hiboot.mcn.autoconfigure.web.exception.ExceptionResolver;
-import cn.hiboot.mcn.autoconfigure.web.filter.common.NameValueProcessor;
 import cn.hiboot.mcn.autoconfigure.web.filter.common.NameValueProcessorFilter;
-import cn.hiboot.mcn.autoconfigure.web.filter.common.NameValueProcessorJacksonConfig;
 import cn.hiboot.mcn.core.exception.ExceptionKeys;
 import cn.hiboot.mcn.core.exception.ServiceException;
 import cn.hiboot.mcn.core.model.result.RestResp;
@@ -21,7 +19,6 @@ import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -120,12 +117,6 @@ public class ParamProcessorAutoConfiguration {
         filterRegistrationBean.setOrder(properties.getOrder());
         filterRegistrationBean.setName(properties.getName());
         return filterRegistrationBean;
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public NameValueProcessorJacksonConfig nameValueProcessorJacksonConfig(ObjectProvider<NameValueProcessor> valueProcessors) {
-        return new NameValueProcessorJacksonConfig(valueProcessors);
     }
 
     @Bean
