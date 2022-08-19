@@ -1,9 +1,12 @@
 package cn.hiboot.mcn.autoconfigure.web.filter.common;
 
+import cn.hiboot.mcn.autoconfigure.web.security.WebSecurityProperties;
 import cn.hiboot.mcn.core.util.McnAssert;
+import cn.hiboot.mcn.core.util.SpringBeanUtils;
 import org.springframework.util.AntPathMatcher;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -14,8 +17,6 @@ import java.util.List;
  * @since 2022/6/17 17:06
  */
 public class RequestMatcher {
-
-    static RequestMatcher DEFAULT_REQUEST_MATCHER = new RequestMatcher();
 
     private final AntPathMatcher antPathMatcher = new AntPathMatcher();
 
@@ -30,6 +31,16 @@ public class RequestMatcher {
         McnAssert.notNull(excludeUrls,"includeUrls must be not null");
         this.includeUrls = includeUrls;
         this.excludeUrls = excludeUrls;
+    }
+
+    public RequestMatcher enableDefaultExclude(){
+        WebSecurityProperties webSecurityProperties = SpringBeanUtils.getBean(WebSecurityProperties.class);
+        if(webSecurityProperties.isEnableDefaultIgnore()){
+            List<String> excludePatterns = new ArrayList<>(excludeUrls);
+            Collections.addAll(excludePatterns,webSecurityProperties.getDefaultExcludeUrls());
+            this.excludeUrls = excludePatterns;
+        }
+        return this;
     }
 
     public boolean matches(HttpServletRequest request){
