@@ -5,7 +5,7 @@ org.springframework.context.ApplicationListener=\
   cn.hiboot.mcn.autoconfigure.context.McnApplicationListener
 
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  cn.hiboot.mcn.autoconfigure.jdbc.MultipleDataSourceAutoConfiguration.\
+  cn.hiboot.mcn.autoconfigure.jdbc.MultipleDataSourceAutoConfiguration,\
   cn.hiboot.mcn.autoconfigure.mybatis.MybatisSingleDataSourceAutoConfiguration,\
   cn.hiboot.mcn.autoconfigure.mybatis.MybatisMultipleDataSourceAutoConfiguration,\
   cn.hiboot.mcn.autoconfigure.web.groovy.GroovyWebAutoConfiguration,\
