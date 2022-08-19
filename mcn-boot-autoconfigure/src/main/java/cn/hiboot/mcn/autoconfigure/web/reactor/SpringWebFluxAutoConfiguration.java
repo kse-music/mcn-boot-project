@@ -45,7 +45,7 @@ public class SpringWebFluxAutoConfiguration {
 
     @EnableConfigurationProperties(CorsProperties.class)
     @Configuration(proxyBeanMethods = false)
-    protected static class FilterAutoConfiguration{
+    protected static class CorsAutoConfiguration{
 
         @Bean
         @ConditionalOnMissingBean
