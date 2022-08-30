@@ -17,8 +17,6 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.PropertySource;
-import org.springframework.util.ClassUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * 监听器
@@ -28,7 +26,6 @@ import org.springframework.util.StringUtils;
  * @since 2021/1/16 16:28
  */
 public class McnApplicationListener implements GenericApplicationListener {
-    private static final String SECURITY_CONTEXT_HOLDER_STRATEGY_SYSTEM_PROPERTY = "spring.security.strategy";
 
     private final Logger log = LoggerFactory.getLogger(McnApplicationListener.class);
 
@@ -52,7 +49,6 @@ public class McnApplicationListener implements GenericApplicationListener {
 
     private void triggerEnvironmentPreparedEvent(ConfigurableEnvironment environment, ConfigurableBootstrapContext context) {
         registerLogFileChecker(environment,context);
-        configSecurityContextHolderStrategyMode(environment);
     }
 
     private void logPropertySource(ConfigurableEnvironment environment){
@@ -82,19 +78,6 @@ public class McnApplicationListener implements GenericApplicationListener {
     private void registerLogFileChecker(ConfigurableEnvironment environment, ConfigurableBootstrapContext context){
         if(environment.getProperty("delete.default.log-file.enable", Boolean.class, true)){
             context.registerIfAbsent(LogFileChecker.class, BootstrapRegistry.InstanceSupplier.of(new LogFileChecker(environment)));
-        }
-    }
-
-    private void configSecurityContextHolderStrategyMode(ConfigurableEnvironment environment){
-        String strategyName = environment.getProperty(SECURITY_CONTEXT_HOLDER_STRATEGY_SYSTEM_PROPERTY);
-        if (!StringUtils.hasText(strategyName)) {
-            if(ClassUtils.isPresent("org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken",null)
-                    && ClassUtils.isPresent("feign.Feign",null)){
-                strategyName = "MODE_INHERITABLETHREADLOCAL";
-            }
-        }
-        if (StringUtils.hasText(strategyName)) {
-            System.setProperty(SECURITY_CONTEXT_HOLDER_STRATEGY_SYSTEM_PROPERTY,strategyName);
         }
     }
 
