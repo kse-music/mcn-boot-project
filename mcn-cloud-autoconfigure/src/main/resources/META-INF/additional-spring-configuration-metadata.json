@@ -3,6 +3,7 @@
     {
       "name": "feign.circuitbreaker.globalfallback.enabled",
       "type": "java.lang.Boolean",
+      "sourceType": "cn.hiboot.mcn.cloud.feign.FeignExtensionAutoConfiguration$GlobalFallbackCondition",
       "description": "是否启用全局fallback.",
       "defaultValue": "true"
     },
@@ -19,6 +20,13 @@
       "sourceType": "cn.hiboot.mcn.cloud.feign.FeignInterceptorConfiguration$DataIntegrityFeignInterceptor",
       "description": "是否启用数据完整性feign拦截器.",
       "defaultValue": "false"
+    },
+    {
+      "name": "erase.decrypted-data.enable",
+      "type": "java.lang.Boolean",
+      "sourceType": "cn.hiboot.mcn.cloud.context.McnCloudApplicationListener",
+      "description": "是否删除解密后的数据.",
+      "defaultValue": false
     }
   ]
 }
