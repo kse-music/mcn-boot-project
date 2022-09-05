@@ -4,7 +4,6 @@ import cn.hiboot.mcn.autoconfigure.context.McnApplicationListener;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.cloud.bootstrap.encrypt.EnvironmentDecryptApplicationInitializer;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.event.GenericApplicationListener;
 import org.springframework.core.ResolvableType;
@@ -19,6 +18,7 @@ import org.springframework.util.StringUtils;
  * @since 2022/8/30 23:02
  */
 public class McnCloudApplicationListener implements GenericApplicationListener {
+    private static final String DECRYPTED_PROPERTY_SOURCE_NAME = "decrypted";
 
     private static final String SECURITY_CONTEXT_HOLDER_STRATEGY_SYSTEM_PROPERTY = "spring.security.strategy";
 
@@ -53,7 +53,7 @@ public class McnCloudApplicationListener implements GenericApplicationListener {
 
     private void eraseDecryptedData(ConfigurableEnvironment environment) {
         if(environment.getProperty("erase.decrypted-data.enable",boolean.class,false)){
-            environment.getPropertySources().remove(EnvironmentDecryptApplicationInitializer.DECRYPTED_PROPERTY_SOURCE_NAME);
+            environment.getPropertySources().remove(DECRYPTED_PROPERTY_SOURCE_NAME);
         }
     }
 
