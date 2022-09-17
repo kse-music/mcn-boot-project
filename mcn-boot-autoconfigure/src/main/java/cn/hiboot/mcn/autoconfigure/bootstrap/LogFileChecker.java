@@ -1,11 +1,11 @@
 package cn.hiboot.mcn.autoconfigure.bootstrap;
 
 import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.util.ObjectUtils;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Objects;
 
 /**
  * LogFileChecker
@@ -15,23 +15,25 @@ import java.util.Objects;
  */
 public class LogFileChecker {
 
-    private final String originalLogFile;
-    private final ConfigurableEnvironment environment;
-
-    public LogFileChecker(ConfigurableEnvironment environment) {
-        this.environment = environment;
-        this.originalLogFile = getLogFile(environment);
-    }
+    private String originalLogFile;
+    private ConfigurableEnvironment environment;
 
     public void check(){
-        String finalLogFile = getLogFile(environment);
-        if(Objects.nonNull(finalLogFile) && !finalLogFile.equals(originalLogFile)){
+        if(environment.getProperty("delete.default.log-file.enable", Boolean.class, true)){
+            if(ObjectUtils.nullSafeEquals(getLogFile(environment),originalLogFile)){
+                return;
+            }
             try {
                 Files.delete(Paths.get(originalLogFile));
             } catch (IOException e) {
                 //ignore
             }
         }
+    }
+
+    public void setEnvironment(ConfigurableEnvironment environment) {
+        this.environment = environment;
+        this.originalLogFile = getLogFile(environment);
     }
 
     private String getLogFile(ConfigurableEnvironment environment ) {
