@@ -133,7 +133,7 @@
     {
       "name": "erase.decrypted-data.enable",
       "type": "java.lang.Boolean",
-      "sourceType": "cn.hiboot.mcn.autoconfigure.context.McnApplicationListener",
+      "sourceType": "cn.hiboot.mcn.autoconfigure.bootstrap.LogFileChecker",
       "description": "是否删除解密后的数据.",
       "defaultValue": false
     }
