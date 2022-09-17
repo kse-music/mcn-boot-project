@@ -1,5 +1,2 @@
 org.springframework.cloud.bootstrap.BootstrapConfiguration=\
   cn.hiboot.mcn.cloud.encryptor.sm4.SM4BootstrapConfiguration
-
-org.springframework.context.ApplicationListener=\
-  cn.hiboot.mcn.cloud.context.McnCloudApplicationListener

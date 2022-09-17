@@ -7,9 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.BootstrapRegistry;
 import org.springframework.boot.ConfigurableBootstrapContext;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.context.event.ApplicationContextInitializedEvent;
-import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
-import org.springframework.boot.context.event.ApplicationPreparedEvent;
+import org.springframework.boot.context.event.*;
 import org.springframework.boot.context.logging.LoggingApplicationListener;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.event.GenericApplicationListener;
@@ -17,6 +15,8 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.PropertySource;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * 监听器
@@ -29,29 +29,51 @@ public class McnApplicationListener implements GenericApplicationListener {
 
     private final Logger log = LoggerFactory.getLogger(McnApplicationListener.class);
 
+    private static final String DECRYPTED_PROPERTY_SOURCE_NAME = "decrypted";
+    private static final String SECURITY_CONTEXT_HOLDER_STRATEGY_SYSTEM_PROPERTY = "spring.security.strategy";
+
     public static final int DEFAULT_ORDER = LoggingApplicationListener.DEFAULT_ORDER + 1;
 
-    private static final Class<?>[] EVENT_TYPES = { ApplicationEnvironmentPreparedEvent.class, ApplicationContextInitializedEvent.class, ApplicationPreparedEvent.class};
-
+    private static final Class<?>[] EVENT_TYPES = { SpringApplicationEvent.class};
     private static final Class<?>[] SOURCE_TYPES = { SpringApplication.class };
 
     @Override
     public void onApplicationEvent(ApplicationEvent applicationEvent) {
-        if(applicationEvent instanceof ApplicationEnvironmentPreparedEvent){
-            ApplicationEnvironmentPreparedEvent event = (ApplicationEnvironmentPreparedEvent) applicationEvent;
-            triggerEnvironmentPreparedEvent(event.getEnvironment(),event.getBootstrapContext());
+        if(applicationEvent instanceof ApplicationStartingEvent){
+            onApplicationStartingEvent((ApplicationStartingEvent) applicationEvent);
+        }else if(applicationEvent instanceof ApplicationEnvironmentPreparedEvent){
+            onApplicationEnvironmentPreparedEvent((ApplicationEnvironmentPreparedEvent) applicationEvent);
         }else if(applicationEvent instanceof ApplicationContextInitializedEvent){
-            logPropertySource(((ApplicationContextInitializedEvent) applicationEvent).getApplicationContext().getEnvironment());
+            onApplicationContextInitializedEvent((ApplicationContextInitializedEvent) applicationEvent);
         }else if(applicationEvent instanceof ApplicationPreparedEvent){
-            SpringBeanUtils.setApplicationContext(((ApplicationPreparedEvent) applicationEvent).getApplicationContext());
+            onApplicationPreparedEvent((ApplicationPreparedEvent)applicationEvent);
+        }else if(applicationEvent instanceof ApplicationReadyEvent){
+            onApplicationReadyEvent((ApplicationReadyEvent) applicationEvent);
         }
     }
 
-    private void triggerEnvironmentPreparedEvent(ConfigurableEnvironment environment, ConfigurableBootstrapContext context) {
-        registerLogFileChecker(environment,context);
+    private void onApplicationStartingEvent(ApplicationStartingEvent event) {
+        //config security holder
+        if (!StringUtils.hasText(System.getProperty(SECURITY_CONTEXT_HOLDER_STRATEGY_SYSTEM_PROPERTY))) {
+            if(ClassUtils.isPresent("org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken",null)
+                    && ClassUtils.isPresent("feign.Feign",null)){
+                System.setProperty(SECURITY_CONTEXT_HOLDER_STRATEGY_SYSTEM_PROPERTY,"MODE_INHERITABLETHREADLOCAL");
+            }
+        }
+        //register repeat log file checker
+        event.getBootstrapContext().registerIfAbsent(LogFileChecker.class, BootstrapRegistry.InstanceSupplier.of(new LogFileChecker()));
     }
 
-    private void logPropertySource(ConfigurableEnvironment environment){
+    private void onApplicationEnvironmentPreparedEvent(ApplicationEnvironmentPreparedEvent event) {
+        ConfigurableEnvironment environment = event.getEnvironment();
+        ConfigurableBootstrapContext bootstrapContext = event.getBootstrapContext();
+        //config log file checker
+        bootstrapContext.getOrElse(LogFileChecker.class, new LogFileChecker()).setEnvironment(environment);
+    }
+
+    private void onApplicationContextInitializedEvent(ApplicationContextInitializedEvent event){
+        ConfigurableEnvironment environment = event.getApplicationContext().getEnvironment();
+        //print all EnumerablePropertySource
         if(environment.getProperty("mcn.print-env.enable",Boolean.class,false)){
             for (PropertySource<?> propertySource : environment.getPropertySources()) {
                 String name = propertySource.getName();
@@ -75,9 +97,16 @@ public class McnApplicationListener implements GenericApplicationListener {
         }
     }
 
-    private void registerLogFileChecker(ConfigurableEnvironment environment, ConfigurableBootstrapContext context){
-        if(environment.getProperty("delete.default.log-file.enable", Boolean.class, true)){
-            context.registerIfAbsent(LogFileChecker.class, BootstrapRegistry.InstanceSupplier.of(new LogFileChecker(environment)));
+    private void onApplicationPreparedEvent(ApplicationPreparedEvent event){
+        //set context to SpringBeanUtils
+        SpringBeanUtils.setApplicationContext(event.getApplicationContext());
+    }
+
+    private void onApplicationReadyEvent(ApplicationReadyEvent event) {
+        ConfigurableEnvironment environment = event.getApplicationContext().getEnvironment();
+        //Whether to delete the configuration after decryption
+        if(environment.getProperty("erase.decrypted-data.enable",boolean.class,false)){
+            environment.getPropertySources().remove(DECRYPTED_PROPERTY_SOURCE_NAME);
         }
     }
 
