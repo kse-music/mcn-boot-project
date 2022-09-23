@@ -43,6 +43,7 @@
         <mapstruct.version>1.5.2.Final</mapstruct.version>
         <mybatis-spring-boot.version>2.2.2</mybatis-spring-boot.version>
         <minio.version>8.4.3</minio.version>
+        <snakeyaml.version>1.32</snakeyaml.version>
         <spring-boot.version>2.7.4</spring-boot.version>
         <spring-cloud.version>2021.0.4</spring-cloud.version>
         <spring-cloud-alibaba.version>2021.1</spring-cloud-alibaba.version>
@@ -76,6 +77,12 @@
                 <version>${spring-cloud-alibaba.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.yaml</groupId>
+                <artifactId>snakeyaml</artifactId>
+                <version>${snakeyaml.version}</version>
             </dependency>
 
             <dependency>
