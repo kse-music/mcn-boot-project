@@ -19,11 +19,11 @@ public abstract class NameValueProcessorProperties {
      */
     private List<String> excludeUrls = Collections.emptyList();
     /**
-     * 不处理的字段,仅对非json编码有效
+     * 不处理的字段
      */
     private List<String> excludeFields;
     /**
-     * 是否过滤字段名称,仅对非json编码有效
+     * 是否处理字段名称,仅对kv参数生效
      */
     private boolean filterParameterName;
     /**
