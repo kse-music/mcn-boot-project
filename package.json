@@ -1,0 +1,29 @@
+{
+  "name": "mcn-doc",
+  "version": "2.7.4",
+  "description": "mcn doc",
+  "author": "dinghao_1989@163.com",
+  "main": "index.js",
+  "keywords": [
+    "java",
+    "spring",
+    "springBoot",
+    "springCloud"
+  ],
+  "homepage": "https://github.com/kse-music/mcn-boot-project",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kse-music/mcn-boot-project"
+  },
+  "license": "MIT",
+  "scripts": {
+    "docs:dev": "vuepress dev docs",
+    "docs:build": "vuepress build docs"
+  },
+  "devDependencies": {
+    "@vuepress/plugin-back-to-top": "^1.7.1",
+    "vuepress": "^1.7.1",
+    "vuepress-plugin-qrcode": "^1.0.7",
+    "watchpack": "^1.6.1"
+  }
+}

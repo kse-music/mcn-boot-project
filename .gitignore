@@ -4,3 +4,6 @@ target/
 pom.xml.versionsBackup
 .flattened-pom.xml
 *.bat
+node_modules/
+docs/dist
+package-lock.json
