@@ -67,7 +67,7 @@ public class SqlInitAutoConfiguration {
         @Override
         public void afterPropertiesSet() throws Exception {
             super.afterPropertiesSet();
-            String fallback = "additional-script";
+            String fallback = "other";
             runScripts(getScripts(scriptLocations(sqlInitProperties.getScriptLocations(), fallback),fallback), properties.isContinueOnError(), sqlInitProperties.getSeparator(),properties.getEncoding());
         }
 
