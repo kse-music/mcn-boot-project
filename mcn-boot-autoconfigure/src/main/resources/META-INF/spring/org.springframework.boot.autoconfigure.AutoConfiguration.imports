@@ -6,6 +6,7 @@ cn.hiboot.mcn.autoconfigure.mongo.MongoExtensionAutoConfiguration
 cn.hiboot.mcn.autoconfigure.mybatis.MybatisSingleDataSourceAutoConfiguration
 cn.hiboot.mcn.autoconfigure.mybatis.MybatisMultipleDataSourceAutoConfiguration
 cn.hiboot.mcn.autoconfigure.redis.RedisToolAutoConfiguration
+cn.hiboot.mcn.autoconfigure.sql.SqlInitAutoConfiguration
 cn.hiboot.mcn.autoconfigure.validator.ValidatorAutoConfiguration
 cn.hiboot.mcn.autoconfigure.web.groovy.GroovyWebAutoConfiguration
 cn.hiboot.mcn.autoconfigure.web.filter.FilterAutoConfiguration
