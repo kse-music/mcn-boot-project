@@ -68,12 +68,16 @@ class SqlInitCreator {
         public boolean initializeDatabase() {
             ScriptLocationResolver locationResolver = new ScriptLocationResolver(SpringBeanUtils.getApplicationContext());
             boolean initialized = applySchemaScripts(locationResolver);
-            boolean other = applyScripts(this.settings.getScriptLocations(), "other", locationResolver,this.settings.getOtherSeparator());
+            boolean other = applyOtherScripts(locationResolver);
             return applyDataScripts(locationResolver) || other || initialized;
         }
 
         private boolean applySchemaScripts(ScriptLocationResolver locationResolver) {
             return applyScripts(this.settings.getSchemaLocations(), "schema", locationResolver,null);
+        }
+
+        private boolean applyOtherScripts(ScriptLocationResolver locationResolver) {
+            return applyScripts(this.settings.getScriptLocations(), "other", locationResolver,this.settings.getOtherSeparator());
         }
 
         private boolean applyDataScripts(ScriptLocationResolver locationResolver) {
