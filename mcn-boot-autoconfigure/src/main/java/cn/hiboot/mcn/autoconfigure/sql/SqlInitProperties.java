@@ -14,7 +14,8 @@ import java.util.List;
 public class SqlInitProperties {
 
     private String separator = "//";
-    private List<String> scriptLocations;
+    private String dir = "db";
+    private List<String> locations;
 
     public String getSeparator() {
         return separator;
@@ -24,11 +25,19 @@ public class SqlInitProperties {
         this.separator = separator;
     }
 
-    public List<String> getScriptLocations() {
-        return scriptLocations;
+    public String getDir() {
+        return dir;
     }
 
-    public void setScriptLocations(List<String> scriptLocations) {
-        this.scriptLocations = scriptLocations;
+    public void setDir(String dir) {
+        this.dir = dir;
+    }
+
+    public List<String> getLocations() {
+        return locations;
+    }
+
+    public void setLocations(List<String> locations) {
+        this.locations = locations;
     }
 }
