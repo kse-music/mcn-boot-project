@@ -9,6 +9,8 @@ module.exports = {
         '@vuepress/back-to-top'
     ],
     themeConfig: {
+        repo : 'https://github.com/kse-music/mcn-boot-project',
+        docsDir: 'docs',
         editLinks : true,
         editLinkText: "在 GitHub 上编辑此页",
         lastUpdated: "上次更新",

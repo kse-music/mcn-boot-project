@@ -3,7 +3,7 @@
 ## 统一异常处理
 
 ### 三种使用方式
-1. 直接使用异常ServiceException(推荐)
+1. [**推荐**]直接使用异常ServiceException
 ```java
 public class UserService{
     
@@ -122,16 +122,121 @@ web.security.default-exclude-urls=/v2/api-docs,/swagger-resources/**,/doc.html,/
 :::
 
 ## 多数据源配置
+通过前缀multiple.datasource配置数据源即代表使用的是多数据源配置。
 
-### Mybatis多数据源
+1. 配置多个数据源
 
-### Jpa多数据源
+```properties
+multiple.datasource.hello.url=jdbc:mysql://127.0.0.1:3306/test?createDatabaseIfNotExist=true&characterEncoding=utf8&autoReconnect=true&failOverReadOnly=false&useSSL=false&serverTimezone=Asia/Shanghai
+multiple.datasource.hello.username=root
+multiple.datasource.hello.password=123456
 
-## 配置加解密
+multiple.datasource.world.url=jdbc:mysql://127.0.0.1:3306/web_template?createDatabaseIfNotExist=true&characterEncoding=utf8&autoReconnect=true&failOverReadOnly=false&useSSL=false&serverTimezone=Asia/Shanghai
+multiple.datasource.world.username=root
+multiple.datasource.world.password=123456
+```
 
-### 使用SM4加密配置
+2. 启用动态数据源支持
+
+```properties
+dynamic.datasource.enable=true
+```
+
+### 在MyBatis和Jpa使用动态数据源
+1. 在Mybatis中使用
+```xml
+<dependency>
+    <groupId>org.mybatis.spring.boot</groupId>
+    <artifactId>mybatis-spring-boot-starter</artifactId>
+</dependency>
+```
+
+2. 在Jpa中使用
+```xml
+ <dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-jpa</artifactId>
+</dependency>
+
+```
+3. 使用注解SwitchSource切换数据源（**数据源名称就是multiple.datasource后的第一个字符串即hello和world**）
+
+```java
+@RequestMapping("test")
+@RestController
+@SwitchSource("hello")
+public class TestRestApi {
+
+    private UserDao userDao;
+    
+	public TestRestApi(UserDao userDao) {
+        this.userDao = userDao;
+    }
+
+    @GetMapping("list")
+    public RestResp<List<User>> list() {
+        return new RestResp<>(userDao.findAll());
+    }
+
+    @GetMapping("list2")
+    @SwitchSource("world")
+    public RestResp<List<User>> list2() {
+        return new RestResp<>(userDao.findAll());
+    }
+}    
+```
+
+::: tip 提示
+SwitchSource注解既可以用在类上也可以用在方法上，方法上的优先级高
+:::
+
+
+### MyBatis和Jpa使用多数据源
+1. 使用多数据源
+```properties
+#同时只能启动一个
+#mybatis.multiple.datasource.enable=true
+jpa.multiple.datasource.enable=true
+```
+2. 数据访问层位置
+> dao层必须在启动类所在包的子包dao下且用数据源的名称当子包名称，如下图所示
+![数据访问层位置](/images/d.png)
+
+3. 使用
+```java
+@RequestMapping("test")
+@RestController
+public class TestRestApi {
+    private UserDao userDao;
+    private UserDao2 userDao2;
+
+    public TestRestApi(UserDao userDao, UserDao2 userDao2) {
+        this.userDao = userDao;
+        this.userDao2 = userDao2;
+    }
+
+    @GetMapping("list3")
+    public RestResp<List<User>> list3() {
+        List<User> all = userDao2.findAll();
+        all.addAll(userDao.findAll());
+        return new RestResp<>(all);
+    }
+}  
+```
+
+::: warning 注意
+1. 动态数据源开关和jpa多数据源开关以及mybatis多数据源开关三者同时只能开启一个
+2. 当三个开关都没开启时，默认会使用动态数据源模式
+3. jpa和mybatis的多数据源配置基本一样，引入不同的依赖就行了
+:::
+## 传输加解密
+### 使用SM2加密配置
 
 ## 完整性校验
+### 使用SM3加密配置
+
+## 配置加解密
+### 使用SM4加密配置
 
 ## 参数预处理
 
@@ -228,7 +333,8 @@ spring.sql.init.platform=mysql
 spring.sql.init.continue-on-error=true
 
 ```
-3. 在classpath:db/下分别创建schema-mysql.sql、schema-kingbase8.sql、other-kingbase8.sql
+3. 在classpath:db/下分别创建schema-mysql.sql、schema-kingbase8.sql、other-kingbase8.sql文件
+
 schema-mysql.sql内容如下：
 ```sql
 CREATE TABLE t_user (
