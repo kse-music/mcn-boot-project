@@ -5,5 +5,5 @@ pom.xml.versionsBackup
 .flattened-pom.xml
 *.bat
 node_modules/
-docs/dist
+docs/.vuepress/dist
 package-lock.json

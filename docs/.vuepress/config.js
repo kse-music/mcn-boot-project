@@ -1,5 +1,5 @@
 module.exports = {
-    base: '/',
+    base: '/mcn/',
     port: 80,
     lang: 'zh-CN',
     title: 'Mcn文档',
