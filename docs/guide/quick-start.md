@@ -156,17 +156,7 @@ spring.application.name=demo
 swagger.enable=true
 ```
 
-## 运行访问
+## 运行&访问
 
 ### 运行DemoApplication
-### [查看rest接口](http://127.0.0.1:8080/doc.html)
-
-## 其它
-
-::: tip 提示
-用不到依赖包一定要去掉!
-
-因为SpringBoot的理念就是约定大于配置，很多东西都是自动配置好的，拿来即用。
-所以在不了解它的运作机制的时候，就会造成一些额外的莫名错误。特别与数据库驱动相关的包。
-
-:::
+### [SwaggerUI](http://127.0.0.1:8080/doc.html)

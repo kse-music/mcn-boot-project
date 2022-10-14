@@ -35,7 +35,7 @@ module.exports = {
         },{
             title : '使用教程',
             collapsable: false,
-            children: ['guide/quick-start']
+            children: ['guide/quick-start','guide/dependency']
         },{
             title: '功能说明',
             collapsable: false,

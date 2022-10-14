@@ -31,7 +31,7 @@ server.tomcat.basedir=/tmp/tomcat/
 server.compression.enabled=true
 
 ```
-[查看](https://github.com/kse-music/mcn-boot-project/blob/master/mcn-boot-autoconfigure/src/main/java/cn/hiboot/mcn/autoconfigure/config/mcn-default.properties)所有配置
+[全部配置](https://github.com/kse-music/mcn-boot-project/blob/master/mcn-boot-autoconfigure/src/main/java/cn/hiboot/mcn/autoconfigure/config/mcn-default.properties)
 
 ::: warning 注意
 
