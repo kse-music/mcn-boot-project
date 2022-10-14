@@ -200,7 +200,7 @@ jpa.multiple.datasource.enable=true
 ```
 2. 数据访问层位置
 > dao层必须在启动类所在包的子包dao下且用数据源的名称当子包名称，如下图所示
-![数据访问层位置](/images/d.png)
+<img :src="$withBase('/images/d.png')" alt="数据访问层位置">
 
 3. 使用
 ```java
