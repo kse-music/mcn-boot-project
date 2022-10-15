@@ -1,5 +1,7 @@
 package cn.hiboot.mcn.core.task;
 
+import cn.hiboot.mcn.core.util.McnUtils;
+
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -32,9 +34,7 @@ public class TaskThreadPool extends ThreadPoolExecutor {
     @Override
     public void execute(Runnable runnable){
         //防止队列数过多OOM
-        while (blocking()){
-
-        }
+        McnUtils.loopContinue(this::blocking);
         super.execute(runnable);
     }
 
@@ -44,9 +44,7 @@ public class TaskThreadPool extends ThreadPoolExecutor {
 
     public void closeUntilAllTaskFinish(){
         shutdown();
-        while (!isTerminated()){
-
-        }
+        McnUtils.loopEnd(this::isTerminated);
     }
 
     private static class CustomThreadFactory implements ThreadFactory {
