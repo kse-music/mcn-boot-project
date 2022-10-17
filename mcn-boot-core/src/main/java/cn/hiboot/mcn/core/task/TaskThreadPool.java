@@ -16,10 +16,15 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class TaskThreadPool extends ThreadPoolExecutor {
 
+    private static final int DEFAULT_WORK_QUEUE_SIZE = 1000;
     private final int workQueueSize;
 
     public TaskThreadPool(){
-        this(Runtime.getRuntime().availableProcessors(), 10, "BatchTask");
+        this(Runtime.getRuntime().availableProcessors(), DEFAULT_WORK_QUEUE_SIZE);
+    }
+
+    public TaskThreadPool(int corePoolSize, int workQueueSize){
+        this(corePoolSize,corePoolSize,workQueueSize, "BatchTask");
     }
 
     public TaskThreadPool(int corePoolSize, int workQueueSize, String namePrefix){
@@ -53,7 +58,7 @@ public class TaskThreadPool extends ThreadPoolExecutor {
         private final AtomicInteger nextId = new AtomicInteger();
 
         public CustomThreadFactory(String name) {
-            this.namePrefix = name + "-Worker";
+            this.namePrefix = name + "-Worker-";
         }
 
         @Override
