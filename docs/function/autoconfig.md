@@ -229,8 +229,98 @@ public class TestRestApi {
 2. 当三个开关都没开启时，默认会使用动态数据源模式
 3. jpa和mybatis的多数据源配置基本一样，引入不同的依赖就行了
 :::
+
 ## 传输加解密
 ### 使用SM2加密配置
+使用方式
+1. 引入依赖并配置密钥对
+```xml
+<dependencies>
+    <dependency>
+        <groupId>org.bouncycastle</groupId>
+        <artifactId>bcprov-jdk18on</artifactId>
+    </dependency>
+
+    <dependency>
+        <groupId>cn.hutool</groupId>
+        <artifactId>hutool-crypto</artifactId>
+    </dependency>
+</dependencies>
+```
+```properties
+encryptor.sm2.private-key=308193020100301306072a8648ce3d020106082a811ccf5501822d04793077020101042044880abf2572c0946e4d7a18a812fe554f20db40bc852a3b78b7e057af72344ca00a06082a811ccf5501822da14403420004258785f13a181c19fe366f13e1e4d93834944fb6b2d05b0ef58963e3cbdc3d680b228bdeab895a1f113dd6690279cd932ab85ecf694ebf34d6201b9d76055094
+encryptor.sm2.public-key=3059301306072a8648ce3d020106082a811ccf5501822d03420004258785f13a181c19fe366f13e1e4d93834944fb6b2d05b0ef58963e3cbdc3d680b228bdeab895a1f113dd6690279cd932ab85ecf694ebf34d6201b9d76055094
+```
+2. 接口中使用
+
+```java
+
+@RequestMapping("test")
+@RestController
+public class TestRestApi {
+
+    private final TextEncryptor textEncryptor;
+
+    public TestRestApi(TextEncryptor textEncryptor) {
+        this.textEncryptor = textEncryptor;
+    }
+
+    @GetMapping("encrypt")
+    public RestResp<String> encrypt(String text) {
+        return new RestResp<>(textEncryptor.encrypt(text));
+    }
+
+    @GetMapping("decrypt")
+    public RestResp<String> decrypt(String text) {
+        return new RestResp<>(textEncryptor.decrypt(text));
+    }
+
+}
+```
+
+3. 数据模型中使用
+使用注解@Decrypt加在需要解密的参数上
+```java
+@RequestMapping("test")
+@RestController
+public class TestRestApi {
+
+    @GetMapping("list")
+    public RestResp<String> list(@Decrypt String query) {
+        return new RestResp<>(query);
+    }
+
+}
+
+```
+4. json反序列化中使用
+使用注解@Decrypt加在需要解密的字段上
+```java
+@RequestMapping("test")
+@RestController
+public class TestRestApi {
+
+    @PostMapping("add")
+    public RestResp<User> add( @RequestBody User userBean) {
+        return new RestResp<>(userBean);
+    }
+
+}
+
+@Setter
+@Getter
+public class User{
+
+    private Integer id;
+
+    @Decrypt
+    private String name;
+
+    private Integer age;
+
+}
+
+```
 
 ## 完整性校验
 ### 使用SM3加密配置
