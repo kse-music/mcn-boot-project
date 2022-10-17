@@ -83,6 +83,17 @@ public class CustomExceptionResolver {
 ## 跨域配置
 
 1. 默认跨域不启动,可通过filter.cross=true启用跨域,方便开发调试
+2. 参数说明
+```properties
+#配置允许的请求方式
+mcn.cors.allowed-method=GET,POST
+#配置允许的请求来源
+mcn.cors.allowed-origin=https://www.xxx.com/
+#配置允许的请求头
+mcn.cors.allowed-header=TSM
+#配置拦截的路径模式,默认/**即拦截所有
+mcn.cors.pattern=/**
+```
 
 ::: tip 提示
 生产环境一定要关闭跨域设置
@@ -92,7 +103,17 @@ public class CustomExceptionResolver {
 
 1. 默认跨域不启用,可通过mcn.xss.enable=true启用
 2. 如果使用security,默认顺序在安全过滤器链后执行,可通过mcn.xss.order=-101调整到其之前执行
-
+3. 参数说明
+```properties
+#是否启用参数处理
+mcn.xss.enable=true
+#指定哪些接口需要处理(ant匹配模式)
+mcn.xss.exclude-urls=
+#指定哪些字段不做处理(全局生效),如mcn.xss.exclude-fields=name,则所有接口中name字段不处理
+mcn.xss.exclude-fields=
+#指定哪些接口需要处理(ant匹配模式),默认/**
+mcn.xss.include-urls=/**
+```
 ::: tip 提示
 生产环境建议开启XSS设置
 :::
@@ -105,8 +126,14 @@ public class CustomExceptionResolver {
 web.security.default-exclude-urls=/v2/api-docs,/swagger-resources/**,/doc.html,/webjars/**,/error,/favicon.ico,/_imagePreview,/*.png,/_groovyDebug_
 ```
 
+2. 配置说明
+```properties
+#配置不拦截的路径
+web.security.exclude-urls==/user/**,/news/add
+```
+
 ::: tip 提示
-可通过web.security.enable-default-ignore=false关闭默认忽略，也可以通过web.security.exclude-urls=/a/b,/c/**添加更多放行路径
+可通过web.security.enable-default-ignore=false关闭默认忽略的路径
 :::
 
 ## Validator配置
@@ -444,8 +471,66 @@ public class TestRestApi {
 :::
 
 ## 参数预处理
+对输入的参数的统一处理,支持kv编码和json编码参数
 
+1. 参数说明
+```properties
+#是否启用参数处理
+param.processor.enable=true
+#指定哪些接口需要校验(ant匹配模式)
+param.processor.exclude-urls=
+#指定哪些字段不做处理(全局生效),如param.processor.exclude-fields=name,则所有接口中name字段不处理
+param.processor.exclude-fields=
+#指定哪些接口需要校验(ant匹配模式),默认/**
+param.processor.include-urls=/**
+#全局校验规则(正则表达式),默认的参数处理器ParamProcessor是基于正则的
+global.rule.pattern=.*
+```
 
+2. 自定义参数处理器
+
+```java
+@Component
+public class CustomRule{
+
+    @Bean
+    public ParamProcessor myParamProcessor() {
+        return (rule, name, value) -> {
+            //这里可以编写校验逻辑
+            //rule:当前规则
+            //name:当前字段名
+            //value:当前字段值
+            Pattern pattern = Pattern.compile(rule);
+            if(pattern.matcher(value).matches()){
+                throw ServiceException.newInstance(ExceptionKeys.SPECIAL_SYMBOL_ERROR);
+            }
+            return value;
+        };
+    }
+}
+
+```
+
+3. 各字段自定义规则(一般用不到)
+
+通过在参数上指定注解@CheckParam来定义各字段不同的校验规则
+
+```java
+
+@Setter
+@Getter
+@CheckParam("[a-z0-9]+")
+public class User{
+
+	private Integer id;
+    @CheckParam("[a-z]+")
+	private String name;
+
+	private Integer age;
+
+}
+
+```
 
 ## 分布式锁
 默认获取锁及锁持有的时间都是5秒。
