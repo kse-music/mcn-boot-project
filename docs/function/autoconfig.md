@@ -84,7 +84,7 @@ public class CustomExceptionResolver {
 
 1. 默认跨域不启动,可通过filter.cross=true启用跨域,方便开发调试
 
-::: warning 注意
+::: tip 提示
 生产环境一定要关闭跨域设置
 :::
 
@@ -93,7 +93,7 @@ public class CustomExceptionResolver {
 1. 默认跨域不启用,可通过mcn.xss.enable=true启用
 2. 如果使用security,默认顺序在安全过滤器链后执行,可通过mcn.xss.order=-101调整到其之前执行
 
-::: warning 注意
+::: tip 提示
 生产环境建议开启XSS设置
 :::
 
@@ -115,7 +115,7 @@ web.security.default-exclude-urls=/v2/api-docs,/swagger-resources/**,/doc.html,/
 2. 扩展了分组校验区分校验时是否需要校验默认分组
 3. 提供注解@Phone校验手机号
 
-::: warning 注意
+::: tip 提示
 
 @Phone 仅简单校验了11位数字手机号
 
@@ -382,8 +382,70 @@ public class TestRestApi {
 
 ## 配置加解密
 ### 使用SM4加密配置
+使用方式
+1. 引入依赖
+```xml
+<dependencies>
+    <dependency>
+        <groupId>org.bouncycastle</groupId>
+        <artifactId>bcprov-jdk18on</artifactId>
+    </dependency>
+
+    <dependency>
+        <groupId>cn.hutool</groupId>
+        <artifactId>hutool-crypto</artifactId>
+    </dependency>
+</dependencies>
+```
+
+2. 配置加密key
+
+以下配置必须放在classpath:config/mcn.properties文件中
+```properties
+#加密key,必须128位即16字节
+encryptor.sm4.key=abcdefghijklmnop
+```
+3. 配置中使用
+
+如在application.properties中存在加密项spring.datasource.username,而真正使用的是解密后的值root
+```properties
+spring.datasource.username={cipher}7eda434344898ba11617084e0f117103
+```
+
+4. 接口中使用
+
+```java
+@RequestMapping("test")
+@RestController
+public class TestRestApi {
+    
+    private UserDao userDao;
+    private TextEncryptor textEncryptor;
+
+    public TestRestApi(UserDao userDao, TextEncryptor textEncryptor) {
+        this.userDao = userDao;
+        this.textEncryptor = textEncryptor;
+    }
+
+    @PostMapping("add")
+    public RestResp<User> add( @RequestBody User userBean) {
+        //入库手机号加密
+        userBean.setMobile(textEncryptor.encrypt(userBean.getMobile()));
+        userDao.save(userBean);
+        return new RestResp<>(userBean);
+    }
+
+}
+
+```
+::: warning 注意
+1. sm4是对称加密一般用于后端配置项及入库数据加密
+2. 密钥key必须放在classpath:config/mcn.properties文件中
+:::
 
 ## 参数预处理
+
+
 
 ## 分布式锁
 默认获取锁及锁持有的时间都是5秒。
