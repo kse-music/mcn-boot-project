@@ -45,6 +45,7 @@ public class EncryptorProperties {
 
     public static class SM2{
         private boolean base64;
+        private boolean bcd;
         private boolean lowerCase;
         private String privateKey;
         private String publicKey;
@@ -56,6 +57,14 @@ public class EncryptorProperties {
 
         public void setBase64(boolean base64) {
             this.base64 = base64;
+        }
+
+        public boolean isBcd() {
+            return bcd;
+        }
+
+        public void setBcd(boolean bcd) {
+            this.bcd = bcd;
         }
 
         public boolean isLowerCase() {
