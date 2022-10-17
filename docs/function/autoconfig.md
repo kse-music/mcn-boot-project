@@ -279,7 +279,8 @@ public class TestRestApi {
 ```
 
 3. 数据模型中使用
-使用注解@Decrypt加在需要解密的参数上
+
+只需要在需要解密的参数上添加注解@Decrypt即可
 ```java
 @RequestMapping("test")
 @RestController
@@ -294,7 +295,8 @@ public class TestRestApi {
 
 ```
 4. json反序列化中使用
-使用注解@Decrypt加在需要解密的字段上
+
+只需要在需要解密的字段上添加注解@Decrypt即可
 ```java
 @RequestMapping("test")
 @RestController
@@ -323,7 +325,60 @@ public class User{
 ```
 
 ## 完整性校验
-### 使用SM3加密配置
+### 使用SM3计算摘要
+使用方式
+1. 引入依赖
+```xml
+<dependencies>
+    <dependency>
+        <groupId>org.bouncycastle</groupId>
+        <artifactId>bcprov-jdk18on</artifactId>
+    </dependency>
+
+    <dependency>
+        <groupId>cn.hutool</groupId>
+        <artifactId>hutool-crypto</artifactId>
+    </dependency>
+</dependencies>
+```
+
+2. 配置说明
+```properties
+#开启完整性校验
+data.integrity.enable=true
+#指定哪些接口不需要校验(ant匹配模式)
+data.integrity.exclude-patterns=
+#指定哪些接口需要校验(ant匹配模式),默认/**
+data.integrity.include-patterns=/**
+#指定是否在feign调用中也校验,默认false不校验
+#data.integrity.interceptor.enable=false
+```
+
+3. 接口中使用
+
+在header里出入以下三个参数timestamp(时间戳)、nonceStr(随机字符串)、signature(签名)
+```java
+@RequestMapping("test")
+@RestController
+public class TestRestApi {
+
+    @GetMapping("list")
+    public RestResp<String> list(String query) {
+        return new RestResp<>(query);
+    }
+
+}
+```
+::: tip 提示
+如果不在header里传入相关参数或者校验失败会提示
+```json
+{
+    "ActionStatus": "FAIL",
+    "ErrorCode": 999999,
+    "ErrorInfo": "验证失败,数据被篡改"
+}
+```
+:::
 
 ## 配置加解密
 ### 使用SM4加密配置
