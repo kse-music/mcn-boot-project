@@ -1,7 +1,6 @@
 package cn.hiboot.mcn.cloud.encryptor.sm2;
 
 import cn.hiboot.mcn.cloud.encryptor.sm4.EncryptorProperties;
-import cn.hutool.core.codec.Base64;
 import cn.hutool.core.util.HexUtil;
 import cn.hutool.crypto.SmUtil;
 import cn.hutool.crypto.asymmetric.KeyType;
@@ -22,18 +21,24 @@ public class SM2Encryptor implements TextEncryptor {
     public SM2Encryptor(EncryptorProperties encryptorProperties) {
         this.continueOnError = encryptorProperties.isContinueOnError();
         this.config = encryptorProperties.getSm2();
-        SM2 sm2 = SmUtil.sm2(config.getPrivateKey(),config.getPublicKey());
+        this.sm2 = SmUtil.sm2(config.getPrivateKey(), config.getPublicKey());
         sm2.setMode(SM2Engine.Mode.valueOf(config.getMode().name()));
-        this.sm2 = sm2;
     }
 
     @Override
     public String encrypt(String text) {
         try {
-            String encryptBcd = sm2.encryptBcd(text, KeyType.PublicKey);
+            String encryptBcd;
+            if (config.isBase64()) {
+                encryptBcd = sm2.encryptBase64(text, KeyType.PublicKey);
+            } else if (config.isBcd()) {
+                encryptBcd = sm2.encryptBcd(text, KeyType.PublicKey);
+            } else {
+                encryptBcd = sm2.encryptHex(text, KeyType.PublicKey);
+            }
             return config.isLowerCase() ? encryptBcd.toLowerCase() : encryptBcd;
-        }catch (Exception e){
-            if(!continueOnError){
+        } catch (Exception e) {
+            if (!continueOnError) {
                 throw e;
             }
         }
@@ -43,25 +48,25 @@ public class SM2Encryptor implements TextEncryptor {
     @Override
     public String decrypt(String text) {
         try {
-            String decryptStr = sm2.decryptStr(text, KeyType.PrivateKey);
-            if(config.isBase64()){
-                return Base64.decodeStr(decryptStr);
+            String decryptStr;
+            if (config.isBcd()) {
+                decryptStr = sm2.decryptStrFromBcd(text, KeyType.PrivateKey);
+            } else {
+                decryptStr = sm2.decryptStr(text, KeyType.PrivateKey);
             }
             return decryptStr;
-        }catch (Exception e){
-            if(!continueOnError){
+        } catch (Exception e) {
+            if (!continueOnError) {
                 throw e;
             }
         }
         return text;
     }
 
-    @Override
     public String publicKey() {
         return HexUtil.encodeHexStr(sm2.getQ(false));
     }
 
-    @Override
     public String privateKey() {
         return sm2.getDHex();
     }
