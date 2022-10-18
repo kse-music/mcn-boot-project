@@ -1,8 +1,8 @@
 # 快速开始
 
-## 新建一个Maven项目
+## 新建Maven项目
 
-### 引入父模块
+1. 引入父模块
 
 ```xml
 <parent>
@@ -11,7 +11,7 @@
     <version>${最新稳定版}</version>
 </parent>
 ```
-### 引入相关依赖包
+2. 添加依赖
 
 ```xml
 <dependencies>
@@ -40,7 +40,7 @@
 </dependencies>
 ```
 
-### 添加maven插件
+3. 添加maven插件
 
 ```xml
 <build>
@@ -88,9 +88,9 @@
 </build>
 ```
 
-## 组织项目包结构
+## 组织包结构
 
-### 创建base package，如cn.hiboot.demo，并在其下创建一个SpringBoot应用启动类，如：DemoApplication
+1. 创建base package，如cn.hiboot.demo，并创建一个SpringBoot应用启动类，如：DemoApplication
 ```java
 package cn.hiboot.demo;
 
@@ -110,7 +110,7 @@ public class DemoApplication {
     }
 }
 ```
-### 创建rest接口，如cn.hiboot.demo.rest，创建DemoRestApi,内容如下
+2. 创建rest包，如cn.hiboot.demo.rest，并创建DemoRestApi,内容如下
 ```java
 package cn.hiboot.demo.rest;
 
@@ -147,7 +147,7 @@ public class DemoRestApi {
 }
 ```
 
-### 在src/java/resources下新建config文件夹，再在里面新建一个application.properties并写入以下内容
+3. 在src/java/resources下新建config文件夹，再在里面新建一个application.properties并写入以下内容
 
 ```properties
 #一般与项目模块对应
@@ -158,5 +158,5 @@ swagger.enable=true
 
 ## 运行&访问
 
-### 运行DemoApplication
-### [SwaggerUI](http://127.0.0.1:8080/doc.html)
+1. 运行DemoApplication
+2. 访问[SwaggerUI](http://127.0.0.1:8080/doc.html)
