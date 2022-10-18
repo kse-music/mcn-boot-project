@@ -137,25 +137,3 @@ SpringBoot内置三种日志系统：
 2. spring-boot-configuration-processor：处理自动配置类所依赖的配置属性并输出记录在META-INF下spring-configuration-metadata.json文件中，后续开发时在IDE中就可以提示配置项的类型和默认值（如果有）
 
 :::
-
-## 远程配置
-
-标准的属性源定位器PropertySourceLocator可以加载外部属性源也可以远程的属性源，而执行该定位器是通过实现ApplicationContextInitializer的PropertySourceBootstrapConfiguration实现的,而要加载额外的属性源我们只需要实现PropertySourceLocator接口就行了，如：NacosPropertySourceLocator
-
-1. 加载外部属性源：PropertySourceBootstrapConfiguration
-* 默认加载的外部属性源被添加的Environment第一个位置即优先级最高，这样会导致本地无法通过系统属性覆盖其配置
-* 可以通过设置spring.cloud.config.override-system-properties=false来将外部属性源的顺序放在系统环境后面，这样就可以本地通过设置系统属性或者环境变量来覆盖外部配置项。#注意：该配置项只能和外部配置放一起#
-
-2. 解密解密配置项：EncryptionBootstrapConfiguration
-* 从当前上下文（**引导上下文**，这就是为什么加解密的配置必须要放在bootstrap配置里的原因）中获取TextEncryptor并设置EnvironmentDecryptApplicationInitializer中
-* 收集{cipher}开头的配置项
-* 使用前面的TextEncryptor解密
-* 生成名为decrypted的属性源放在Environment优先级最高的位置，这样引用获取到的配置就是解密后的配置
-
-::: warning 重要
-
-1. 由于PropertySourceBootstrapConfiguration和EncryptionBootstrapConfiguration都是通过BootstrapConfiguration（可以理解为和EnableAutoConfiguration一样，只不过使用场景不一样）配置加载的所以这两个功能 <<core.adoc#truebootstrapcontext,#目前#>> 只能在启用了引导上下文才可以正常工作，而从2.4.0版本开始默认不启动引导上下文了
-
-2. 高版本启用引导上下文：可通过指定系统属性spring.cloud.bootstrap.enabled=true或直接引入spring-cloud-starter-bootstrap依赖
-
-:::
