@@ -43,6 +43,10 @@ module.exports = {
             collapsable: false,
             children: ['function/common','function/extension','function/autoconfig']
         },{
+            title: 'SpringBoot',
+            collapsable: false,
+            children: ['spring/core','spring/lifecycle','spring/source-parse']
+        },{
             title: '参考',
             collapsable: false,
             children: ['refer']
