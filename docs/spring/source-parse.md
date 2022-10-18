@@ -82,10 +82,10 @@ SpringBoot内置三种日志系统：
 * 执行beforeInitialize，如果存在SLF4JBridge等依赖，就会把对应的日志全部桥接到统一的日志输出，如：jul-to-slf4j
 
 2. ApplicationEnvironmentPreparedEvent：开始初始化日志系统
-* 将指定存在于Environment中的配置项(如：编码、样式、级别等)设置到系统属性中(#Why?#)
-* 通过配置项logging.file.name或logging.file.path获取日志文件(注意：#同时设置可不是两者的组合#)
+* 将指定存在于Environment中的配置项(如：编码、样式、级别等)设置到系统属性中
+* 通过配置项logging.file.name或logging.file.path获取日志文件(注意：**同时设置可不是两者的组合**)
 * 如果通过logging.config指定了日志的配置文件(如：logback.xml)则会使用指定的配置文件初始化，默认未指定
-* 接下来会默认从classpath下查找是否存在logback-test.groovy、logback-test.xml、logback.groovy、logback.xml文件，如果还没有则会将前面四类文件后拼接-spring后继续在classpath下查找即查找logback-test-spring.groovy、logback-test-spring.xml、logback-spring.groovy、logback-spring.xml是否存在(#Why?#)
+* 接下来会默认从classpath下查找是否存在logback-test.groovy、logback-test.xml、logback.groovy、logback.xml文件，如果还没有则会将前面四类文件后拼接-spring后继续在classpath下查找即查找logback-test-spring.groovy、logback-test-spring.xml、logback-spring.groovy、logback-spring.xml是否存在
 * 由于我们什么都没配置最后SpringBoot通过编程方式执行默认日志配置初始化(DefaultLogbackConfiguration)完成后并标记已初始化
 
 3. ApplicationPreparedEvent：将日志系统相关对象注册到IOC容器中
@@ -106,10 +106,10 @@ SpringBoot内置三种日志系统：
 1. 加载
 * 读取META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports文件所有自动配置类,默认有144个
 * 通过注解SpringBootApplication中定义的exclude和excludeName以及配置文件中spring.autoconfigure.exclude配置项获取需要排除的自动配置类
-* 根据前面核心组件中的<<core.adoc#trueautoconfigurationimportfilter,三个条件接口>>生成ConfigurationClassFilter(同时加载自动配置元数据[845项])用于过滤自动配置类，最终只剩下24项
+* 根据前面核心组件中的[三个条件接口](core.md#AutoConfigurationImportFilter)生成ConfigurationClassFilter(同时加载自动配置元数据[845项])用于过滤自动配置类，最终只剩下24项
 
 2. 排序
-* 首选将自动配置类的before和after注解相关的 #可用类#（存在classpath中）添加到结果集（34项）上
+* 首选将自动配置类的before和after注解相关的 **可用类**（存在classpath中）添加到结果集（34项）上
 * 接着先按字母顺序自然排序
 * 再按指定的自动配置顺序（AutoConfigureOrder,默认0）排
 * 最后再根据before和after指定依赖排序
