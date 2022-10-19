@@ -16,6 +16,10 @@ public class SqlInitProperties {
     private String separator = "//";
     private String dir = "db";
     private List<String> locations;
+    /**
+     * 用于建立连接再创建应用所使用的db
+     */
+    private String initDbName;
 
     public String getSeparator() {
         return separator;
@@ -39,5 +43,13 @@ public class SqlInitProperties {
 
     public void setLocations(List<String> locations) {
         this.locations = locations;
+    }
+
+    public String getInitDbName() {
+        return initDbName;
+    }
+
+    public void setInitDbName(String initDbName) {
+        this.initDbName = initDbName;
     }
 }

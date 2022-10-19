@@ -663,9 +663,13 @@ end;
 ```
 ::: tip 提示
 
-1. 由于kingbase不支持createDatabaseIfNotExist参数，所以kingbase需要手动先建数据库
+1. 由于kingbase不支持createDatabaseIfNotExist参数，所以kingbase需要手动先建数据库或者**指定一个已存在的库来自动建库**
+```properties
+#系统会与该init_db建立连接再创建test库
+spring.sql.init.additional.init-db-name=init_db
+```
 2. 由于kingbase不支持ON UPDATE CURRENT_TIMESTAMP,所以需要使用触发器实现
-3. 由于触发器脚本不能以;分隔，所以需要指定一个其它的分隔符，默认使用的是//
+3. 由于触发器脚本不能以;分隔，所以需要指定一个其它的分隔符，默认//
 
 :::
 
