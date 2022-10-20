@@ -1,7 +1,7 @@
 package cn.hiboot.mcn.autoconfigure.redis;
 
+import cn.hiboot.mcn.autoconfigure.config.ConfigProperties;
 import cn.hiboot.mcn.core.exception.ServiceException;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.scripting.support.ResourceScriptSource;
@@ -25,7 +25,7 @@ public class RedisDistributedLocker implements DistributedLocker{
         this.redisTemplate = redisTemplate;
         this.redisScript = new DefaultRedisScript<>();
         this.redisScript.setResultType(Long.class);
-        this.redisScript.setScriptSource(new ResourceScriptSource(new ClassPathResource("unlock.lua")));
+        this.redisScript.setScriptSource(new ResourceScriptSource(ConfigProperties.createResource("unlock.lua",DistributedLocker.class)));
     }
 
     @Override

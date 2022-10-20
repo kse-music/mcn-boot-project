@@ -145,6 +145,8 @@
                 <includes>
                     <include>**/*.properties</include>
                     <include>**/*.xml</include>
+                    <include>**/*.html</include>
+                    <include>**/*.lua</include>
                 </includes>
                 <filtering>false</filtering>
             </resource>

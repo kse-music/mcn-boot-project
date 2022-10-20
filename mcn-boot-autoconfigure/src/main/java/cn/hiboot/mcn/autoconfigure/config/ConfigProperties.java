@@ -1,5 +1,6 @@
 package cn.hiboot.mcn.autoconfigure.config;
 
+import cn.hiboot.mcn.autoconfigure.web.exception.error.DefaultErrorView;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
@@ -19,19 +20,28 @@ public abstract class ConfigProperties {
     private static final String DATA_SOURCE = "DataSource";
 
     public static final String APP_BASE_PACKAGE = "app.base-package";
-    public static final String DEFAULT_PROPERTY_SOURCE_NAME = "mcn-default";
 
     public static final String MULTIPLE_DATASOURCE_PREFIX = "multiple.datasource";
     public static final String JPA_MULTIPLE_DATASOURCE_PREFIX = "jpa." + MULTIPLE_DATASOURCE_PREFIX;
     public static final String MYBATIS_MULTIPLE_DATASOURCE_PREFIX = "mybatis." + MULTIPLE_DATASOURCE_PREFIX;
     public static final String DYNAMIC_DATASOURCE_PREFIX = "dynamic.datasource";
 
-    public static ClassPathResource mcnDefault() {
-        return createResource("mcn-default.properties");
+    private static String error_view;
+
+    static {
+        try {
+            error_view = StreamUtils.copyToString(createResource("defaultErrorView.html", DefaultErrorView.class).getInputStream(), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            //ignore
+        }
     }
 
-    private static ClassPathResource createResource(String file) {
-        return new ClassPathResource(file, ConfigProperties.class);
+    public static ClassPathResource mcnDefault() {
+        return createResource("mcn-default.properties", ConfigProperties.class);
+    }
+
+    public static ClassPathResource createResource(String file,Class<?> clazz) {
+        return new ClassPathResource(file, clazz);
     }
 
     public static String errorView(Map<String, ?> error, String basePath) {
@@ -49,13 +59,7 @@ public abstract class ConfigProperties {
             message = error.get("error");
         }
         String msg = message == null ? "" : message.toString();
-        String view = "";
-        try {
-            view = StreamUtils.copyToString(ConfigProperties.class.getClassLoader().getResourceAsStream("defaultErrorView.html"), StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            //ignore
-        }
-        return view.replace("{blueprint}",blueprint)
+        return error_view.replace("{blueprint}",blueprint)
                 .replace("{errorHanger}",errorHanger)
                 .replace("{errorPin}",errorPin)
                 .replace("{status}",htmlEscape(status))

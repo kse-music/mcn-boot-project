@@ -34,7 +34,7 @@ public class McnEnvironmentPostProcessor implements EnvironmentPostProcessor, Or
 
     private static final String BOOTSTRAP_EAGER_LOAD = "mcn.bootstrap.eagerLoad.enable";
     private static final String MCN_SOURCE_NAME = "mcn-global-unique";
-    private static final String MCN_DEFAULT_PROPERTY_SOURCE_NAME = ConfigProperties.DEFAULT_PROPERTY_SOURCE_NAME;
+    private static final String MCN_DEFAULT_PROPERTY_SOURCE_NAME = "mcn-default";
     private static final String BOOTSTRAP_PROPERTY_SOURCE_NAME = "bootstrap";
 
     @Override
