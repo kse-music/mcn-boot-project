@@ -42,7 +42,7 @@
         <knife4j.version>3.0.3</knife4j.version>
         <mapstruct.version>1.5.2.Final</mapstruct.version>
         <mybatis-spring-boot.version>2.2.2</mybatis-spring-boot.version>
-        <minio.version>8.4.3</minio.version>
+        <minio.version>8.4.5</minio.version>
         <snakeyaml.version>1.32</snakeyaml.version>
         <spring-boot.version>2.7.4</spring-boot.version>
         <spring-cloud.version>2021.0.4</spring-cloud.version>

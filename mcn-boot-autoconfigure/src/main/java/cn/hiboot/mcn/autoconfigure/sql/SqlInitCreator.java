@@ -94,8 +94,9 @@ class SqlInitCreator {
                 int slash = urlServer.lastIndexOf(47);
                 String dbName = urlServer.substring(slash + 1);
                 url = urlServer.substring(0, slash + 1) + initDdName;
-                Connection con = DriverManager.getConnection(url,properties.getUsername(),properties.getPassword());
-                con.prepareStatement("CREATE DATABASE ".concat(dbName)).executeUpdate();
+                try(Connection con = DriverManager.getConnection(url,properties.getUsername(),properties.getPassword())){
+                    con.prepareStatement("CREATE DATABASE ".concat(dbName)).executeUpdate();
+                }
             }catch (SQLException e){
                 //ignore
             }
