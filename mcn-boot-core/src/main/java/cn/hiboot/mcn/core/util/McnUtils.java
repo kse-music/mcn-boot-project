@@ -16,7 +16,7 @@ import java.time.*;
 import java.time.temporal.Temporal;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
-import java.util.function.Supplier;
+import java.util.function.BooleanSupplier;
 
 /**
  * 封装一些常用的工具
@@ -300,17 +300,17 @@ public abstract class McnUtils {
         replaceAnnotationValue(proxy, Collections.singletonMap(name, value));
     }
 
-    public static void loopEnd(Supplier<Boolean> endCondition){
+    public static void loopEnd(BooleanSupplier endCondition){
         while (true){
-            if(endCondition.get()){
+            if(endCondition.getAsBoolean()){
                 return;
             }
         }
     }
 
-    public static void loopContinue(Supplier<Boolean> continueCondition){
+    public static void loopContinue(BooleanSupplier continueCondition){
         while (true){
-            if(continueCondition.get()){
+            if(continueCondition.getAsBoolean()){
                 continue;
             }
             return;
