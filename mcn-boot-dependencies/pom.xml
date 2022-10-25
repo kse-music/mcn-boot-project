@@ -37,7 +37,7 @@
         <fastjson.version>1.2.83</fastjson.version>
         <fastjson2.version>2.0.14</fastjson2.version>
         <guava.version>31.1-jre</guava.version>
-        <hutool.version>5.8.8</hutool.version>
+        <hutool.version>5.8.9</hutool.version>
         <jsoup.version>1.15.3</jsoup.version>
         <knife4j.version>3.0.3</knife4j.version>
         <mapstruct.version>1.5.2.Final</mapstruct.version>
@@ -80,6 +80,14 @@
             </dependency>
 
             <dependency>
+                <groupId>cn.hutool</groupId>
+                <artifactId>hutool-bom</artifactId>
+                <version>${hutool.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
                 <groupId>org.yaml</groupId>
                 <artifactId>snakeyaml</artifactId>
                 <version>${snakeyaml.version}</version>
@@ -104,17 +112,6 @@
                 <groupId>org.bouncycastle</groupId>
                 <artifactId>bcpkix-jdk18on</artifactId>
                 <version>${bcprov-jdk18on.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>cn.hutool</groupId>
-                <artifactId>hutool-crypto</artifactId>
-                <version>${hutool.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>cn.hutool</groupId>
-                <artifactId>hutool-core</artifactId>
-                <version>${hutool.version}</version>
             </dependency>
 
             <dependency>
