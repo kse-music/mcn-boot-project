@@ -1,6 +1,6 @@
 package cn.hiboot.mcn.autoconfigure.config;
 
-import cn.hiboot.mcn.autoconfigure.web.exception.error.DefaultErrorView;
+import cn.hiboot.mcn.autoconfigure.web.exception.error.ErrorPageController;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
@@ -30,7 +30,7 @@ public abstract class ConfigProperties {
 
     static {
         try {
-            error_view = StreamUtils.copyToString(createResource("defaultErrorView.html", DefaultErrorView.class).getInputStream(), StandardCharsets.UTF_8);
+            error_view = StreamUtils.copyToString(createResource("defaultErrorView.html", ErrorPageController.class).getInputStream(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             //ignore
         }
