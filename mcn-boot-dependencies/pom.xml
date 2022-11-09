@@ -45,7 +45,7 @@
         <minio.version>8.4.5</minio.version>
         <snakeyaml.version>1.32</snakeyaml.version>
         <spring-boot.version>2.7.5</spring-boot.version>
-        <spring-cloud.version>2021.0.4</spring-cloud.version>
+        <spring-cloud.version>2021.0.5</spring-cloud.version>
         <spring-cloud-alibaba.version>2021.1</spring-cloud-alibaba.version>
         <springfox-swagger.version>3.0.0</springfox-swagger.version>
         <swagger.version>1.6.4</swagger.version>
