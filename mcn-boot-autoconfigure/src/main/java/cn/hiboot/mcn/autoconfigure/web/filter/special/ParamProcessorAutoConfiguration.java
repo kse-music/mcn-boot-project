@@ -1,11 +1,10 @@
 package cn.hiboot.mcn.autoconfigure.web.filter.special;
 
 
-import cn.hiboot.mcn.autoconfigure.web.exception.ExceptionResolver;
 import cn.hiboot.mcn.autoconfigure.web.filter.common.NameValueProcessorFilter;
+import cn.hiboot.mcn.autoconfigure.web.security.WebSecurityProperties;
 import cn.hiboot.mcn.core.exception.ExceptionKeys;
 import cn.hiboot.mcn.core.exception.ServiceException;
-import cn.hiboot.mcn.core.model.result.RestResp;
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.AnnotationIntrospector;
@@ -30,7 +29,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Role;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.env.Environment;
-import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -53,7 +51,7 @@ import java.util.regex.Pattern;
  * @since 2022/6/6 15:03
  */
 @Configuration(proxyBeanMethods = false)
-@EnableConfigurationProperties(ParamProcessorProperties.class)
+@EnableConfigurationProperties({ParamProcessorProperties.class, WebSecurityProperties.class})
 @ConditionalOnProperty(prefix = "param.processor",name = "enable",havingValue = "true")
 public class ParamProcessorAutoConfiguration {
 
@@ -90,27 +88,6 @@ public class ParamProcessorAutoConfiguration {
     }
 
     @Bean
-    public ExceptionResolver specialSymbolExceptionResolver() {
-        return new ExceptionResolver(){
-
-            @Override
-            public boolean support(HttpServletRequest request,Throwable t) {
-                return t instanceof HttpMessageNotReadableException;
-            }
-
-            @Override
-            public RestResp<Object> resolveException(HttpServletRequest request, Throwable t) {
-                ServiceException serviceException = ServiceException.find(t);
-                if(serviceException == null || serviceException.getCode() != ExceptionKeys.SPECIAL_SYMBOL_ERROR){
-                    return null;
-                }
-                return RestResp.error(serviceException.getCode(),serviceException.getMessage());
-            }
-
-        };
-    }
-
-    @Bean
     @ConditionalOnProperty(prefix = "param.processor",name = "use-filter",havingValue = "true", matchIfMissing = true)
     public FilterRegistrationBean<NameValueProcessorFilter> paramProcessorFilterRegistration(ParamProcessor paramProcessor) {
         FilterRegistrationBean<NameValueProcessorFilter> filterRegistrationBean = new FilterRegistrationBean<>(new NameValueProcessorFilter(properties,paramProcessor));
@@ -121,7 +98,6 @@ public class ParamProcessorAutoConfiguration {
 
     @Bean
     public WebMvcConfigurer WebMvcConfig(ParamProcessor paramProcessor) {
-
         return new WebMvcConfigurer(){
             @Override
             public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {

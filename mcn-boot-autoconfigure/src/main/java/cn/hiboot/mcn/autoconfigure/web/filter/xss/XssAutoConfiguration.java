@@ -1,6 +1,9 @@
 package cn.hiboot.mcn.autoconfigure.web.filter.xss;
 
 import cn.hiboot.mcn.autoconfigure.web.filter.common.NameValueProcessorFilter;
+import cn.hiboot.mcn.autoconfigure.web.security.WebSecurityProperties;
+import cn.hiboot.mcn.core.exception.ExceptionKeys;
+import cn.hiboot.mcn.core.exception.ServiceException;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -19,7 +22,7 @@ import org.springframework.web.util.HtmlUtils;
 @AutoConfiguration
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @ConditionalOnProperty(prefix = "mcn.xss", name = "enable", havingValue = "true")
-@EnableConfigurationProperties(XssProperties.class)
+@EnableConfigurationProperties({XssProperties.class, WebSecurityProperties.class})
 public class XssAutoConfiguration {
 
     private final XssProperties xssProperties;
@@ -39,7 +42,16 @@ public class XssAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public XssProcessor defaultXssProcessor(){
-        return (name, value) -> HtmlUtils.htmlEscape(value);
+        return (name, value) ->{
+            String rs = HtmlUtils.htmlEscape(value);
+            if(value.equals(rs)){
+                return rs;
+            }
+            if(xssProperties.isFailedFast()){
+                throw ServiceException.newInstance(ExceptionKeys.SPECIAL_SYMBOL_ERROR);
+            }
+            return rs;
+        };
     }
 
 }

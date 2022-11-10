@@ -1,5 +1,9 @@
 # 更新日志
 
+## [v2.7.6] 2022.11.25
+- 升级到SpringBoot 2.7.6
+- 升级到SpringCloud 2021.0.5
+
 ## [v2.7.5] 2022.10.22
 - 升级到SpringBoot 2.7.5
 - 修正NameValueProcessorProperties字段说明
