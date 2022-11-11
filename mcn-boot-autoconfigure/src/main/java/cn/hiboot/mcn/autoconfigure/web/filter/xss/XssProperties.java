@@ -27,6 +27,11 @@ public class XssProperties extends NameValueProcessorProperties {
      */
     private boolean escapeResponse;
 
+    /**
+     * 存在xss直接抛异常
+     */
+    private boolean failedFast;
+
     public String getName() {
         return name;
     }
@@ -51,4 +56,11 @@ public class XssProperties extends NameValueProcessorProperties {
         this.escapeResponse = escapeResponse;
     }
 
+    public boolean isFailedFast() {
+        return failedFast;
+    }
+
+    public void setFailedFast(boolean failedFast) {
+        this.failedFast = failedFast;
+    }
 }
