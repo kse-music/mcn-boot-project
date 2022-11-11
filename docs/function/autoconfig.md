@@ -105,8 +105,10 @@ mcn.cors.pattern=/**
 2. 如果使用security,默认顺序在安全过滤器链后执行,可通过mcn.xss.order=-101调整到其之前执行
 3. 参数说明
 ```properties
-#是否启用参数处理
+#是否启用Xss过滤
 mcn.xss.enable=true
+#存在xss是否直接抛异常,默认false
+#mcn.xss.failed-fast=true
 #指定哪些接口需要处理(ant匹配模式)
 mcn.xss.exclude-urls=
 #指定哪些字段不做处理(全局生效),如mcn.xss.exclude-fields=name,则所有接口中name字段不处理
