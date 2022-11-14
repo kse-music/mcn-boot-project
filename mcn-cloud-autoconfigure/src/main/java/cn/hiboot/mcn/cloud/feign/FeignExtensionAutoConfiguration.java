@@ -60,6 +60,7 @@ public class FeignExtensionAutoConfiguration {
 
     @Configuration(proxyBeanMethods = false)
     @ConditionalOnClass(ErrorDecoder.class)
+    @ConditionalOnMissingBean(ErrorDecoder.class)
     protected static class FeignErrorDecoder implements ErrorDecoder {
 
         @Override
@@ -97,7 +98,7 @@ public class FeignExtensionAutoConfiguration {
     static class GlobalFallbackCondition extends AllNestedConditions {
 
         GlobalFallbackCondition() {
-            super(ConfigurationPhase.REGISTER_BEAN);
+            super(ConfigurationPhase.PARSE_CONFIGURATION);
         }
 
         @ConditionalOnProperty(prefix = "feign.circuitbreaker",name = "enabled",havingValue = "true")
@@ -105,7 +106,7 @@ public class FeignExtensionAutoConfiguration {
 
         }
 
-        @ConditionalOnProperty(prefix = "feign.circuitbreaker",name = "globalfallback.enabled", havingValue = "true",matchIfMissing = true)
+        @ConditionalOnProperty(prefix = "feign.circuitbreaker",name = "globalfallback.enabled", havingValue = "true", matchIfMissing = true)
         static class FeignGlobalCircuitbreakerEnabled {
 
         }

@@ -57,24 +57,21 @@ public class FeignCircuitBreakerInvocationHandler implements InvocationHandler {
     public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
         // early exit if the invoked method is from java.lang.Object
         // code is the same as ReflectiveFeign.FeignInvocationHandler
-        if ("equals".equals(method.getName())) {
-            try {
-                Object otherHandler = args.length > 0 && args[0] != null ? Proxy.getInvocationHandler(args[0]) : null;
-                return equals(otherHandler);
-            }
-            catch (IllegalArgumentException e) {
-                return false;
-            }
-        }
-        else if ("hashCode".equals(method.getName())) {
-            return hashCode();
-        }
-        else if ("toString".equals(method.getName())) {
-            return toString();
+        switch (method.getName()) {
+            case "equals":
+                try {
+                    Object otherHandler = args.length > 0 && args[0] != null ? Proxy.getInvocationHandler(args[0]) : null;
+                    return equals(otherHandler);
+                } catch (IllegalArgumentException e) {
+                    return false;
+                }
+            case "hashCode":
+                return hashCode();
+            case "toString":
+                return toString();
         }
         String circuitName = Feign.configKey(target.type(), method);
-        CircuitBreaker circuitBreaker = circuitBreakerGroupEnabled ? factory.create(circuitName, feignClientName)
-                : factory.create(circuitName);
+        CircuitBreaker circuitBreaker = circuitBreakerGroupEnabled ? factory.create(circuitName, feignClientName) : factory.create(circuitName);
         Supplier<Object> supplier = asSupplier(method, args);
         if (this.nullableFallbackFactory != null) {
             Function<Throwable, Object> fallbackFunction = throwable -> {
