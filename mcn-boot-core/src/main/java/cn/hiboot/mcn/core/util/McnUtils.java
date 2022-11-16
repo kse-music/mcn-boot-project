@@ -316,4 +316,15 @@ public abstract class McnUtils {
             return;
         }
     }
+
+    public static Map<String,Object> put(Object... keyValues){
+        McnAssert.notNull(keyValues,"keyValues must no be null");
+        McnAssert.state(keyValues.length % 2 == 0,"The provided key/value array length must be a multiple of two");
+        Map<String,Object> map = new HashMap<>();
+        for (int i = 0; i < keyValues.length; i = i + 2) {
+            map.put(keyValues[i].toString(),keyValues[i+1]);
+        }
+        return map;
+    }
+
 }
