@@ -1,8 +1,6 @@
 package cn.hiboot.mcn.autoconfigure.web.swagger;
 
 import cn.hiboot.mcn.swagger.MvcSwagger2;
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -16,14 +14,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.DispatcherServlet;
 import springfox.documentation.RequestHandler;
 import springfox.documentation.builders.ApiInfoBuilder;
-import springfox.documentation.builders.ParameterBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
-import springfox.documentation.schema.ModelRef;
-import springfox.documentation.service.ApiInfo;
-import springfox.documentation.service.ApiKey;
-import springfox.documentation.service.Contact;
-import springfox.documentation.service.Parameter;
+import springfox.documentation.builders.RequestParameterBuilder;
+import springfox.documentation.schema.ScalarType;
+import springfox.documentation.service.*;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.ApiSelectorBuilder;
 import springfox.documentation.spring.web.plugins.Docket;
@@ -33,6 +28,7 @@ import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Predicate;
 
 /**
  * SwaggerAutoConfiguration
@@ -50,15 +46,16 @@ public class SwaggerAutoConfiguration {
 
     private final Swagger2Properties swagger2Properties;
     private final ObjectProvider<DocketCustomizer> docketCustomizers;
+    private final Predicate<RequestHandler> DEFAULT_REQUEST_HANDLER = withClassAnnotation(RestController.class)
+            .and(withClassAnnotation(IgnoreApi.class).negate()).and(RequestHandlerSelectors.withMethodAnnotation(IgnoreApi.class).negate());
 
     public SwaggerAutoConfiguration(Swagger2Properties swagger2Properties, ObjectProvider<DocketCustomizer> docketCustomizers) {
         this.swagger2Properties = swagger2Properties;
         this.docketCustomizers = docketCustomizers;
     }
 
-    private Predicate<RequestHandler> selector(Class<? extends Annotation> annotation){
-        return Predicates.and(RequestHandlerSelectors.withClassAnnotation(RestController.class),Predicates.not(RequestHandlerSelectors.withClassAnnotation(annotation))
-                ,Predicates.not(RequestHandlerSelectors.withMethodAnnotation(annotation)));
+    private Predicate<RequestHandler> withClassAnnotation(Class<? extends Annotation> annotation){
+        return RequestHandlerSelectors.withClassAnnotation(annotation);
     }
 
     @Bean
@@ -74,25 +71,25 @@ public class SwaggerAutoConfiguration {
             docketCustomizer.customize(docket);
         }
 
-        ApiSelectorBuilder apiSelectorBuilder = docket.select().apis(selector(IgnoreApi.class));
+        ApiSelectorBuilder apiSelectorBuilder = docket.select().apis(DEFAULT_REQUEST_HANDLER);
 
         return apiSelectorBuilder.paths(PathSelectors.any()).build();
     }
 
     private void configRequestParameters(Docket docket,Environment environment) {
         docket.securitySchemes(Collections.singletonList(new ApiKey("BearerToken", "Authorization", "header")));
-        List<Parameter> pars = new ArrayList<>();
+        List<RequestParameter> pars = new ArrayList<>();
         //csrf
         if(swagger2Properties.isCsrf()){
-            pars.add(new ParameterBuilder().name("X-XSRF-TOKEN").description("csrf token").modelRef(new ModelRef("string")).parameterType("header").required(true).build());
+            pars.add(new RequestParameterBuilder().name("X-XSRF-TOKEN").description("csrf token").in(ParameterType.HEADER).query(s -> s.model(m -> m.scalarModel(ScalarType.STRING))).required(true).build());
         }
         //enable data integrity
         if(environment.getProperty("data.integrity.enable", Boolean.class, false)){
-            pars.add(new ParameterBuilder().name("TSM").description("时间戳").parameterType("header").modelRef(new ModelRef("long")).required(true).build());
-            pars.add(new ParameterBuilder().name("nonceStr").description("随机字符串").parameterType("header").modelRef(new ModelRef("string")).required(true).build());
-            pars.add(new ParameterBuilder().name("signature").description("签名").parameterType("header").modelRef(new ModelRef("string")).required(true).build());
+            pars.add(new RequestParameterBuilder().name("TSM").description("时间戳").in(ParameterType.HEADER).query(s -> s.model(m -> m.scalarModel(ScalarType.LONG))).required(true).build());
+            pars.add(new RequestParameterBuilder().name("nonceStr").description("随机字符串").in(ParameterType.HEADER).query(s -> s.model(m -> m.scalarModel(ScalarType.STRING))).required(true).build());
+            pars.add(new RequestParameterBuilder().name("signature").description("签名").in(ParameterType.HEADER).query(s -> s.model(m -> m.scalarModel(ScalarType.STRING))).required(true).build());
         }
-        docket.globalOperationParameters(pars);
+        docket.globalRequestParameters(pars);
     }
 
     private ApiInfo apiInfo() {
