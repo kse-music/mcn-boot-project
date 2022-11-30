@@ -39,11 +39,19 @@ public class PageSort {
     }
 
     public int getPageNo() {
+        return pageNo;
+    }
+
+    public int getPageIndex() {
         return pageNo - 1;
     }
 
     public int getSkip() {
-        return (pageNo - 1) * pageSize;
+        return getOffset();
+    }
+
+    public int getOffset() {
+        return getPageIndex() * getPageSize();
     }
 
     public void setPageNo(int pageNo) {

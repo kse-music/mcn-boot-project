@@ -50,7 +50,7 @@ public interface BaseService<T,PK,R extends BaseRepository<T,PK>> {
     }
 
     default RestResp<List<T>> page(T t, PageSort pageSort){
-        PageRequest pageRequest = PageRequest.of(pageSort.getPageNo(),pageSort.getPageSize(),JpaUtils.jpaSort(pageSort.getSort()));
+        PageRequest pageRequest = PageRequest.of(pageSort.getPageIndex(),pageSort.getPageSize(),JpaUtils.jpaSort(pageSort.getSort()));
         Page<T> page;
         if(t == null){
             page = getRepository().findAll(pageRequest);
@@ -73,7 +73,7 @@ public interface BaseService<T,PK,R extends BaseRepository<T,PK>> {
     }
 
     default RestResp<List<T>> page(Specification<T> s, PageSort pageSort){
-        PageRequest pageRequest = PageRequest.of(pageSort.getPageNo(),pageSort.getPageSize(),JpaUtils.jpaSort(pageSort.getSort()));
+        PageRequest pageRequest = PageRequest.of(pageSort.getPageIndex(),pageSort.getPageSize(),JpaUtils.jpaSort(pageSort.getSort()));
         Page<T> page = getRepository().findAll(s,pageRequest);
         return new RestResp<>(page.getContent(),page.getTotalElements());
     }
