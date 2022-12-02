@@ -48,6 +48,7 @@ public class CorsFilterAutoConfiguration {
         corsConfiguration.addAllowedHeader(corsProperties.getAllowedHeader());
         corsConfiguration.addAllowedMethod(corsProperties.getAllowedMethod());
         corsConfiguration.setMaxAge(corsProperties.getMaxAge());
+        corsConfiguration.setExposedHeaders(corsProperties.getExposedHeaders());
         source.registerCorsConfiguration(corsProperties.getPattern(), corsConfiguration);
         return source;
     }

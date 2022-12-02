@@ -3,6 +3,8 @@ package cn.hiboot.mcn.autoconfigure.web.filter.cors;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.web.cors.CorsConfiguration;
 
+import java.util.List;
+
 /**
  * CorsProperties
  *
@@ -18,6 +20,7 @@ public class CorsProperties {
     private String allowedOrigin = CorsConfiguration.ALL;
     private String allowedHeader = CorsConfiguration.ALL;
     private String allowedMethod = CorsConfiguration.ALL;
+    private List<String> exposedHeaders;
     private Long maxAge = 3600L;
     private int order = -1000;
 
@@ -67,6 +70,14 @@ public class CorsProperties {
 
     public void setAllowedMethod(String allowedMethod) {
         this.allowedMethod = allowedMethod;
+    }
+
+    public List<String> getExposedHeaders() {
+        return exposedHeaders;
+    }
+
+    public void setExposedHeaders(List<String> exposedHeaders) {
+        this.exposedHeaders = exposedHeaders;
     }
 
     public Long getMaxAge() {
