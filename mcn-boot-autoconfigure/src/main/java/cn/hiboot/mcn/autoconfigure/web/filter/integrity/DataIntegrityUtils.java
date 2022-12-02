@@ -6,6 +6,8 @@ import cn.hiboot.mcn.core.util.McnUtils;
 import cn.hutool.core.text.StrBuilder;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SmUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
@@ -17,6 +19,7 @@ import java.util.*;
  * @since 2022/6/21 13:22
  */
 public abstract class DataIntegrityUtils {
+    private static final Logger log = LoggerFactory.getLogger(DataIntegrityUtils.class);
 
     public static Triplet<String,String,String> signature(Map<String, Object> params, String payload) {
         String timestamp = String.valueOf(System.currentTimeMillis());
@@ -39,10 +42,11 @@ public abstract class DataIntegrityUtils {
         }
         String qs ;
         if(StrUtil.isNotEmpty(param)){
-            qs=String.format("%s&timestamp=%s&nonceStr=%s", param, timestamp, nonceStr);
+            qs = String.format("%s&timestamp=%s&nonceStr=%s", param, timestamp, nonceStr);
         }else{
-            qs=String.format("timestamp=%s&nonceStr=%s", timestamp, nonceStr);
+            qs = String.format("timestamp=%s&nonceStr=%s", timestamp, nonceStr);
         }
+        log.debug("Computer Param : {}",qs);
         return SmUtil.sm3(qs);
     }
 
