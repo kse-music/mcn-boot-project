@@ -19,7 +19,10 @@ public class GlobalExceptionProperties {
      * 是否返回参数校验失败明细
      */
     private boolean returnValidateResult = false;
-
+    /**
+     * 是否将参数校验结果设置到ErrorInfo
+     */
+    private boolean validateResultToErrorInfo = true;
     /**
      * 指定全局异常处理的顺序
      */
@@ -50,6 +53,14 @@ public class GlobalExceptionProperties {
 
     public void setReturnValidateResult(boolean returnValidateResult) {
         this.returnValidateResult = returnValidateResult;
+    }
+
+    public boolean isValidateResultToErrorInfo() {
+        return validateResultToErrorInfo;
+    }
+
+    public void setValidateResultToErrorInfo(boolean validateResultToErrorInfo) {
+        this.validateResultToErrorInfo = validateResultToErrorInfo;
     }
 
     public int getOrder() {
