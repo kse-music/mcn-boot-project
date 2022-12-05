@@ -14,9 +14,7 @@ public class ValidationErrorBean {
     private String invalidValue;
 
     public ValidationErrorBean(String message, String path, String invalidValue) {
-        this.message = message;
-        this.path = path;
-        this.invalidValue = invalidValue;
+        this(message,null,path,invalidValue);
     }
 
     public ValidationErrorBean(String message, String messageTemplate, String path, String invalidValue) {

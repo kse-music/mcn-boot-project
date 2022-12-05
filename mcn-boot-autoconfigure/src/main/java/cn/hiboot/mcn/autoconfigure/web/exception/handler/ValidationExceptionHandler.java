@@ -27,8 +27,8 @@ public class ValidationExceptionHandler{
         List<ValidationErrorBean> data = null;
         if (exception instanceof ConstraintViolationException) {
             ConstraintViolationException cve = (ConstraintViolationException) exception;
-            data = cve.getConstraintViolations().stream().map(violation1 ->
-                    new ValidationErrorBean(violation1.getMessage(), getViolationPath(violation1), getViolationInvalidValue(violation1.getInvalidValue()))
+            data = cve.getConstraintViolations().stream().map(violation ->
+                    new ValidationErrorBean(violation.getMessage(), getViolationPath(violation), getViolationInvalidValue(violation.getInvalidValue()))
             ).collect(Collectors.toList());
         }
         return data;
@@ -83,7 +83,14 @@ public class ValidationExceptionHandler{
     private static String getViolationPath(ConstraintViolation violation) {
         String rootBeanName = violation.getRootBean().getClass().getSimpleName();
         String propertyPath = violation.getPropertyPath().toString();
-        return rootBeanName + (!"".equals(propertyPath) ? '.' + propertyPath : "");
+        if("".equals(propertyPath)){
+            return rootBeanName;
+        }
+        int index = propertyPath.lastIndexOf(".");
+        if(index != -1){
+            return propertyPath.substring(index + 1);
+        }
+        return rootBeanName + '.' + propertyPath;
     }
 
 }
