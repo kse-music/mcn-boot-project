@@ -8,6 +8,7 @@ import cn.hiboot.mcn.core.exception.BaseException;
 import cn.hiboot.mcn.core.exception.ErrorMsg;
 import cn.hiboot.mcn.core.exception.ExceptionKeys;
 import cn.hiboot.mcn.core.model.result.RestResp;
+import cn.hiboot.mcn.core.util.McnUtils;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -132,8 +133,13 @@ public class ExceptionHelper {
             }
         }
         RestResp<Object> resp = RestResp.error(code, msg);
-        if(data != null && properties.isReturnValidateResult()){//设置参数校验具体错误数据信息
-            resp.setData(data);
+        if(McnUtils.isNotNullAndEmpty(data)){
+            if(properties.isValidateResultToErrorInfo()){
+                resp.setErrorInfo(data.get(0).toString());
+            }
+            if(properties.isReturnValidateResult()){//设置参数校验具体错误数据信息
+                resp.setData(data);
+            }
         }
         return resp;
     }
