@@ -67,10 +67,8 @@ public class ExceptionHelper {
         if(properties.isRemoveFrameworkStack()){
             dealCurrentStackTraceElement(t);
             Throwable[] suppressed = t.getSuppressed();
-            if(suppressed.length != 0){
-                for (Throwable throwable : suppressed) {
-                    dealCurrentStackTraceElement(throwable);
-                }
+            for (Throwable throwable : suppressed) {
+                dealCurrentStackTraceElement(throwable);
             }
         }
         log.error("The exception information is as follows",t);
