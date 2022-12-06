@@ -12,11 +12,14 @@ import java.lang.reflect.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.*;
 import java.time.temporal.Temporal;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.function.BooleanSupplier;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 /**
  * 封装一些常用的工具
@@ -325,6 +328,45 @@ public abstract class McnUtils {
             map.put(keyValues[i].toString(),keyValues[i+1]);
         }
         return map;
+    }
+
+    public static void unzip(String zipFilePath) {
+        unzip(zipFilePath,null,false);
+    }
+
+    public static void unzip(String zipFilePath,boolean isDelete) {
+        unzip(zipFilePath,null,isDelete);
+    }
+
+    public static void unzip(String zipFilePath,String targetDirName) {
+        unzip(zipFilePath,targetDirName,false);
+    }
+
+    public static void unzip(String zipFilePath,String targetDirName,boolean deleteZipFile){
+        File file = new File(zipFilePath);
+        try(ZipFile zipFile = new ZipFile(file,deleteZipFile ? ZipFile.OPEN_READ | ZipFile.OPEN_DELETE : ZipFile.OPEN_READ)){
+            Path targetDir = file.toPath().getParent();
+            if(targetDirName != null){
+                targetDir = targetDir.resolve(targetDirName);
+                if(!Files.exists(targetDir)){
+                    Files.createDirectories(targetDir);
+                }
+            }
+            Enumeration<? extends ZipEntry> entries = zipFile.entries();
+            while (entries.hasMoreElements()) {
+                ZipEntry entry = entries.nextElement();
+                Path path = targetDir.resolve(entry.getName());
+                if (entry.isDirectory()) {
+                    if(!Files.exists(path)){
+                        Files.createDirectories(path);
+                    }
+                } else {
+                    Files.copy(zipFile.getInputStream(entry), path, StandardCopyOption.REPLACE_EXISTING);
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }
