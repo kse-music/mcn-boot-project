@@ -32,7 +32,7 @@ public class RestResp<T> {
 
 	public RestResp() {	}
 
-	private RestResp(Integer code,String msg){
+	public RestResp(Integer code,String msg){
 		this.ActionStatus = ActionStatusMethod.FAIL;
 		this.ErrorCode = code;
 		this.ErrorInfo = msg;
