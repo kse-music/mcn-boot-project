@@ -99,15 +99,15 @@ public class RestResp<T> {
         this.count = count;
     }
 
-	public static RestResp<Object> error(Integer code,String msg){
+	public static <S> RestResp<S> error(Integer code,String msg){
 		return new RestResp<>(code, msg);
 	}
 
-	public static RestResp<Object> error(Integer code){
+	public static <S> RestResp<S> error(Integer code){
 		return error(code, ErrorMsg.getErrorMsg(code));
 	}
 
-	public static RestResp<Object> error(String msg){
+	public static <S> RestResp<S> error(String msg){
 		return error(BaseException.DEFAULT_ERROR_CODE, msg);
 	}
 }
