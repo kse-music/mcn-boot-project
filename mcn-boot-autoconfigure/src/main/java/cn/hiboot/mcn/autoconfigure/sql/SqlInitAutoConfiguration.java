@@ -4,6 +4,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -23,9 +24,10 @@ import org.springframework.jdbc.datasource.init.DatabasePopulator;
 @EnableConfigurationProperties(SqlInitProperties.class)
 @ConditionalOnClass(DatabasePopulator.class)
 @Import(DataSourceInitializerInvoker.class)
+@ConditionalOnBean(name = SqlInitAutoConfiguration.BEAN_NAME)
 public class SqlInitAutoConfiguration {
 
-    private static final String BEAN_NAME = "dataSourceInitializerPostProcessor";
+    static final String BEAN_NAME = "dataSourceInitializerPostProcessor";
 
     @Bean
     BeanFactoryPostProcessor dataSourceScriptDatabaseInitializerBeanFactoryPostProcessor() {
