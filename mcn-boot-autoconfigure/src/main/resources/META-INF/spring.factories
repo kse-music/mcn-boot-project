@@ -22,7 +22,8 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
   cn.hiboot.mcn.autoconfigure.validator.ValidatorAutoConfiguration,\
   cn.hiboot.mcn.autoconfigure.redis.RedisToolAutoConfiguration,\
   cn.hiboot.mcn.autoconfigure.xxl.XxlJobAutoConfiguration,\
-  cn.hiboot.mcn.autoconfigure.web.reactor.SpringWebFluxAutoConfiguration
+  cn.hiboot.mcn.autoconfigure.web.reactor.SpringWebFluxAutoConfiguration,\
+  cn.hiboot.mcn.autoconfigure.sql.SqlInitAutoConfiguration
 
 org.springframework.boot.env.EnvironmentPostProcessor=\
   cn.hiboot.mcn.autoconfigure.context.McnEnvironmentPostProcessor
