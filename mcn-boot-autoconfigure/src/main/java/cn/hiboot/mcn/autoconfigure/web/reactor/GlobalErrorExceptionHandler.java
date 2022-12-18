@@ -42,6 +42,7 @@ public class GlobalErrorExceptionHandler extends DefaultErrorWebExceptionHandler
     private WebFluxProperties webFluxProperties;
     private GlobalExceptionProperties properties;
     private ExceptionHelper exceptionHelper;
+    private int order;
 
     public GlobalErrorExceptionHandler(ErrorAttributes errorAttributes, WebProperties webProperties, ServerProperties serverProperties, ApplicationContext applicationContext) {
         super(errorAttributes, webProperties.getResources(), serverProperties.getError(), applicationContext);
@@ -87,12 +88,12 @@ public class GlobalErrorExceptionHandler extends DefaultErrorWebExceptionHandler
     @Override
     public void setEnvironment(Environment environment) {
         this.exceptionHelper = new ExceptionHelper(properties,environment);
-        properties.setOrder(environment.getProperty("mcn.exception.handler.reactor.order",Integer.class, properties.getOrder()));
+        this.order = environment.getProperty("mcn.exception.handler.reactor.order",Integer.class, -1);
     }
 
     @Override
     public int getOrder() {
-        return properties.getOrder();
+        return order;
     }
- 
+
 }
