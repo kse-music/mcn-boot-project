@@ -87,11 +87,12 @@ public class GlobalErrorExceptionHandler extends DefaultErrorWebExceptionHandler
     @Override
     public void setEnvironment(Environment environment) {
         this.exceptionHelper = new ExceptionHelper(properties,environment);
+        properties.setOrder(environment.getProperty("mcn.exception.handler.reactor.order",Integer.class, properties.getOrder()));
     }
 
     @Override
     public int getOrder() {
         return properties.getOrder();
     }
-
+ 
 }
