@@ -17,11 +17,11 @@ public class BaseException extends RuntimeException {
     }
 
     protected BaseException(String msg) {
-        super(msg);
+        super(msg == null ? "" : msg);
     }
 
     protected BaseException(Integer code, String msg) {
-        super(msg);
+        super(msg == null ? "" : msg);
         this.code = code;
     }
 
