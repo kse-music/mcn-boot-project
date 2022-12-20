@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class RestResp<T> {
@@ -115,12 +115,12 @@ public class RestResp<T> {
 	}
 
 	@JsonIgnore
-	public T feignData(BiConsumer<Integer,String> errorConsumer){
+	public T feignData(BiFunction<Integer,String,T> errorFunction){
 		if(getActionStatus() == ActionStatusMethod.FAIL){
-			if(errorConsumer == null){
+			if(errorFunction == null){
 				throw ServiceException.newInstance(getErrorInfo());
 			}
-			errorConsumer.accept(getErrorCode(),getErrorInfo());
+			setData(errorFunction.apply(getErrorCode(), getErrorInfo()));
 		}
 		return getData();
 	}
