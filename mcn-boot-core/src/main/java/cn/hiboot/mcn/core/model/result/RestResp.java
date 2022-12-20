@@ -2,9 +2,12 @@ package cn.hiboot.mcn.core.model.result;
 
 import cn.hiboot.mcn.core.exception.BaseException;
 import cn.hiboot.mcn.core.exception.ErrorMsg;
+import cn.hiboot.mcn.core.exception.ServiceException;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.util.function.BiConsumer;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class RestResp<T> {
@@ -110,4 +113,21 @@ public class RestResp<T> {
 	public static <S> RestResp<S> error(String msg){
 		return error(BaseException.DEFAULT_ERROR_CODE, msg);
 	}
+
+	@JsonIgnore
+	public T feignData(BiConsumer<Integer,String> errorConsumer){
+		if(getActionStatus() == ActionStatusMethod.FAIL){
+			if(errorConsumer == null){
+				throw ServiceException.newInstance(getErrorInfo());
+			}
+			errorConsumer.accept(getErrorCode(),getErrorInfo());
+		}
+		return getData();
+	}
+
+	@JsonIgnore
+	public T feignData(){
+		return feignData(null);
+	}
+
 }
