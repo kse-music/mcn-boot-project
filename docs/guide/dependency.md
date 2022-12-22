@@ -17,7 +17,7 @@
 | knife4j-spring-ui                 | knife4j.version              |    3.0.3    |
 | mapstruct                         | mapstruct.version            | 1.5.2.Final |
 | mybatis-spring-boot-starter       | mybatis-spring-boot.version  |    2.2.2    |
-| minio                             | minio.version                |    8.4.3    |
+| minio                             | minio.version                |    8.4.6    |
 | snakeyaml                         | snakeyaml.version            |    1.32     |
 | spring-boot-dependencies          | spring-boot.version          |    2.7.4    |
 | spring-cloud-dependencies         | spring-cloud.version         |  2021.0.4   |
