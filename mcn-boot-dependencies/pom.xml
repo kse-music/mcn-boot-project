@@ -44,7 +44,7 @@
         <mybatis-spring-boot.version>2.2.2</mybatis-spring-boot.version>
         <minio.version>8.4.6</minio.version>
         <snakeyaml.version>1.33</snakeyaml.version>
-        <spring-boot.version>2.7.6</spring-boot.version>
+        <spring-boot.version>2.7.7</spring-boot.version>
         <spring-cloud.version>2021.0.5</spring-cloud.version>
         <spring-cloud-alibaba.version>2021.1</spring-cloud-alibaba.version>
         <springfox-swagger.version>3.0.0</springfox-swagger.version>
