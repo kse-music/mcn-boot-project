@@ -115,7 +115,7 @@ public class RestResp<T> {
 	}
 
 	@JsonIgnore
-	public T feignData(BiFunction<Integer,String,T> errorFunction){
+	public T remoteData(BiFunction<Integer,String,T> errorFunction){
 		if(getActionStatus() == ActionStatusMethod.FAIL){
 			if(errorFunction == null){
 				throw ServiceException.newInstance(getErrorInfo());
@@ -126,8 +126,8 @@ public class RestResp<T> {
 	}
 
 	@JsonIgnore
-	public T feignData(){
-		return feignData(null);
+	public T remoteData(){
+		return remoteData(null);
 	}
 
 }
