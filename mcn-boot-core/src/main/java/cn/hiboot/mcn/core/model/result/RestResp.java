@@ -114,7 +114,6 @@ public class RestResp<T> {
 		return error(BaseException.DEFAULT_ERROR_CODE, msg);
 	}
 
-	@JsonIgnore
 	public T remoteData(BiFunction<Integer,String,T> errorFunction){
 		if(getActionStatus() == ActionStatusMethod.FAIL){
 			if(errorFunction == null){
@@ -125,7 +124,6 @@ public class RestResp<T> {
 		return getData();
 	}
 
-	@JsonIgnore
 	public T remoteData(){
 		return remoteData(null);
 	}
