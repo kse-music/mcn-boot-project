@@ -361,6 +361,9 @@ public abstract class McnUtils {
                         Files.createDirectories(path);
                     }
                 } else {
+                    if(!Files.exists(path.getParent())){
+                        Files.createDirectories(path.getParent());
+                    }
                     Files.copy(zipFile.getInputStream(entry), path, StandardCopyOption.REPLACE_EXISTING);
                 }
             }
