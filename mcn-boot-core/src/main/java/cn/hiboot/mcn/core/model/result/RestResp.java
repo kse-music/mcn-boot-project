@@ -3,6 +3,7 @@ package cn.hiboot.mcn.core.model.result;
 import cn.hiboot.mcn.core.exception.BaseException;
 import cn.hiboot.mcn.core.exception.ErrorMsg;
 import cn.hiboot.mcn.core.exception.ServiceException;
+import cn.hiboot.mcn.core.model.HttpTime;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -10,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.function.BiFunction;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class RestResp<T> {
+public class RestResp<T> implements HttpTime {
 	
     public enum ActionStatusMethod {
         OK,
@@ -78,10 +79,12 @@ public class RestResp<T> {
 	}
 
 	@JsonIgnore
+	@Override
 	public Long getDuration() {
 		return duration;
 	}
 
+	@Override
 	public void setDuration(Long duration) {
 		this.duration = duration;
 	}
