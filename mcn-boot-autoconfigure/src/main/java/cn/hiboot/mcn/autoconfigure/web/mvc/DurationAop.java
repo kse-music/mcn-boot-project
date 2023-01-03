@@ -1,6 +1,6 @@
 package cn.hiboot.mcn.autoconfigure.web.mvc;
 
-import cn.hiboot.mcn.core.model.result.RestResp;
+import cn.hiboot.mcn.core.model.HttpTime;
 import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.springframework.aop.Advisor;
@@ -48,8 +48,8 @@ public class DurationAop {
                 long start = System.currentTimeMillis();
                 Object o = invocation.proceed();
                 long duration = System.currentTimeMillis() - start;
-                if (o instanceof RestResp) {
-                    RestResp r = (RestResp) o;
+                if (o instanceof HttpTime) {
+                    HttpTime r = (HttpTime) o;
                     r.setDuration(duration);
                 }
                 return o;
