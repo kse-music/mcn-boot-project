@@ -1,4 +1,4 @@
-package cn.hiboot.mcn.autoconfigure.web.client;
+package cn.hiboot.mcn.cloud.client;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.web.client.RestTemplateAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.client.RestTemplate;
 
@@ -31,6 +32,7 @@ public class RestClientAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    @LoadBalanced
     RestTemplate restTemplate(RestTemplateBuilder builder) {
         builder.setReadTimeout(properties.getReadTimeout());
         builder.setConnectTimeout(properties.getConnectTimeout());
