@@ -1,4 +1,4 @@
-package cn.hiboot.mcn.autoconfigure.web.client;
+package cn.hiboot.mcn.cloud.client;
 
 import org.springframework.boot.web.client.RestTemplateBuilder;
 

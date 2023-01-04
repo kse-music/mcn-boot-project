@@ -1,4 +1,5 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  cn.hiboot.mcn.cloud.client.RestClientAutoConfiguration,\
   cn.hiboot.mcn.cloud.discover.ServiceRegisterAutoConfiguration,\
   cn.hiboot.mcn.cloud.encryptor.jackson.DecryptJacksonAutoConfiguration,\
   cn.hiboot.mcn.cloud.encryptor.sm2.SM2AutoConfiguration,\
