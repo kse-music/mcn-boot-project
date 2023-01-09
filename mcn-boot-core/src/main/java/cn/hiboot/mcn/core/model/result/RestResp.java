@@ -118,8 +118,17 @@ public class RestResp<T> implements HttpTime {
 	}
 
 	@JsonIgnore
+	public boolean isSuccess(){
+		return getActionStatus() == ActionStatusMethod.OK;
+	}
+
+	@JsonIgnore
+	public boolean isFailed(){
+		return getActionStatus() == ActionStatusMethod.FAIL;
+	}
+
 	public T remoteData(BiFunction<Integer,String,T> errorFunction){
-		if(getActionStatus() == ActionStatusMethod.FAIL){
+		if(isFailed()){
 			if(errorFunction == null){
 				throw ServiceException.newInstance(getErrorInfo());
 			}
