@@ -3,7 +3,6 @@ package cn.hiboot.mcn.autoconfigure.config;
 import cn.hiboot.mcn.autoconfigure.web.exception.error.ErrorPageController;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.StreamUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.web.util.HtmlUtils;
 
 import java.io.IOException;
@@ -45,25 +44,13 @@ public abstract class ConfigProperties {
     }
 
     public static String errorView(Map<String, ?> error, String basePath) {
-        String blueprint = "/blueprint.png";
-        String errorHanger = "/error-hanger.png";
-        String errorPin = "/error-pin.png";
-        if(StringUtils.hasText(basePath)){
-            blueprint = basePath + blueprint;
-            errorHanger = basePath + errorHanger;
-            errorPin = basePath + errorPin;
-        }
         String status = error.get("status").toString();
         Object message = error.get("message");
         if(message == null){
             message = error.get("error");
         }
         String msg = message == null ? "" : message.toString();
-        return error_view.replace("{blueprint}",blueprint)
-                .replace("{errorHanger}",errorHanger)
-                .replace("{errorPin}",errorPin)
-                .replace("{status}",htmlEscape(status))
-                .replace("{msg}",htmlEscape(msg));
+        return error_view.replace("{status}",htmlEscape(status)).replace("{msg}",htmlEscape(msg));
     }
 
     private static String htmlEscape(Object input) {
