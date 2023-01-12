@@ -1,6 +1,7 @@
 package cn.hiboot.mcn.autoconfigure.config;
 
 import cn.hiboot.mcn.autoconfigure.web.exception.error.ErrorPageController;
+import cn.hiboot.mcn.core.util.McnUtils;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.util.HtmlUtils;
@@ -46,7 +47,7 @@ public abstract class ConfigProperties {
     public static String errorView(Map<String, ?> error, String basePath) {
         String status = error.get("status").toString();
         Object message = error.get("message");
-        if(message == null){
+        if(McnUtils.isNullOrEmpty(message)){
             message = error.get("error");
         }
         String msg = message == null ? "" : message.toString();
