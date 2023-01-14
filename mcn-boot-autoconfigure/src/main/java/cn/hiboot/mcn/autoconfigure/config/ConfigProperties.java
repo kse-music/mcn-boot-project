@@ -3,13 +3,12 @@ package cn.hiboot.mcn.autoconfigure.config;
 import cn.hiboot.mcn.autoconfigure.web.exception.error.ErrorPageController;
 import cn.hiboot.mcn.core.util.McnUtils;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.util.HtmlUtils;
 
 import java.io.IOException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.Enumeration;
 import java.util.Map;
 import java.util.Properties;
 
@@ -44,16 +43,11 @@ public abstract class ConfigProperties {
         if (classLoader == null) {
             classLoader = ConfigProperties.class.getClassLoader();
         }
-        Enumeration<URL> urls;
-        try {
-            urls = classLoader.getResources(location);
-        }catch (IOException ex) {
-            throw new IllegalArgumentException("Failed to load configurations from location [" + location + "]", ex);
-        }
         Properties properties = new Properties();
-        while (urls.hasMoreElements()) {
-            URL url = urls.nextElement();
-            properties.putAll(McnUtils.loadProperties(url.getFile(), classLoader));
+        try {
+            properties = PropertiesLoaderUtils.loadAllProperties(location, classLoader);
+        } catch (IOException e) {
+            //ignore
         }
         return (Map) properties;
     }
