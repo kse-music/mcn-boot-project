@@ -7,8 +7,11 @@ import org.springframework.util.StreamUtils;
 import org.springframework.web.util.HtmlUtils;
 
 import java.io.IOException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Enumeration;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * 定位mcn默认配置所在位置
@@ -34,6 +37,25 @@ public abstract class ConfigProperties {
         } catch (IOException e) {
             //ignore
         }
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public static Map<String, Object> loadConfig(ClassLoader classLoader,String location) {
+        if (classLoader == null) {
+            classLoader = ConfigProperties.class.getClassLoader();
+        }
+        Enumeration<URL> urls;
+        try {
+            urls = classLoader.getResources(location);
+        }catch (IOException ex) {
+            throw new IllegalArgumentException("Failed to load configurations from location [" + location + "]", ex);
+        }
+        Properties properties = new Properties();
+        while (urls.hasMoreElements()) {
+            URL url = urls.nextElement();
+            properties.putAll(McnUtils.loadProperties(url.getFile(), classLoader));
+        }
+        return (Map) properties;
     }
 
     public static ClassPathResource mcnDefault() {
