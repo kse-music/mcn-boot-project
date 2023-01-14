@@ -88,7 +88,7 @@ public class McnEnvironmentPostProcessor implements EnvironmentPostProcessor, Or
             return;
         }
         //add MapPropertySource,包含主源的包名,日志文件名,mcn版本,以及dao包下的日志打印级别
-        Map<String, Object> mapProp = new HashMap<>();
+        Map<String, Object> mapProp = new HashMap<>(ConfigProperties.loadConfig(null,"config/config.properties"));
         if (Objects.nonNull(mainApplicationClass)) {
             String packageName = ClassUtils.getPackageName(mainApplicationClass);
             mapProp.put(ConfigProperties.APP_BASE_PACKAGE, packageName);
