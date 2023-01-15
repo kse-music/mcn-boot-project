@@ -5,13 +5,17 @@ import cn.hiboot.mcn.core.util.McnUtils;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.env.EnvironmentPostProcessor;
 import org.springframework.core.Ordered;
-import org.springframework.core.env.*;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.MapPropertySource;
+import org.springframework.core.env.MutablePropertySources;
+import org.springframework.core.env.PropertyResolver;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePropertySource;
 import org.springframework.util.ClassUtils;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -32,6 +36,7 @@ public class McnEnvironmentPostProcessor implements EnvironmentPostProcessor, Or
     private static final String CONSOLE_LOG_CHARSET = "CONSOLE_LOG_CHARSET";
     private static final String FILE_LOG_CHARSET = "FILE_LOG_CHARSET";
 
+    private static final MapPropertySource EMPTY_PROPERTY_SOURCE = new MapPropertySource("Empty", Collections.emptyMap());
     private static final String BOOTSTRAP_EAGER_LOAD = "mcn.bootstrap.eagerLoad.enable";
     private static final String MCN_SOURCE_NAME = "mcn-global-unique";
     private static final String MCN_DEFAULT_PROPERTY_SOURCE_NAME = "mcn-default";
@@ -97,7 +102,7 @@ public class McnEnvironmentPostProcessor implements EnvironmentPostProcessor, Or
             return;
         }
         //add MapPropertySource,包含主源的包名,日志文件名,mcn版本,以及dao包下的日志打印级别
-        Map<String, Object> mapProp = new HashMap<>(ConfigProperties.loadConfig(null,"config/config.properties"));
+        Map<String, Object> mapProp = new HashMap<>();
         if (Objects.nonNull(mainApplicationClass)) {
             String packageName = ClassUtils.getPackageName(mainApplicationClass);
             mapProp.put(ConfigProperties.APP_BASE_PACKAGE, packageName);
@@ -111,28 +116,32 @@ public class McnEnvironmentPostProcessor implements EnvironmentPostProcessor, Or
         mapProp.put("mcn.version", "v" + McnUtils.getVersion(this.getClass()));
         addLast(propertySources, new MapPropertySource("mcn-map", mapProp));
 
-        ResourcePropertySource propertySource = loadResourcePropertySource(MCN_DEFAULT_PROPERTY_SOURCE_NAME, ConfigProperties.mcnDefault());
-        if(!PRESENT && propertySource != null){
+        MapPropertySource propertySource = loadResourcePropertySource(MCN_DEFAULT_PROPERTY_SOURCE_NAME, ConfigProperties.mcnDefault());
+        if(!PRESENT){
             propertySource.getSource().remove("logging.pattern.console");
             propertySource.getSource().remove("logging.pattern.file");
         }
+
+        String additionConfigFile = environment.getProperty("mcn.config.additional-file","config/config.properties");
+        propertySource.getSource().putAll(ConfigProperties.loadConfig(null,additionConfigFile));
+
         addLast(propertySources, propertySource);
 
     }
 
-    private ResourcePropertySource loadResourcePropertySource(String name, Object resource) {
+    private MapPropertySource loadResourcePropertySource(String name, Object resource) {
         try {
             if (resource instanceof Resource) {
                 return new ResourcePropertySource(name, (Resource) resource);
             }
             return new ResourcePropertySource(name, resource.toString());
         } catch (IOException e) {
-            return null;
+            return EMPTY_PROPERTY_SOURCE;
         }
     }
 
-    private void addLast(MutablePropertySources propertySources, PropertySource<?> propertySource) {
-        if (propertySource == null) {
+    private void addLast(MutablePropertySources propertySources, MapPropertySource propertySource) {
+        if (propertySource == EMPTY_PROPERTY_SOURCE) {
             return;
         }
         propertySources.addLast(propertySource);

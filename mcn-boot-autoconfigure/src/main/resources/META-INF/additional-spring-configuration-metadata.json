@@ -146,6 +146,13 @@
       "sourceType": "cn.hiboot.mcn.autoconfigure.context.McnApplicationListener",
       "description": "是否删除解密后的数据.",
       "defaultValue": false
+    },
+    {
+      "name": "mcn.config.additional-file",
+      "type": "java.lang.String",
+      "sourceType": "cn.hiboot.mcn.autoconfigure.context.McnEnvironmentPostProcessor",
+      "description": "加载classpath下指定的所有配置文件.",
+      "defaultValue": "config/config.properties"
     }
   ],
   "hints": [
