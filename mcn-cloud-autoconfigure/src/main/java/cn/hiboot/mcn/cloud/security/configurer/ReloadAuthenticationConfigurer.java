@@ -5,12 +5,9 @@ import org.springframework.security.config.annotation.SecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.web.DefaultSecurityFilterChain;
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -36,24 +33,12 @@ public class ReloadAuthenticationConfigurer extends SecurityConfigurerAdapter<De
                 Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
                 if (authentication != null) {
                     Object principal = authentication.getPrincipal();
-                    if (principal instanceof Map) {
+                    if (principal instanceof Map) {//resource sever
                         @SuppressWarnings("unchecked")
                         Map<String, Object> oldPrincipal = (Map<String, Object>) principal;
                         Map<String, Object> newPrincipal = authenticationReload.reload(oldPrincipal);
                         if(newPrincipal != null){
                             oldPrincipal.putAll(newPrincipal);
-                        }
-                    } else if (principal instanceof Jwt) {
-                        Jwt jwt0 = (Jwt) principal;
-                        Map<String, Object> oldPrincipal = new HashMap<>(jwt0.getClaims());
-                        Map<String, Object> newPrincipal = authenticationReload.reload(oldPrincipal);
-                        if(newPrincipal != null){
-                            oldPrincipal.putAll(newPrincipal);
-                            JwtAuthenticationToken jwtAuthenticationToken = (JwtAuthenticationToken)authentication;
-                            Jwt jwt = new Jwt(jwt0.getTokenValue(),jwt0.getIssuedAt(),jwt0.getExpiresAt(),jwt0.getHeaders(),oldPrincipal);
-                            JwtAuthenticationToken authenticationToken = new JwtAuthenticationToken(jwt,jwtAuthenticationToken.getAuthorities());
-                            authenticationToken.setDetails(jwtAuthenticationToken.getDetails());
-                            SecurityContextHolder.getContext().setAuthentication(authenticationToken);
                         }
                     }
                 }
