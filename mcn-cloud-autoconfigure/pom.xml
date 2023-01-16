@@ -93,6 +93,10 @@
             <version>1.0</version>
             <optional>true</optional>
         </dependency>
+        <dependency>
+            <groupId>io.minio</groupId>
+            <artifactId>minio</artifactId>
+        </dependency>
     </dependencies>
 
 </project>
