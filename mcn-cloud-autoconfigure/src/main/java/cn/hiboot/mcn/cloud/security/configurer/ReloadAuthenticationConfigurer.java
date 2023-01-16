@@ -32,7 +32,7 @@ public class ReloadAuthenticationConfigurer extends SecurityConfigurerAdapter<De
         String[] authenticationReloadBeanNames = applicationContext.getBeanNamesForType(AuthenticationReload.class);
         if (authenticationReloadBeanNames.length == 1) {
             AuthenticationReload authenticationReload = applicationContext.getBean(authenticationReloadBeanNames[0], AuthenticationReload.class);
-            http.addFilterAfter((request, response, chain) -> {
+            http.addFilterBefore((request, response, chain) -> {
                 Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
                 if (authentication != null) {
                     Object principal = authentication.getPrincipal();
