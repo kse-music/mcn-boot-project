@@ -6,8 +6,8 @@
 |-----------------------------------|:-----------------------------|:-----------:|
 | bcprov-jdk15on                    | bcprov-jdk15on.version       |    1.70     |
 | bcpkix-jdk18on                    | bcprov-jdk18on.version       |    1.71     |
-| spring-boot-admin-starter-client  | boot-admin.version           |    2.7.7    |
-| spring-boot-admin-starter-server  | boot-admin.version           |    2.7.7    |
+| spring-boot-admin-starter-client  | boot-admin.version           |   2.7.10    |
+| spring-boot-admin-starter-server  | boot-admin.version           |   2.7.10    |
 | commons-io                        | commons-io.version           |   2.11.0    |
 | fastjson                          | fastjson.version             |   1.2.83    |
 | fastjson2                         | fastjson2.version            |   2.0.14    |
@@ -18,9 +18,9 @@
 | mapstruct                         | mapstruct.version            | 1.5.2.Final |
 | mybatis-spring-boot-starter       | mybatis-spring-boot.version  |    2.2.2    |
 | minio                             | minio.version                |    8.4.6    |
-| snakeyaml                         | snakeyaml.version            |    1.32     |
-| spring-boot-dependencies          | spring-boot.version          |    2.7.4    |
-| spring-cloud-dependencies         | spring-cloud.version         |  2021.0.4   |
+| snakeyaml                         | snakeyaml.version            |    1.33     |
+| spring-boot-dependencies          | spring-boot.version          |    2.7.8    |
+| spring-cloud-dependencies         | spring-cloud.version         |  2021.0.5   |
 | spring-cloud-alibaba-dependencies | spring-cloud-alibaba.version |   2021.1    |
 | springfox-swagger2                | springfox-swagger.version    |    3.0.0    |
 | springfox-swagger-ui              | springfox-swagger.version    |    3.0.0    |
