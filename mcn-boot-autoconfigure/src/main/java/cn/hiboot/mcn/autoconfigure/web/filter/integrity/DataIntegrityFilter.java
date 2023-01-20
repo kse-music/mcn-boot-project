@@ -3,8 +3,7 @@ package cn.hiboot.mcn.autoconfigure.web.filter.integrity;
 import cn.hiboot.mcn.autoconfigure.web.filter.common.JsonRequestHelper;
 import cn.hiboot.mcn.autoconfigure.web.filter.common.RequestMatcher;
 import cn.hiboot.mcn.autoconfigure.web.filter.common.RequestPayloadRequestWrapper;
-import cn.hiboot.mcn.core.model.result.RestResp;
-import cn.hiboot.mcn.core.util.JacksonUtils;
+import cn.hiboot.mcn.autoconfigure.web.mvc.HttpUtils;
 import cn.hutool.core.net.URLDecoder;
 import cn.hutool.core.util.StrUtil;
 import org.springframework.core.Ordered;
@@ -15,7 +14,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
@@ -47,7 +45,7 @@ public class DataIntegrityFilter implements Filter, Ordered {
             String signature = request.getHeader("signature");// 获取签名
 
             if (StrUtil.isEmpty(timestamp)) {
-                write("验证失败,无效的时间戳",(HttpServletResponse) servletResponse);
+                HttpUtils.failed("验证失败,无效的时间戳",(HttpServletResponse) servletResponse);
                 return;
             }
 
@@ -55,7 +53,7 @@ public class DataIntegrityFilter implements Filter, Ordered {
                 long receiveTime = Long.parseLong(timestamp);
                 long NONCE_STR_TIMEOUT_SECONDS = dataIntegrityProperties.getTimeout().toMillis();// 判断时间是否大于 1 分钟 (防止重放攻击)
                 if (System.currentTimeMillis() - receiveTime > NONCE_STR_TIMEOUT_SECONDS) {
-                    write("验证失败,时间戳过期",(HttpServletResponse) servletResponse);
+                    HttpUtils.failed("验证失败,时间戳过期",(HttpServletResponse) servletResponse);
                     return;
                 }
             }
@@ -71,22 +69,12 @@ public class DataIntegrityFilter implements Filter, Ordered {
 
             // 对请求头参数进行签名
             if (StrUtil.isEmpty(signature) || !Objects.equals(signature, signature(timestamp, nonceStr, request, payload))) {
-                write("验证失败,数据被篡改",(HttpServletResponse)servletResponse);
+                HttpUtils.failed("验证失败,数据被篡改",(HttpServletResponse)servletResponse);
                 return;
             }
         }
 
         filterChain.doFilter(servletRequest,servletResponse);
-    }
-
-    private void write(String msg, HttpServletResponse response) throws IOException {
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-        response.setStatus(HttpServletResponse.SC_OK);
-        PrintWriter out = response.getWriter();
-        out.write(JacksonUtils.toJson(RestResp.error(msg)));
-        out.flush();
-        out.close();
     }
 
     /**
