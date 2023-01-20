@@ -16,6 +16,7 @@ import java.util.Map;
  */
 public interface SessionHolder {
     String BEARER_PREFIX = "Bearer ";
+    String USER_NAME = "user_name";
 
     static String getUserId() {
         return get("userId");
@@ -27,7 +28,7 @@ public interface SessionHolder {
     }
 
     static Map<String, Object> getUser() {
-        return getUser("user_name");
+        return getUser(USER_NAME);
     }
 
     static Map<String, Object> getUser(String userNameKey) {

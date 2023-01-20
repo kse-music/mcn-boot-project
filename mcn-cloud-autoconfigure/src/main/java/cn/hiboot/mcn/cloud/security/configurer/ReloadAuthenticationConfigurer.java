@@ -1,5 +1,6 @@
 package cn.hiboot.mcn.cloud.security.configurer;
 
+import cn.hiboot.mcn.cloud.security.SessionHolder;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.config.annotation.SecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -45,12 +46,14 @@ public class ReloadAuthenticationConfigurer extends SecurityConfigurerAdapter<De
                         }
                     } else if (principal instanceof Jwt) {
                         Jwt jwt0 = (Jwt) principal;
-                        Map<String, Object> oldPrincipal = new HashMap<>(jwt0.getClaims());
+                        Map<String, Object> oldPrincipal = jwt0.getClaimAsMap(SessionHolder.USER_NAME);
                         Map<String, Object> newPrincipal = authenticationReload.reload(oldPrincipal);
                         if(newPrincipal != null){
                             oldPrincipal.putAll(newPrincipal);
+                            Map<String,Object> claims = new HashMap<>(jwt0.getClaims());
+                            claims.put(SessionHolder.USER_NAME,oldPrincipal);
                             JwtAuthenticationToken jwtAuthenticationToken = (JwtAuthenticationToken)authentication;
-                            Jwt jwt = new Jwt(jwt0.getTokenValue(),jwt0.getIssuedAt(),jwt0.getExpiresAt(),jwt0.getHeaders(),oldPrincipal);
+                            Jwt jwt = new Jwt(jwt0.getTokenValue(),jwt0.getIssuedAt(),jwt0.getExpiresAt(),jwt0.getHeaders(),claims);
                             JwtAuthenticationToken authenticationToken = new JwtAuthenticationToken(jwt,jwtAuthenticationToken.getAuthorities());
                             authenticationToken.setDetails(jwtAuthenticationToken.getDetails());
                             SecurityContextHolder.getContext().setAuthentication(authenticationToken);
