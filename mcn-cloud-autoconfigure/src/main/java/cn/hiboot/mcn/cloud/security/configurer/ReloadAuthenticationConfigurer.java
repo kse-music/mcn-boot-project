@@ -2,13 +2,12 @@ package cn.hiboot.mcn.cloud.security.configurer;
 
 import cn.hiboot.mcn.cloud.security.SessionHolder;
 import org.springframework.context.ApplicationContext;
-import org.springframework.security.config.annotation.SecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
-import org.springframework.security.web.DefaultSecurityFilterChain;
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 
 import java.util.HashMap;
@@ -20,16 +19,11 @@ import java.util.Map;
  * @author DingHao
  * @since 2023/1/16 12:15
  */
-public class ReloadAuthenticationConfigurer extends SecurityConfigurerAdapter<DefaultSecurityFilterChain, HttpSecurity>{
-
-    private final ApplicationContext applicationContext;
-
-    public ReloadAuthenticationConfigurer(HttpSecurity httpSecurity) {
-        this.applicationContext = httpSecurity.getSharedObject(ApplicationContext.class);
-    }
+public class ReloadAuthenticationConfigurer extends AbstractHttpConfigurer<ReloadAuthenticationConfigurer, HttpSecurity> {
 
     @Override
     public void configure(HttpSecurity http) throws Exception {
+        ApplicationContext applicationContext = http.getSharedObject(ApplicationContext.class);
         String[] authenticationReloadBeanNames = applicationContext.getBeanNamesForType(AuthenticationReload.class);
         if (authenticationReloadBeanNames.length == 1) {
             AuthenticationReload authenticationReload = applicationContext.getBean(authenticationReloadBeanNames[0], AuthenticationReload.class);
