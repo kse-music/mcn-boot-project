@@ -17,14 +17,9 @@ import java.util.Map;
  */
 public class ReloadAuthenticationConfigurer extends AbstractHttpConfigurer<ReloadAuthenticationConfigurer, HttpSecurity> {
 
-    private final ApplicationContext applicationContext;
-
-    public ReloadAuthenticationConfigurer(HttpSecurity httpSecurity) {
-        this.applicationContext = httpSecurity.getSharedObject(ApplicationContext.class);
-    }
-
     @Override
     public void configure(HttpSecurity http) throws Exception {
+        ApplicationContext applicationContext = http.getSharedObject(ApplicationContext.class);
         String[] authenticationReloadBeanNames = applicationContext.getBeanNamesForType(AuthenticationReload.class);
         if (authenticationReloadBeanNames.length == 1) {
             AuthenticationReload authenticationReload = applicationContext.getBean(authenticationReloadBeanNames[0], AuthenticationReload.class);
