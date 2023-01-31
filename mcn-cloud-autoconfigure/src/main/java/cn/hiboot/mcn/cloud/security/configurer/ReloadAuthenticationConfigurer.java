@@ -1,11 +1,10 @@
 package cn.hiboot.mcn.cloud.security.configurer;
 
 import org.springframework.context.ApplicationContext;
-import org.springframework.security.config.annotation.SecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.DefaultSecurityFilterChain;
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 
 import java.util.Map;
@@ -16,7 +15,7 @@ import java.util.Map;
  * @author DingHao
  * @since 2023/1/16 12:15
  */
-public class ReloadAuthenticationConfigurer extends SecurityConfigurerAdapter<DefaultSecurityFilterChain, HttpSecurity>{
+public class ReloadAuthenticationConfigurer extends AbstractHttpConfigurer<ReloadAuthenticationConfigurer, HttpSecurity> {
 
     private final ApplicationContext applicationContext;
 
