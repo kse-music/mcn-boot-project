@@ -12,9 +12,17 @@ import java.time.Duration;
  */
 @ConfigurationProperties(prefix = "rest.template")
 public class RestClientProperties {
-
+    private boolean enable = true;
     private Duration connectTimeout = Duration.ofMillis(10000);
     private Duration readTimeout = Duration.ofMillis(60000);
+
+    public boolean isEnable() {
+        return enable;
+    }
+
+    public void setEnable(boolean enable) {
+        this.enable = enable;
+    }
 
     public Duration getConnectTimeout() {
         return connectTimeout;

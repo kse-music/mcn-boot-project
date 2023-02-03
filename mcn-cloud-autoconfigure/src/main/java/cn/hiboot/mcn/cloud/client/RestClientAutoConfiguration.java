@@ -4,7 +4,7 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.web.client.RestTemplateAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -23,6 +23,7 @@ import org.springframework.web.client.RestTemplate;
 @AutoConfigureAfter(RestTemplateAutoConfiguration.class)
 @EnableConfigurationProperties(RestClientProperties.class)
 @ConditionalOnClass(RestTemplate.class)
+@ConditionalOnProperty(prefix = "rest.template",name = "enable",havingValue = "true",matchIfMissing = true)
 public class RestClientAutoConfiguration {
 
     private final RestClientProperties properties;
@@ -34,14 +35,19 @@ public class RestClientAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean
-    @LoadBalanced
     @ConditionalOnBean(RestTemplateBuilder.class)
     RestTemplate restTemplate(RestTemplateBuilder builder) {
         builder.setReadTimeout(properties.getReadTimeout());
         builder.setConnectTimeout(properties.getConnectTimeout());
         restTemplateBuilderCustomizers.orderedStream().forEachOrdered(b -> b.custom(builder));
         return builder.build();
+    }
+
+    @Bean
+    @ConditionalOnBean(RestTemplateBuilder.class)
+    @LoadBalanced
+    RestTemplate loadBalancedRestTemplate(RestTemplateBuilder builder) {
+        return restTemplate(builder);
     }
 
 }
