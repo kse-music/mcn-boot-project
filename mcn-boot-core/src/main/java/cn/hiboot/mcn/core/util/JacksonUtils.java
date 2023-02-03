@@ -7,7 +7,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 
 import java.util.List;
 import java.util.Map;
@@ -35,6 +37,10 @@ public abstract class JacksonUtils {
         return objectMapper;
     }
 
+    public static TypeFactory getTypeFactory(){
+        return getObjectMapper().getTypeFactory();
+    }
+
     public static <T> T fromJson(String content, Class<T> clazz){
         try {
             return getObjectMapper().readValue(content,clazz);
@@ -45,51 +51,38 @@ public abstract class JacksonUtils {
 
     public static <T> T fromJson(String json, TypeReference<T> reference) {
         try {
-            return JacksonUtils.getObjectMapper().readValue(json, reference);
+            return getObjectMapper().readValue(json, reference);
+        } catch (Exception e) {
+            throw newInstance(e);
+        }
+    }
+
+    public static <T> T fromJson(String json, JavaType javaType) {
+        try {
+            return getObjectMapper().readValue(json, javaType);
         } catch (Exception e) {
             throw newInstance(e);
         }
     }
 
     public static <T> List<T> fromList(String content,Class<T> clazz){
-        try {
-            return getObjectMapper().readValue(content,getObjectMapper().getTypeFactory().constructCollectionType(List.class, clazz));
-        } catch (JsonProcessingException e) {
-            throw newInstance(e);
-        }
+        return fromJson(content,getTypeFactory().constructCollectionType(List.class, clazz));
     }
 
     public static List<Map<String,Object>> fromListMap(String content){
-        try {
-            return getObjectMapper().readValue(content,getObjectMapper().getTypeFactory().constructCollectionType(List.class,Map.class));
-        } catch (JsonProcessingException e) {
-            throw newInstance(e);
-        }
+        return fromJson(content,getTypeFactory().constructCollectionType(List.class,Map.class));
     }
 
     public static <K, V> List<Map<K,V>> fromListMap(String content,Class<K> keyClass,Class<V> valueClass){
-        try {
-            return getObjectMapper().readValue(content,getObjectMapper().getTypeFactory().constructCollectionType(List.class,
-                    getObjectMapper().getTypeFactory().constructMapType(Map.class,keyClass,valueClass)));
-        } catch (JsonProcessingException e) {
-            throw newInstance(e);
-        }
+        return fromJson(content,getTypeFactory().constructCollectionType(List.class,getTypeFactory().constructMapType(Map.class,keyClass,valueClass)));
     }
 
     public static Map<String, Object> fromMap(String content){
-        try {
-            return getObjectMapper().readValue(content,new TypeReference<Map<String, Object>>(){});
-        } catch (JsonProcessingException e) {
-            throw newInstance(e);
-        }
+        return fromJson(content,new TypeReference<Map<String, Object>>(){});
     }
 
     public static <K,V> Map<K, V> fromMap(String content,Class<K> keyClass,Class<V> valueClass){
-        try {
-            return getObjectMapper().readValue(content,getObjectMapper().getTypeFactory().constructMapType(Map.class,keyClass,valueClass));
-        } catch (JsonProcessingException e) {
-            throw newInstance(e);
-        }
+        return fromJson(content,getTypeFactory().constructMapType(Map.class,keyClass,valueClass));
     }
 
     public static String toJson(Object value){
