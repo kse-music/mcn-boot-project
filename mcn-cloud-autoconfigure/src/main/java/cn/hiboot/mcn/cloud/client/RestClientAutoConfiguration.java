@@ -37,6 +37,10 @@ public class RestClientAutoConfiguration {
     @Bean
     @ConditionalOnBean(RestTemplateBuilder.class)
     RestTemplate restTemplate(RestTemplateBuilder builder) {
+        return restTemplate0(builder);
+    }
+
+    private RestTemplate restTemplate0(RestTemplateBuilder builder) {
         builder.setReadTimeout(properties.getReadTimeout());
         builder.setConnectTimeout(properties.getConnectTimeout());
         restTemplateBuilderCustomizers.orderedStream().forEachOrdered(b -> b.custom(builder));
@@ -47,7 +51,7 @@ public class RestClientAutoConfiguration {
     @ConditionalOnBean(RestTemplateBuilder.class)
     @LoadBalanced
     RestTemplate loadBalancedRestTemplate(RestTemplateBuilder builder) {
-        return restTemplate(builder);
+        return restTemplate0(builder);
     }
 
 }
