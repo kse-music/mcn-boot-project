@@ -1,16 +1,21 @@
 package cn.hiboot.mcn.autoconfigure.web.security;
 
+import cn.hiboot.mcn.autoconfigure.web.exception.ExceptionResolver;
+import cn.hiboot.mcn.core.exception.ExceptionKeys;
+import cn.hiboot.mcn.core.model.result.RestResp;
 import cn.hiboot.mcn.core.util.McnUtils;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -48,6 +53,23 @@ public class WebSecurityAutoConfiguration {
             if(McnUtils.isNotNullAndEmpty(urls)){
                 web.ignoring().requestMatchers(new OrRequestMatcher(urls.stream().map(AntPathRequestMatcher::new).collect(Collectors.toList())));
             }
+        };
+    }
+
+    @Bean
+    public ExceptionResolver securityExceptionResolver() {
+        return new ExceptionResolver(){
+
+            @Override
+            public boolean support(HttpServletRequest request, Throwable t) {
+                return t instanceof AccessDeniedException;
+            }
+
+            @Override
+            public RestResp<Object> resolveException(HttpServletRequest request, Throwable t) {
+                return RestResp.error(ExceptionKeys.HTTP_ERROR_403, t.getMessage());
+            }
+
         };
     }
 
