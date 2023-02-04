@@ -4,6 +4,7 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.web.client.RestTemplateAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -36,6 +37,7 @@ public class RestClientAutoConfiguration {
 
     @Bean
     @ConditionalOnBean(RestTemplateBuilder.class)
+    @ConditionalOnMissingBean(name = "restTemplate")
     RestTemplate restTemplate(RestTemplateBuilder builder) {
         return restTemplate0(builder);
     }
@@ -50,6 +52,7 @@ public class RestClientAutoConfiguration {
     @Bean
     @ConditionalOnBean(RestTemplateBuilder.class)
     @LoadBalanced
+    @ConditionalOnMissingBean(name = "loadBalancedRestTemplate")
     RestTemplate loadBalancedRestTemplate(RestTemplateBuilder builder) {
         return restTemplate0(builder);
     }
