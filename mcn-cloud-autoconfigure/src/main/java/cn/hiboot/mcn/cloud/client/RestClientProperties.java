@@ -5,12 +5,12 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import java.time.Duration;
 
 /**
- * RestTemplateProperties
+ * RestClientProperties
  *
  * @author DingHao
  * @since 2023/1/3 14:54
  */
-@ConfigurationProperties(prefix = "rest.template")
+@ConfigurationProperties(prefix = "rest.client")
 public class RestClientProperties {
     private boolean enable = true;
     private Duration connectTimeout = Duration.ofMillis(10000);

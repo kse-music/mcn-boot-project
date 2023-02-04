@@ -23,7 +23,7 @@ import org.springframework.web.client.RestTemplate;
 @EnableConfigurationProperties(RestClientProperties.class)
 @ConditionalOnClass(RestTemplate.class)
 @ConditionalOnBean(RestTemplateBuilder.class)
-@ConditionalOnProperty(prefix = "rest.template",name = "enable",havingValue = "true",matchIfMissing = true)
+@ConditionalOnProperty(prefix = "rest.client",name = "enable",havingValue = "true",matchIfMissing = true)
 public class RestClientAutoConfiguration {
 
     private final RestClientProperties properties;
