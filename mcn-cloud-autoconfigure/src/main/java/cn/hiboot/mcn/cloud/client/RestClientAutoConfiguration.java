@@ -24,6 +24,7 @@ import org.springframework.web.client.RestTemplate;
 @AutoConfigureAfter(RestTemplateAutoConfiguration.class)
 @EnableConfigurationProperties(RestClientProperties.class)
 @ConditionalOnClass(RestTemplate.class)
+@ConditionalOnBean(RestTemplateBuilder.class)
 @ConditionalOnProperty(prefix = "rest.template",name = "enable",havingValue = "true",matchIfMissing = true)
 public class RestClientAutoConfiguration {
 
@@ -36,7 +37,6 @@ public class RestClientAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnBean(RestTemplateBuilder.class)
     @ConditionalOnMissingBean(name = "restTemplate")
     RestTemplate restTemplate(RestTemplateBuilder builder) {
         return restTemplate0(builder);
@@ -50,8 +50,8 @@ public class RestClientAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnBean(RestTemplateBuilder.class)
     @LoadBalanced
+    @ConditionalOnClass(name = "org.springframework.cloud.client.loadbalancer.LoadBalanced")
     @ConditionalOnMissingBean(name = "loadBalancedRestTemplate")
     RestTemplate loadBalancedRestTemplate(RestTemplateBuilder builder) {
         return restTemplate0(builder);
