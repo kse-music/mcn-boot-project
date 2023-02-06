@@ -1,7 +1,6 @@
 package cn.hiboot.mcn.autoconfigure.web.mvc;
 
 import cn.hiboot.mcn.autoconfigure.minio.MinioException;
-import cn.hiboot.mcn.autoconfigure.web.exception.ExceptionPostProcessor;
 import cn.hiboot.mcn.autoconfigure.web.exception.ExceptionResolver;
 import cn.hiboot.mcn.autoconfigure.web.exception.error.DefaultErrorView;
 import cn.hiboot.mcn.autoconfigure.web.exception.error.ErrorPageController;
@@ -77,14 +76,6 @@ public class SpringMvcAutoConfiguration {
             return new DefaultErrorAttributes();
         }
 
-        @Bean
-        @ConditionalOnProperty(prefix = "mcn.exception.handler",name = "override-ex-msg",havingValue = "true")
-        public ExceptionPostProcessor<RestResp<Throwable>> internalExceptionMessagePostProcessor() {
-            return resp -> {
-                System.out.println();
-                return resp;
-            };
-        }
     }
 
     @Configuration(proxyBeanMethods = false)
