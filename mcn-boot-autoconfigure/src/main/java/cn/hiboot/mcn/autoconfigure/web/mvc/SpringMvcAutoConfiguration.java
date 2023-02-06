@@ -1,7 +1,7 @@
 package cn.hiboot.mcn.autoconfigure.web.mvc;
 
-import cn.hiboot.mcn.autoconfigure.web.exception.ExceptionHelper;
-import cn.hiboot.mcn.autoconfigure.web.exception.ExceptionMessageProcessor;
+import cn.hiboot.mcn.autoconfigure.minio.MinioException;
+import cn.hiboot.mcn.autoconfigure.web.exception.ExceptionResolver;
 import cn.hiboot.mcn.autoconfigure.web.exception.error.DefaultErrorView;
 import cn.hiboot.mcn.autoconfigure.web.exception.error.ErrorPageController;
 import cn.hiboot.mcn.autoconfigure.web.exception.handler.GlobalExceptionHandler;
@@ -11,6 +11,7 @@ import cn.hiboot.mcn.autoconfigure.web.mvc.resolver.StringObjectMethodArgumentRe
 import cn.hiboot.mcn.core.exception.ExceptionKeys;
 import cn.hiboot.mcn.core.model.result.RestResp;
 import cn.hiboot.mcn.core.util.JacksonUtils;
+import io.minio.MinioClient;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.*;
@@ -76,27 +77,18 @@ public class SpringMvcAutoConfiguration {
             return new DefaultErrorAttributes();
         }
 
+    }
+
+    @Configuration(proxyBeanMethods = false)
+    @ConditionalOnClass(MinioClient.class)
+    private static class MinioExceptionResolverConfig{
+
         @Bean
-        @ConditionalOnMissingBean
-        @ConditionalOnProperty(prefix = "mcn.exception.handler",name = "override-ex-msg",havingValue = "true")
-        public ExceptionMessageProcessor exceptionMessageProcessor() {
-            return errorCode -> {
-                switch (errorCode){
-                    case ExceptionKeys.PARAM_PARSE_ERROR:
-                    case ExceptionKeys.JSON_PARSE_ERROR:
-                    case ExceptionKeys.PARAM_TYPE_ERROR:
-                    case ExceptionKeys.SPECIAL_SYMBOL_ERROR:
-                        return "您输入的数据有误，请重新输入";
-                    case ExceptionKeys.HTTP_ERROR_500:
-                    case ExceptionKeys.HTTP_ERROR_503:
-                    case ExceptionKeys.SERVICE_ERROR:
-                    case ExceptionHelper.DEFAULT_ERROR_CODE:
-                        return "系统繁忙，请稍候再试";
-                    default:
-                        return null;
-                }
-            };
+        @ConditionalOnMissingBean(name = "minioExceptionResolver")
+        ExceptionResolver<MinioException> minioExceptionResolver(){
+            return t -> RestResp.error(ExceptionKeys.INVOKE_MINIO_ERROR,t.getCause().getMessage());
         }
+
     }
 
     @Configuration(proxyBeanMethods = false)

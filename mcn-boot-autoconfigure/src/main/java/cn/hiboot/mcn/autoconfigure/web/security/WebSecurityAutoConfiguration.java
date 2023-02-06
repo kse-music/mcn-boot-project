@@ -12,8 +12,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 
-import javax.servlet.http.HttpServletRequest;
-
 /**
  * WebSecurityAutoConfiguration
  * 配置忽略的请求路径
@@ -29,20 +27,8 @@ import javax.servlet.http.HttpServletRequest;
 public class WebSecurityAutoConfiguration {
 
     @Bean
-    public ExceptionResolver securityExceptionResolver() {
-        return new ExceptionResolver(){
-
-            @Override
-            public boolean support(HttpServletRequest request, Throwable t) {
-                return t instanceof AccessDeniedException;
-            }
-
-            @Override
-            public RestResp<Object> resolveException(HttpServletRequest request, Throwable t) {
-                return RestResp.error(ExceptionKeys.HTTP_ERROR_403, t.getMessage());
-            }
-
-        };
+    public ExceptionResolver<AccessDeniedException> securityExceptionResolver() {
+        return t -> RestResp.error(ExceptionKeys.HTTP_ERROR_403, t.getMessage());
     }
 
 }
