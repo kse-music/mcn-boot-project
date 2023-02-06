@@ -16,8 +16,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 
-import javax.servlet.http.HttpServletRequest;
-
 /**
  * FilterAutoConfiguration
  *
@@ -31,23 +29,13 @@ import javax.servlet.http.HttpServletRequest;
 public class FilterAutoConfiguration {
 
     @Bean
-    public ExceptionResolver specialSymbolExceptionResolver() {
-        return new ExceptionResolver(){
-
-            @Override
-            public boolean support(HttpServletRequest request, Throwable t) {
-                return t instanceof HttpMessageNotReadableException;
+    public ExceptionResolver<HttpMessageNotReadableException> specialSymbolExceptionResolver() {
+        return t -> {
+            ServiceException serviceException = ServiceException.find(t);
+            if(serviceException == null || serviceException.getCode() != ExceptionKeys.SPECIAL_SYMBOL_ERROR){
+                return null;
             }
-
-            @Override
-            public RestResp<Object> resolveException(HttpServletRequest request, Throwable t) {
-                ServiceException serviceException = ServiceException.find(t);
-                if(serviceException == null || serviceException.getCode() != ExceptionKeys.SPECIAL_SYMBOL_ERROR){
-                    return null;
-                }
-                return RestResp.error(serviceException.getCode(),serviceException.getMessage());
-            }
-
+            return RestResp.error(serviceException.getCode(),serviceException.getMessage());
         };
     }
 

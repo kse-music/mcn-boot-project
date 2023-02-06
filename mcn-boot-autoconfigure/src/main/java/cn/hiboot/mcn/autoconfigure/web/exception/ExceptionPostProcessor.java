@@ -13,22 +13,15 @@ import javax.servlet.http.HttpServletRequest;
 public interface ExceptionPostProcessor<T> {
 
     /**
-     * 在内部异常处理器之前执行
-     * @param request 当前请求
-     * @param t 异常
-     * @return 如果返回非null则直接结束异常处理的结果
-     */
-    default T beforeHandle(HttpServletRequest request, Throwable t){
-        return null;
-    }
-
-    /**
      * 在内部异常处理器之后执行
      * @param request 当前请求
      * @param t 异常
      * @param resp 内部异常处理器处理结果
      * @return 如果返回非null则直接结束异常处理的结果
      */
-    T afterHandle(HttpServletRequest request, Throwable t, RestResp<Object> resp);
+    default T afterHandle(HttpServletRequest request, Throwable t, RestResp<Throwable> resp){
+        return afterHandle(resp);
+    }
 
+    T afterHandle(RestResp<Throwable> resp);
 }

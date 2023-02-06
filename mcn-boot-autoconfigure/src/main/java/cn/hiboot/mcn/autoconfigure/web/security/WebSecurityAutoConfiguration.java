@@ -15,7 +15,6 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -57,20 +56,8 @@ public class WebSecurityAutoConfiguration {
     }
 
     @Bean
-    public ExceptionResolver securityExceptionResolver() {
-        return new ExceptionResolver(){
-
-            @Override
-            public boolean support(HttpServletRequest request, Throwable t) {
-                return t instanceof AccessDeniedException;
-            }
-
-            @Override
-            public RestResp<Object> resolveException(HttpServletRequest request, Throwable t) {
-                return RestResp.error(ExceptionKeys.HTTP_ERROR_403, t.getMessage());
-            }
-
-        };
+    public ExceptionResolver<AccessDeniedException> securityExceptionResolver() {
+        return t -> RestResp.error(ExceptionKeys.HTTP_ERROR_403, t.getMessage());
     }
 
 }
