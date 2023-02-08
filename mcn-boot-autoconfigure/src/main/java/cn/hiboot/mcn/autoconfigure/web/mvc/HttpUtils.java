@@ -18,11 +18,27 @@ import java.nio.charset.StandardCharsets;
 public class HttpUtils {
 
     public static <T> void success(T data, HttpServletResponse response) throws IOException {
-        write(JacksonUtils.toJson(new RestResp<>(data)),response);
+        write(new RestResp<>(data),response);
+    }
+
+    public static <T> void success(T data,Long count, HttpServletResponse response) throws IOException {
+        write(new RestResp<>(data,count),response);
     }
 
     public static void failed(String msg, HttpServletResponse response) throws IOException {
-        write(JacksonUtils.toJson(RestResp.error(msg)),response);
+        write(RestResp.error(msg),response);
+    }
+
+    public static void failed(Integer code,HttpServletResponse response) throws IOException {
+        write(RestResp.error(code),response);
+    }
+
+    public static void failed(Integer code,String msg, HttpServletResponse response) throws IOException {
+        write(RestResp.error(code,msg),response);
+    }
+
+    public static <T> void write(RestResp<T> resp, HttpServletResponse response) throws IOException {
+        write(JacksonUtils.toJson(resp),response);
     }
 
     public static void write(String str, HttpServletResponse response) throws IOException {
