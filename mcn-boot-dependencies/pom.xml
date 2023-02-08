@@ -358,7 +358,7 @@
                         </goals>
                     </execution>
                 </executions>
-                <configuration>
+                <!--<configuration>
                     <defaultAuthor>DingHao</defaultAuthor>
                     <defaultVersion>${revision}</defaultVersion>
                     <doclet>nl.talsmasoftware.umldoclet.UMLDoclet</doclet>
@@ -367,7 +367,7 @@
                         <artifactId>umldoclet</artifactId>
                         <version>1.1.4</version>
                     </docletArtifact>
-                </configuration>
+                </configuration>-->
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
