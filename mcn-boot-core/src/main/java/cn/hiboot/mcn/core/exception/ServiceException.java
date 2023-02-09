@@ -16,6 +16,10 @@ public class ServiceException extends BaseException{
 		super(msg);
 	}
 
+	private ServiceException(Integer code,String msg) {
+		super(code,msg);
+	}
+
 	private ServiceException(String message, Throwable cause) {
 		super(message, cause);
 	}
@@ -38,6 +42,10 @@ public class ServiceException extends BaseException{
 
 	public static ServiceException newInstance(String msg){
 		return new ServiceException(msg);
+	}
+
+	public static ServiceException newInstance(Integer code,String msg){
+		return new ServiceException(code,msg);
 	}
 
 	public static ServiceException find(Throwable t){

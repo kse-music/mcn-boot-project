@@ -2,6 +2,7 @@ package cn.hiboot.mcn.core.model.result;
 
 import cn.hiboot.mcn.core.exception.BaseException;
 import cn.hiboot.mcn.core.exception.ErrorMsg;
+import cn.hiboot.mcn.core.exception.ExceptionKeys;
 import cn.hiboot.mcn.core.exception.ServiceException;
 import cn.hiboot.mcn.core.model.HttpTime;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -130,7 +131,7 @@ public class RestResp<T> implements HttpTime {
 	public T remoteData(BiFunction<Integer,String,T> errorFunction){
 		if(isFailed()){
 			if(errorFunction == null){
-				throw ServiceException.newInstance(getErrorInfo());
+				throw ServiceException.newInstance(ExceptionKeys.REMOTE_SERVICE_ERROR,getErrorInfo());
 			}
 			setData(errorFunction.apply(getErrorCode(), getErrorInfo()));
 		}
