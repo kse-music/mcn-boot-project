@@ -10,12 +10,12 @@ import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 
 /**
- * HttpUtils
+ * ResponseUtils
  *
  * @author DingHao
  * @since 2023/1/20 23:27
  */
-public class HttpUtils {
+public class ResponseUtils {
 
     public static <T> void success(T data, HttpServletResponse response) throws IOException {
         write(new RestResp<>(data),response);
