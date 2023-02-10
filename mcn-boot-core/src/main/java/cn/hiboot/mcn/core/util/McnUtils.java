@@ -14,7 +14,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.Temporal;
+import java.time.temporal.TemporalAccessor;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.function.BooleanSupplier;
@@ -28,6 +30,52 @@ import java.util.zip.ZipFile;
  * @since 2018/12/22 13:23
  */
 public abstract class McnUtils {
+    private static final DateTimeFormatter PATTERN_1 = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static final DateTimeFormatter PATTERN_2 = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+    public static String formatNowDate() {
+        return localDateToString(LocalDate.now());
+    }
+
+    public static String formatNowDateTime() {
+        return localDateTimeToString(LocalDateTime.now());
+    }
+
+    public static String localDateToString(LocalDate date) {
+        return formatToString(date,true);
+    }
+
+    public static String localDateTimeToString(LocalDateTime dateTime) {
+        return formatToString(dateTime,false);
+    }
+
+    private static String formatToString(TemporalAccessor date,boolean isDate) {
+        return isDate ? PATTERN_2.format(date) : PATTERN_1.format(date);
+    }
+
+    public static LocalDate stringToLocalDate(String dateString) {
+        return LocalDate.from(PATTERN_2.parse(dateString));
+    }
+
+    public static LocalDateTime stringToLocalDateTime(String dateTimeString) {
+        return LocalDateTime.from(PATTERN_1.parse(dateTimeString));
+    }
+
+    public static long localDateToEpochMilli(LocalDate localDate) {
+        return localDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
+    }
+
+    public static long localDateTimeToEpochMilli(LocalDateTime localDateTime) {
+        return localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+    }
+
+    public static String millToString(Long mill){
+        return PATTERN_1.format(LocalDateTime.ofInstant(Instant.ofEpochMilli(mill), ZoneId.systemDefault()));
+    }
+
+    public static String dateToString(Date date){
+        return PATTERN_1.format(LocalDateTime.ofInstant(Instant.ofEpochMilli(date.getTime()),ZoneId.systemDefault()));
+    }
 
     public static LocalDateTime dateToLocalDateTime(Date date) {
         return LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
