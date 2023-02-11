@@ -74,7 +74,7 @@ public abstract class McnUtils {
     }
 
     public static String dateToString(Date date){
-        return PATTERN_1.format(LocalDateTime.ofInstant(Instant.ofEpochMilli(date.getTime()),ZoneId.systemDefault()));
+        return millToString(date.getTime());
     }
 
     public static LocalDateTime dateToLocalDateTime(Date date) {
@@ -82,7 +82,7 @@ public abstract class McnUtils {
     }
 
     public static LocalDate dateToLocalDate(Date date) {
-        return LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault()).toLocalDate();
+        return dateToLocalDateTime(date).toLocalDate();
     }
 
     public static Date localDateToDate(LocalDate localDate) {
