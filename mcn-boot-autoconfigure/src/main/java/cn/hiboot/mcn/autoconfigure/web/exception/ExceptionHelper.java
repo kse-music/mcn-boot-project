@@ -135,7 +135,9 @@ public class ExceptionHelper {
         RestResp<Object> resp = RestResp.error(code, msg);
         if(McnUtils.isNotNullAndEmpty(data)){
             if(properties.isValidateResultToErrorInfo()){
-                resp.setErrorInfo(data.get(0).toString());
+                ValidationErrorBean validationErrorBean = data.get(0);
+                String message = validationErrorBean.getMessage();
+                resp.setErrorInfo(properties.isAppendField() ? validationErrorBean.getPath().concat(message) : message);
             }
             if(properties.isReturnValidateResult()){//设置参数校验具体错误数据信息
                 resp.setData(data);
