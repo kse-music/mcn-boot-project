@@ -24,6 +24,10 @@ public class GlobalExceptionProperties {
      */
     private boolean validateResultToErrorInfo = true;
     /**
+     * 是否将校验字段名附在消息上
+     */
+    private boolean appendField = false;
+    /**
      * 指定全局异常处理的顺序
      */
     private int order = Integer.MAX_VALUE;
@@ -61,6 +65,14 @@ public class GlobalExceptionProperties {
 
     public void setValidateResultToErrorInfo(boolean validateResultToErrorInfo) {
         this.validateResultToErrorInfo = validateResultToErrorInfo;
+    }
+
+    public boolean isAppendField() {
+        return appendField;
+    }
+
+    public void setAppendField(boolean appendField) {
+        this.appendField = appendField;
     }
 
     public int getOrder() {

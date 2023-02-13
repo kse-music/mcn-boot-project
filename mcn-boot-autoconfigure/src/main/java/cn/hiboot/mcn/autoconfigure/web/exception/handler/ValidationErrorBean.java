@@ -56,8 +56,4 @@ public class ValidationErrorBean {
         this.invalidValue = invalidValue;
     }
 
-    @Override
-    public String toString() {
-        return path + "" + message;
-    }
 }
