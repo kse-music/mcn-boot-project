@@ -10,6 +10,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  */
 @ConfigurationProperties("mongo")
 public class MongoExtensionProperties {
+    private boolean autoPojo;
 
     /**
      * 读取偏好设置
@@ -23,6 +24,14 @@ public class MongoExtensionProperties {
     private Pool pool = new Pool();
 
     private Socket socket = new Socket();
+
+    public boolean isAutoPojo() {
+        return autoPojo;
+    }
+
+    public void setAutoPojo(boolean autoPojo) {
+        this.autoPojo = autoPojo;
+    }
 
     public ReadPreference getReadPreference() {
         return readPreference;

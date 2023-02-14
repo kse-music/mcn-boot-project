@@ -1,9 +1,12 @@
 package cn.hiboot.mcn.autoconfigure.mongo;
 
+import com.mongodb.MongoClientSettings;
 import com.mongodb.ReadConcern;
 import com.mongodb.ReadPreference;
 import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoClient;
+import org.bson.codecs.configuration.CodecRegistries;
+import org.bson.codecs.pojo.PojoCodecProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -64,6 +67,11 @@ public class MongoExtensionAutoConfiguration {
                 socket.connectTimeout(mongo.getSocket().getConnectTimeout(),TimeUnit.MILLISECONDS);
                 socket.readTimeout(mongo.getSocket().getReadTimeout(),TimeUnit.MILLISECONDS);
             });
+
+            if(mongo.isAutoPojo()){
+                builder.codecRegistry(CodecRegistries.fromRegistries(MongoClientSettings.getDefaultCodecRegistry(),
+                        CodecRegistries.fromProviders(PojoCodecProvider.builder().automatic(true).build())));
+            }
 
         };
     }
