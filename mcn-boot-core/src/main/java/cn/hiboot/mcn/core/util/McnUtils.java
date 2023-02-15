@@ -42,15 +42,23 @@ public abstract class McnUtils {
     }
 
     public static String localDateToString(LocalDate date) {
-        return formatToString(date,true);
+        return localDateToString(date,1);
+    }
+
+    public static String localDateToString(LocalDate date,int mod) {
+        return formatToString(date,mod);
     }
 
     public static String localDateTimeToString(LocalDateTime dateTime) {
-        return formatToString(dateTime,false);
+        return formatToString(dateTime,1);
     }
 
-    private static String formatToString(TemporalAccessor date,boolean isDate) {
-        return isDate ? PATTERN_2.format(date) : PATTERN_1.format(date);
+    public static String localDateTimeToString(LocalDateTime dateTime,int mod) {
+        return formatToString(dateTime,mod);
+    }
+
+    private static String formatToString(TemporalAccessor date,int mod) {
+        return (mod == 2 ? PATTERN_2 :PATTERN_1).format(date);
     }
 
     public static LocalDate stringToLocalDate(String dateString) {
@@ -70,11 +78,19 @@ public abstract class McnUtils {
     }
 
     public static String millToString(Long mill){
-        return PATTERN_1.format(LocalDateTime.ofInstant(Instant.ofEpochMilli(mill), ZoneId.systemDefault()));
+        return millToString(mill,1);
+    }
+
+    public static String millToString(Long mill,int mod){
+        return formatToString(LocalDateTime.ofInstant(Instant.ofEpochMilli(mill), ZoneId.systemDefault()),mod);
     }
 
     public static String dateToString(Date date){
-        return millToString(date.getTime());
+        return dateToString(date,1);
+    }
+
+    public static String dateToString(Date date,int mod){
+        return millToString(date.getTime(),mod);
     }
 
     public static LocalDateTime dateToLocalDateTime(Date date) {
