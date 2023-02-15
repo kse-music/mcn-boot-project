@@ -10,7 +10,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  */
 @ConfigurationProperties("mongo")
 public class MongoExtensionProperties {
-    private boolean autoPojo;
+    private boolean autoPojo = true;
 
     /**
      * 读取偏好设置
