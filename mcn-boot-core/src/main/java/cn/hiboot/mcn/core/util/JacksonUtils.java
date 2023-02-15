@@ -49,20 +49,32 @@ public abstract class JacksonUtils {
         }
     }
 
-    public static <T> T fromJson(String json, TypeReference<T> reference) {
+    public static <T> T fromJson(Object content, Class<T> clazz){
+        return fromJson(toJson(content),clazz);
+    }
+
+    public static <T> T fromJson(String content, TypeReference<T> reference) {
         try {
-            return getObjectMapper().readValue(json, reference);
+            return getObjectMapper().readValue(content, reference);
         } catch (Exception e) {
             throw newInstance(e);
         }
     }
 
-    public static <T> T fromJson(String json, JavaType javaType) {
+    public static <T> T fromJson(Object content, TypeReference<T> reference){
+        return fromJson(toJson(content),reference);
+    }
+
+    public static <T> T fromJson(String content, JavaType javaType) {
         try {
-            return getObjectMapper().readValue(json, javaType);
+            return getObjectMapper().readValue(content, javaType);
         } catch (Exception e) {
             throw newInstance(e);
         }
+    }
+
+    public static <T> T fromJson(Object content, JavaType javaType){
+        return fromJson(toJson(content),javaType);
     }
 
     public static <T> List<T> fromList(String content,Class<T> clazz){
