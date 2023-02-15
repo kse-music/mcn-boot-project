@@ -41,60 +41,52 @@ public abstract class JacksonUtils {
         return getObjectMapper().getTypeFactory();
     }
 
-    public static <T> T fromJson(String content, Class<T> clazz){
+    private static String valueString(Object content){
+        return content instanceof String ? (String) content : toJson(content);
+    }
+
+    public static <T> T fromJson(Object content, Class<T> clazz){
         try {
-            return getObjectMapper().readValue(content,clazz);
+            return getObjectMapper().readValue(valueString(content),clazz);
         } catch (JsonProcessingException e) {
             throw newInstance(e);
         }
     }
 
-    public static <T> T fromJson(Object content, Class<T> clazz){
-        return fromJson(toJson(content),clazz);
-    }
-
     public static <T> T fromJson(String content, TypeReference<T> reference) {
         try {
-            return getObjectMapper().readValue(content, reference);
-        } catch (Exception e) {
-            throw newInstance(e);
-        }
-    }
-
-    public static <T> T fromJson(Object content, TypeReference<T> reference){
-        return fromJson(toJson(content),reference);
-    }
-
-    public static <T> T fromJson(String content, JavaType javaType) {
-        try {
-            return getObjectMapper().readValue(content, javaType);
+            return getObjectMapper().readValue(valueString(content), reference);
         } catch (Exception e) {
             throw newInstance(e);
         }
     }
 
     public static <T> T fromJson(Object content, JavaType javaType){
-        return fromJson(toJson(content),javaType);
+        try {
+            return getObjectMapper().readValue(valueString(content), javaType);
+        } catch (Exception e) {
+            throw newInstance(e);
+        }
     }
 
-    public static <T> List<T> fromList(String content,Class<T> clazz){
-        return fromJson(content,getTypeFactory().constructCollectionType(List.class, clazz));
+    public static <T> List<T> fromList(Object content,Class<T> clazz){
+        return fromJson(valueString(content),getTypeFactory().constructCollectionType(List.class, clazz));
     }
 
-    public static List<Map<String,Object>> fromListMap(String content){
-        return fromJson(content,getTypeFactory().constructCollectionType(List.class,Map.class));
+    public static List<Map<String,Object>> fromListMap(Object content){
+        return fromJson(valueString(content),getTypeFactory().constructCollectionType(List.class,Map.class));
     }
 
-    public static <K, V> List<Map<K,V>> fromListMap(String content,Class<K> keyClass,Class<V> valueClass){
-        return fromJson(content,getTypeFactory().constructCollectionType(List.class,getTypeFactory().constructMapType(Map.class,keyClass,valueClass)));
+    public static <K, V> List<Map<K,V>> fromListMap(Object content,Class<K> keyClass,Class<V> valueClass){
+        return fromJson(valueString(content),getTypeFactory().constructCollectionType(List.class,getTypeFactory().constructMapType(Map.class,keyClass,valueClass)));
     }
 
-    public static Map<String, Object> fromMap(String content){
-        return fromJson(content,new TypeReference<Map<String, Object>>(){});
+    public static Map<String, Object> fromMap(Object content){
+        return fromJson(valueString(content),new TypeReference<Map<String, Object>>(){});
     }
 
-    public static <K,V> Map<K, V> fromMap(String content,Class<K> keyClass,Class<V> valueClass){
-        return fromJson(content,getTypeFactory().constructMapType(Map.class,keyClass,valueClass));
+    public static <K,V> Map<K, V> fromMap(Object content,Class<K> keyClass,Class<V> valueClass){
+        return fromJson(valueString(content),getTypeFactory().constructMapType(Map.class,keyClass,valueClass));
     }
 
     public static String toJson(Object value){
