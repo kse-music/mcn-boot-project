@@ -94,6 +94,28 @@ public abstract class McnUtils {
     }
 
     /**
+     * 近几天
+     * @param days 1
+     * @return firstDate endDate
+     */
+    public static Pair<Date,Date> lastDay(int days){
+        LocalDateTime now = LocalDateTime.now();
+        return Pair.with(Date.from(now.withHour(0).withMinute(0).withSecond(0).minusDays(days).atZone(ZoneId.systemDefault()).toInstant())
+                ,Date.from(now.withHour(23).withMinute(59).withSecond(59).atZone(ZoneId.systemDefault()).toInstant()));
+    }
+
+    /**
+     * 未来几天
+     * @param days 1
+     * @return firstDate endDate
+     */
+    public static Pair<Date,Date> nextDay(int days){
+        LocalDateTime now = LocalDateTime.now();
+        return Pair.with(Date.from(now.withHour(0).withMinute(0).withSecond(0).atZone(ZoneId.systemDefault()).toInstant())
+                ,Date.from(now.withHour(23).withMinute(59).withSecond(59).plusDays(days).atZone(ZoneId.systemDefault()).toInstant()));
+    }
+
+    /**
      * 获取一周的第一天和最后一天的日期时间
      * @param week 0:当前周,-1:上一周,1:下一周
      * @return firstDate endDate
