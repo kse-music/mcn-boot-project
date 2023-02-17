@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.ObjectUtils;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -112,26 +111,15 @@ public class ExceptionHelper {
                 errorCode = error;
             }
         }
-        String errorInfo = null;
-        if(properties.isUniformExMsg()){
-            if(errorCode == DEFAULT_ERROR_CODE){
-                errorCode = ExceptionKeys.SERVICE_ERROR;
-            }
-            errorInfo = ErrorMsg.getErrorMsg(errorCode);
-        }
-        return buildErrorMessage(errorCode,errorInfo,data,exception);
+        return buildErrorMessage(errorCode,data,exception);
     }
 
-    private RestResp<Object> buildErrorMessage(Integer code,String msg,List<ValidationErrorBean> data,Throwable t){
-        if(ObjectUtils.isEmpty(msg)){//这里的消息可能是重写后的
-            msg = t.getMessage();//1.take msg from exception
-            if(ObjectUtils.isEmpty(msg)){
-                msg = ErrorMsg.getErrorMsg(code);//2.take msg from code
-                if(ObjectUtils.isEmpty(msg) && code != DEFAULT_ERROR_CODE && code != BaseException.DEFAULT_ERROR_CODE){
-                    log.warn("please set code = {} exception message", code);//3.log no exception message
-                }
-            }
-        }
+    private Integer getErrorCode(Integer errorCode){
+        return errorCode == DEFAULT_ERROR_CODE ? ExceptionKeys.SERVICE_ERROR : errorCode;
+    }
+
+    private RestResp<Object> buildErrorMessage(Integer code,List<ValidationErrorBean> data,Throwable t){
+        String msg = properties.isFromErrorCode() ? ErrorMsg.getErrorMsg(getErrorCode(code)) : t.getMessage();
         RestResp<Object> resp = RestResp.error(code, msg);
         if(McnUtils.isNotNullAndEmpty(data)){
             if(properties.isValidateResultToErrorInfo()){

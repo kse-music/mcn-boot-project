@@ -2,6 +2,8 @@ package cn.hiboot.mcn.autoconfigure.web.exception.handler;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.util.Map;
+
 /**
  * GlobalExceptionProperties
  *
@@ -33,13 +35,15 @@ public class GlobalExceptionProperties {
     private int order = Integer.MAX_VALUE;
 
     /**
-     * 是否返回统一异常消息
+     * 是否优先从errorCode中获取消息
      */
-    private boolean uniformExMsg;
+    private boolean fromErrorCode;
     /**
      * 是否允许重写内部异常消息
      */
     private boolean overrideExMsg;
+
+    private Map<Integer,String> errorCodeMsg;
 
     private JvmError jvmError;
 
@@ -83,12 +87,12 @@ public class GlobalExceptionProperties {
         this.order = order;
     }
 
-    public boolean isUniformExMsg() {
-        return uniformExMsg;
+    public boolean isFromErrorCode() {
+        return fromErrorCode;
     }
 
-    public void setUniformExMsg(boolean uniformExMsg) {
-        this.uniformExMsg = uniformExMsg;
+    public void setFromErrorCode(boolean fromErrorCode) {
+        this.fromErrorCode = fromErrorCode;
     }
 
     public boolean isOverrideExMsg() {
@@ -97,6 +101,14 @@ public class GlobalExceptionProperties {
 
     public void setOverrideExMsg(boolean overrideExMsg) {
         this.overrideExMsg = overrideExMsg;
+    }
+
+    public Map<Integer, String> getErrorCodeMsg() {
+        return errorCodeMsg;
+    }
+
+    public void setErrorCodeMsg(Map<Integer, String> errorCodeMsg) {
+        this.errorCodeMsg = errorCodeMsg;
     }
 
     public JvmError getJvmError() {
