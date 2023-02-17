@@ -162,7 +162,7 @@ public class ExceptionHelper {
     }
 
     public static RestResp<Object> error(String msg){
-        return RestResp.error(DEFAULT_ERROR_CODE, msg);
+        return RestResp.error(ExceptionKeys.REMOTE_SERVICE_ERROR, msg);
     }
 
     public interface CustomHandler{
