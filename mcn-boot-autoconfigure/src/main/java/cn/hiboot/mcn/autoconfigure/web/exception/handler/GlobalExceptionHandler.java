@@ -5,11 +5,8 @@ import cn.hiboot.mcn.autoconfigure.web.exception.ExceptionPostProcessor;
 import cn.hiboot.mcn.autoconfigure.web.exception.ExceptionResolver;
 import cn.hiboot.mcn.autoconfigure.web.exception.GenericExceptionResolver;
 import cn.hiboot.mcn.autoconfigure.web.exception.error.GlobalExceptionViewResolver;
-import cn.hiboot.mcn.core.exception.BaseException;
-import cn.hiboot.mcn.core.exception.ErrorMsg;
 import cn.hiboot.mcn.core.exception.ExceptionKeys;
 import cn.hiboot.mcn.core.model.result.RestResp;
-import cn.hiboot.mcn.core.util.McnUtils;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -84,12 +81,6 @@ public class GlobalExceptionHandler implements EnvironmentAware, ApplicationCont
             if (resp == null) {
                 continue;
             }
-            if(properties.isUniformExMsg()){
-                String errorMsg = ErrorMsg.getErrorMsg(resp.getErrorCode());
-                if(McnUtils.isNotNullAndEmpty(errorMsg)){
-                    resp.setErrorInfo(errorMsg);
-                }
-            }
             break;
         }
         if(Objects.isNull(resp)){
@@ -107,7 +98,7 @@ public class GlobalExceptionHandler implements EnvironmentAware, ApplicationCont
             resp = RestResp.error(rs.getErrorCode(),rs.getErrorInfo());
         }
         if(properties.isOverrideExMsg()){
-            String message = exceptionMessageOverride(resp.getErrorCode());
+            String message = properties.getErrorCodeMsg().get(resp.getErrorCode());
             if(Objects.nonNull(message)){
                 resp.setErrorInfo(message);
             }
@@ -180,24 +171,6 @@ public class GlobalExceptionHandler implements EnvironmentAware, ApplicationCont
             return code;
         }
         throw exception;
-    }
-
-    private String exceptionMessageOverride(int errorCode) {
-        switch (errorCode){
-            case ExceptionKeys.PARAM_PARSE_ERROR:
-            case ExceptionKeys.JSON_PARSE_ERROR:
-            case ExceptionKeys.PARAM_TYPE_ERROR:
-            case ExceptionKeys.SPECIAL_SYMBOL_ERROR:
-                return "您输入的数据有误，请重新输入";
-            case ExceptionKeys.HTTP_ERROR_500:
-            case ExceptionKeys.HTTP_ERROR_503:
-            case ExceptionKeys.SERVICE_ERROR:
-            case ExceptionHelper.DEFAULT_ERROR_CODE:
-            case BaseException.DEFAULT_ERROR_CODE:
-                return "系统繁忙，请稍候再试";
-            default:
-                return null;
-        }
     }
 
     @Override
