@@ -19,7 +19,7 @@ public abstract class ErrorMsg {
     static {
         errMsgProp = new ArrayList<>(4);
         errMsgProp.add(McnUtils.loadProperties("error-msg.properties"));
-        errMsgProp.add(McnUtils.loadProperties("mcn-error-msg.properties"));
+        errMsgProp.add(McnUtils.loadProperties("mcn-error-msg.properties",ErrorMsg.class));
     }
 
     public static String getErrorMsg(Integer code){

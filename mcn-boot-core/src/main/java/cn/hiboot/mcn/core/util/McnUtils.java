@@ -266,6 +266,16 @@ public abstract class McnUtils {
         return properties;
     }
 
+    public static Properties loadProperties(String fileName,Class<?> clazz){
+        Properties properties = new Properties();
+        try(InputStream in = clazz.getResourceAsStream(fileName)){
+            properties.load(in);
+        }catch (Exception e) {
+            //ignore not found file
+        }
+        return properties;
+    }
+
     public static String randomUUID(){
         return UUID.randomUUID().toString();
     }
