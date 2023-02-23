@@ -25,7 +25,7 @@ public interface BaseService<T,PK,R extends BaseRepository<T,PK>> {
         return getRepository().save( data );
     }
 
-    default List<T> saveAll(Iterable<T> data){
+    default List<T> saveAll(List<T> data){
         return getRepository().saveAll( data );
     }
 
