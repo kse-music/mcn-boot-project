@@ -30,6 +30,7 @@ import java.util.zip.ZipFile;
  * @since 2018/12/22 13:23
  */
 public abstract class McnUtils {
+
     private static final DateTimeFormatter PATTERN_1 = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private static final DateTimeFormatter PATTERN_2 = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
@@ -197,26 +198,8 @@ public abstract class McnUtils {
         return !isNullOrEmpty(obj);
     }
 
-    public static String dealUrlPath(String path) {
-        if(path == null || path.isEmpty()){
-            return "";
-        }
-        while (path.contains("//")){
-            path = path.replace("//","/");
-        }
-        if(!path.startsWith("/")){
-            path = "/" + path;
-        }
-        if(path.endsWith("/")){
-            path = path.substring(0, path.lastIndexOf("/"));
-        }else if(path.endsWith("/*")){
-            path = path.substring(0, path.lastIndexOf("/*"));
-        }
-        return path;
-    }
-
     public static String getExtName(String fileName){
-        if(fileName == null){
+        if(isNullOrEmpty(fileName)){
             return "";
         }
         int i = fileName.lastIndexOf(".");
