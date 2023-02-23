@@ -19,21 +19,13 @@ public interface SessionHolder {
     String USER_NAME = "user_name";
 
     static String getUserId() {
-        return get("userId");
-    }
-
-    static String get(String userIdKey) {
-        Object userId = getUser().get(userIdKey);
-        return userId == null ? null : userId.toString();
+        Object value = getUser().get("userId");
+        return value == null ? null : value.toString();
     }
 
     static Map<String, Object> getUser() {
-        return getUser(USER_NAME);
-    }
-
-    static Map<String, Object> getUser(String userNameKey) {
         Jwt jwt = getJwtToken();
-        return jwt == null ? Collections.emptyMap() : jwt.getClaimAsMap(userNameKey);
+        return jwt == null ? Collections.emptyMap() : jwt.getClaimAsMap(USER_NAME);
     }
 
     static Map<String, Object> getClaims() {
@@ -42,11 +34,11 @@ public interface SessionHolder {
     }
 
     static String getBearerToken() {
-        String token = getToken();
+        String token = getJwtTokenString();
         return token == null ? null : BEARER_PREFIX.concat(token);
     }
 
-    static String getToken() {
+    static String getJwtTokenString() {
         Jwt jwt = getJwtToken();
         return jwt == null ? null : jwt.getTokenValue();
     }
