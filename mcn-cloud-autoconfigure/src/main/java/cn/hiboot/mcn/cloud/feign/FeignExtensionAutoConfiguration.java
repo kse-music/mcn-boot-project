@@ -1,8 +1,9 @@
 package cn.hiboot.mcn.cloud.feign;
 
 import cn.hiboot.mcn.autoconfigure.web.filter.common.NameValueProcessorJacksonConfig;
-import cn.hiboot.mcn.cloud.security.SessionHolder;
-import feign.*;
+import feign.Feign;
+import feign.FeignException;
+import feign.Response;
 import feign.codec.Decoder;
 import feign.codec.ErrorDecoder;
 import feign.optionals.OptionalDecoder;
@@ -16,8 +17,6 @@ import org.springframework.cloud.openfeign.support.SpringDecoder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.security.authentication.DefaultAuthenticationEventPublisher;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -32,23 +31,6 @@ import java.lang.reflect.Type;
 @ConditionalOnClass(Feign.class)
 @Import(FeignInterceptorConfiguration.class)
 public class FeignExtensionAutoConfiguration {
-
-
-    @Configuration(proxyBeanMethods = false)
-    @ConditionalOnClass({DefaultAuthenticationEventPublisher.class,JwtAuthenticationToken.class})
-    protected static class FeignRequestInterceptor implements RequestInterceptor {
-
-        private static final String TOKEN_TYPE = "Bearer ";
-        private static final String AUTHORIZATION = "Authorization";
-
-        @Override
-        public void apply(RequestTemplate requestTemplate) {
-            String authorization = SessionHolder.getToken();
-            if (authorization != null) {
-                requestTemplate.header(AUTHORIZATION, TOKEN_TYPE.concat(authorization));
-            }
-        }
-    }
 
     @Configuration(proxyBeanMethods = false)
     @ConditionalOnClass(ErrorDecoder.class)

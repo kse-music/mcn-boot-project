@@ -2,17 +2,13 @@ package cn.hiboot.mcn.cloud.feign;
 
 import cn.hiboot.mcn.autoconfigure.web.filter.common.NameValueProcessorJacksonConfig;
 import cn.hiboot.mcn.autoconfigure.web.filter.integrity.DataIntegrityUtils;
-import cn.hiboot.mcn.cloud.security.SessionHolder;
 import cn.hiboot.mcn.core.tuples.Triplet;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.DefaultAuthenticationEventPublisher;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -62,23 +58,6 @@ public class FeignInterceptorConfiguration  {
         @Override
         public void apply(RequestTemplate template) {
             NameValueProcessorJacksonConfig.setFeignRequest();
-        }
-
-    }
-
-    @Configuration(proxyBeanMethods = false)
-    @ConditionalOnClass({DefaultAuthenticationEventPublisher.class, JwtAuthenticationToken.class})
-    private static class FeignRequestInterceptor implements RequestInterceptor {
-
-        private static final String TOKEN_TYPE = "Bearer ";
-        private static final String AUTHORIZATION = "Authorization";
-
-        @Override
-        public void apply(RequestTemplate requestTemplate) {
-            String authorization = SessionHolder.getToken();
-            if (authorization != null) {
-                requestTemplate.header(AUTHORIZATION, TOKEN_TYPE.concat(authorization));
-            }
         }
 
     }
