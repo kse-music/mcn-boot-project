@@ -57,7 +57,7 @@ public class WebSecurityAutoConfiguration {
 
     @Bean
     public ExceptionResolver<AccessDeniedException> securityExceptionResolver() {
-        return t -> RestResp.error(ExceptionKeys.HTTP_ERROR_403, t.getMessage());
+        return t -> RestResp.error(ExceptionKeys.HTTP_ERROR_403);
     }
 
 }
