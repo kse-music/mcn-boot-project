@@ -12,7 +12,16 @@ import java.util.List;
  */
 @ConfigurationProperties(prefix = "sso")
 public class ResourceServerProperties {
+    private boolean opaqueToken;
     private List<String> allowedPaths;
+
+    public boolean isOpaqueToken() {
+        return opaqueToken;
+    }
+
+    public void setOpaqueToken(boolean opaqueToken) {
+        this.opaqueToken = opaqueToken;
+    }
 
     public List<String> getAllowedPaths() {
         return allowedPaths;

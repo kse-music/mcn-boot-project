@@ -9,11 +9,13 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.security.ConditionalOnDefaultWebSecurity;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -44,16 +46,21 @@ public class ResourceServerAutoConfiguration {
     }
 
     @Bean
-    SecurityFilterChain jwtSecurityFilterChain(HttpSecurity http) throws Exception {
+    @ConditionalOnDefaultWebSecurity
+    SecurityFilterChain resourceServerSecurityFilterChain(HttpSecurity http) throws Exception {
         if (McnUtils.isNotNullAndEmpty(ssoProperties.getAllowedPaths())) {
             http.authorizeRequests().antMatchers(ssoProperties.getAllowedPaths().toArray(new String[0])).permitAll();
         }
+        OAuth2ResourceServerConfigurer<HttpSecurity> resourceServerConfigurer = http.oauth2ResourceServer()
+                .accessDeniedHandler((request, response, accessDeniedException) -> handleException(accessDeniedException,response))
+                .authenticationEntryPoint((request, response, authException) -> handleException(authException,response));
+        if(ssoProperties.isOpaqueToken()){
+            resourceServerConfigurer.opaqueToken();
+        }else {
+            resourceServerConfigurer.jwt();
+        }
         return http
                 .authorizeRequests((requests) -> requests.anyRequest().authenticated())
-                .oauth2ResourceServer(c -> c.jwt().and()
-                        .authenticationEntryPoint((request, response, authException) -> handleException(authException,response))
-                        .accessDeniedHandler((request, response, accessDeniedException) -> handleException(accessDeniedException,response))
-                )
                 .apply(new ReloadAuthenticationConfigurer()).and()
                 .build();
     }
