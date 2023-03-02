@@ -1,9 +1,10 @@
 package cn.hiboot.mcn.core.model;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * JsonArray
@@ -12,34 +13,22 @@ import java.util.Iterator;
  * @since 2023/3/2 11:14
  */
 public class JsonArray implements Iterable<JsonObject> {
-
-    private final ArrayNode arrayNode;
+    private final List<JsonObject> list;
 
     public JsonArray(JsonNode jsonNode) {
-        this.arrayNode = (ArrayNode) jsonNode;
+        list = new ArrayList<>(jsonNode.size());
+        for (JsonNode node : jsonNode) {
+            list.add(new JsonObject(node));
+        }
     }
 
     public JsonObject getJsonObject(int index){
-        return new JsonObject(arrayNode.get(index));
-    }
-
-    public JsonObject getJsonObject(String field){
-        return new JsonObject(arrayNode.get(field));
+        return list.get(index);
     }
 
     @Override
     public Iterator<JsonObject> iterator() {
-        Iterator<JsonNode> iterator = arrayNode.iterator();
-        return new Iterator<JsonObject>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
-            }
-
-            @Override
-            public JsonObject next() {
-                return new JsonObject(iterator.next());
-            }
-        };
+        return list.iterator();
     }
+
 }

@@ -1,6 +1,9 @@
 package cn.hiboot.mcn.core.model;
 
+import cn.hiboot.mcn.core.exception.ServiceException;
 import com.fasterxml.jackson.databind.JsonNode;
+
+import java.util.function.Function;
 
 /**
  * JsonObject
@@ -18,77 +21,99 @@ public class JsonObject {
     }
     
     public int getInt(){
-        return jsonNode().intValue();
+        return getValue(JsonNode::intValue);
     }
     
-    public int getInt(String field){
-        return jsonNode().at(toJsonExpr(field)).intValue();
+    public Integer getInt(String field){
+        return getValue(field, JsonNode::intValue);
     }
 
     public long getLong(){
-        return jsonNode().longValue();
+        return getValue(JsonNode::longValue);
     }
 
-    public long getLong(String field){
-        return jsonNode().at(toJsonExpr(field)).longValue();
+    public Long getLong(String field){
+        return getValue(field, JsonNode::longValue);
     }
 
     public double getDouble(){
-        return jsonNode().doubleValue();
+        return getValue(JsonNode::doubleValue);
     }
     
-    public double getDouble(String field){
-        return jsonNode().at(toJsonExpr(field)).doubleValue();
+    public Double getDouble(String field){
+        return getValue(field, JsonNode::doubleValue);
     }
 
     public short getShort(){
-        return jsonNode().shortValue();
+        return getValue(JsonNode::shortValue);
     }
     
-    public short getShort(String field){
-        return jsonNode().at(toJsonExpr(field)).shortValue();
+    public Short getShort(String field){
+        return getValue(field, JsonNode::shortValue);
     }
 
     public String getString(){
-        return jsonNode().asText();
+        return getValue(JsonNode::asText);
     }
     
     public String getString(String field){
-        return jsonNode().at(toJsonExpr(field)).asText();
+        return getValue(field, JsonNode::asText);
     }
 
     public boolean getBoolean(){
-        return jsonNode().booleanValue();
+        return getValue(JsonNode::booleanValue);
     }
     
-    public boolean getBoolean(String field){
-        return jsonNode().at(toJsonExpr(field)).booleanValue();
+    public Boolean getBoolean(String field){
+        return getValue(field, JsonNode::booleanValue);
     }
 
-    @SuppressWarnings("unchecked")
-    public <T extends Number> T readNumber(){
-        return (T) jsonNode().numberValue();
+    public Number readNumber(){
+        return getValue(JsonNode::numberValue);
     }
 
-    @SuppressWarnings("unchecked")
-    public <T extends Number> T readNumber(String field){
-        return (T) jsonNode().at(toJsonExpr(field)).numberValue();
+    public Number readNumber(String field){
+        return getValue(field, JsonNode::numberValue);
+    }
+
+
+    public JsonObject getJsonObject(){
+        return new JsonObject(currentNode());
+    }
+
+    public JsonArray getJsonArray(){
+        return new JsonArray(currentNode());
     }
 
     public JsonObject getJsonObject(String field){
-        return new JsonObject(jsonNode().with(field));
+        return new JsonObject(currentNode().with(field));
     }
 
     public JsonArray getJsonArray(String field){
-        return new JsonArray(jsonNode().withArray(field));
+        return new JsonArray(currentNode().withArray(field));
     }
 
-    private String toJsonExpr(String field){
-        return SLASH + field;
+    private <R> R getValue(String field, Function<JsonNode,R> function){
+        JsonNode node = currentNode().at(SLASH + field);
+        if(node.isMissingNode()){
+            return null;
+        }
+        return getValue(node,function);
     }
-    
-    private JsonNode jsonNode(){
-       return jsonNode;
+
+    private <R> R getValue(Function<JsonNode,R> function){
+        return getValue(currentNode(),function);
     }
-    
+
+    private <R> R getValue(JsonNode jsonNode,Function<JsonNode,R> function){
+        if(jsonNode.isValueNode()){
+            return function.apply(jsonNode);
+        }
+        throw ServiceException.newInstance("当前节点不是值节点");
+    }
+
+    private JsonNode currentNode(){
+        return jsonNode;
+    }
+
 }
