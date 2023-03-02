@@ -3,6 +3,8 @@ package cn.hiboot.mcn.core.util;
 import cn.hiboot.mcn.core.exception.ErrorMsg;
 import cn.hiboot.mcn.core.exception.ExceptionKeys;
 import cn.hiboot.mcn.core.exception.ServiceException;
+import cn.hiboot.mcn.core.model.JsonArray;
+import cn.hiboot.mcn.core.model.JsonObject;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -92,6 +94,22 @@ public abstract class JacksonUtils {
     public static String toJson(Object value){
         try {
             return getObjectMapper().writeValueAsString(value);
+        } catch (JsonProcessingException e) {
+            throw newInstance(e);
+        }
+    }
+
+    public static JsonObject jsonObject(Object content){
+        try {
+            return new JsonObject(getObjectMapper().readTree(valueString(content)));
+        } catch (JsonProcessingException e) {
+            throw newInstance(e);
+        }
+    }
+
+    public static JsonArray jsonArray(Object content){
+        try {
+            return new JsonArray(getObjectMapper().readTree(valueString(content)));
         } catch (JsonProcessingException e) {
             throw newInstance(e);
         }
