@@ -8,6 +8,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 
@@ -21,6 +22,8 @@ import java.util.Map;
  * @since 2021/7/7 21:02
  */
 public abstract class JacksonUtils {
+    private static final String DOT = ".";
+    private static final String SLASH = "/";
 
     private static ObjectMapper objectMapper;
 
@@ -92,6 +95,47 @@ public abstract class JacksonUtils {
     public static String toJson(Object value){
         try {
             return getObjectMapper().writeValueAsString(value);
+        } catch (JsonProcessingException e) {
+            throw newInstance(e);
+        }
+    }
+
+    public static int readInt(Object content,String field){
+        return readTree(content).at(toJsonExpr(field)).intValue();
+    }
+
+    public static long readLong(Object content,String field){
+        return readTree(content).at(toJsonExpr(field)).longValue();
+    }
+
+    public static double readDouble(Object content,String field){
+        return readTree(content).at(toJsonExpr(field)).doubleValue();
+    }
+
+    public static short readShort(Object content,String field){
+        return readTree(content).at(toJsonExpr(field)).shortValue();
+    }
+
+    public static String readString(Object content,String field){
+        return readTree(content).at(toJsonExpr(field)).asText();
+    }
+
+    public static boolean readBoolean(Object content,String field){
+        return readTree(content).at(toJsonExpr(field)).booleanValue();
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T extends Number> T readNumber(Object content,String field){
+        return (T) readTree(content).at(toJsonExpr(field)).numberValue();
+    }
+
+    private static String toJsonExpr(String fields){
+        return SLASH + fields.replace(DOT,SLASH);
+    }
+
+    public static JsonNode readTree(Object content){
+        try {
+            return getObjectMapper().readTree(valueString(content));
         } catch (JsonProcessingException e) {
             throw newInstance(e);
         }
