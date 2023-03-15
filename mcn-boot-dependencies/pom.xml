@@ -48,6 +48,7 @@
         <spring-boot.version>2.7.9</spring-boot.version>
         <spring-cloud.version>2021.0.5</spring-cloud.version>
         <spring-cloud-alibaba.version>2021.1</spring-cloud-alibaba.version>
+        <spring-cloud-huawei.version>1.10.10-2021.0.x</spring-cloud-huawei.version>
         <springfox-swagger.version>3.0.0</springfox-swagger.version>
         <swagger.version>1.6.4</swagger.version>
         <swagger-bootstrap-ui.version>1.9.6</swagger-bootstrap-ui.version>
@@ -76,6 +77,14 @@
                 <groupId>com.alibaba.cloud</groupId>
                 <artifactId>spring-cloud-alibaba-dependencies</artifactId>
                 <version>${spring-cloud-alibaba.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>com.huaweicloud</groupId>
+                <artifactId>spring-cloud-huawei-bom</artifactId>
+                <version>${spring-cloud-huawei.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
