@@ -23,25 +23,28 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-        <excludeGroupIds>org.projectlombok</excludeGroupIds>
+        <defaultExcludeGroupIds>org.projectlombok</defaultExcludeGroupIds>
+        <excludeGroupIds/>
     </properties>
 
     <build>
         <resources>
             <resource>
-                <directory>src/main/resources</directory>
+                <directory>${basedir}/src/main/resources</directory>
+                <filtering>true</filtering>
                 <includes>
-                    <include>**/*.*</include>
+                    <include>**/application*.yml</include>
+                    <include>**/application*.yaml</include>
+                    <include>**/application*.properties</include>
                 </includes>
-                <filtering>false</filtering>
             </resource>
             <resource>
-                <directory>src/main/java</directory>
-                <includes>
-                    <include>**/*.properties</include>
-                    <include>**/*.xml</include>
-                </includes>
-                <filtering>false</filtering>
+                <directory>${basedir}/src/main/resources</directory>
+                <excludes>
+                    <exclude>**/application*.yml</exclude>
+                    <exclude>**/application*.yaml</exclude>
+                    <exclude>**/application*.properties</exclude>
+                </excludes>
             </resource>
         </resources>
 
@@ -58,7 +61,7 @@
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-maven-plugin</artifactId>
                     <configuration>
-                        <excludeGroupIds>${excludeGroupIds}</excludeGroupIds>
+                        <excludeGroupIds>${defaultExcludeGroupIds},${excludeGroupIds}</excludeGroupIds>
                     </configuration>
                     <executions>
                         <execution>
@@ -95,7 +98,7 @@
                                 <properties>keep</properties>
                                 <pluginManagement>keep</pluginManagement>
                                 <dependencyManagement>keep</dependencyManagement>
-                                <build>remove</build>
+                                <build>keep</build>
                             </pomElements>
                         </configuration>
                     </execution>
@@ -110,21 +113,5 @@
             </plugin>
         </plugins>
     </build>
-
-    <profiles>
-        <profile>
-            <id>cse</id>
-            <dependencies>
-                <dependency>
-                    <groupId>com.huaweicloud</groupId>
-                    <artifactId>spring-cloud-starter-huawei-discovery</artifactId>
-                </dependency>
-                <dependency>
-                    <groupId>com.huaweicloud</groupId>
-                    <artifactId>spring-cloud-starter-huawei-config</artifactId>
-                </dependency>
-            </dependencies>
-        </profile>
-    </profiles>
 
 </project>
