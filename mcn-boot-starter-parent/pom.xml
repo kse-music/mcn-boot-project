@@ -111,4 +111,20 @@
         </plugins>
     </build>
 
+    <profiles>
+        <profile>
+            <id>cse</id>
+            <dependencies>
+                <dependency>
+                    <groupId>com.huaweicloud</groupId>
+                    <artifactId>spring-cloud-starter-huawei-discovery</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>com.huaweicloud</groupId>
+                    <artifactId>spring-cloud-starter-huawei-config</artifactId>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
+
 </project>
