@@ -19,7 +19,7 @@
 | mybatis-spring-boot-starter       | mybatis-spring-boot.version  |      2.2.2       |
 | minio                             | minio.version                |      8.4.6       |
 | snakeyaml                         | snakeyaml.version            |       1.33       |
-| spring-boot-dependencies          | spring-boot.version          |      2.7.8       |
+| spring-boot-dependencies          | spring-boot.version          |      2.7.10      |
 | spring-cloud-dependencies         | spring-cloud.version         |     2021.0.5     |
 | spring-cloud-alibaba-dependencies | spring-cloud-alibaba.version |      2021.1      |
 | spring-cloud-huawei-bom           | spring-cloud-huawei.version  | 1.10.10-2021.0.x |
