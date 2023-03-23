@@ -36,6 +36,7 @@
                     <include>**/application*.yml</include>
                     <include>**/application*.yaml</include>
                     <include>**/application*.properties</include>
+                    <include>**/mcn*.properties</include>
                 </includes>
             </resource>
             <resource>
