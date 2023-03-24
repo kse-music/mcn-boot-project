@@ -27,7 +27,7 @@ import springfox.documentation.schema.ScalarType;
 import springfox.documentation.service.*;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spi.service.RequestHandlerProvider;
-import springfox.documentation.spring.web.plugins.ApiSelectorBuilder;
+import springfox.documentation.spi.service.contexts.SecurityContext;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * SwaggerAutoConfiguration
@@ -94,24 +95,48 @@ public class SwaggerAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public Docket createRestApi(Environment environment) {
+    public Docket createRestApi(Environment environment, ObjectProvider<ApiKey> apiKeys) {
         Docket docket = new Docket(DocumentationType.SWAGGER_2).apiInfo(apiInfo()).enable(swagger2Properties.isEnable());
+
+        List<ApiKey> apiKeyList = apiKeys.orderedStream().collect(Collectors.toList());
+        apiKeyList.add(defaultApiKey());
+
+        configApiKey(docket, apiKeyList);
 
         docketCustomizers.ifUnique(d -> d.customize(docket));
 
         configRequestParameters(docket,environment);
 
-        for (DocketCustomizer docketCustomizer : docketCustomizers) {
-            docketCustomizer.customize(docket);
+        return docket.select().apis(DEFAULT_REQUEST_HANDLER).paths(PathSelectors.any()).build();
+    }
+
+    private ApiKey defaultApiKey() {
+        return new ApiKey("JwtToken", "Authorization", "header");
+    }
+
+    private void configApiKey(Docket docket,List<ApiKey> apiKeys) {
+        List<SecurityScheme> apiKeyList = new ArrayList<>();
+        List<SecurityReference> securityReferences = new ArrayList<>();
+        for (ApiKey apiKey : apiKeys) {
+            apiKeyList.add(apiKey);
+            securityReferences.add(defaultAuth(apiKey));
         }
+        docket.securityContexts(Collections.singletonList(securityContext(securityReferences))).securitySchemes(apiKeyList);
 
-        ApiSelectorBuilder apiSelectorBuilder = docket.select().apis(DEFAULT_REQUEST_HANDLER);
+    }
 
-        return apiSelectorBuilder.paths(PathSelectors.any()).build();
+    private SecurityContext securityContext(List<SecurityReference> securityReferences) {
+        return SecurityContext.builder().securityReferences(securityReferences).forPaths(PathSelectors.regex("/.*")).build();
+    }
+
+    private SecurityReference defaultAuth(ApiKey apiKey) {
+        AuthorizationScope authorizationScope = new AuthorizationScope("global", "accessEverything");
+        AuthorizationScope[] authorizationScopes = new AuthorizationScope[1];
+        authorizationScopes[0] = authorizationScope;
+        return new SecurityReference(apiKey.getName(), authorizationScopes);
     }
 
     private void configRequestParameters(Docket docket,Environment environment) {
-        docket.securitySchemes(Collections.singletonList(new ApiKey("BearerToken", "Authorization", "header")));
         List<RequestParameter> pars = new ArrayList<>();
         //csrf
         if(swagger2Properties.isCsrf()){
