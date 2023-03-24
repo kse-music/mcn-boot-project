@@ -99,7 +99,7 @@ public class SwaggerAutoConfiguration {
         Docket docket = new Docket(DocumentationType.SWAGGER_2).apiInfo(apiInfo()).enable(swagger2Properties.isEnable());
 
         List<ApiKey> apiKeyList = apiKeys.orderedStream().collect(Collectors.toList());
-        apiKeyList.add(defaultApiKey());
+        apiKeyList.add(new ApiKey("JwtToken", "Authorization", "header"));
 
         configApiKey(docket, apiKeyList);
 
@@ -110,26 +110,18 @@ public class SwaggerAutoConfiguration {
         return docket.select().apis(DEFAULT_REQUEST_HANDLER).paths(PathSelectors.any()).build();
     }
 
-    private ApiKey defaultApiKey() {
-        return new ApiKey("JwtToken", "Authorization", "header");
-    }
-
     private void configApiKey(Docket docket,List<ApiKey> apiKeys) {
         List<SecurityScheme> apiKeyList = new ArrayList<>();
         List<SecurityReference> securityReferences = new ArrayList<>();
         for (ApiKey apiKey : apiKeys) {
             apiKeyList.add(apiKey);
-            securityReferences.add(defaultAuth(apiKey));
+            securityReferences.add(buildSecurityReference(apiKey));
         }
-        docket.securityContexts(Collections.singletonList(securityContext(securityReferences))).securitySchemes(apiKeyList);
-
+        SecurityContext securityContext = SecurityContext.builder().securityReferences(securityReferences).forPaths(PathSelectors.regex("/.*")).build();
+        docket.securityContexts(Collections.singletonList(securityContext)).securitySchemes(apiKeyList);
     }
 
-    private SecurityContext securityContext(List<SecurityReference> securityReferences) {
-        return SecurityContext.builder().securityReferences(securityReferences).forPaths(PathSelectors.regex("/.*")).build();
-    }
-
-    private SecurityReference defaultAuth(ApiKey apiKey) {
+    private SecurityReference buildSecurityReference(ApiKey apiKey) {
         AuthorizationScope authorizationScope = new AuthorizationScope("global", "accessEverything");
         AuthorizationScope[] authorizationScopes = new AuthorizationScope[1];
         authorizationScopes[0] = authorizationScope;
