@@ -83,7 +83,7 @@ public class SwaggerAutoConfiguration {
             apiKeyList.add(apiKey);
             securityReferences.add(buildSecurityReference(apiKey));
         }
-        SecurityContext securityContext = SecurityContext.builder().securityReferences(securityReferences).forPaths(PathSelectors.regex("/.*")).build();
+        SecurityContext securityContext = SecurityContext.builder().securityReferences(securityReferences).operationSelector(p -> true).build();
         docket.securityContexts(Collections.singletonList(securityContext)).securitySchemes(apiKeyList);
     }
 
