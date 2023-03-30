@@ -31,4 +31,8 @@ public class JsonArray implements Iterable<JsonObject> {
         return list.iterator();
     }
 
+    public int size(){
+        return list.size();
+    }
+
 }
