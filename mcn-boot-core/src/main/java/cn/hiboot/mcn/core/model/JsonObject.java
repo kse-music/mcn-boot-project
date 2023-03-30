@@ -76,6 +76,9 @@ public class JsonObject {
         return getValue(field, JsonNode::numberValue);
     }
 
+    public boolean contains(String field){
+        return !getNode(field).isMissingNode();
+    }
 
     public JsonObject getJsonObject(){
         return new JsonObject(currentNode());
@@ -86,15 +89,15 @@ public class JsonObject {
     }
 
     public JsonObject getJsonObject(String field){
-        return new JsonObject(currentNode().with(field));
+        return new JsonObject(getNode(field));
     }
 
     public JsonArray getJsonArray(String field){
-        return new JsonArray(currentNode().withArray(field));
+        return new JsonArray(getNode(field));
     }
 
     private <R> R getValue(String field, Function<JsonNode,R> function){
-        JsonNode node = currentNode().at(SLASH + field);
+        JsonNode node = getNode(field);
         if(node.isMissingNode()){
             return null;
         }
@@ -114,6 +117,10 @@ public class JsonObject {
 
     private JsonNode currentNode(){
         return jsonNode;
+    }
+
+    private JsonNode getNode(String field){
+        return currentNode().at(SLASH + field);
     }
 
 }
