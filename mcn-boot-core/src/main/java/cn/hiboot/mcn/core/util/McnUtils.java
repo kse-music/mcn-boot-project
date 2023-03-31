@@ -250,6 +250,9 @@ public abstract class McnUtils {
     }
 
     public static Properties loadProperties(String fileName,Class<?> clazz){
+        if(clazz == null){
+            return loadProperties(fileName);
+        }
         Properties properties = new Properties();
         try(InputStream in = clazz.getResourceAsStream(fileName)){
             properties.load(in);

@@ -2,9 +2,8 @@ package cn.hiboot.mcn.core.exception;
 
 import cn.hiboot.mcn.core.util.McnUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * ErrorMsg
@@ -14,22 +13,20 @@ import java.util.Properties;
  */
 public abstract class ErrorMsg {
 
-    private static final List<Properties> errMsgProp;
+    private static final Map<Integer,String> errMsg;
 
     static {
-        errMsgProp = new ArrayList<>(4);
-        errMsgProp.add(McnUtils.loadProperties("error-msg.properties"));
-        errMsgProp.add(McnUtils.loadProperties("mcn-error-msg.properties",ErrorMsg.class));
+        errMsg = new HashMap<>();
+        loadProperties("error-msg.properties",null);
+        loadProperties("mcn-error-msg.properties",ErrorMsg.class);
+    }
+
+    private static void loadProperties(String fileName,Class<?> clazz){
+        McnUtils.loadProperties(fileName,clazz).forEach((k,v) -> errMsg.put(Integer.parseInt(k.toString()),v.toString()));
     }
 
     public static String getErrorMsg(Integer code){
-        for (Properties prop : errMsgProp) {
-            String propertyValue = prop.getProperty(code.toString());
-            if(propertyValue != null){
-                return propertyValue;
-            }
-        }
-        return "";
+        return errMsg.getOrDefault(code,"");
     }
 
 }
