@@ -17,8 +17,8 @@ public abstract class ErrorMsg {
 
     static {
         errMsg = new HashMap<>();
-        loadProperties("error-msg.properties",null);
         loadProperties("mcn-error-msg.properties",ErrorMsg.class);
+        loadProperties("error-msg.properties",null);
     }
 
     private static void loadProperties(String fileName,Class<?> clazz){
