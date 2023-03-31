@@ -1,7 +1,6 @@
 package cn.hiboot.mcn.autoconfigure.redis;
 
 import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
 
 /**
  * 分布式锁
@@ -9,7 +8,7 @@ import java.util.function.Supplier;
  * @author DingHao
  * @since 2021/10/21 22:47
  */
-public interface DistributedLocker{
+public interface DistributedLocker {
 
     TimeUnit DEFAULT_TIME_UNIT = TimeUnit.SECONDS;
 
@@ -17,28 +16,16 @@ public interface DistributedLocker{
 
     int DEFAULT_LEASE_TIME = 5;
 
-    default boolean tryLock(String lockKey) {
-        return tryLock(lockKey,DEFAULT_WAIT_TIME);
+    default void tryLock(String lockKey,Runnable runnable) {
+        tryLock(lockKey,DEFAULT_WAIT_TIME,runnable);
     }
 
-    default <V> V tryExecute(String lockKey, Supplier<V> supplier) {
-        return tryExecute(lockKey,DEFAULT_WAIT_TIME,supplier);
+    default void tryLock(String lockKey, int waitTime,Runnable runnable) {
+        tryLock(lockKey,waitTime,DEFAULT_LEASE_TIME,runnable);
     }
 
-    default boolean tryLock(String lockKey, int waitTime) {
-        return tryLock(lockKey,waitTime,DEFAULT_LEASE_TIME);
-    }
-
-    default <V> V tryExecute(String lockKey, int waitTime, Supplier<V> supplier) {
-        return tryExecute(lockKey,waitTime,DEFAULT_LEASE_TIME,supplier);
-    }
-
-    default boolean tryLock(String lockKey, int waitTime, int leaseTime) {
-        return tryLock(lockKey,waitTime,leaseTime,DEFAULT_TIME_UNIT);
-    }
-
-    default <V> V tryExecute(String lockKey, int waitTime, int leaseTime, Supplier<V> supplier) {
-        return tryExecute(lockKey,waitTime,leaseTime,DEFAULT_TIME_UNIT,supplier);
+    default void tryLock(String lockKey, int waitTime, int leaseTime,Runnable runnable) {
+        tryLock(lockKey,waitTime,leaseTime,DEFAULT_TIME_UNIT,runnable);
     }
 
     /**
@@ -51,15 +38,14 @@ public interface DistributedLocker{
      */
     boolean tryLock(String lockKey,int waitTime, int leaseTime, TimeUnit unit);
 
-    default <V> V tryExecute(String lockKey, int waitTime, int leaseTime, TimeUnit unit, Supplier<V> supplier) {
+    default void tryLock(String lockKey, int waitTime, int leaseTime, TimeUnit unit, Runnable runnable) {
         if(tryLock(lockKey,waitTime,leaseTime,unit)){
             try {
-                return supplier.get();
-            }finally {
+                runnable.run();
+            } finally {
                 unlock(lockKey);
             }
         }
-        return null;
     }
 
     /**
