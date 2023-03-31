@@ -125,7 +125,7 @@ public class ExceptionHelper {
     }
 
     private RestResp<Object> buildErrorMessage(Integer code,List<ValidationErrorBean> data,Throwable t){
-        String msg = properties.isFromErrorCode() ? ErrorMsg.getErrorMsg(getErrorCode(code)) : t.getMessage();
+        String msg = properties.isReturnOriginExMsg() ? t.getMessage() : ErrorMsg.getErrorMsg(getErrorCode(code));
         RestResp<Object> resp = RestResp.error(code, msg);
         if(McnUtils.isNotNullAndEmpty(data)){
             if(properties.isValidateResultToErrorInfo()){

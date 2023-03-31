@@ -35,13 +35,13 @@ public class GlobalExceptionProperties {
     private int order = Integer.MAX_VALUE;
 
     /**
-     * 是否优先从errorCode中获取消息
+     * 是否返回原始异常消息
      */
-    private boolean fromErrorCode;
+    private boolean returnOriginExMsg = true;
     /**
      * 是否允许重写内部异常消息
      */
-    private boolean overrideExMsg;
+    private boolean overrideExMsg = false;
 
     private Map<Integer,String> errorCodeMsg;
 
@@ -87,12 +87,12 @@ public class GlobalExceptionProperties {
         this.order = order;
     }
 
-    public boolean isFromErrorCode() {
-        return fromErrorCode;
+    public boolean isReturnOriginExMsg() {
+        return returnOriginExMsg;
     }
 
-    public void setFromErrorCode(boolean fromErrorCode) {
-        this.fromErrorCode = fromErrorCode;
+    public void setReturnOriginExMsg(boolean returnOriginExMsg) {
+        this.returnOriginExMsg = returnOriginExMsg;
     }
 
     public boolean isOverrideExMsg() {
