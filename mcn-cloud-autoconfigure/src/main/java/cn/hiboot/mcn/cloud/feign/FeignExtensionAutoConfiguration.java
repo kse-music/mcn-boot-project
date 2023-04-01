@@ -18,11 +18,16 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
 import org.springframework.cloud.circuitbreaker.resilience4j.Resilience4JCircuitBreakerFactory;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
+import org.springframework.cloud.openfeign.CircuitBreakerNameResolver;
+import org.springframework.cloud.openfeign.FeignAutoConfiguration;
 import org.springframework.cloud.openfeign.Targeter;
 import org.springframework.cloud.openfeign.support.HttpMessageConverterCustomizer;
 import org.springframework.cloud.openfeign.support.ResponseEntityDecoder;
 import org.springframework.cloud.openfeign.support.SpringDecoder;
-import org.springframework.context.annotation.*;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -33,11 +38,10 @@ import java.lang.reflect.Type;
  * @author DingHao
  * @since 2021/9/21 13:37
  */
-@AutoConfiguration
+@AutoConfiguration(before = FeignAutoConfiguration.class)
 @ConditionalOnClass(Feign.class)
 @Import(FeignInterceptorConfiguration.class)
 public class FeignExtensionAutoConfiguration {
-
 
     @Configuration(proxyBeanMethods = false)
     @ConditionalOnClass(Resilience4JCircuitBreakerFactory.class)
@@ -45,15 +49,10 @@ public class FeignExtensionAutoConfiguration {
     protected static class CircuitBreakerConfiguration {
 
         @Bean
-        @Scope("prototype")
-        public Feign.Builder circuitBreakerFeignBuilder() {
-            return FeignCircuitBreaker.builder();
-        }
-
-        @Bean
         public Targeter circuitBreakerFeignTargeter(CircuitBreakerFactory circuitBreakerFactory,
-                                                    @Value("${feign.circuitbreaker.group.enabled:false}") boolean circuitBreakerGroupEnabled) {
-            return new FeignCircuitBreakerTargeter(circuitBreakerFactory, circuitBreakerGroupEnabled);
+                @Value("${feign.circuitbreaker.group.enabled:false}") boolean circuitBreakerGroupEnabled,
+                CircuitBreakerNameResolver circuitBreakerNameResolver) {
+            return new FeignCircuitBreakerTargeter(circuitBreakerFactory, circuitBreakerGroupEnabled, circuitBreakerNameResolver);
         }
 
     }

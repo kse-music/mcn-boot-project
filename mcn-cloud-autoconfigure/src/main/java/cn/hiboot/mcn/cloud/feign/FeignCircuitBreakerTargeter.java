@@ -1,13 +1,16 @@
 package cn.hiboot.mcn.cloud.feign;
 
+
 import feign.Feign;
 import feign.Target;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
-import org.springframework.cloud.openfeign.FallbackFactory;
-import org.springframework.cloud.openfeign.FeignClientFactoryBean;
-import org.springframework.cloud.openfeign.FeignContext;
-import org.springframework.cloud.openfeign.Targeter;
+import org.springframework.cloud.openfeign.*;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
+
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * FeignCircuitBreakerTargeter
@@ -15,15 +18,21 @@ import org.springframework.util.StringUtils;
  * @author DingHao
  * @since 2021/7/4 10:43
  */
-public class FeignCircuitBreakerTargeter implements Targeter {
+class FeignCircuitBreakerTargeter implements Targeter {
+    private final Map<String,Method> map = new HashMap<>();
 
     private final CircuitBreakerFactory circuitBreakerFactory;
-
     private final boolean circuitBreakerGroupEnabled;
+    private final CircuitBreakerNameResolver circuitBreakerNameResolver;
 
-    public FeignCircuitBreakerTargeter(CircuitBreakerFactory circuitBreakerFactory, boolean circuitBreakerGroupEnabled) {
+
+    FeignCircuitBreakerTargeter(CircuitBreakerFactory circuitBreakerFactory, boolean circuitBreakerGroupEnabled, CircuitBreakerNameResolver circuitBreakerNameResolver) {
         this.circuitBreakerFactory = circuitBreakerFactory;
         this.circuitBreakerGroupEnabled = circuitBreakerGroupEnabled;
+        this.circuitBreakerNameResolver = circuitBreakerNameResolver;
+        for (Method method : ReflectionUtils.getDeclaredMethods(FeignCircuitBreaker.Builder.class)) {
+            map.put(method.getName(),method);
+        }
     }
 
     @Override
@@ -42,7 +51,7 @@ public class FeignCircuitBreakerTargeter implements Targeter {
         if (fallbackFactory != void.class) {
             return targetWithFallbackFactory(name, context, target, builder, fallbackFactory);
         }
-        return builder(name, builder).target(target);
+        return builder(name, builder).target(target,new GlobalFallBackFactory<>(target));
     }
 
     private <T> T targetWithFallbackFactory(String feignClientName, FeignContext context,
@@ -76,8 +85,20 @@ public class FeignCircuitBreakerTargeter implements Targeter {
     }
 
     private FeignCircuitBreaker.Builder builder(String feignClientName, FeignCircuitBreaker.Builder builder) {
-        return builder.circuitBreakerFactory(circuitBreakerFactory).feignClientName(feignClientName)
-                .circuitBreakerGroupEnabled(circuitBreakerGroupEnabled);
+        invoke(map.get("circuitBreakerFactory"), builder, circuitBreakerFactory);
+        invoke(map.get("feignClientName"), builder, feignClientName);
+        invoke(map.get("circuitBreakerGroupEnabled"), builder, circuitBreakerGroupEnabled);
+        invoke(map.get("circuitBreakerNameResolver"), builder, circuitBreakerNameResolver);
+        return builder;
+    }
+
+    private void invoke(Method method, FeignCircuitBreaker.Builder builder, Object... args){
+        ReflectionUtils.makeAccessible(method);
+        try {
+            method.invoke(builder,args);
+        } catch (Exception e) {
+            //
+        }
     }
 
 }
