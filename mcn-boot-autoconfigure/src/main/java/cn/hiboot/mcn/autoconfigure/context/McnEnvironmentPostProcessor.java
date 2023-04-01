@@ -3,6 +3,7 @@ package cn.hiboot.mcn.autoconfigure.context;
 import cn.hiboot.mcn.autoconfigure.config.ConfigProperties;
 import cn.hiboot.mcn.core.util.McnUtils;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.context.config.ConfigDataEnvironmentPostProcessor;
 import org.springframework.boot.env.EnvironmentPostProcessor;
 import org.springframework.core.Ordered;
 import org.springframework.core.env.ConfigurableEnvironment;
@@ -135,7 +136,7 @@ public class McnEnvironmentPostProcessor implements EnvironmentPostProcessor, Or
 
     @Override
     public int getOrder() {
-        return McnApplicationListener.DEFAULT_ORDER + 1;
+        return ConfigDataEnvironmentPostProcessor.ORDER + 1;
     }
 
 }

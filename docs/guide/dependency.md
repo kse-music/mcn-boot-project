@@ -21,7 +21,7 @@
 | snakeyaml                         | snakeyaml.version            |       1.33       |
 | spring-boot-dependencies          | spring-boot.version          |      2.7.10      |
 | spring-cloud-dependencies         | spring-cloud.version         |     2021.0.5     |
-| spring-cloud-alibaba-dependencies | spring-cloud-alibaba.version |      2021.1      |
+| spring-cloud-alibaba-dependencies | spring-cloud-alibaba.version |    2021.0.5.0    |
 | spring-cloud-huawei-bom           | spring-cloud-huawei.version  | 1.10.10-2021.0.x |
 | springfox-swagger2                | springfox-swagger.version    |      3.0.0       |
 | springfox-swagger-ui              | springfox-swagger.version    |      3.0.0       |
