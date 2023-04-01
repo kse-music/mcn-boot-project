@@ -16,7 +16,7 @@ public abstract class ErrorMsg {
     private static final Map<Integer,String> errMsg;
 
     static {
-        errMsg = new HashMap<>();
+        errMsg = new HashMap<>(4);
         loadProperties("mcn-error-msg.properties",ErrorMsg.class);
         loadProperties("error-msg.properties",null);
     }
