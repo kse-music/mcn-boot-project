@@ -21,7 +21,6 @@ import org.springframework.core.Ordered;
 @AutoConfigureOrder(Ordered.LOWEST_PRECEDENCE)
 @Conditional(ServiceRegisterAutoConfiguration.ServiceRegisterCondition.class)
 @Import(ServiceRegisterAutoConfiguration.ServiceRegisterConfig.class)
-@ConditionalOnNotWebApplication
 public class ServiceRegisterAutoConfiguration {
 
     static class ServiceRegisterConfig implements BeanPostProcessor {
@@ -48,6 +47,7 @@ public class ServiceRegisterAutoConfiguration {
         }
 
         @ConditionalOnClass(name = "com.huaweicloud.servicecomb.discovery.registry.ServiceCombAutoServiceRegistration")
+        @ConditionalOnNotWebApplication
         static class CseServiceEngine {
 
         }
