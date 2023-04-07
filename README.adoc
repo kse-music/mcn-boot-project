@@ -1,1 +1,1 @@
-MCN是一个基于SpringBoot和SpringCloud的一个快速构建JavaWeb系统的工具。MCN在SpringBoot的基础上提供更多的默认配置，如mybatis多数据源配置、跨域、编码等等一些SpringBoot没有的或者扩展的配置。
+MCN is a tool for quickly building JavaWeb systems based on SpringBoot and SpringCloud. MCN provides more default configurations on the basis of SpringBoot, such as mybatis multi-data source configuration, cross-domain, global exception handler etc.
