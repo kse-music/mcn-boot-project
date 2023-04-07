@@ -25,6 +25,7 @@ public class ComponentScanPackageCheck {
     private static final Set<String> PROBLEM_PACKAGES = new HashSet<>();
 
     public ComponentScanPackageCheck(){
+        PROBLEM_PACKAGES.add("cn");
         PROBLEM_PACKAGES.add("cn.hiboot");
     }
 
