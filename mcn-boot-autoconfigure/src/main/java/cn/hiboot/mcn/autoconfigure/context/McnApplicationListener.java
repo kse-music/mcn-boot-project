@@ -1,6 +1,7 @@
 package cn.hiboot.mcn.autoconfigure.context;
 
 import cn.hiboot.mcn.autoconfigure.bootstrap.LogFileChecker;
+import cn.hiboot.mcn.core.util.McnUtils;
 import cn.hiboot.mcn.core.util.SpringBeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,8 +16,13 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.PropertySource;
+import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
+
+import java.net.URL;
+import java.net.URLClassLoader;
 
 /**
  * 监听器
@@ -62,6 +68,21 @@ public class McnApplicationListener implements GenericApplicationListener {
         }
         //register repeat log file checker
         event.getBootstrapContext().registerIfAbsent(LogFileChecker.class, BootstrapRegistry.InstanceSupplier.of(new LogFileChecker()));
+
+        //additional jar path
+        String jarPath = System.getProperty("mcn.jar.path");
+        if (StringUtils.hasText(jarPath)) {
+            SpringApplication application = event.getSpringApplication();
+            ResourceLoader resourceLoader = application.getResourceLoader();
+            URLClassLoader urlClassLoader;
+            URL[] urls = McnUtils.loadJar(jarPath);
+            if(resourceLoader == null || resourceLoader.getClassLoader() == null){
+                urlClassLoader = new URLClassLoader(urls);
+            }else {
+                urlClassLoader = new URLClassLoader(urls, resourceLoader.getClassLoader());
+            }
+            application.setResourceLoader(new DefaultResourceLoader(urlClassLoader));
+        }
     }
 
     private void onApplicationEnvironmentPreparedEvent(ApplicationEnvironmentPreparedEvent event) {

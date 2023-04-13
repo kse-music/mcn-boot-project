@@ -9,6 +9,8 @@ import java.beans.PropertyDescriptor;
 import java.io.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -20,6 +22,7 @@ import java.time.temporal.TemporalAccessor;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.function.BooleanSupplier;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -454,4 +457,21 @@ public abstract class McnUtils {
         }
     }
 
+    public static URL[] loadJar(String dir) {
+        List<URL> urls = new ArrayList<>();
+        try{
+            try(Stream<Path> stream = Files.walk(Paths.get(dir)).filter(f -> f.toString().endsWith(".jar"))){
+                stream.forEach(path -> {
+                    try {
+                        urls.add(path.toFile().toURI().toURL());
+                    } catch (MalformedURLException e) {
+                        //ignore
+                    }
+                });
+            }
+        }catch (IOException e){
+            //ignore
+        }
+        return urls.toArray(new URL[0]);
+    }
 }
