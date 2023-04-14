@@ -24,6 +24,8 @@ import java.time.temporal.TemporalAccessor;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.function.BooleanSupplier;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -35,7 +37,7 @@ import java.util.zip.ZipFile;
  * @since 2018/12/22 13:23
  */
 public abstract class McnUtils {
-
+    private static final String DOT = ".";
     private static final DateTimeFormatter PATTERN_1 = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private static final DateTimeFormatter PATTERN_2 = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
@@ -459,16 +461,24 @@ public abstract class McnUtils {
         }
     }
 
-    private static URL[] loadJarUrl(String dir) {
-        List<URL> urls = new ArrayList<>();
+    public static <T> List<T> loadFile(String dir, String suffix, Function<Path,T> converter) {
+        McnAssert.notNull(dir, "dir is null !");
+        McnAssert.notNull(suffix, "suffix is null !");
+        if(suffix.lastIndexOf(DOT) == -1){
+            suffix = DOT + suffix;
+        }
         try{
-            try(Stream<Path> stream = Files.walk(Paths.get(dir)).filter(f -> f.toString().toLowerCase().endsWith(".jar"))){
-                stream.forEach(path -> urls.add(getURL(path.toFile())));
+            String finalSuffix = suffix;
+            try(Stream<Path> stream = Files.walk(Paths.get(dir)).filter(f -> f.toString().toLowerCase().endsWith(finalSuffix))){
+                return stream.map(converter).collect(Collectors.toList());
             }
         }catch (IOException e){
-            //ignore
+            return Collections.emptyList();
         }
-        return urls.toArray(new URL[0]);
+    }
+
+    public static URL getURL(Path path) {
+        return getURL(path.toFile());
     }
 
     public static URL getURL(File file) {
@@ -485,7 +495,7 @@ public abstract class McnUtils {
             Method method = ReflectionUtils.findMethod(URLClassLoader.class, "addURL", URL.class);
             if (null != method) {
                 method.setAccessible(true);
-                for (URL jar : loadJarUrl(jarDir)) {
+                for (URL jar : loadFile(jarDir,".jar", McnUtils::getURL)) {
                     ReflectionUtils.invokeMethod(method, classLoader, jar);
                 }
             }
