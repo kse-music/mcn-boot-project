@@ -2,6 +2,7 @@ package cn.hiboot.mcn.core.util;
 
 import cn.hiboot.mcn.core.exception.ServiceException;
 import cn.hiboot.mcn.core.tuples.Pair;
+import org.springframework.util.ReflectionUtils;
 
 import java.beans.BeanInfo;
 import java.beans.Introspector;
@@ -9,6 +10,8 @@ import java.beans.PropertyDescriptor;
 import java.io.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
+import java.net.MalformedURLException;
+import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -20,6 +23,9 @@ import java.time.temporal.TemporalAccessor;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.function.BooleanSupplier;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -30,6 +36,7 @@ import java.util.zip.ZipFile;
  * @since 2018/12/22 13:23
  */
 public abstract class McnUtils {
+    private static final String DOT = ".";
     private static final DateTimeFormatter PATTERN_1 = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private static final DateTimeFormatter PATTERN_2 = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
@@ -469,6 +476,51 @@ public abstract class McnUtils {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static <T> List<T> loadFile(String dir, String suffix, Function<Path,T> converter) {
+        McnAssert.notNull(dir, "dir is null !");
+        McnAssert.notNull(suffix, "suffix is null !");
+        if(suffix.lastIndexOf(DOT) == -1){
+            suffix = DOT + suffix;
+        }
+        try{
+            String finalSuffix = suffix;
+            try(Stream<Path> stream = Files.walk(Paths.get(dir)).filter(f -> f.toString().toLowerCase().endsWith(finalSuffix))){
+                return stream.map(converter).collect(Collectors.toList());
+            }
+        }catch (IOException e){
+            return Collections.emptyList();
+        }
+    }
+
+    public static URL getURL(Path path) {
+        return getURL(path.toFile());
+    }
+
+    public static URL getURL(File file) {
+        McnAssert.notNull(file, "File is null !");
+        try {
+            return file.toURI().toURL();
+        } catch (MalformedURLException e) {
+            throw ServiceException.newInstance("Error occur when get URL!", e);
+        }
+    }
+
+    public static void loadJar(ClassLoader classLoader, String jarDir){
+        if(classLoader instanceof URLClassLoader){
+            Method method = ReflectionUtils.findMethod(URLClassLoader.class, "addURL", URL.class);
+            if (null != method) {
+                method.setAccessible(true);
+                for (URL jar : loadFile(jarDir,".jar", McnUtils::getURL)) {
+                    ReflectionUtils.invokeMethod(method, classLoader, jar);
+                }
+            }
+        }
+    }
+
+    public static void loadJarToSystemClassLoader(String jarDir) {
+        loadJar(ClassLoader.getSystemClassLoader(), jarDir);
     }
 
 }
