@@ -1,7 +1,6 @@
 package cn.hiboot.mcn.autoconfigure.web.exception.handler;
 
 import cn.hiboot.mcn.autoconfigure.web.exception.ExceptionHelper;
-import cn.hiboot.mcn.autoconfigure.web.exception.ExceptionPostProcessor;
 import cn.hiboot.mcn.autoconfigure.web.exception.ExceptionResolver;
 import cn.hiboot.mcn.autoconfigure.web.exception.GenericExceptionResolver;
 import cn.hiboot.mcn.autoconfigure.web.exception.error.GlobalExceptionViewResolver;
@@ -32,9 +31,12 @@ import org.springframework.web.util.NestedServletException;
 import javax.servlet.ServletException;
 import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * global exception handler
@@ -44,7 +46,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler implements EnvironmentAware, ApplicationContextAware, Ordered {
-    private static final Map<Class<?>, ExceptionResolver<Throwable>> exceptionTypeCache = new ConcurrentHashMap<>();
+    private static final Map<Class<?>, List<ExceptionResolver<Throwable>>> exceptionResolverCache = new ConcurrentHashMap<>();
     private static final Map<Class<?>, ResolvableType> exceptionResolverTypeCache = new ConcurrentReferenceHashMap<>();
 
     private final GlobalExceptionProperties properties;
@@ -52,15 +54,11 @@ public class GlobalExceptionHandler implements EnvironmentAware, ApplicationCont
     private ExceptionHelper exceptionHelper;
 
     private final GlobalExceptionViewResolver viewResolver;
-    private final ExceptionPostProcessor<?> exceptionPostProcessor;
     private String[] exceptionResolverNames;
     private ApplicationContext applicationContext;
 
-    public GlobalExceptionHandler(GlobalExceptionProperties properties,
-                                  ObjectProvider<ExceptionPostProcessor<?>> exceptionPostProcessors,
-                                  ObjectProvider<GlobalExceptionViewResolver> globalExceptionViewResolvers) {
+    public GlobalExceptionHandler(GlobalExceptionProperties properties,ObjectProvider<GlobalExceptionViewResolver> globalExceptionViewResolvers) {
         this.properties = properties;
-        this.exceptionPostProcessor = exceptionPostProcessors.getIfUnique();
         this.viewResolver = globalExceptionViewResolvers.getIfUnique();
     }
 
@@ -71,17 +69,17 @@ public class GlobalExceptionHandler implements EnvironmentAware, ApplicationCont
             return viewResolver.view(request, exception);
         }
         RestResp<Throwable> resp = null;
-        for (String s : exceptionResolverNames) {
-            Class<? extends Throwable> exClass = exception.getClass();
-            ExceptionResolver<Throwable> exceptionResolver = exceptionTypeCache.computeIfAbsent(exClass, a -> supportsExceptionType(s, exClass));
-            if (exceptionResolver == null) {
-                continue;
-            }
+        Class<? extends Throwable> exClass = exception.getClass();
+        List<ExceptionResolver<Throwable>> exceptionResolvers = exceptionResolverCache.get(exClass);
+        if (exceptionResolvers == null) {
+            exceptionResolvers = Arrays.stream(exceptionResolverNames).map(s -> supportsExceptionType(s, exClass)).filter(Objects::nonNull).collect(Collectors.toList());
+            exceptionResolverCache.put(exClass,exceptionResolvers);
+        }
+        for (ExceptionResolver<Throwable> exceptionResolver : exceptionResolvers) {
             resp = exceptionResolver.resolveException(request, exception);
-            if (resp == null) {
-                continue;
+            if (resp != null) {
+                break;
             }
-            break;
         }
         if(Objects.isNull(resp)){
             RestResp<Object> rs = exceptionHelper.doHandleException(ex -> {
@@ -104,12 +102,6 @@ public class GlobalExceptionHandler implements EnvironmentAware, ApplicationCont
             }
         }
         exceptionHelper.logError(exception);
-        if(Objects.nonNull(exceptionPostProcessor)){
-            Object o = exceptionPostProcessor.afterHandle(request, exception, resp);
-            if(Objects.nonNull(o)){
-                return o;
-            }
-        }
         return resp;
     }
 
