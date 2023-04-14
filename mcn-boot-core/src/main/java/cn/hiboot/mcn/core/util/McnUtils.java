@@ -2,6 +2,7 @@ package cn.hiboot.mcn.core.util;
 
 import cn.hiboot.mcn.core.exception.ServiceException;
 import cn.hiboot.mcn.core.tuples.Pair;
+import org.springframework.util.ReflectionUtils;
 
 import java.beans.BeanInfo;
 import java.beans.Introspector;
@@ -11,6 +12,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -457,21 +459,41 @@ public abstract class McnUtils {
         }
     }
 
-    public static URL[] loadJar(String dir) {
+    private static URL[] loadJarUrl(String dir) {
         List<URL> urls = new ArrayList<>();
         try{
-            try(Stream<Path> stream = Files.walk(Paths.get(dir)).filter(f -> f.toString().endsWith(".jar"))){
-                stream.forEach(path -> {
-                    try {
-                        urls.add(path.toFile().toURI().toURL());
-                    } catch (MalformedURLException e) {
-                        //ignore
-                    }
-                });
+            try(Stream<Path> stream = Files.walk(Paths.get(dir)).filter(f -> f.toString().toLowerCase().endsWith(".jar"))){
+                stream.forEach(path -> urls.add(getURL(path.toFile())));
             }
         }catch (IOException e){
             //ignore
         }
         return urls.toArray(new URL[0]);
     }
+
+    public static URL getURL(File file) {
+        McnAssert.notNull(file, "File is null !");
+        try {
+            return file.toURI().toURL();
+        } catch (MalformedURLException e) {
+            throw ServiceException.newInstance("Error occur when get URL!", e);
+        }
+    }
+
+    public static void loadJar(ClassLoader classLoader, String jarDir){
+        if(classLoader instanceof URLClassLoader){
+            Method method = ReflectionUtils.findMethod(URLClassLoader.class, "addURL", URL.class);
+            if (null != method) {
+                method.setAccessible(true);
+                for (URL jar : loadJarUrl(jarDir)) {
+                    ReflectionUtils.invokeMethod(method, classLoader, jar);
+                }
+            }
+        }
+    }
+
+    public static void loadJarToSystemClassLoader(String jarDir) {
+        loadJar(ClassLoader.getSystemClassLoader(), jarDir);
+    }
+
 }
