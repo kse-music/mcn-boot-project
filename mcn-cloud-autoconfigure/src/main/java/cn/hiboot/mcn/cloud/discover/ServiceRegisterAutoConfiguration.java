@@ -6,9 +6,15 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.boot.autoconfigure.condition.*;
 import org.springframework.cloud.client.serviceregistry.AbstractAutoServiceRegistration;
+import org.springframework.context.annotation.Condition;
+import org.springframework.context.annotation.ConditionContext;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.Ordered;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.type.AnnotatedTypeMetadata;
+import org.springframework.util.ClassUtils;
+import org.springframework.web.context.WebApplicationContext;
 
 /**
  * ServiceRegisterAutoConfiguration
@@ -41,17 +47,33 @@ public class ServiceRegisterAutoConfiguration {
             super(ConfigurationPhase.PARSE_CONFIGURATION);
         }
 
-        @ConditionalOnWarDeployment
+        @ConditionalOnWebApplication
+        @Conditional(OnWarDeploymentCondition.class)
         static class WarDeploy {
 
         }
 
         @ConditionalOnClass(name = "com.huaweicloud.servicecomb.discovery.registry.ServiceCombAutoServiceRegistration")
         @ConditionalOnNotWebApplication
-        static class CseServiceEngine {
+        static class CseServiceEngine {//cse不注册上去订阅不到其它服务,nacos则不需要
 
         }
 
+    }
+
+    static class OnWarDeploymentCondition implements Condition {
+
+        @Override
+        public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+            if(ClassUtils.isPresent("org.springframework.web.context.WebApplicationContext",context.getClassLoader())){
+                ResourceLoader resourceLoader = context.getResourceLoader();
+                if (resourceLoader instanceof WebApplicationContext) {
+                    WebApplicationContext applicationContext = (WebApplicationContext) resourceLoader;
+                    return applicationContext.getServletContext() != null;
+                }
+            }
+            return false;
+        }
     }
 
 }
