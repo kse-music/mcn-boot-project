@@ -1,5 +1,10 @@
 # 更新日志
 
+## [v2.7.11] 2023.04.20
+- 升级到SpringBoot 2.7.11
+- remove ExceptionPostProcessor
+- fix custom ExceptionResolver bug
+
 ## [v2.7.10] 2023.03.23
 - 升级到SpringBoot 2.7.10
 - 添加huawei bom
