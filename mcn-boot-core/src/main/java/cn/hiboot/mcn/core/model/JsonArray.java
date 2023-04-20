@@ -37,11 +37,6 @@ public class JsonArray implements Iterable<JsonObject> {
         return this;
     }
 
-    public JsonArray remove(JsonObject jsonObject){
-        list.remove(jsonObject);
-        return this;
-    }
-
     public JsonArray remove(int index){
         list.remove(index);
         return this;
