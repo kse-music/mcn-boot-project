@@ -48,7 +48,7 @@ import java.util.stream.Collectors;
 @EnableSwagger2
 @EnableConfigurationProperties(Swagger2Properties.class)
 @ConditionalOnClass(MvcSwagger2.class)
-@ConditionalOnProperty(prefix = "swagger", name = {"enable"}, havingValue = "true")
+@ConditionalOnProperty(prefix = "swagger", name = "enable", havingValue = "true")
 public class SwaggerAutoConfiguration {
 
     private final Swagger2Properties swagger2Properties;
@@ -74,8 +74,7 @@ public class SwaggerAutoConfiguration {
 
         @Override
         public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
-            WebMvcProperties.MatchingStrategy strategy = environment.getProperty("spring.mvc.pathmatch.matching-strategy", WebMvcProperties.MatchingStrategy.class);
-            if(registry.containsBeanDefinition(BEAN_NAME) && strategy != WebMvcProperties.MatchingStrategy.ANT_PATH_MATCHER){
+            if(registry.containsBeanDefinition(BEAN_NAME) && WebMvcProperties.MatchingStrategy.ANT_PATH_MATCHER != environment.getProperty("spring.mvc.pathmatch.matching-strategy", WebMvcProperties.MatchingStrategy.class)){
                 registry.removeBeanDefinition(BEAN_NAME);
                 registry.registerBeanDefinition(BEAN_NAME,new RootBeanDefinition(WebMvcRequestHandlerProvider.class));
             }
