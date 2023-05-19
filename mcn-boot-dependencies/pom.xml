@@ -37,15 +37,15 @@
         <fastjson.version>1.2.83</fastjson.version>
         <fastjson2.version>2.0.14</fastjson2.version>
         <guava.version>31.1-jre</guava.version>
-        <hutool.version>5.8.11</hutool.version>
+        <hutool.version>5.8.18</hutool.version>
         <jsoup.version>1.15.3</jsoup.version>
         <knife4j.version>3.0.3</knife4j.version>
         <mapstruct.version>1.5.2.Final</mapstruct.version>
         <mybatis-spring-boot.version>2.2.2</mybatis-spring-boot.version>
         <mysql.version>8.0.32</mysql.version>
         <minio.version>8.4.6</minio.version>
-        <snakeyaml.version>1.33</snakeyaml.version>
-        <spring-boot.version>2.7.11</spring-boot.version>
+        <snakeyaml.version>2.0</snakeyaml.version>
+        <spring-boot.version>2.7.12</spring-boot.version>
         <spring-cloud.version>2021.0.5</spring-cloud.version>
         <spring-cloud-alibaba.version>2021.0.5.0</spring-cloud-alibaba.version>
         <spring-cloud-huawei.version>1.10.10-2021.0.x</spring-cloud-huawei.version>

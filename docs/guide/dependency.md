@@ -12,14 +12,14 @@
 | fastjson                          | fastjson.version             |      1.2.83      |
 | fastjson2                         | fastjson2.version            |      2.0.14      |
 | guava                             | guava.version                |     31.1-jre     |
-| hutool-core                       | hutool.version               |      5.8.9       |
+| hutool-bom                        | hutool.version               |      5.8.18      |
 | jsoup                             | jsoup.version                |      1.15.3      |
 | knife4j-spring-ui                 | knife4j.version              |      3.0.3       |
 | mapstruct                         | mapstruct.version            |   1.5.2.Final    |
 | mybatis-spring-boot-starter       | mybatis-spring-boot.version  |      2.2.2       |
 | minio                             | minio.version                |      8.4.6       |
-| snakeyaml                         | snakeyaml.version            |       1.33       |
-| spring-boot-dependencies          | spring-boot.version          |      2.7.11      |
+| snakeyaml                         | snakeyaml.version            |       2.0        |
+| spring-boot-dependencies          | spring-boot.version          |      2.7.12      |
 | spring-cloud-dependencies         | spring-cloud.version         |     2021.0.5     |
 | spring-cloud-alibaba-dependencies | spring-cloud-alibaba.version |    2021.0.5.0    |
 | spring-cloud-huawei-bom           | spring-cloud-huawei.version  | 1.10.10-2021.0.x |
