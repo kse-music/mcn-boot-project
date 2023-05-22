@@ -8,8 +8,6 @@ import cn.hiboot.mcn.autoconfigure.web.reactor.ServerHttpResponseUtils;
 import cn.hiboot.mcn.core.exception.ServiceException;
 import cn.hutool.core.net.URLDecoder;
 import cn.hutool.core.util.StrUtil;
-import org.apache.tomcat.util.http.fileupload.ParameterParser;
-import org.apache.tomcat.util.http.parser.HttpParser;
 import org.springframework.core.Ordered;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpMethod;
@@ -60,7 +58,6 @@ public class ReactiveDataIntegrityFilter implements WebFilter, Ordered {
             if (StrUtil.isEmpty(timestamp)) {
                 return Mono.error(ServiceException.newInstance("验证失败,无效的时间戳"));
             }
-
             if (dataIntegrityProperties.isCheckReplay()) {
                 long receiveTime = Long.parseLong(timestamp);
                 long NONCE_STR_TIMEOUT_SECONDS = dataIntegrityProperties.getTimeout().toMillis();// 判断时间是否大于 1 分钟 (防止重放攻击)
@@ -68,19 +65,18 @@ public class ReactiveDataIntegrityFilter implements WebFilter, Ordered {
                     return Mono.error(ServiceException.newInstance("验证失败,无效的时间戳"));
                 }
             }
-
             String signature = getHeader(request, "signature");// 获取签名
             if (StrUtil.isEmpty(signature)) {
                 return Mono.error(ServiceException.newInstance("验证失败,数据被篡改"));
             }
             String nonceStr = getHeader(request, "nonceStr");// 获取随机字符串
-            if (request.getMethod() == HttpMethod.POST && MediaType.APPLICATION_JSON.equals(request.getHeaders().getContentType())) {
+            if (request.getMethod() == HttpMethod.POST && MediaType.APPLICATION_JSON.isCompatibleWith(request.getHeaders().getContentType())) {
                 ServerHttpRequestDecorator decorator = new ServerHttpRequestDecorator(request) {
                     @Override
                     public Flux<DataBuffer> getBody() {
                         return super.getBody().flatMap(dataBuffer -> {
                             String str = JsonRequestHelper.getData(dataBuffer.asInputStream());
-                            if (!Objects.equals(signature, signature(timestamp, nonceStr, exchange, str))) {
+                            if (!Objects.equals(signature, signature(timestamp, nonceStr, exchange, str,null))) {
                                 return Mono.error(ServiceException.newInstance("验证失败,数据被篡改"));
                             }
                             return Flux.just(exchange.getResponse().bufferFactory().wrap(str.getBytes(StandardCharsets.UTF_8)));
@@ -89,12 +85,12 @@ public class ReactiveDataIntegrityFilter implements WebFilter, Ordered {
                 };
                 return chain.filter(exchange.mutate().request(decorator).build());
             }
-
-            // 对请求头参数进行签名
-            if (!Objects.equals(signature, signature(timestamp, nonceStr, exchange, null))) {
-                return Mono.error(ServiceException.newInstance("验证失败,数据被篡改"));
-            }
-            return Mono.empty();
+            return parseUpload(exchange).flatMap(fileInfo -> {
+                if (!Objects.equals(signature, signature(timestamp, nonceStr, exchange, null,fileInfo))) {
+                    return Mono.error(ServiceException.newInstance("验证失败,数据被篡改"));
+                }
+                return Mono.empty();
+            });
         }).switchIfEmpty(chain.filter(exchange)).onErrorResume(e -> ServerHttpResponseUtils.failed(e.getMessage(), exchange.getResponse()));
     }
 
@@ -108,29 +104,27 @@ public class ReactiveDataIntegrityFilter implements WebFilter, Ordered {
      * @param payload   json请求体
      * @return signature
      */
-    private String signature(String timestamp, String nonceStr, ServerWebExchange exchange, String payload) {
+    private String signature(String timestamp, String nonceStr, ServerWebExchange exchange, String payload,String fileInfo) {
         Map<String, Object> params = new HashMap<>();
         ServerHttpRequest request = exchange.getRequest();
         request.getQueryParams().forEach((name, value) -> params.put(name, value.get(0)));
-        String fileInfo = null;
-        if (request.getHeaders().getContentType() != null && request.getHeaders().getContentType().isCompatibleWith(MediaType.MULTIPART_FORM_DATA) && dataIntegrityProperties.isCheckUpload()) {//maybe upload
-            fileInfo = parseUpload(exchange);
-        }
         return DataIntegrityUtils.signature(timestamp, nonceStr, params, fileInfo, payload);
     }
 
-    private String parseUpload(ServerWebExchange exchange) {
-        StringBuilder rs = new StringBuilder();
-        exchange.getMultipartData().map(m -> {
-            StringBuilder str = new StringBuilder();
-            m.forEach((k,v) -> {
-                for (Part part : v) {
-                    part.content().map(DataBuffer::capacity).subscribe(l -> str.append(getSubmittedFileName(part)).append(l));
-                }
+    private Mono<String> parseUpload(ServerWebExchange exchange) {
+        ServerHttpRequest request = exchange.getRequest();
+        if (MediaType.MULTIPART_FORM_DATA.isCompatibleWith(request.getHeaders().getContentType()) && dataIntegrityProperties.isCheckUpload()) {//maybe upload
+            return exchange.getMultipartData().map(m -> {
+                StringBuilder str = new StringBuilder();
+                m.forEach((k,v) -> {
+                    for (Part part : v) {
+                        part.content().map(DataBuffer::capacity).subscribe(l -> str.append(getSubmittedFileName(part)).append(l));
+                    }
+                });
+                return str.toString();
             });
-            return str.toString();
-        }).subscribe(rs::append);
-        return rs.toString();
+        }
+        return Mono.just("");
     }
 
     public String getSubmittedFileName(Part part) {
@@ -139,19 +133,11 @@ public class ReactiveDataIntegrityFilter implements WebFilter, Ordered {
         if (cd != null) {
             String cdl = cd.toLowerCase(Locale.ENGLISH);
             if (cdl.startsWith("form-data") || cdl.startsWith("attachment")) {
-                ParameterParser paramParser = new ParameterParser();
-                paramParser.setLowerCaseNames(true);
-                Map<String, String> params = paramParser.parse(cd, ';');
-                if (params.containsKey("filename")) {
-                    fileName = params.get("filename");
-                    if (fileName != null) {
-                        if (fileName.indexOf('\\') > -1) {
-                            fileName = HttpParser.unquote(fileName.trim());
-                        } else {
-                            fileName = fileName.trim();
-                        }
-                    } else {
-                        fileName = "";
+                String[] split = cdl.split(";");
+                for (String s : split) {
+                    s = s.trim();
+                    if (s.startsWith("filename")) {
+                        fileName = s.split("=")[1].replace("\"","");
                     }
                 }
             }
