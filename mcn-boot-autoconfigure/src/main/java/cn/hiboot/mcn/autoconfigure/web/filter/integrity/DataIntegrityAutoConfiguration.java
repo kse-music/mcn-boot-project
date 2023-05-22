@@ -1,5 +1,6 @@
 package cn.hiboot.mcn.autoconfigure.web.filter.integrity;
 
+import cn.hiboot.mcn.autoconfigure.web.filter.integrity.reactive.ReactiveDataIntegrityFilter;
 import cn.hiboot.mcn.autoconfigure.web.security.WebSecurityProperties;
 import cn.hutool.crypto.SmUtil;
 import org.bouncycastle.crypto.digests.SM3Digest;
@@ -9,6 +10,9 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.web.server.WebFilter;
+
+import javax.servlet.Filter;
 
 /**
  * DataIntegrity
@@ -17,21 +21,33 @@ import org.springframework.context.annotation.Bean;
  * @since 2022/6/4 23:39
  */
 @AutoConfiguration
-@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @ConditionalOnClass({SmUtil.class, SM3Digest.class})
 @EnableConfigurationProperties({DataIntegrityProperties.class, WebSecurityProperties.class})
 @ConditionalOnProperty(prefix = "data.integrity",name = "enable",havingValue = "true")
 public class DataIntegrityAutoConfiguration {
 
-    private final DataIntegrityProperties dataIntegrityProperties;
 
-    public DataIntegrityAutoConfiguration(DataIntegrityProperties dataIntegrityProperties) {
-        this.dataIntegrityProperties = dataIntegrityProperties;
+    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
+    @ConditionalOnClass(Filter.class)
+    static class ServletDataIntegrityFilterConfig {
+
+        @Bean
+        DataIntegrityFilter dataIntegrityFilter(DataIntegrityProperties dataIntegrityProperties){
+            return new DataIntegrityFilter(dataIntegrityProperties);
+        }
+
     }
 
-    @Bean
-    public DataIntegrityFilter dataIntegrityInterceptor(){
-        return new DataIntegrityFilter(dataIntegrityProperties);
+    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
+    @ConditionalOnClass(WebFilter.class)
+    static class ReactiveDataIntegrityFilterConfig {
+
+        @Bean
+        ReactiveDataIntegrityFilter dataIntegrityFilter(DataIntegrityProperties dataIntegrityProperties){
+            return new ReactiveDataIntegrityFilter(dataIntegrityProperties);
+        }
+
     }
+
 
 }

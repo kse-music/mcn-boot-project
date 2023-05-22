@@ -9,6 +9,7 @@ import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -21,7 +22,15 @@ public interface JsonRequestHelper {
 
     static String getData(HttpServletRequest request){
         try{
-            return StreamUtils.copyToString(request.getInputStream(), StandardCharsets.UTF_8);
+            return getData(request.getInputStream());
+        }catch (IOException e){
+            return "";
+        }
+    }
+
+    static String getData(InputStream in){
+        try{
+            return StreamUtils.copyToString(in, StandardCharsets.UTF_8);
         }catch (IOException e){
             return "";
         }

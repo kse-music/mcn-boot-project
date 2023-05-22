@@ -3,6 +3,7 @@ package cn.hiboot.mcn.autoconfigure.web.filter.common;
 import cn.hiboot.mcn.autoconfigure.web.security.WebSecurityProperties;
 import cn.hiboot.mcn.core.util.McnAssert;
 import cn.hiboot.mcn.core.util.SpringBeanUtils;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.AntPathMatcher;
 
 import javax.servlet.http.HttpServletRequest;
@@ -45,6 +46,14 @@ public class RequestMatcher {
 
     public boolean matches(HttpServletRequest request){
         String url = request.getServletPath();
+        if (doMatch(url,excludeUrls)) {
+            return false;
+        }
+        return doMatch(url,includeUrls);
+    }
+
+    public boolean matches(ServerHttpRequest request){
+        String url = request.getPath().pathWithinApplication().value();
         if (doMatch(url,excludeUrls)) {
             return false;
         }
