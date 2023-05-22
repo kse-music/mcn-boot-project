@@ -4,6 +4,7 @@ import cn.hiboot.mcn.autoconfigure.web.exception.handler.GlobalExceptionProperti
 import cn.hiboot.mcn.autoconfigure.web.filter.cors.CorsProperties;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.condition.SearchStrategy;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
@@ -18,6 +19,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsConfigurationSource;
+import org.springframework.web.cors.reactive.CorsWebFilter;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 
 /**
@@ -45,7 +47,14 @@ public class SpringWebFluxAutoConfiguration {
 
     @EnableConfigurationProperties(CorsProperties.class)
     @Configuration(proxyBeanMethods = false)
+    @ConditionalOnProperty(prefix = "filter", name = "cross", havingValue = "true")
     protected static class CorsAutoConfiguration{
+
+        @Bean
+        @ConditionalOnMissingBean
+        CorsWebFilter corsWebFilter(CorsConfigurationSource corsConfigurationSource){
+            return new CorsWebFilter(corsConfigurationSource);
+        }
 
         @Bean
         @ConditionalOnMissingBean
