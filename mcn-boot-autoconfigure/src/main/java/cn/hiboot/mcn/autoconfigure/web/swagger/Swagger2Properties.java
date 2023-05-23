@@ -23,9 +23,9 @@ public class Swagger2Properties {
     private String email;
 
     /**
-     * 是否生成csrf请求参数头
+     * 是否生成请求头
      */
-    private boolean csrf;
+    private Header header = new Header();
 
     public boolean isEnable() {
         return enable;
@@ -91,11 +91,38 @@ public class Swagger2Properties {
         this.email = email;
     }
 
-    public boolean isCsrf() {
-        return csrf;
+    public Header getHeader() {
+        return header;
     }
 
-    public void setCsrf(boolean csrf) {
-        this.csrf = csrf;
+    public void setHeader(Header header) {
+        this.header = header;
+    }
+
+    public static class Header {
+        /**
+         * 是否生成csrf请求参数头
+         */
+        private boolean csrf;
+        /**
+         * 是否生成authorization请求头
+         */
+        private Boolean authorization;
+
+        public boolean isCsrf() {
+            return csrf;
+        }
+
+        public void setCsrf(boolean csrf) {
+            this.csrf = csrf;
+        }
+
+        public Boolean getAuthorization() {
+            return authorization;
+        }
+
+        public void setAuthorization(Boolean authorization) {
+            this.authorization = authorization;
+        }
     }
 }

@@ -17,6 +17,7 @@ import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.RequestHandler;
 import springfox.documentation.builders.ApiInfoBuilder;
@@ -98,7 +99,9 @@ public class SwaggerAutoConfiguration {
         Docket docket = new Docket(DocumentationType.SWAGGER_2).apiInfo(apiInfo()).enable(swagger2Properties.isEnable());
 
         List<ApiKey> apiKeyList = apiKeys.orderedStream().collect(Collectors.toList());
-        apiKeyList.add(new ApiKey("JwtToken", "Authorization", "header"));
+        if(Boolean.TRUE.equals(swagger2Properties.getHeader().getAuthorization()) || (swagger2Properties.getHeader().getAuthorization() == null && ClassUtils.isPresent("org.springframework.security.core.Authentication",null))){
+            apiKeyList.add(new ApiKey("JwtToken", "Authorization", "header"));
+        }
 
         configApiKey(docket, apiKeyList);
 
@@ -130,7 +133,7 @@ public class SwaggerAutoConfiguration {
     private void configRequestParameters(Docket docket,Environment environment) {
         List<RequestParameter> pars = new ArrayList<>();
         //csrf
-        if(swagger2Properties.isCsrf()){
+        if(swagger2Properties.getHeader().isCsrf()){
             pars.add(new RequestParameterBuilder().name("X-XSRF-TOKEN").description("csrf token").in(ParameterType.HEADER).query(s -> s.model(m -> m.scalarModel(ScalarType.STRING))).required(true).build());
         }
         //enable data integrity
