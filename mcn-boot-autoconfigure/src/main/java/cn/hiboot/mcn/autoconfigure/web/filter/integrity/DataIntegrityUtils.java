@@ -21,12 +21,8 @@ public abstract class DataIntegrityUtils {
     public static Triplet<String,String,String> signature(Map<String, Object> params, String payload) {
         String timestamp = String.valueOf(System.currentTimeMillis());
         String nonceStr = McnUtils.simpleUUID().substring(0,8);
-        String signature = signature(timestamp, nonceStr,params,payload);
+        String signature = signature(timestamp, nonceStr, params, null,payload);
         return Triplet.with(timestamp,nonceStr,signature);
-    }
-
-    public static String signature(String timestamp, String nonceStr, Map<String, Object> params, String payload) {
-        return signature(timestamp, nonceStr, params, null,payload);
     }
 
     public static String signature(String timestamp, String nonceStr, Map<String, Object> params, String fileInfo, String payload) {

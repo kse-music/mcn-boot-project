@@ -2,7 +2,7 @@ package cn.hiboot.mcn.autoconfigure.web.filter.integrity;
 
 import cn.hiboot.mcn.autoconfigure.web.filter.common.JsonRequestHelper;
 import cn.hiboot.mcn.autoconfigure.web.filter.common.RequestMatcher;
-import cn.hiboot.mcn.autoconfigure.web.filter.common.RequestPayloadRequestWrapper;
+import cn.hiboot.mcn.autoconfigure.web.filter.common.servlet.RequestPayloadRequestWrapper;
 import cn.hiboot.mcn.autoconfigure.web.mvc.ResponseUtils;
 import cn.hutool.core.net.URLDecoder;
 import cn.hutool.core.util.StrUtil;

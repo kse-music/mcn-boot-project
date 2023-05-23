@@ -1,5 +1,7 @@
-package cn.hiboot.mcn.autoconfigure.web.filter.common;
+package cn.hiboot.mcn.autoconfigure.web.filter.common.servlet;
 
+import cn.hiboot.mcn.autoconfigure.web.filter.common.JsonRequestHelper;
+import cn.hiboot.mcn.autoconfigure.web.filter.common.NameValueProcessor;
 import cn.hiboot.mcn.core.util.McnUtils;
 import org.springframework.util.CollectionUtils;
 
@@ -17,7 +19,7 @@ import java.util.Map;
  * @author DingHao
  * @since 2019/1/9 11:02
  */
-public class NameValueProcessorRequestWrapper extends HttpServletRequestWrapper {
+class NameValueProcessorRequestWrapper extends HttpServletRequestWrapper {
 
     private List<String> excludeFields;
     private boolean filterParameterName;

@@ -1,4 +1,6 @@
-package cn.hiboot.mcn.autoconfigure.web.filter.common;
+package cn.hiboot.mcn.autoconfigure.web.filter.common.servlet;
+
+import cn.hiboot.mcn.autoconfigure.web.filter.common.JsonRequestHelper;
 
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;

@@ -82,4 +82,9 @@ public abstract class NameValueProcessorProperties {
     public void setProcessPayload(boolean processPayload) {
         this.processPayload = processPayload;
     }
+
+    public abstract int getOrder();
+
+    public abstract void setOrder(int order);
+
 }

@@ -23,12 +23,12 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
  * @since 2022/8/19 17:59
  */
 @AutoConfiguration(before = JacksonAutoConfiguration.class,after = {ParamProcessorAutoConfiguration.class, XssAutoConfiguration.class})
-@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @Import(NameValueProcessorJacksonConfig.class)
 @ConditionalOnBean(NameValueProcessor.class)
 public class FilterAutoConfiguration {
 
     @Bean
+    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
     public ExceptionResolver<HttpMessageNotReadableException> specialSymbolExceptionResolver() {
         return t -> {
             ServiceException serviceException = ServiceException.find(t);

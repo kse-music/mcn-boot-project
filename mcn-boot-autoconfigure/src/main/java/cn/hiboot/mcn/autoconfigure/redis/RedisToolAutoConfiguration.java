@@ -1,7 +1,7 @@
 package cn.hiboot.mcn.autoconfigure.redis;
 
 import cn.hiboot.mcn.autoconfigure.web.filter.common.JsonRequestHelper;
-import cn.hiboot.mcn.autoconfigure.web.filter.common.RequestPayloadRequestWrapper;
+import cn.hiboot.mcn.autoconfigure.web.filter.common.servlet.RequestPayloadRequestWrapper;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;

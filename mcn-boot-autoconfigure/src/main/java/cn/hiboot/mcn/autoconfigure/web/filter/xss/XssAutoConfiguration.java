@@ -1,6 +1,7 @@
 package cn.hiboot.mcn.autoconfigure.web.filter.xss;
 
-import cn.hiboot.mcn.autoconfigure.web.filter.common.NameValueProcessorFilter;
+import cn.hiboot.mcn.autoconfigure.web.filter.common.reactive.ReactiveNameValueProcessorFilter;
+import cn.hiboot.mcn.autoconfigure.web.filter.common.servlet.NameValueProcessorFilter;
 import cn.hiboot.mcn.autoconfigure.web.security.WebSecurityProperties;
 import cn.hiboot.mcn.core.exception.ExceptionKeys;
 import cn.hiboot.mcn.core.exception.ServiceException;
@@ -11,6 +12,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplicat
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.web.util.HtmlUtils;
 
 /**
@@ -20,28 +22,38 @@ import org.springframework.web.util.HtmlUtils;
  * @since 2022/6/6 10:10
  */
 @AutoConfiguration
-@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @ConditionalOnProperty(prefix = "mcn.xss", name = "enable", havingValue = "true")
 @EnableConfigurationProperties({XssProperties.class, WebSecurityProperties.class})
 public class XssAutoConfiguration {
 
-    private final XssProperties xssProperties;
+    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
+    @Configuration(proxyBeanMethods = false)
+    static class ServletXssConfiguration{
 
-    public XssAutoConfiguration(XssProperties xssProperties) {
-        this.xssProperties = xssProperties;
+        @Bean
+        public FilterRegistrationBean<NameValueProcessorFilter> xssFilterRegistration(XssProcessor xssProcessor,XssProperties xssProperties) {
+            FilterRegistrationBean<NameValueProcessorFilter> filterRegistrationBean = new FilterRegistrationBean<>(new NameValueProcessorFilter(xssProperties,xssProcessor));
+            filterRegistrationBean.setOrder(xssProperties.getOrder());
+            filterRegistrationBean.setName(xssProperties.getName());
+            return filterRegistrationBean;
+        }
+
     }
 
-    @Bean
-    public FilterRegistrationBean<NameValueProcessorFilter> xssFilterRegistration(XssProcessor xssProcessor) {
-        FilterRegistrationBean<NameValueProcessorFilter> filterRegistrationBean = new FilterRegistrationBean<>(new NameValueProcessorFilter(xssProperties,xssProcessor));
-        filterRegistrationBean.setOrder(xssProperties.getOrder());
-        filterRegistrationBean.setName(xssProperties.getName());
-        return filterRegistrationBean;
+    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
+    @Configuration(proxyBeanMethods = false)
+    static class ReactiveXssConfiguration{
+
+        @Bean
+        public ReactiveNameValueProcessorFilter xssFilterRegistration(XssProcessor xssProcessor, XssProperties xssProperties) {
+            return new ReactiveNameValueProcessorFilter(xssProperties,xssProcessor);
+        }
+
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public XssProcessor defaultXssProcessor(){
+    public XssProcessor defaultXssProcessor(XssProperties xssProperties){
         return (name, value) ->{
             String rs = HtmlUtils.htmlEscape(value);
             if(value.equals(rs)){

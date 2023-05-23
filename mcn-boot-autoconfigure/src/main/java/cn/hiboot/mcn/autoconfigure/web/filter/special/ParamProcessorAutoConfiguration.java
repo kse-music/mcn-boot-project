@@ -1,7 +1,8 @@
 package cn.hiboot.mcn.autoconfigure.web.filter.special;
 
 
-import cn.hiboot.mcn.autoconfigure.web.filter.common.NameValueProcessorFilter;
+import cn.hiboot.mcn.autoconfigure.web.filter.special.reactive.ReactiveParamProcessorConfiguration;
+import cn.hiboot.mcn.autoconfigure.web.filter.special.servlet.ServletParamProcessorConfiguration;
 import cn.hiboot.mcn.autoconfigure.web.security.WebSecurityProperties;
 import cn.hiboot.mcn.core.exception.ExceptionKeys;
 import cn.hiboot.mcn.core.exception.ServiceException;
@@ -22,26 +23,17 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Role;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.env.Environment;
-import org.springframework.web.bind.support.WebDataBinderFactory;
-import org.springframework.web.context.request.NativeWebRequest;
-import org.springframework.web.method.support.HandlerMethodArgumentResolver;
-import org.springframework.web.method.support.ModelAndViewContainer;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.springframework.web.servlet.mvc.method.annotation.ServletModelAttributeMethodProcessor;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -52,132 +44,63 @@ import java.util.regex.Pattern;
  * @since 2022/6/6 15:03
  */
 @Configuration(proxyBeanMethods = false)
-@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @EnableConfigurationProperties({ParamProcessorProperties.class, WebSecurityProperties.class})
-@ConditionalOnProperty(prefix = "param.processor",name = "enable",havingValue = "true")
+@ConditionalOnProperty(prefix = "param.processor", name = "enable", havingValue = "true")
+@Import({ReactiveParamProcessorConfiguration.class, ServletParamProcessorConfiguration.class})
 public class ParamProcessorAutoConfiguration {
 
-    private static final Map<String,Pattern> MAP = new HashMap<>();
-
-    private final ParamProcessorProperties properties;
-
-    public ParamProcessorAutoConfiguration(ParamProcessorProperties properties) {
-        this.properties = properties;
-    }
+    private static final Map<String, Pattern> MAP = new HashMap<>();
 
     @Bean
     @ConditionalOnMissingBean
     public ParamProcessor defaultParamProcessor(Environment environment) {
-        String globalRulePattern = environment.getProperty("global.rule.pattern","");
+        String globalRulePattern = environment.getProperty("global.rule.pattern", "");
         return (rule, name, value) -> {
-            String rulePattern = getRule(rule,globalRulePattern);
-            if(rulePattern.isEmpty()){
+            String rulePattern = getRule(rule, globalRulePattern);
+            if (rulePattern.isEmpty()) {
                 return value;
             }
             Pattern pattern = MAP.computeIfAbsent(rulePattern, m -> Pattern.compile(rulePattern));
-            if(pattern.matcher(value).matches()){
+            if (pattern.matcher(value).matches()) {
                 throw ServiceException.newInstance(ExceptionKeys.SPECIAL_SYMBOL_ERROR);
             }
             return value;
         };
     }
 
-    private String getRule(String rule,String globalRulePattern){
-        if(rule.isEmpty()){
+    private String getRule(String rule, String globalRulePattern) {
+        if (rule.isEmpty()) {
             rule = globalRulePattern;
         }
         return rule;
     }
 
-    @Bean
-    @ConditionalOnProperty(prefix = "param.processor",name = "use-filter",havingValue = "true", matchIfMissing = true)
-    public FilterRegistrationBean<NameValueProcessorFilter> paramProcessorFilterRegistration(ParamProcessor paramProcessor) {
-        FilterRegistrationBean<NameValueProcessorFilter> filterRegistrationBean = new FilterRegistrationBean<>(new NameValueProcessorFilter(properties,paramProcessor));
-        filterRegistrationBean.setOrder(properties.getOrder());
-        filterRegistrationBean.setName(properties.getName());
-        return filterRegistrationBean;
-    }
-
-    @Bean
-    public WebMvcConfigurer WebMvcConfig(ParamProcessor paramProcessor) {
-        return new WebMvcConfigurer(){
-            @Override
-            public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-                resolvers.add(new KeyValueArgumentResolver(paramProcessor));
-                resolvers.add(new HandlerMethodArgumentResolver(){
-
-                    private final ServletModelAttributeMethodProcessor processor = new ServletModelAttributeMethodProcessor(true);
-
-                    @Override
-                    public boolean supportsParameter(MethodParameter parameter) {
-                        CheckParam classAnnotation = parameter.getParameterType().getAnnotation(CheckParam.class);
-                        return processor.supportsParameter(parameter) && (parameter.hasParameterAnnotation(CheckParam.class) || classAnnotation != null);
-                    }
-
-                    @Override
-                    public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
-                        Object returnValue = processor.resolveArgument(parameter, mavContainer, webRequest, binderFactory);
-                        if(returnValue == null){
-                            return null;
-                        }
-                        CheckParam classAnnotation = parameter.getParameterType().getAnnotation(CheckParam.class);
-                        if(classAnnotation == null){
-                            classAnnotation = parameter.getParameterAnnotation(CheckParam.class);
-                        }
-                        BeanWrapper src = new BeanWrapperImpl(returnValue);
-                        for (Field declaredField : returnValue.getClass().getDeclaredFields()) {
-                            String name = declaredField.getName();
-                            Object propertyValue = src.getPropertyValue(name);
-                            if(propertyValue instanceof String){
-                                paramProcessor.process(getRule(classAnnotation,declaredField.getAnnotation(CheckParam.class)),name,propertyValue.toString());
-                            }
-                        }
-                        return returnValue;
-                    }
-
-
-                });
-            }
-        };
-
-    }
-
-    static String getRule(CheckParam classAnnotation , CheckParam methodAnnotation){
+    public static String getRule(CheckParam classAnnotation, CheckParam methodAnnotation) {
         String methodRule = methodAnnotation != null ? methodAnnotation.value() : "";
         String classRule = classAnnotation != null ? classAnnotation.value() : "";
-        if(!methodRule.isEmpty()){
+        if (!methodRule.isEmpty()) {
             return methodRule;
         }
-        if(!classRule.isEmpty()){
+        if (!classRule.isEmpty()) {
             return classRule;
         }
         return "";
     }
 
-    protected static class KeyValueArgumentResolver implements HandlerMethodArgumentResolver {
-
-        private final ParamProcessor paramProcessor;
-
-        public KeyValueArgumentResolver(ParamProcessor paramProcessor) {
-            this.paramProcessor = paramProcessor;
+    public static Object validStringValue(MethodParameter parameter, Object returnValue, ParamProcessor paramProcessor){
+        CheckParam classAnnotation = parameter.getParameterType().getAnnotation(CheckParam.class);
+        if (classAnnotation == null) {
+            classAnnotation = parameter.getParameterAnnotation(CheckParam.class);
         }
-
-        @Override
-        public boolean supportsParameter(MethodParameter parameter) {
-            return parameter.hasParameterAnnotation(CheckParam.class) && parameter.getParameterType() == String.class;
-        }
-
-        @Override
-        public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
-            HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
-            if(request == null){
-                return null;
+        BeanWrapper src = new BeanWrapperImpl(returnValue);
+        for (Field declaredField : returnValue.getClass().getDeclaredFields()) {
+            String name = declaredField.getName();
+            Object propertyValue = src.getPropertyValue(name);
+            if (propertyValue instanceof String) {
+                paramProcessor.process(ParamProcessorAutoConfiguration.getRule(classAnnotation, declaredField.getAnnotation(CheckParam.class)), name, propertyValue.toString());
             }
-            String name = parameter.getParameterName();
-            String rule = parameter.getParameterAnnotation(CheckParam.class).value();
-            return paramProcessor.process(rule,name,request.getParameter(name));
         }
-
+        return returnValue;
     }
 
     @Bean
@@ -187,7 +110,7 @@ public class ParamProcessorAutoConfiguration {
 
             @Override
             public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-                if(bean instanceof ObjectMapper){
+                if (bean instanceof ObjectMapper) {
                     ObjectMapper mapper = (ObjectMapper) bean;
                     AnnotationIntrospector sis = mapper.getDeserializationConfig().getAnnotationIntrospector();
                     AnnotationIntrospector pair = AnnotationIntrospectorPair.pair(sis, new ParamProcessorAnnotationIntrospector(paramProcessor));
@@ -199,7 +122,7 @@ public class ParamProcessorAutoConfiguration {
         };
     }
 
-    protected static class ParamProcessorAnnotationIntrospector extends JacksonAnnotationIntrospector {
+    static class ParamProcessorAnnotationIntrospector extends JacksonAnnotationIntrospector {
         private final ParamProcessor paramProcessor;
 
         public ParamProcessorAnnotationIntrospector(ParamProcessor paramProcessor) {
@@ -208,20 +131,20 @@ public class ParamProcessorAutoConfiguration {
 
         @Override
         public Object findDeserializer(Annotated am) {
-            if(am instanceof AnnotatedMethod){
+            if (am instanceof AnnotatedMethod) {
                 AnnotatedMethod annotatedMethod = (AnnotatedMethod) am;
-                if(String.class.isAssignableFrom(annotatedMethod.getParameterType(0).getRawClass())){
+                if (String.class.isAssignableFrom(annotatedMethod.getParameterType(0).getRawClass())) {
                     CheckParam annotation = am.getAnnotation(CheckParam.class);
                     CheckParam classAnnotation = annotatedMethod.getDeclaringClass().getAnnotation(CheckParam.class);
-                    if(annotation == null){
+                    if (annotation == null) {
                         annotation = classAnnotation;
                     }
-                    if(annotation != null){
-                        String rule = getRule(classAnnotation,annotation);
-                        return new StdDeserializer<String>(String.class){
+                    if (annotation != null) {
+                        String rule = getRule(classAnnotation, annotation);
+                        return new StdDeserializer<String>(String.class) {
                             @Override
                             public String deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JacksonException {
-                                return paramProcessor.process(rule,p.currentName(),p.getText());
+                                return paramProcessor.process(rule, p.currentName(), p.getText());
                             }
                         };
                     }
