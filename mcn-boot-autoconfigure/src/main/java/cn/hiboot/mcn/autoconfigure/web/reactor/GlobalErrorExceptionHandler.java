@@ -3,6 +3,7 @@ package cn.hiboot.mcn.autoconfigure.web.reactor;
 import cn.hiboot.mcn.autoconfigure.config.ConfigProperties;
 import cn.hiboot.mcn.autoconfigure.web.exception.ExceptionHelper;
 import cn.hiboot.mcn.autoconfigure.web.exception.handler.GlobalExceptionProperties;
+import cn.hiboot.mcn.core.exception.ErrorMsg;
 import cn.hiboot.mcn.core.exception.ExceptionKeys;
 import cn.hiboot.mcn.core.model.result.RestResp;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,7 @@ import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 
 import java.util.Map;
+import java.util.Objects;
 
 /**
  *
@@ -68,8 +70,8 @@ public class GlobalErrorExceptionHandler extends DefaultErrorWebExceptionHandler
             if(exceptionHelper.isOverrideHttpError()){
                 Map<String, Object> error = getErrorAttributes(request, getErrorAttributeOptions(request, MediaType.ALL));
                 int statusCode = (int) error.get("status");
-                return ServerResponse.status(HttpStatus.OK.value()).contentType(MediaType.APPLICATION_JSON)
-                        .body(BodyInserters.fromValue(RestResp.error(ExceptionKeys.mappingCode(statusCode))));
+                String msg = properties.isReturnOriginExMsg() ? ex.getMessage() : ErrorMsg.getErrorMsg(ExceptionKeys.mappingCode(statusCode));
+                return ServerResponse.status(HttpStatus.OK.value()).contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(overrideExMsg(RestResp.error(msg))));
             }
         }else {
             RestResp<Object> resp;
@@ -80,9 +82,19 @@ public class GlobalErrorExceptionHandler extends DefaultErrorWebExceptionHandler
             }finally {
                 exceptionHelper.logError(ex);
             }
-            return ServerResponse.status(HttpStatus.OK.value()).contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(resp));
+            return ServerResponse.status(HttpStatus.OK.value()).contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(overrideExMsg(resp)));
         }
         return super.renderErrorResponse(request);
+    }
+
+    private RestResp<Object> overrideExMsg(RestResp<Object> resp){
+        if(properties.isOverrideExMsg()){
+            String message = properties.getErrorCodeMsg().get(resp.getErrorCode());
+            if(Objects.nonNull(message)){
+                resp.setErrorInfo(message);
+            }
+        }
+        return resp;
     }
 
     @Override

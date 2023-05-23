@@ -26,6 +26,7 @@ public interface ExceptionKeys {
 
     int UNKNOWN_ERROR = 700001;
 
+    int HTTP_ERROR_400 = 800400;
     int HTTP_ERROR_401 = 800401;
     int HTTP_ERROR_402 = 800402;
     int HTTP_ERROR_403 = 800403;
@@ -48,6 +49,7 @@ public interface ExceptionKeys {
     static int mappingCode(Integer statusCode){
         if(statusCode != null){
             switch (statusCode){
+                case 400: return HTTP_ERROR_400;
                 case 401: return HTTP_ERROR_401;
                 case 402: return HTTP_ERROR_402;
                 case 403: return HTTP_ERROR_403;
