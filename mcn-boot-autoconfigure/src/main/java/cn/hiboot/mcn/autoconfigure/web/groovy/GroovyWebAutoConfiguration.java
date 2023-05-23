@@ -29,7 +29,7 @@ import java.util.Map;
  */
 @AutoConfiguration
 @ConditionalOnClass(GroovyObject.class)
-@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
+@ConditionalOnWebApplication
 @EnableConfigurationProperties(GroovyWebProperties.class)
 @ConditionalOnProperty(prefix = "groovy.web", value = "enable", havingValue = "true")
 public class GroovyWebAutoConfiguration {
