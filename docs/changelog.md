@@ -1,5 +1,9 @@
 # 更新日志
 
+## [v2.7.12] 2023.05.19
+- 升级到SpringBoot 2.7.12
+- 升级到snakeyaml 2.0
+
 ## [v2.7.11] 2023.04.20
 - 升级到SpringBoot 2.7.11
 - remove ExceptionPostProcessor
