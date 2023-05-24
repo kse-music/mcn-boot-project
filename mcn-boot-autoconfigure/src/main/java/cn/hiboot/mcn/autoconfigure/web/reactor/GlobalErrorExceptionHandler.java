@@ -1,9 +1,7 @@
 package cn.hiboot.mcn.autoconfigure.web.reactor;
 
 import cn.hiboot.mcn.autoconfigure.config.ConfigProperties;
-import cn.hiboot.mcn.autoconfigure.web.exception.ExceptionHelper;
 import cn.hiboot.mcn.autoconfigure.web.exception.handler.GlobalExceptionProperties;
-import cn.hiboot.mcn.core.exception.ErrorMsg;
 import cn.hiboot.mcn.core.exception.ExceptionKeys;
 import cn.hiboot.mcn.core.model.result.RestResp;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,11 +23,9 @@ import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
-import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.Objects;
 
 /**
  *
@@ -42,9 +38,8 @@ import java.util.Objects;
 public class GlobalErrorExceptionHandler extends DefaultErrorWebExceptionHandler implements EnvironmentAware, Ordered {
 
     private WebFluxProperties webFluxProperties;
-    private GlobalExceptionProperties properties;
-    private ExceptionHelper exceptionHelper;
     private int order;
+    private GlobalServerExceptionHandler exceptionHandler;
 
     public GlobalErrorExceptionHandler(ErrorAttributes errorAttributes, WebProperties webProperties, ServerProperties serverProperties, ApplicationContext applicationContext) {
         super(errorAttributes, webProperties.getResources(), serverProperties.getError(), applicationContext);
@@ -55,7 +50,7 @@ public class GlobalErrorExceptionHandler extends DefaultErrorWebExceptionHandler
         setMessageWriters(serverCodecConfigurer.getWriters());
         setMessageReaders(serverCodecConfigurer.getReaders());
         this.webFluxProperties = webFluxProperties;
-        this.properties = properties;
+        this.exceptionHandler = new GlobalServerExceptionHandler(properties);
     }
 
     @Override
@@ -65,41 +60,23 @@ public class GlobalErrorExceptionHandler extends DefaultErrorWebExceptionHandler
 
     @Override
     protected Mono<ServerResponse> renderErrorResponse(ServerRequest request) {
-        Throwable ex = getError(request);
-        if (ex instanceof ResponseStatusException) {
-            if(exceptionHelper.isOverrideHttpError()){
-                Map<String, Object> error = getErrorAttributes(request, getErrorAttributeOptions(request, MediaType.ALL));
-                int statusCode = (int) error.get("status");
-                String msg = properties.isReturnOriginExMsg() ? ex.getMessage() : ErrorMsg.getErrorMsg(ExceptionKeys.mappingCode(statusCode));
-                return ServerResponse.status(HttpStatus.OK.value()).contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(overrideExMsg(RestResp.error(msg))));
-            }
-        }else {
-            RestResp<Object> resp;
-            try {
-                resp = exceptionHelper.doHandleException(ex);
-            } catch (Throwable e) {
-                resp = RestResp.error(ExceptionKeys.SERVICE_ERROR);
-            }finally {
-                exceptionHelper.logError(ex);
-            }
-            return ServerResponse.status(HttpStatus.OK.value()).contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(overrideExMsg(resp)));
-        }
-        return super.renderErrorResponse(request);
+        return ServerResponse.status(HttpStatus.OK.value()).contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(handleException(getError(request))));
     }
 
-    private RestResp<Object> overrideExMsg(RestResp<Object> resp){
-        if(properties.isOverrideExMsg()){
-            String message = properties.getErrorCodeMsg().get(resp.getErrorCode());
-            if(Objects.nonNull(message)){
-                resp.setErrorInfo(message);
-            }
+    private RestResp<Throwable> handleException(Throwable ex){
+        RestResp<Throwable> resp;
+        try {
+            resp = exceptionHandler.handleException(ex);
+        } catch (Throwable e) {
+            resp = RestResp.error(ExceptionKeys.SERVICE_ERROR);
+        }finally {
+            exceptionHandler.logError(ex);
         }
         return resp;
     }
 
     @Override
     public void setEnvironment(Environment environment) {
-        this.exceptionHelper = new ExceptionHelper(properties,environment);
         this.order = environment.getProperty("mcn.exception.handler.reactor.order",Integer.class, -1);
     }
 

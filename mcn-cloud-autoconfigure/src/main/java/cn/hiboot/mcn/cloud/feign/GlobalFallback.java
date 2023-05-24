@@ -1,6 +1,7 @@
 package cn.hiboot.mcn.cloud.feign;
 
-import cn.hiboot.mcn.autoconfigure.web.exception.ExceptionHelper;
+import cn.hiboot.mcn.core.exception.ExceptionKeys;
+import cn.hiboot.mcn.core.model.result.RestResp;
 import feign.FeignException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,14 +36,19 @@ public class GlobalFallback<T> implements MethodInterceptor {
         String errorMessage = cause.getMessage();
         log.error("GlobalFallback:[{}.{}] serviceId:[{}] message:[{}]", targetType.getName(), method.getName(), targetName, errorMessage);
         if (!(cause instanceof FeignException)) {
-            return ExceptionHelper.error(errorMessage);
+            return remoteError(errorMessage);
         }
         FeignException exception = (FeignException) cause;
         if(exception.contentUTF8().isEmpty()){
-            return ExceptionHelper.error(errorMessage);
+            return remoteError(errorMessage);
         }
-        return ExceptionHelper.error(exception.contentUTF8());
+        return remoteError(exception.contentUTF8());
     }
+
+    private RestResp<Object> remoteError(String msg){
+        return RestResp.error(ExceptionKeys.REMOTE_SERVICE_ERROR, msg);
+    }
+
 
     @Override
     public boolean equals(Object o) {
