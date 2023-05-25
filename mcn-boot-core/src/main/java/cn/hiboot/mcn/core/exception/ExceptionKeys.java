@@ -40,6 +40,8 @@ public interface ExceptionKeys {
     int HTTP_ERROR_421 = 800421;
     int HTTP_ERROR_500 = 800500;
     int HTTP_ERROR_503 = 800503;
+    int HTTP_ERROR_504 = 800504;
+
 
     int SERVICE_ERROR = 900000;
     int THIRD_PARTY_ERROR = 900001;
@@ -61,6 +63,9 @@ public interface ExceptionKeys {
                 case 413: return HTTP_ERROR_413;
                 case 415: return HTTP_ERROR_415;
                 case 421: return HTTP_ERROR_421;
+                case 500: return HTTP_ERROR_500;
+                case 503: return HTTP_ERROR_503;
+                case 504: return HTTP_ERROR_504;
             }
         }
         return ExceptionKeys.HTTP_ERROR_500;

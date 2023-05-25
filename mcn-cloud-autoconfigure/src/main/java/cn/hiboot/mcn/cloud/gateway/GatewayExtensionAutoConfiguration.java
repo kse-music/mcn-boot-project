@@ -1,6 +1,5 @@
 package cn.hiboot.mcn.cloud.gateway;
 
-import cn.hiboot.mcn.autoconfigure.web.exception.AbstractExceptionHandler;
 import cn.hiboot.mcn.autoconfigure.web.exception.handler.GlobalExceptionProperties;
 import cn.hiboot.mcn.autoconfigure.web.reactor.GlobalServerExceptionHandler;
 import cn.hiboot.mcn.autoconfigure.web.swagger.IgnoreApi;
@@ -32,7 +31,7 @@ public class GatewayExtensionAutoConfiguration {
     @RestController
     @ConditionalOnProperty(prefix = "gateway.fallback",name = "enabled",havingValue = "true",matchIfMissing = true)
     protected static class DefaultFallbackRestController{
-        AbstractExceptionHandler exceptionHandler;
+        private final GlobalServerExceptionHandler exceptionHandler;
 
         public DefaultFallbackRestController(GlobalExceptionProperties properties) {
             exceptionHandler = new GlobalServerExceptionHandler(properties);
@@ -46,11 +45,8 @@ public class GatewayExtensionAutoConfiguration {
                 if(ex == null){
                     return RestResp.error(ExceptionKeys.REMOTE_SERVICE_ERROR);
                 }
-                RestResp<Throwable> resp = exceptionHandler.handleException(ex);
                 Route route = exchange.getAttribute(GATEWAY_ROUTE_ATTR);
-                resp.setErrorInfo((route == null ? "" : route.getUri().getHost()) + " service " +resp.getErrorInfo());
-                return resp;
-//                return RestResp.error(ExceptionKeys.REMOTE_SERVICE_ERROR,(route == null ? "" : route.getUri().getHost())+"服务不可用或请求超时");
+                return exceptionHandler.handleException(ex,(route == null ? "" : route.getUri().getHost()));
             });
         }
 

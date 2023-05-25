@@ -3,9 +3,8 @@ package cn.hiboot.mcn.autoconfigure.web.reactor;
 import cn.hiboot.mcn.autoconfigure.web.exception.AbstractExceptionHandler;
 import cn.hiboot.mcn.autoconfigure.web.exception.handler.GlobalExceptionProperties;
 import cn.hiboot.mcn.core.exception.ExceptionKeys;
+import cn.hiboot.mcn.core.model.result.RestResp;
 import org.springframework.web.server.ResponseStatusException;
-
-import java.util.function.Function;
 
 /**
  * GlobalServerExceptionHandler
@@ -19,29 +18,21 @@ public class GlobalServerExceptionHandler extends AbstractExceptionHandler {
         super(properties);
     }
 
-    @Override
-    protected Function<Throwable, Integer> customHandleException() {
-        return ex -> {
-            if(ex instanceof ResponseStatusException){
-                return mappingCode((ResponseStatusException) ex);
-            }
-            return null;
-        };
+    public RestResp<Throwable> handleException(Throwable exception,String additionMsg) {
+        RestResp<Throwable> resp = super.handleException(exception);
+        if(properties().isReturnOriginExMsg()){
+            return resp;
+        }
+        resp.setErrorInfo(additionMsg + resp.getErrorInfo());
+        return resp;
     }
 
     @Override
-    protected String getMessage(Throwable t) {
-        if(t instanceof ResponseStatusException){
-            return ((ResponseStatusException) t).getReason();
+    protected Integer mappingCode(Throwable ex) {
+        if(ex instanceof ResponseStatusException){
+            return ExceptionKeys.mappingCode(((ResponseStatusException) ex).getRawStatusCode());
         }
-        return super.getMessage(t);
-    }
-
-    private int mappingCode(ResponseStatusException exception){
-        if(isOverrideHttpError()){
-            return ExceptionKeys.mappingCode(exception.getRawStatusCode());
-        }
-        return exception.getRawStatusCode();
+        return super.mappingCode(ex);
     }
 
 }

@@ -19,7 +19,6 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.util.ClassUtils;
@@ -29,6 +28,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Arrays;
 import java.util.List;
@@ -44,7 +44,7 @@ import java.util.stream.Collectors;
  * @author DingHao
  * @since 2023/5/24 13:25
  */
-public abstract class AbstractExceptionHandler implements Ordered {
+public abstract class AbstractExceptionHandler {
     private final Logger log = LoggerFactory.getLogger(AbstractExceptionHandler.class);
 
     /**
@@ -62,13 +62,17 @@ public abstract class AbstractExceptionHandler implements Ordered {
     private final String[] exceptionResolverNames;
     private final ApplicationContext applicationContext;
 
-    public AbstractExceptionHandler(GlobalExceptionProperties properties) {
+    protected AbstractExceptionHandler(GlobalExceptionProperties properties) {
         this.properties = properties;
         this.validationExceptionPresent = ClassUtils.isPresent("javax.validation.ValidationException", getClass().getClassLoader());
         this.applicationContext = SpringBeanUtils.getApplicationContext();
         this.exceptionResolverNames = applicationContext.getBeanNamesForType(ExceptionResolver.class);
         this.basePackage = applicationContext.getEnvironment().getProperty(ConfigProperties.APP_BASE_PACKAGE);
         this.overrideHttpError = applicationContext.getEnvironment().getProperty("http.error.override",Boolean.class,true);
+    }
+
+    protected GlobalExceptionProperties properties(){
+        return properties;
     }
 
     public RestResp<Throwable> handleException(Throwable exception) {
@@ -145,7 +149,10 @@ public abstract class AbstractExceptionHandler implements Ordered {
         return resp;
     }
 
-    protected String getMessage(Throwable t) {
+    private String getMessage(Throwable t) {
+        if(t instanceof ResponseStatusException){
+            return ((ResponseStatusException) t).getReason();
+        }
         return t.getMessage();
     }
 
@@ -153,7 +160,14 @@ public abstract class AbstractExceptionHandler implements Ordered {
         return errorCode == DEFAULT_ERROR_CODE ? ExceptionKeys.SERVICE_ERROR : errorCode;
     }
 
-    protected Function<Throwable,Integer> customHandleException() {
+    private Function<Throwable,Integer> customHandleException() {
+        if(overrideHttpError){
+            return this::mappingCode;
+        }
+        return null;
+    }
+
+    protected Integer mappingCode(Throwable exception) {
         return null;
     }
 
@@ -220,10 +234,6 @@ public abstract class AbstractExceptionHandler implements Ordered {
         }
     }
 
-    protected boolean isOverrideHttpError() {
-        return overrideHttpError;
-    }
-
     public void logError(Throwable t){
         if(properties.isRemoveFrameworkStack()){
             dealCurrentStackTraceElement(t);
@@ -241,12 +251,6 @@ public abstract class AbstractExceptionHandler implements Ordered {
             return;
         }
         exception.setStackTrace(Arrays.stream(exception.getStackTrace()).filter(s -> s.getClassName().contains(basePackage)).toArray(StackTraceElement[]::new));
-    }
-
-
-    @Override
-    public int getOrder() {
-        return properties.getOrder();
     }
 
 }
