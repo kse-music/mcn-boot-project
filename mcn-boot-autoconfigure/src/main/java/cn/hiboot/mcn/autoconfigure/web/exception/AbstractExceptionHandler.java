@@ -150,10 +150,11 @@ public abstract class AbstractExceptionHandler {
     }
 
     private String getMessage(Throwable t) {
+        String msg = null;
         if(t instanceof ResponseStatusException){
-            return ((ResponseStatusException) t).getReason();
+            msg = ((ResponseStatusException) t).getReason();
         }
-        return t.getMessage();
+        return msg == null ? t.getMessage() : msg;
     }
 
     private Integer getErrorCode(Integer errorCode){
