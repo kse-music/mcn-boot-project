@@ -29,7 +29,7 @@ public class ReactiveNameValueProcessorFilter implements OrderedWebFilter {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         if (requestMatcher.matches(exchange.getRequest())) {
-            NameValueProcessorRequestDecorator decorator = new NameValueProcessorRequestDecorator(exchange,valueProcessor)
+            NameValueProcessorRequestDecorator decorator = new NameValueProcessorRequestDecorator(exchange.getRequest(),valueProcessor)
                     .filterHeaderValue(properties.isFilterHeaderValue())
                     .filterParameterName(properties.isFilterParameterName())
                     .processPayload(properties.isProcessPayload())

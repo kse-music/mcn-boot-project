@@ -79,31 +79,43 @@ public class ReactiveDataIntegrityFilter implements OrderedWebFilter {
                 exchange.getRequest().getQueryParams().forEach((name, value) -> params.put(name, value.get(0)));
                 formParams.forEach((name, value) -> params.put(name, value.get(0)));
                 return params;
-            }).flatMap(params -> parseUpload(exchange).map(fileInfo -> Pair.with(params,fileInfo))).flatMap(p -> {
+            })
+            .flatMap(params -> parseUpload(exchange).map(fileInfo -> Pair.with(params,fileInfo)))
+            .flatMap(p -> {
                 if (request.getMethod() == HttpMethod.POST && MediaType.APPLICATION_JSON.isCompatibleWith(request.getHeaders().getContentType())) {
                     ServerHttpRequestDecorator decorator = new ServerHttpRequestDecorator(request) {
                         @Override
                         public Flux<DataBuffer> getBody() {
                             return super.getBody().flatMap(dataBuffer -> {
+                                int length = dataBuffer.readableByteCount();
                                 String payload = JsonRequestHelper.getData(dataBuffer.asInputStream());
-                                if (!Objects.equals(signature, DataIntegrityUtils.signature(timestamp, nonceStr, p.getValue0(), null,payload))) {
+                                if (isInValid(signature, timestamp, nonceStr, p.getValue0(), null,payload)) {
                                     return Mono.error(DataIntegrityException.newInstance("验证失败,数据被篡改"));
                                 }
-                                return Flux.just(exchange.getResponse().bufferFactory().wrap(payload.getBytes(StandardCharsets.UTF_8)));
+                                return Flux.just(dataBuffer.retainedSlice(0,length));
                             });
                         }
                     };
-                    return chain.filter(exchange.mutate().request(decorator).build());
+                    return Mono.just(exchange.mutate().request(decorator).build());
                 }
-                if (!Objects.equals(signature, DataIntegrityUtils.signature(timestamp, nonceStr, p.getValue0(), p.getValue1(),null))) {
+                if (isInValid(signature, timestamp, nonceStr, p.getValue0(), p.getValue1(),null)) {
                     return Mono.error(DataIntegrityException.newInstance("验证失败,数据被篡改"));
                 }
-                return Mono.empty();
+                return Mono.just(exchange);
             });
-        }).switchIfEmpty(chain.filter(exchange)).onErrorResume(DataIntegrityException.class,ex -> {
+        }).flatMap(chain::filter).onErrorResume(DataIntegrityException.class, ex -> {
             log.error("Check DataIntegrity Failed: {}", ex.getMessage());
             return ServerHttpResponseUtils.failed(ex.getMessage(), exchange.getResponse());
         });
+    }
+
+    private boolean isInValid(String signature, String timestamp, String nonceStr, Map<String,Object> params, String fileInfo,String payload) {
+        String sign = DataIntegrityUtils.signature(timestamp, nonceStr, params, fileInfo, payload);
+        if (Objects.equals(signature, sign)) {
+            return false;
+        }
+        log.error("kv param = {},payload = {},signature = {}",params,payload,sign);
+        return true;
     }
 
     private Mono<String> parseUpload(ServerWebExchange exchange) {

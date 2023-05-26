@@ -6,6 +6,8 @@ import cn.hiboot.mcn.autoconfigure.web.filter.common.servlet.RequestPayloadReque
 import cn.hiboot.mcn.autoconfigure.web.mvc.ResponseUtils;
 import cn.hutool.core.net.URLDecoder;
 import cn.hutool.core.util.StrUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;
 import org.springframework.http.MediaType;
 
@@ -24,6 +26,7 @@ import java.util.*;
  * @since 2022/6/4 23:41
  */
 public class DataIntegrityFilter implements Filter, Ordered {
+    private final Logger log = LoggerFactory.getLogger(DataIntegrityFilter.class);
 
     private final DataIntegrityProperties dataIntegrityProperties;
     private final RequestMatcher requestMatcher;
@@ -67,8 +70,7 @@ public class DataIntegrityFilter implements Filter, Ordered {
                 }
             }
 
-            // 对请求头参数进行签名
-            if (StrUtil.isEmpty(signature) || !Objects.equals(signature, signature(timestamp, nonceStr, request, payload))) {
+            if (isInValid(signature, timestamp, nonceStr, request, payload)) {
                 ResponseUtils.failed("验证失败,数据被篡改",(HttpServletResponse)servletResponse);
                 return;
             }
@@ -80,13 +82,17 @@ public class DataIntegrityFilter implements Filter, Ordered {
     /**
      * 后端生成的 sm3加密编码
      * (通过 参数+时间戳+随机数   生成的编码)
+     * @param signature 签名
      * @param timestamp 时间戳
      * @param nonceStr 随机数
      * @param request 参数
      * @param payload json请求体
-     * @return signature
+     * @return boolean
      */
-    private String signature(String timestamp, String nonceStr, HttpServletRequest request,String payload) {
+    private boolean isInValid(String signature,String timestamp, String nonceStr, HttpServletRequest request,String payload) {
+        if(StrUtil.isEmpty(signature)){
+            return true;
+        }
         Map<String, Object> params = new HashMap<>();
         Enumeration<String> enumeration = request.getParameterNames();
         while (enumeration.hasMoreElements()){
@@ -98,7 +104,13 @@ public class DataIntegrityFilter implements Filter, Ordered {
         if(request.getContentType() != null && request.getContentType().contains(MediaType.MULTIPART_FORM_DATA_VALUE) && dataIntegrityProperties.isCheckUpload()){//maybe upload
             fileInfo = parseUpload(request);
         }
-        return DataIntegrityUtils.signature(timestamp,nonceStr,params,fileInfo,payload);
+        String sign = DataIntegrityUtils.signature(timestamp, nonceStr, params, fileInfo, payload);
+        boolean rs = Objects.equals(signature, sign);
+        if(rs){
+            return false;
+        }
+        log.error("kv param = {},payload = {},signature ={}",params,payload,sign);
+        return true;
     }
 
     @Override

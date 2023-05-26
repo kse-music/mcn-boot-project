@@ -5,11 +5,11 @@ import cn.hiboot.mcn.autoconfigure.web.filter.common.NameValueProcessor;
 import cn.hiboot.mcn.core.util.McnUtils;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpRequestDecorator;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 
 import java.nio.charset.StandardCharsets;
@@ -30,11 +30,9 @@ class NameValueProcessorRequestDecorator extends ServerHttpRequestDecorator {
     private boolean processPayload;
     private boolean filterHeaderValue;
     private final NameValueProcessor valueProcessor;
-    private final ServerWebExchange exchange;
 
-    public NameValueProcessorRequestDecorator(ServerWebExchange exchange, NameValueProcessor valueProcessor) {
-        super(exchange.getRequest());
-        this.exchange = exchange;
+    public NameValueProcessorRequestDecorator(ServerHttpRequest request, NameValueProcessor valueProcessor) {
+        super(request);
         this.valueProcessor = valueProcessor;
     }
 
@@ -101,7 +99,7 @@ class NameValueProcessorRequestDecorator extends ServerHttpRequestDecorator {
             return super.getBody().flatMap(dataBuffer -> {
                 String data = JsonRequestHelper.getData(dataBuffer.asInputStream());
                 data = clean(null,data);
-                return Flux.just(exchange.getResponse().bufferFactory().wrap(data.getBytes(StandardCharsets.UTF_8)));
+                return Flux.just(dataBuffer.factory().wrap(data.getBytes(StandardCharsets.UTF_8)));
             });
         }
         return super.getBody();
