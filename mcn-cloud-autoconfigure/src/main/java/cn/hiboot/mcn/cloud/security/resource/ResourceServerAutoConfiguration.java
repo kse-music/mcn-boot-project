@@ -1,5 +1,7 @@
 package cn.hiboot.mcn.cloud.security.resource;
 
+import cn.hiboot.mcn.autoconfigure.web.exception.HttpStatusCodeResolver;
+import cn.hiboot.mcn.autoconfigure.web.exception.handler.ExceptionHandler;
 import cn.hiboot.mcn.autoconfigure.web.mvc.ResponseUtils;
 import cn.hiboot.mcn.autoconfigure.web.reactor.ServerHttpResponseUtils;
 import cn.hiboot.mcn.cloud.security.SessionHolder;
@@ -30,7 +32,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.BearerTokenAuthenticationToken;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -62,8 +63,25 @@ import java.util.Map;
 @ConditionalOnProperty(value = "spring.security.oauth2.resourceserver.jwt.public-key-location",havingValue = "classpath:config/public.txt")
 public class ResourceServerAutoConfiguration {
 
+    @Bean
+    HttpStatusCodeResolver resourceServerHttpStatusCodeResolver(){
+        return exception -> {
+            if(exception instanceof AuthenticationException){
+                return ExceptionKeys.HTTP_ERROR_401;
+            }else if(exception instanceof AccessDeniedException){
+                return ExceptionKeys.HTTP_ERROR_403;
+            }
+            return null;
+        };
+    }
+
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
     static class ReactiveResourceServerConfiguration {
+        private final ExceptionHandler exceptionHandler;
+
+        ReactiveResourceServerConfiguration(ExceptionHandler exceptionHandler) {
+            this.exceptionHandler = exceptionHandler;
+        }
 
         @Bean
         @ConditionalOnMissingBean(SecurityWebFilterChain.class)
@@ -114,14 +132,7 @@ public class ResourceServerAutoConfiguration {
         }
 
         private Mono<Void> handleException(RuntimeException exception, ServerHttpResponse response){
-            if(exception instanceof AuthenticationException){
-                if(exception instanceof OAuth2AuthenticationException){
-                    return ServerHttpResponseUtils.failed(exception.getMessage(),response);
-                }else {
-                    return ServerHttpResponseUtils.failed(ExceptionKeys.HTTP_ERROR_401,response);
-                }
-            }
-            return ServerHttpResponseUtils.failed(ExceptionKeys.HTTP_ERROR_403,response);
+            return ServerHttpResponseUtils.write(exceptionHandler.handleException(exception),response);
         }
 
         static class ReloadAuthenticationWebFilter implements WebFilter{
@@ -170,7 +181,11 @@ public class ResourceServerAutoConfiguration {
 
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
     static class ServletResourceServerConfiguration {
+        private final ExceptionHandler exceptionHandler;
 
+        ServletResourceServerConfiguration(ExceptionHandler exceptionHandler) {
+            this.exceptionHandler = exceptionHandler;
+        }
         @Bean
         @ConditionalOnDefaultWebSecurity
         SecurityFilterChain resourceServerSecurityFilterChain(HttpSecurity http,ResourceServerProperties ssoProperties) throws Exception {
@@ -192,15 +207,7 @@ public class ResourceServerAutoConfiguration {
         }
 
         private void handleException(RuntimeException exception, HttpServletResponse response){
-            if(exception instanceof AuthenticationException){
-                if(exception instanceof OAuth2AuthenticationException){
-                    ResponseUtils.failed(exception.getMessage(),response);
-                }else {
-                    ResponseUtils.failed(ExceptionKeys.HTTP_ERROR_401,response);
-                }
-            }else if(exception instanceof AccessDeniedException){
-                ResponseUtils.failed(ExceptionKeys.HTTP_ERROR_403,response);
-            }
+            ResponseUtils.write(exceptionHandler.handleException(exception),response);
         }
 
         @Component

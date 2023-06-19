@@ -38,7 +38,7 @@ public abstract class ServerHttpResponseUtils {
         return write(RestResp.error(code),response);
     }
 
-    private static Mono<Void> write(RestResp<?> resp,ServerHttpResponse response) {
+    public static Mono<Void> write(RestResp<?> resp,ServerHttpResponse response) {
         response.setStatusCode(HttpStatus.OK);
         return write(JacksonUtils.toJson(resp),response);
     }

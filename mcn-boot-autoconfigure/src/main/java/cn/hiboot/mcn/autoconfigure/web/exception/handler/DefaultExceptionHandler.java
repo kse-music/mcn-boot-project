@@ -1,9 +1,10 @@
-package cn.hiboot.mcn.autoconfigure.web.exception;
+package cn.hiboot.mcn.autoconfigure.web.exception.handler;
 
 import cn.hiboot.mcn.autoconfigure.config.ConfigProperties;
-import cn.hiboot.mcn.autoconfigure.web.exception.handler.GlobalExceptionProperties;
-import cn.hiboot.mcn.autoconfigure.web.exception.handler.ValidationErrorBean;
-import cn.hiboot.mcn.autoconfigure.web.exception.handler.ValidationExceptionHandler;
+import cn.hiboot.mcn.autoconfigure.web.exception.ExceptionProperties;
+import cn.hiboot.mcn.autoconfigure.web.exception.ExceptionResolver;
+import cn.hiboot.mcn.autoconfigure.web.exception.GenericExceptionResolver;
+import cn.hiboot.mcn.autoconfigure.web.exception.HttpStatusCodeResolver;
 import cn.hiboot.mcn.core.exception.BaseException;
 import cn.hiboot.mcn.core.exception.ErrorMsg;
 import cn.hiboot.mcn.core.exception.ExceptionKeys;
@@ -15,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ApplicationContext;
@@ -35,17 +37,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * AbstractExceptionHandler
+ * DefaultExceptionHandler
  *
  * @author DingHao
  * @since 2023/5/24 13:25
  */
-public abstract class AbstractExceptionHandler {
-    private final Logger log = LoggerFactory.getLogger(AbstractExceptionHandler.class);
+public class DefaultExceptionHandler implements ExceptionHandler{
+    private final Logger log = LoggerFactory.getLogger(DefaultExceptionHandler.class);
 
     /**
      * 非BaseException的默认code码
@@ -58,23 +59,27 @@ public abstract class AbstractExceptionHandler {
     private final boolean validationExceptionPresent;
     private final String basePackage;
     private final boolean overrideHttpError;
-    private final GlobalExceptionProperties properties;
+    private final ExceptionProperties properties;
     private final String[] exceptionResolverNames;
     private final ApplicationContext applicationContext;
+    private final ObjectProvider<HttpStatusCodeResolver> httpStatusCodeResolvers;
 
-    protected AbstractExceptionHandler(GlobalExceptionProperties properties) {
+    protected DefaultExceptionHandler(ExceptionProperties properties) {
         this.properties = properties;
         this.validationExceptionPresent = ClassUtils.isPresent("javax.validation.ValidationException", getClass().getClassLoader());
         this.applicationContext = SpringBeanUtils.getApplicationContext();
+        this.httpStatusCodeResolvers = applicationContext.getBeanProvider(HttpStatusCodeResolver.class);
         this.exceptionResolverNames = applicationContext.getBeanNamesForType(ExceptionResolver.class);
         this.basePackage = applicationContext.getEnvironment().getProperty(ConfigProperties.APP_BASE_PACKAGE);
         this.overrideHttpError = applicationContext.getEnvironment().getProperty("http.error.override",Boolean.class,true);
     }
 
-    protected GlobalExceptionProperties properties(){
+    @Override
+    public ExceptionProperties config(){
         return properties;
     }
 
+    @Override
     public RestResp<Throwable> handleException(Throwable exception) {
         RestResp<Throwable> resp = null;
         Class<? extends Throwable> exClass = exception.getClass();
@@ -90,7 +95,7 @@ public abstract class AbstractExceptionHandler {
             }
         }
         if(Objects.isNull(resp)){
-            RestResp<Object> rs = doHandleException(customHandleException(), exception);
+            RestResp<Object> rs = doHandleException(exception);
             resp = RestResp.error(rs.getErrorCode(),rs.getErrorInfo());
         }
         if(properties.isOverrideExMsg()){
@@ -103,7 +108,7 @@ public abstract class AbstractExceptionHandler {
         return resp;
     }
 
-    private RestResp<Object> doHandleException(Function<Throwable,Integer> customHandler, Throwable exception) {
+    private RestResp<Object> doHandleException(Throwable exception) {
         Integer errorCode = DEFAULT_ERROR_CODE;
         List<ValidationErrorBean> data = null;
         if(exception instanceof BaseException){
@@ -124,18 +129,14 @@ public abstract class AbstractExceptionHandler {
         }else if(exception instanceof VirtualMachineError){
             errorCode = ExceptionKeys.HTTP_ERROR_500;
             handleError((Error) exception.getCause());
-        }else if(customHandler != null){
-            Integer error = customHandler.apply(exception);
+        }else if(overrideHttpError){
+            Integer error = httpStatusCodeResolvers.orderedStream().map(resolver -> resolver.resolve(exception)).filter(Objects::nonNull).findFirst().orElse(null);
             if(error != null){
                 errorCode = error;
             }
         }
-        return buildErrorMessage(errorCode,data,exception);
-    }
-
-    private RestResp<Object> buildErrorMessage(Integer code,List<ValidationErrorBean> data,Throwable t){
-        String msg = properties.isReturnOriginExMsg() ? getMessage(t) : ErrorMsg.getErrorMsg(getErrorCode(code));
-        RestResp<Object> resp = RestResp.error(code, msg);
+        String msg = properties.isReturnOriginExMsg() ? getMessage(exception) : ErrorMsg.getErrorMsg(getErrorCode(errorCode));
+        RestResp<Object> resp = RestResp.error(errorCode, msg);
         if(McnUtils.isNotNullAndEmpty(data)){
             if(properties.isValidateResultToErrorInfo()){
                 ValidationErrorBean validationErrorBean = data.get(0);
@@ -159,17 +160,6 @@ public abstract class AbstractExceptionHandler {
 
     private Integer getErrorCode(Integer errorCode){
         return errorCode == DEFAULT_ERROR_CODE ? ExceptionKeys.SERVICE_ERROR : errorCode;
-    }
-
-    private Function<Throwable,Integer> customHandleException() {
-        if(overrideHttpError){
-            return this::mappingCode;
-        }
-        return null;
-    }
-
-    protected Integer mappingCode(Throwable exception) {
-        return null;
     }
 
     @SuppressWarnings("unchecked")
@@ -210,7 +200,7 @@ public abstract class AbstractExceptionHandler {
         return null;
     }
 
-    private static ResolvableType resolveDeclaredExceptionType(Class<?> exceptionResolverType) {
+    private ResolvableType resolveDeclaredExceptionType(Class<?> exceptionResolverType) {
         ResolvableType exceptionType = exceptionResolverTypeCache.computeIfAbsent(exceptionResolverType, e -> ResolvableType.forClass(exceptionResolverType).as(ExceptionResolver.class).getGeneric());
         return (exceptionType != ResolvableType.NONE ? exceptionType : null);
     }
@@ -226,15 +216,17 @@ public abstract class AbstractExceptionHandler {
         ).collect(Collectors.toList());
     }
 
-    protected void handleError(Error error) {
+    @Override
+    public void handleError(Error error) {
         if(error instanceof VirtualMachineError){
-            GlobalExceptionProperties.JvmError jvm = properties.getJvmError();
+            ExceptionProperties.JvmError jvm = properties.getJvmError();
             if(jvm != null && jvm.isExit()){
                 System.exit(jvm.getStatus());
             }
         }
     }
 
+    @Override
     public void logError(Throwable t){
         if(properties.isRemoveFrameworkStack()){
             dealCurrentStackTraceElement(t);

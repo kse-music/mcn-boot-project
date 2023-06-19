@@ -4,8 +4,6 @@ import cn.hiboot.mcn.autoconfigure.minio.MinioException;
 import cn.hiboot.mcn.autoconfigure.web.exception.ExceptionResolver;
 import cn.hiboot.mcn.autoconfigure.web.exception.error.DefaultErrorView;
 import cn.hiboot.mcn.autoconfigure.web.exception.error.ErrorPageController;
-import cn.hiboot.mcn.autoconfigure.web.exception.handler.GlobalExceptionHandler;
-import cn.hiboot.mcn.autoconfigure.web.exception.handler.GlobalExceptionProperties;
 import cn.hiboot.mcn.autoconfigure.web.mvc.resolver.StrToObj;
 import cn.hiboot.mcn.autoconfigure.web.mvc.resolver.StringObjectMethodArgumentResolver;
 import cn.hiboot.mcn.core.exception.ExceptionKeys;
@@ -54,7 +52,7 @@ public class SpringMvcAutoConfiguration {
 
     @Configuration(proxyBeanMethods = false)
     @Import(GlobalExceptionHandler.class)
-    @EnableConfigurationProperties({ServerProperties.class, GlobalExceptionProperties.class})
+    @EnableConfigurationProperties(ServerProperties.class)
     protected static class SpringMvcExceptionHandler{
 
         @Bean

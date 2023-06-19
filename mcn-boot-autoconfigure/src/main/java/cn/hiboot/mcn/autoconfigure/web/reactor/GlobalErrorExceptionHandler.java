@@ -1,7 +1,9 @@
 package cn.hiboot.mcn.autoconfigure.web.reactor;
 
 import cn.hiboot.mcn.autoconfigure.config.ConfigProperties;
-import cn.hiboot.mcn.autoconfigure.web.exception.handler.GlobalExceptionProperties;
+import cn.hiboot.mcn.autoconfigure.web.exception.HttpStatusCodeResolver;
+import cn.hiboot.mcn.autoconfigure.web.exception.handler.DefaultExceptionHandler;
+import cn.hiboot.mcn.autoconfigure.web.exception.handler.ExceptionHandler;
 import cn.hiboot.mcn.core.exception.ExceptionKeys;
 import cn.hiboot.mcn.core.model.result.RestResp;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +25,7 @@ import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 
 import java.util.Map;
@@ -35,22 +38,22 @@ import java.util.Map;
  * @since 2022/5/23 23:08
  */
 @ConditionalOnMissingBean(value = ErrorWebExceptionHandler.class, search = SearchStrategy.CURRENT)
-public class GlobalErrorExceptionHandler extends DefaultErrorWebExceptionHandler implements EnvironmentAware, Ordered {
+public class GlobalErrorExceptionHandler extends DefaultErrorWebExceptionHandler implements HttpStatusCodeResolver,EnvironmentAware, Ordered {
 
     private WebFluxProperties webFluxProperties;
     private int order;
-    private GlobalServerExceptionHandler exceptionHandler;
+    private ExceptionHandler exceptionHandler;
 
     public GlobalErrorExceptionHandler(ErrorAttributes errorAttributes, WebProperties webProperties, ServerProperties serverProperties, ApplicationContext applicationContext) {
         super(errorAttributes, webProperties.getResources(), serverProperties.getError(), applicationContext);
     }
 
     @Autowired
-    public void configGlobalErrorExceptionHandler(ServerCodecConfigurer serverCodecConfigurer,WebFluxProperties webFluxProperties,GlobalExceptionProperties properties) {
+    public void configGlobalErrorExceptionHandler(ServerCodecConfigurer serverCodecConfigurer, WebFluxProperties webFluxProperties, DefaultExceptionHandler exceptionHandler) {
         setMessageWriters(serverCodecConfigurer.getWriters());
         setMessageReaders(serverCodecConfigurer.getReaders());
         this.webFluxProperties = webFluxProperties;
-        this.exceptionHandler = new GlobalServerExceptionHandler(properties);
+        this.exceptionHandler = exceptionHandler;
     }
 
     @Override
@@ -85,4 +88,11 @@ public class GlobalErrorExceptionHandler extends DefaultErrorWebExceptionHandler
         return order;
     }
 
+    @Override
+    public Integer resolve(Throwable ex) {
+        if(ex instanceof ResponseStatusException){
+            return ExceptionKeys.mappingCode(((ResponseStatusException) ex).getRawStatusCode());
+        }
+        return null;
+    }
 }
