@@ -8,12 +8,13 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
   cn.hiboot.mcn.autoconfigure.jdbc.MultipleDataSourceAutoConfiguration,\
   cn.hiboot.mcn.autoconfigure.mybatis.MybatisSingleDataSourceAutoConfiguration,\
   cn.hiboot.mcn.autoconfigure.mybatis.MybatisMultipleDataSourceAutoConfiguration,\
-  cn.hiboot.mcn.autoconfigure.web.groovy.GroovyWebAutoConfiguration,\
+  cn.hiboot.mcn.autoconfigure.web.exception.ExceptionHandlerAutoConfiguration,\
   cn.hiboot.mcn.autoconfigure.web.filter.FilterAutoConfiguration,\
   cn.hiboot.mcn.autoconfigure.web.filter.integrity.DataIntegrityAutoConfiguration,\
   cn.hiboot.mcn.autoconfigure.web.filter.cors.CorsFilterAutoConfiguration,\
   cn.hiboot.mcn.autoconfigure.web.filter.xss.XssAutoConfiguration,\
   cn.hiboot.mcn.autoconfigure.web.filter.special.ParamProcessorAutoConfiguration,\
+  cn.hiboot.mcn.autoconfigure.web.groovy.GroovyWebAutoConfiguration,\
   cn.hiboot.mcn.autoconfigure.web.mvc.SpringMvcAutoConfiguration,\
   cn.hiboot.mcn.autoconfigure.web.swagger.SwaggerAutoConfiguration,\
   cn.hiboot.mcn.autoconfigure.web.security.WebSecurityAutoConfiguration,\

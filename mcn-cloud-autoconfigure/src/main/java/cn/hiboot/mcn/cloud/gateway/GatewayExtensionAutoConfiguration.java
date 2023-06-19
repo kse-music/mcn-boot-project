@@ -1,7 +1,6 @@
 package cn.hiboot.mcn.cloud.gateway;
 
-import cn.hiboot.mcn.autoconfigure.web.exception.handler.GlobalExceptionProperties;
-import cn.hiboot.mcn.autoconfigure.web.reactor.GlobalServerExceptionHandler;
+import cn.hiboot.mcn.autoconfigure.web.exception.handler.ExceptionHandler;
 import cn.hiboot.mcn.autoconfigure.web.swagger.IgnoreApi;
 import cn.hiboot.mcn.core.exception.ExceptionKeys;
 import cn.hiboot.mcn.core.model.result.RestResp;
@@ -31,10 +30,11 @@ public class GatewayExtensionAutoConfiguration {
     @RestController
     @ConditionalOnProperty(prefix = "gateway.fallback",name = "enabled",havingValue = "true",matchIfMissing = true)
     protected static class DefaultFallbackRestController{
-        private final GlobalServerExceptionHandler exceptionHandler;
 
-        public DefaultFallbackRestController(GlobalExceptionProperties properties) {
-            exceptionHandler = new GlobalServerExceptionHandler(properties);
+        private final ExceptionHandler exceptionHandler;
+
+        public DefaultFallbackRestController(ExceptionHandler exceptionHandler) {
+            this.exceptionHandler = exceptionHandler;
         }
 
         @IgnoreApi
@@ -46,10 +46,18 @@ public class GatewayExtensionAutoConfiguration {
                     return RestResp.error(ExceptionKeys.REMOTE_SERVICE_ERROR);
                 }
                 Route route = exchange.getAttribute(GATEWAY_ROUTE_ATTR);
-                return exceptionHandler.handleException(ex,(route == null ? "" : route.getUri().getHost()));
+                return handleException(ex,(route == null ? "" : route.getUri().getHost()));
             });
         }
 
-    }
+        public RestResp<Throwable> handleException(Throwable exception,String additionMsg) {
+            RestResp<Throwable> resp = exceptionHandler.handleException(exception);
+            if(exceptionHandler.config().isReturnOriginExMsg()){
+                return resp;
+            }
+            resp.setErrorInfo(additionMsg + resp.getErrorInfo());
+            return resp;
+        }
 
+    }
 }

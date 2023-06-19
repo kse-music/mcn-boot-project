@@ -1,4 +1,4 @@
-package cn.hiboot.mcn.autoconfigure.web.exception.handler;
+package cn.hiboot.mcn.autoconfigure.web.exception;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -11,7 +11,7 @@ import java.util.Map;
  * @since 2022/6/7 9:44
  */
 @ConfigurationProperties("mcn.exception.handler")
-public class GlobalExceptionProperties {
+public class ExceptionProperties {
     /**
      * 是否移除非应用包名的异常栈
      */
