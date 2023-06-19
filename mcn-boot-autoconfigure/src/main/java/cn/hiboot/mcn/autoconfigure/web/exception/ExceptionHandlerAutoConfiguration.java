@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Import;
  * @author DingHao
  * @since 2023/6/17 23:27
  */
-@AutoConfiguration(after = {SpringMvcAutoConfiguration.class, SpringWebFluxAutoConfiguration.class})
+@AutoConfiguration(before = {SpringMvcAutoConfiguration.class, SpringWebFluxAutoConfiguration.class})
 @Import(DefaultExceptionHandler.class)
 @ConditionalOnWebApplication
 @EnableConfigurationProperties(ExceptionProperties.class)
