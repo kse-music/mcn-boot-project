@@ -53,23 +53,14 @@ public class CustomException extends RuntimeException{
 @Configuration
 public class CustomExceptionResolver {
     @Bean
-    public ExceptionResolver specialSymbolExceptionResolver() {
-        return new ExceptionResolver() {
-
-            @Override
-            public boolean support(HttpServletRequest request, Throwable t) {
-                return t instanceof HttpMessageNotReadableException;
+    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
+    public ExceptionResolver<HttpMessageNotReadableException> specialSymbolExceptionResolver() {
+        return t -> {
+            ServiceException serviceException = ServiceException.find(t);
+            if(serviceException == null || serviceException.getCode() != ExceptionKeys.SPECIAL_SYMBOL_ERROR){
+                return null;
             }
-
-            @Override
-            public RestResp<Object> resolveException(HttpServletRequest request, Throwable t) {
-                ServiceException serviceException = ServiceException.find(t);
-                if (serviceException == null || serviceException.getCode() != ExceptionKeys.SPECIAL_SYMBOL_ERROR) {
-                    return null;
-                }
-                return RestResp.error(serviceException.getCode(), serviceException.getMessage());
-            }
-
+            return RestResp.error(serviceException.getCode(),serviceException.getMessage());
         };
     }
 }
