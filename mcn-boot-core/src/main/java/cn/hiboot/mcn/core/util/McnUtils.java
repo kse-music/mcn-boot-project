@@ -13,10 +13,8 @@ import java.lang.reflect.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.Temporal;
@@ -332,6 +330,23 @@ public abstract class McnUtils {
             return Files.copy(in,target);
         }catch (IOException e){
             throw ServiceException.newInstance("copy file failed",e);
+        }
+    }
+
+    public static void deleteDirectory(String path){
+        try {
+            Files.walkFileTree(Paths.get(path),new SimpleFileVisitor<Path>(){
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    Files.delete(file);
+                    return FileVisitResult.CONTINUE;
+                }
+                public FileVisitResult postVisitDirectory(Path dir,IOException exc) throws IOException{
+                    Files.delete(dir);
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+        } catch (IOException e) {
+            //ignore
         }
     }
 
