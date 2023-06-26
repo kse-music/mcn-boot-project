@@ -1,11 +1,8 @@
 package cn.hiboot.mcn.autoconfigure.bootstrap;
 
+import cn.hiboot.mcn.core.util.McnUtils;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.util.ObjectUtils;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 /**
  * LogFileChecker
@@ -23,11 +20,7 @@ public class LogFileChecker {
             if(ObjectUtils.nullSafeEquals(getLogFile(environment),originalLogFile)){
                 return;
             }
-            try {
-                Files.delete(Paths.get(originalLogFile));
-            } catch (IOException e) {
-                //ignore
-            }
+            McnUtils.deleteFile(originalLogFile);
         }
     }
 

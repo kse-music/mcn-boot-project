@@ -333,9 +333,13 @@ public abstract class McnUtils {
         }
     }
 
-    public static void deleteDirectory(String path){
+    public static void deleteFile(String filePath){
+        deleteDirectory(filePath);
+    }
+
+    public static void deleteDirectory(String dirPath){
         try {
-            Files.walkFileTree(Paths.get(path),new SimpleFileVisitor<Path>(){
+            Files.walkFileTree(Paths.get(dirPath),new SimpleFileVisitor<Path>(){
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                     Files.delete(file);
                     return FileVisitResult.CONTINUE;
