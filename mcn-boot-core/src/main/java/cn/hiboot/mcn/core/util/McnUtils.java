@@ -525,4 +525,18 @@ public abstract class McnUtils {
         loadJar(ClassLoader.getSystemClassLoader(), jarDir);
     }
 
+    public static String substring(String str,int maxLength) {
+        if(str == null){
+            return null;
+        }
+        return str.length() < maxLength ? str : str.substring(0,maxLength);
+    }
+
+    public static <T> List<T> sublist(List<T> list,int maxLength) {
+        if(list == null){
+            return null;
+        }
+        return list.size() < maxLength ? list : list.subList(0,maxLength);
+    }
+
 }
