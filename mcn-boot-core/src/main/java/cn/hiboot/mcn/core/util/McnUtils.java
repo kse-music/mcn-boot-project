@@ -539,4 +539,16 @@ public abstract class McnUtils {
         return list.size() < maxLength ? list : list.subList(0,maxLength);
     }
 
+    public static <S> List<S> list(Iterable<S> iterable){
+        List<S> rs = new ArrayList<>();
+        iterable.forEach(rs::add);
+        return rs;
+    }
+
+    public static <S> Set<S> set(Iterable<S> iterable){
+        Set<S> rs = new HashSet<>();
+        iterable.forEach(rs::add);
+        return rs;
+    }
+
 }
