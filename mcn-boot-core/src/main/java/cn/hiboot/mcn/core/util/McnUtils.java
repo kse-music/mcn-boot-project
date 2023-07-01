@@ -13,10 +13,8 @@ import java.lang.reflect.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.Temporal;
@@ -205,26 +203,8 @@ public abstract class McnUtils {
         return !isNullOrEmpty(obj);
     }
 
-    public static String dealUrlPath(String path) {
-        if(path == null || path.isEmpty()){
-            return "";
-        }
-        while (path.contains("//")){
-            path = path.replace("//","/");
-        }
-        if(!path.startsWith("/")){
-            path = "/" + path;
-        }
-        if(path.endsWith("/")){
-            path = path.substring(0, path.lastIndexOf("/"));
-        }else if(path.endsWith("/*")){
-            path = path.substring(0, path.lastIndexOf("/*"));
-        }
-        return path;
-    }
-
     public static String getExtName(String fileName){
-        if(fileName == null){
+        if(isNullOrEmpty(fileName)){
             return "";
         }
         int i = fileName.lastIndexOf(".");
@@ -350,6 +330,27 @@ public abstract class McnUtils {
             return Files.copy(in,target);
         }catch (IOException e){
             throw ServiceException.newInstance("copy file failed",e);
+        }
+    }
+
+    public static void deleteFile(String filePath){
+        deleteDirectory(filePath);
+    }
+
+    public static void deleteDirectory(String dirPath){
+        try {
+            Files.walkFileTree(Paths.get(dirPath),new SimpleFileVisitor<Path>(){
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    Files.delete(file);
+                    return FileVisitResult.CONTINUE;
+                }
+                public FileVisitResult postVisitDirectory(Path dir,IOException exc) throws IOException{
+                    Files.delete(dir);
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+        } catch (IOException e) {
+            //ignore
         }
     }
 
@@ -522,6 +523,32 @@ public abstract class McnUtils {
 
     public static void loadJarToSystemClassLoader(String jarDir) {
         loadJar(ClassLoader.getSystemClassLoader(), jarDir);
+    }
+
+    public static String substring(String str,int maxLength) {
+        if(str == null){
+            return null;
+        }
+        return str.length() < maxLength ? str : str.substring(0,maxLength);
+    }
+
+    public static <T> List<T> sublist(List<T> list,int maxLength) {
+        if(list == null){
+            return null;
+        }
+        return list.size() < maxLength ? list : list.subList(0,maxLength);
+    }
+
+    public static <S> List<S> list(Iterable<S> iterable){
+        List<S> rs = new ArrayList<>();
+        iterable.forEach(rs::add);
+        return rs;
+    }
+
+    public static <S> Set<S> set(Iterable<S> iterable){
+        Set<S> rs = new HashSet<>();
+        iterable.forEach(rs::add);
+        return rs;
     }
 
 }
