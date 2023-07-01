@@ -7,7 +7,9 @@ import org.springframework.boot.autoconfigure.web.ErrorProperties;
 import org.springframework.boot.autoconfigure.web.servlet.error.BasicErrorController;
 import org.springframework.boot.autoconfigure.web.servlet.error.ErrorViewResolver;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 import javax.servlet.http.HttpServletRequest;
@@ -36,7 +38,9 @@ public class ErrorPageController extends BasicErrorController {
             rs.put("ActionStatus",resp.getActionStatus());
             rs.put("ErrorCode",resp.getErrorCode());
             rs.put("ErrorInfo",resp.getErrorInfo());
-            return new ResponseEntity<>(rs, HttpStatus.valueOf(HttpServletResponse.SC_OK));
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.parseMediaType("application/json;charset=UTF-8"));
+            return new ResponseEntity<>(rs, headers,HttpStatus.valueOf(HttpServletResponse.SC_OK));
         }
         return error;
     }
