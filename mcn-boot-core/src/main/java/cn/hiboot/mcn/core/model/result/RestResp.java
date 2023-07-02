@@ -4,6 +4,7 @@ import cn.hiboot.mcn.core.exception.BaseException;
 import cn.hiboot.mcn.core.exception.ErrorMsg;
 import cn.hiboot.mcn.core.exception.ExceptionKeys;
 import cn.hiboot.mcn.core.exception.ServiceException;
+import cn.hiboot.mcn.core.model.DictionaryData;
 import cn.hiboot.mcn.core.model.HttpTime;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -11,28 +12,67 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.function.BiFunction;
 
+/**
+ * 接口返回数据统一格式
+ */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class RestResp<T> implements HttpTime {
-	
-    public enum ActionStatusMethod {
-        OK,
-        FAIL
+
+    public enum ActionStatusMethod implements DictionaryData {
+
+		OK {
+			@Override
+			public String getValue() {
+				return "Invoke Success";
+			}
+		},
+		FAIL {
+			@Override
+			public String getValue() {
+				return "Invoke Failed";
+			}
+		};
+
+		@Override
+		public String getKey() {
+			return this.name();
+		}
+
     }
-	
+
+	/**
+	 * 接口响应状态:OK/FAIL
+	 */
     @JsonProperty("ActionStatus")
 	private ActionStatusMethod ActionStatus = ActionStatusMethod.OK;
 
+	/**
+	 * 接口返回错误码
+	 *
+	 */
     @JsonProperty("ErrorCode")
 	private Integer ErrorCode = 0;
 
+	/**
+	 * 接口返回错误信息
+	 */
     @JsonProperty("ErrorInfo")
 	private String ErrorInfo = "";
 
+	/**
+	 * 接口执行时间
+	 */
 	@JsonProperty("Duration")
 	private Long duration;
 
+	/**
+	 * 接口返回数据
+	 */
 	private T data;
 
+	/**
+	 * 接口返回数据的总数
+	 */
 	private Long count;
 
 	public RestResp() {	}

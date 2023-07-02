@@ -13,8 +13,14 @@ import java.util.Date;
 @MappedSuperclass
 public abstract class BaseBean {
 
+    /**
+     * 創建时间
+     */
     @Column(name = "create_at",insertable = false,updatable = false)
     private Date createAt;
+    /**
+     * 更新时间
+     */
     @Column(name = "update_at",insertable = false,updatable = false)
     private Date updateAt;
 

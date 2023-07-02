@@ -41,6 +41,12 @@
             <optional>true</optional>
         </dependency>
 
+        <dependency>
+            <groupId>com.github.shalousun</groupId>
+            <artifactId>smart-doc</artifactId>
+            <optional>true</optional>
+        </dependency>
+
     </dependencies>
 
 </project>

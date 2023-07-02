@@ -15,10 +15,12 @@ public class PageSort {
 
     /**
      * 当前页，默认1
+     * @mock 1
      */
     private int pageNo = 1;
     /**
      * 每页数，默认10
+     * @mock 10
      */
     private int pageSize = 10;
 
