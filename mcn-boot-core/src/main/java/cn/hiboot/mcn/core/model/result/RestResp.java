@@ -4,7 +4,6 @@ import cn.hiboot.mcn.core.exception.BaseException;
 import cn.hiboot.mcn.core.exception.ErrorMsg;
 import cn.hiboot.mcn.core.exception.ExceptionKeys;
 import cn.hiboot.mcn.core.exception.ServiceException;
-import cn.hiboot.mcn.core.model.DictionaryData;
 import cn.hiboot.mcn.core.model.HttpTime;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -18,25 +17,16 @@ import java.util.function.BiFunction;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class RestResp<T> implements HttpTime {
 
-    public enum ActionStatusMethod implements DictionaryData {
+    public enum ActionStatusMethod {
 
-		OK {
-			@Override
-			public String getValue() {
-				return "Invoke Success";
-			}
-		},
-		FAIL {
-			@Override
-			public String getValue() {
-				return "Invoke Failed";
-			}
-		};
-
-		@Override
-		public String getKey() {
-			return this.name();
-		}
+		/**
+		 * 成功
+		 */
+		OK,
+		/**
+		 * 失败
+		 */
+		FAIL
 
     }
 
