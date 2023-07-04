@@ -14,7 +14,7 @@ import java.util.Date;
 public abstract class BaseBean {
 
     /**
-     * 創建时间
+     * 创建时间
      */
     @Column(name = "create_at",insertable = false,updatable = false)
     private Date createAt;
