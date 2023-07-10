@@ -18,7 +18,7 @@
 | mapstruct                         | mapstruct.version                     |   1.5.2.Final    |
 | mybatis-spring-boot-starter       | mybatis-spring-boot.version           |      2.2.2       |
 | minio                             | minio.version                         |      8.4.6       |
-| smart-doc                         | smart-doc.version                     |      2.7.1       |
+| smart-doc                         | smart-doc.version                     |      2.7.2       |
 | snakeyaml                         | snakeyaml.version                     |       2.0        |
 | spring-boot-dependencies          | spring-boot.version                   |      2.7.13      |
 | spring-cloud-dependencies         | spring-cloud.version                  |     2021.0.8     |

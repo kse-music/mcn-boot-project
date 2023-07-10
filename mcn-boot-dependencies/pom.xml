@@ -44,7 +44,7 @@
         <mybatis-spring-boot.version>2.2.2</mybatis-spring-boot.version>
         <mysql.version>8.0.33</mysql.version>
         <minio.version>8.4.6</minio.version>
-        <smart-doc.version>2.7.1</smart-doc.version>
+        <smart-doc.version>2.7.2</smart-doc.version>
         <snakeyaml.version>2.0</snakeyaml.version>
         <spring-boot.version>2.7.13</spring-boot.version>
         <spring-cloud.version>2021.0.8</spring-cloud.version>
