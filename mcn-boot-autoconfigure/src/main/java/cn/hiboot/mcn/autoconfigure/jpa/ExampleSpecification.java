@@ -42,7 +42,7 @@ public class ExampleSpecification<T> implements Specification<T> {
 
     ExampleSpecification(T t, List<PredicateProvider<T>> predicateProviders) {
         this.predicateProviders = predicateProviders;
-        if(t != null){
+        if(!McnUtils.isFieldAllNull(t)){
             this.example = Example.of(t);
         }
     }
@@ -52,26 +52,27 @@ public class ExampleSpecification<T> implements Specification<T> {
         if(example == null && McnUtils.isNullOrEmpty(predicateProviders)){
             return null;
         }
-        List<Predicate> predicates =  new ArrayList<>();
+        Predicate beanPredicate = null;
         if(example != null){
-            predicates.add(QueryByExamplePredicateBuilder.getPredicate(root, criteriaBuilder,example,escapeCharacter));
+            beanPredicate = criteriaBuilder.and(QueryByExamplePredicateBuilder.getPredicate(root, criteriaBuilder, example, escapeCharacter));
         }
-        if(predicateProviders != null){
-            for (PredicateProvider<T> predicateProvider : predicateProviders) {
-                Predicate predicate = predicateProvider.getPredicate(root, criteriaBuilder);
-                if(predicate == null){
-                    continue;
-                }
-                predicates.add(predicate);
+        List<Predicate> predicates =  new ArrayList<>(predicateProviders.size());
+        for (PredicateProvider<T> predicateProvider : predicateProviders) {
+            Predicate predicate = predicateProvider.getPredicate(root, criteriaBuilder);
+            if(predicate == null){
+                continue;
             }
+            predicates.add(predicate);
         }
         if(predicates.isEmpty()){
-            return null;
+            return beanPredicate;
         }
-        if(isOr){
-            return criteriaBuilder.or(predicates.toArray(new Predicate[0]));
+        Predicate[] predicatesArray = predicates.toArray(new Predicate[0]);
+        Predicate logicPredicate = isOr ? criteriaBuilder.or(predicatesArray) : criteriaBuilder.and(predicatesArray);
+        if(beanPredicate == null){
+            return logicPredicate;
         }
-        return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        return criteriaBuilder.and(beanPredicate,logicPredicate);
     }
 
     public ExampleSpecification<T> escapeCharacter(EscapeCharacter escapeCharacter) {

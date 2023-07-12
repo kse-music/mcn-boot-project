@@ -551,4 +551,23 @@ public abstract class McnUtils {
         return rs;
     }
 
+    public static boolean isFieldAllNull(Object obj) {
+        if (obj != null) {
+            Field[] fields = obj.getClass().getDeclaredFields();
+            for (Field field : fields) {
+                field.setAccessible(true);
+                Object fieldObj;
+                try {
+                    fieldObj = field.get(obj);
+                } catch (IllegalAccessException e) {
+                    continue;
+                }
+                if (Objects.nonNull(fieldObj)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
 }
