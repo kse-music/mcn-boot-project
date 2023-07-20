@@ -12,7 +12,6 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -23,58 +22,47 @@ import java.util.List;
  */
 public class ExampleSpecification<T> implements Specification<T> {
 
-    private List<PredicateProvider<T>> andPredicateProviders;
-    private List<PredicateProvider<T>> orPredicateProviders;
+    private final PredicateProvider<T>[] predicateProviders;
     private Example<T> example;
     private EscapeCharacter escapeCharacter = EscapeCharacter.DEFAULT;
     private boolean isOr;
 
-    private ExampleSpecification(T t) {
-        if(!McnUtils.isFieldAllNull(t)){
-            this.example = Example.of(t);
+    @SafeVarargs
+    ExampleSpecification(PredicateProvider<T>... predicateProviders) {
+        this.predicateProviders = predicateProviders;
+    }
+
+    @SafeVarargs
+    ExampleSpecification(T bean, PredicateProvider<T>... predicateProviders) {
+        this(predicateProviders);
+        if(!McnUtils.isFieldAllNull(bean)){
+            this.example = Example.of(bean);
         }
     }
 
-    ExampleSpecification(T t, List<PredicateProvider<T>> andPredicateProviders, List<PredicateProvider<T>> orPredicateProviders) {
-        this(t);
-        this.andPredicateProviders = andPredicateProviders;
-        this.orPredicateProviders = orPredicateProviders;
+    ExampleSpecification<T> or() {
+        this.isOr = true;
+        return this;
     }
 
-    public void setAndPredicateProviders(List<PredicateProvider<T>> andPredicateProviders) {
-        this.andPredicateProviders = andPredicateProviders;
-    }
-
-    public void setOrPredicateProviders(List<PredicateProvider<T>> orPredicateProviders) {
-        this.orPredicateProviders = orPredicateProviders;
-    }
-
-    public void setOr(boolean or) {
-        isOr = or;
+    public ExampleSpecification<T> escapeCharacter(EscapeCharacter escapeCharacter) {
+        this.escapeCharacter = escapeCharacter;
+        return this;
     }
 
     @Override
     public Predicate toPredicate(@NonNull Root<T> root, @NonNull CriteriaQuery<?> query, @NonNull CriteriaBuilder criteriaBuilder) {
-        if(example == null && McnUtils.isNullOrEmpty(andPredicateProviders) && McnUtils.isNullOrEmpty(orPredicateProviders)){
+        if(example == null && McnUtils.isNullOrEmpty(predicateProviders)){
             return null;
         }
         Predicate beanPredicate = null;
         if(example != null){
             beanPredicate = criteriaBuilder.and(QueryByExamplePredicateBuilder.getPredicate(root, criteriaBuilder, example, escapeCharacter));
         }
-        Predicate[] andPredicates =  predicates(andPredicateProviders,root,criteriaBuilder);
-        Predicate[] orPredicates =  predicates(orPredicateProviders,root,criteriaBuilder);
+        Predicate[] predicates =  predicates(predicateProviders,root,criteriaBuilder);
         Predicate logicPredicate = null;
-        if(McnUtils.isNotNullAndEmpty(andPredicates)){
-            logicPredicate = criteriaBuilder.and(andPredicates);
-        }
-        if(McnUtils.isNotNullAndEmpty(orPredicates)){
-            Predicate orPredicate = criteriaBuilder.or(orPredicates);
-            if(logicPredicate == null){
-                logicPredicate = orPredicate;
-            }else {
-                logicPredicate = isOr ? criteriaBuilder.or(logicPredicate,orPredicate) : criteriaBuilder.and(logicPredicate,orPredicate);
-            }
+        if(McnUtils.isNotNullAndEmpty(predicates)){
+            logicPredicate = isOr ? criteriaBuilder.or(predicates) : criteriaBuilder.and(predicates);
         }
         if(beanPredicate == null){
             return logicPredicate;
@@ -82,11 +70,11 @@ public class ExampleSpecification<T> implements Specification<T> {
         return isOr ? criteriaBuilder.or(beanPredicate,logicPredicate) : criteriaBuilder.and(beanPredicate,logicPredicate);
     }
 
-    private Predicate[] predicates(List<PredicateProvider<T>> predicateProviders,Root<T> root, CriteriaBuilder criteriaBuilder){
+    private Predicate[] predicates(PredicateProvider<T>[] predicateProviders,Root<T> root, CriteriaBuilder criteriaBuilder){
         if(McnUtils.isNullOrEmpty(predicateProviders)){
             return null;
         }
-        List<Predicate> predicates =  new ArrayList<>(predicateProviders.size());
+        List<Predicate> predicates =  new ArrayList<>(predicateProviders.length);
         for (PredicateProvider<T> predicateProvider : predicateProviders) {
             Predicate predicate = predicateProvider.getPredicate(root, criteriaBuilder);
             if(predicate == null){
@@ -97,50 +85,5 @@ public class ExampleSpecification<T> implements Specification<T> {
         return predicates.toArray(new Predicate[0]);
     }
 
-    public ExampleSpecification<T> escapeCharacter(EscapeCharacter escapeCharacter) {
-        this.escapeCharacter = escapeCharacter;
-        return this;
-    }
-
-    public static class Builder<B> {
-        private PredicateProvider<B>[] andPredicateProviders;
-        private PredicateProvider<B>[] orPredicateProviders;
-        private B bean;
-        private boolean isOr;
-
-        @SafeVarargs
-        public final Builder<B> and(PredicateProvider<B>... andPredicateProviders) {
-            this.andPredicateProviders = andPredicateProviders;
-            return this;
-        }
-
-        @SafeVarargs
-        public final Builder<B> or(PredicateProvider<B>... orPredicateProviders) {
-            this.orPredicateProviders = orPredicateProviders;
-            return this;
-        }
-
-        public Builder<B> bean(B bean) {
-            this.bean = bean;
-            return this;
-        }
-
-        public Builder<B> globalOr() {
-            this.isOr = true;
-            return this;
-        }
-
-        public ExampleSpecification<B> build(){
-            ExampleSpecification<B> exampleSpecification = new ExampleSpecification<>(bean);
-            if(andPredicateProviders != null){
-                exampleSpecification.setAndPredicateProviders(Arrays.asList(andPredicateProviders));
-            }
-            if(orPredicateProviders != null){
-                exampleSpecification.setOrPredicateProviders(Arrays.asList(orPredicateProviders));
-            }
-            exampleSpecification.setOr(isOr);
-            return exampleSpecification;
-        }
-    }
 
 }
