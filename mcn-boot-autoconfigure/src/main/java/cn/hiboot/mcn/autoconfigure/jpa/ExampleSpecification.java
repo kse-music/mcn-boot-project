@@ -12,7 +12,6 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -23,55 +22,27 @@ import java.util.List;
  */
 public class ExampleSpecification<T> implements Specification<T> {
 
-    private final List<PredicateProvider<T>> predicateProviders;
+    private final PredicateProvider<T>[] predicateProviders;
     private Example<T> example;
     private EscapeCharacter escapeCharacter = EscapeCharacter.DEFAULT;
     private boolean isOr;
 
-    ExampleSpecification(PredicateProvider<T> predicateProvider) {
-        this(Collections.singletonList(predicateProvider));
-    }
-
-    ExampleSpecification(List<PredicateProvider<T>> predicateProviders) {
-        this(null,predicateProviders);
-    }
-
-    ExampleSpecification(T t, PredicateProvider<T> predicateProvider) {
-        this(t, Collections.singletonList(predicateProvider));
-    }
-
-    ExampleSpecification(T t, List<PredicateProvider<T>> predicateProviders) {
+    @SafeVarargs
+    ExampleSpecification(PredicateProvider<T>... predicateProviders) {
         this.predicateProviders = predicateProviders;
-        if(t != null){
-            this.example = Example.of(t);
+    }
+
+    @SafeVarargs
+    ExampleSpecification(T bean, PredicateProvider<T>... predicateProviders) {
+        this(predicateProviders);
+        if(!McnUtils.isFieldAllNull(bean)){
+            this.example = Example.of(bean);
         }
     }
 
-    @Override
-    public Predicate toPredicate(@NonNull Root<T> root, @NonNull CriteriaQuery<?> query, @NonNull CriteriaBuilder criteriaBuilder) {
-        if(example == null && McnUtils.isNullOrEmpty(predicateProviders)){
-            return null;
-        }
-        List<Predicate> predicates =  new ArrayList<>();
-        if(example != null){
-            predicates.add(QueryByExamplePredicateBuilder.getPredicate(root, criteriaBuilder,example,escapeCharacter));
-        }
-        if(predicateProviders != null){
-            for (PredicateProvider<T> predicateProvider : predicateProviders) {
-                Predicate predicate = predicateProvider.getPredicate(root, criteriaBuilder);
-                if(predicate == null){
-                    continue;
-                }
-                predicates.add(predicate);
-            }
-        }
-        if(predicates.isEmpty()){
-            return null;
-        }
-        if(isOr){
-            return criteriaBuilder.or(predicates.toArray(new Predicate[0]));
-        }
-        return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+    ExampleSpecification<T> or() {
+        this.isOr = true;
+        return this;
     }
 
     public ExampleSpecification<T> escapeCharacter(EscapeCharacter escapeCharacter) {
@@ -79,9 +50,40 @@ public class ExampleSpecification<T> implements Specification<T> {
         return this;
     }
 
-    ExampleSpecification<T> or() {
-        this.isOr = true;
-        return this;
+    @Override
+    public Predicate toPredicate(@NonNull Root<T> root, @NonNull CriteriaQuery<?> query, @NonNull CriteriaBuilder criteriaBuilder) {
+        if(example == null && McnUtils.isNullOrEmpty(predicateProviders)){
+            return null;
+        }
+        Predicate beanPredicate = null;
+        if(example != null){
+            beanPredicate = criteriaBuilder.and(QueryByExamplePredicateBuilder.getPredicate(root, criteriaBuilder, example, escapeCharacter));
+        }
+        Predicate[] predicates =  predicates(predicateProviders,root,criteriaBuilder);
+        Predicate logicPredicate = null;
+        if(McnUtils.isNotNullAndEmpty(predicates)){
+            logicPredicate = isOr ? criteriaBuilder.or(predicates) : criteriaBuilder.and(predicates);
+        }
+        if(beanPredicate == null){
+            return logicPredicate;
+        }
+        return isOr ? criteriaBuilder.or(beanPredicate,logicPredicate) : criteriaBuilder.and(beanPredicate,logicPredicate);
     }
+
+    private Predicate[] predicates(PredicateProvider<T>[] predicateProviders,Root<T> root, CriteriaBuilder criteriaBuilder){
+        if(McnUtils.isNullOrEmpty(predicateProviders)){
+            return null;
+        }
+        List<Predicate> predicates =  new ArrayList<>(predicateProviders.length);
+        for (PredicateProvider<T> predicateProvider : predicateProviders) {
+            Predicate predicate = predicateProvider.getPredicate(root, criteriaBuilder);
+            if(predicate == null){
+                continue;
+            }
+            predicates.add(predicate);
+        }
+        return predicates.toArray(new Predicate[0]);
+    }
+
 
 }
