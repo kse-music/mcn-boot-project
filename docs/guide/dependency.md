@@ -20,7 +20,7 @@
 | minio                             | minio.version                         |      8.4.6       |
 | smart-doc                         | smart-doc.version                     |      2.7.2       |
 | snakeyaml                         | snakeyaml.version                     |       2.0        |
-| spring-boot-dependencies          | spring-boot.version                   |      2.7.13      |
+| spring-boot-dependencies          | spring-boot.version                   |      2.7.14      |
 | spring-cloud-dependencies         | spring-cloud.version                  |     2021.0.8     |
 | spring-cloud-alibaba-dependencies | spring-cloud-alibaba.version          |    2021.0.5.0    |
 | spring-cloud-huawei-bom           | spring-cloud-huawei.version           | 1.10.10-2021.0.x |

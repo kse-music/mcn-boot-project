@@ -35,7 +35,7 @@
         <boot-admin.version>2.7.10</boot-admin.version>
         <commons-io.version>2.13.0</commons-io.version>
         <fastjson.version>1.2.83</fastjson.version>
-        <fastjson2.version>2.0.14</fastjson2.version>
+        <fastjson2.version>2.0.35</fastjson2.version>
         <guava.version>32.1.1-jre</guava.version>
         <hutool.version>5.8.20</hutool.version>
         <jsoup.version>1.16.1</jsoup.version>
@@ -46,7 +46,7 @@
         <minio.version>8.4.6</minio.version>
         <smart-doc.version>2.7.2</smart-doc.version>
         <snakeyaml.version>2.0</snakeyaml.version>
-        <spring-boot.version>2.7.13</spring-boot.version>
+        <spring-boot.version>2.7.14</spring-boot.version>
         <spring-cloud.version>2021.0.8</spring-cloud.version>
         <spring-cloud-alibaba.version>2021.0.5.0</spring-cloud-alibaba.version>
         <spring-cloud-huawei.version>1.10.10-2021.0.x</spring-cloud-huawei.version>
