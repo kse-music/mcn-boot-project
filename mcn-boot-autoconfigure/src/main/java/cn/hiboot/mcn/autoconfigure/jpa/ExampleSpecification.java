@@ -64,8 +64,14 @@ public class ExampleSpecification<T> implements Specification<T> {
         if(McnUtils.isNotNullAndEmpty(predicates)){
             logicPredicate = isOr ? criteriaBuilder.or(predicates) : criteriaBuilder.and(predicates);
         }
+        if(beanPredicate == null && logicPredicate == null){
+            return null;
+        }
         if(beanPredicate == null){
             return logicPredicate;
+        }
+        if(logicPredicate == null){
+            return beanPredicate;
         }
         return isOr ? criteriaBuilder.or(beanPredicate,logicPredicate) : criteriaBuilder.and(beanPredicate,logicPredicate);
     }
