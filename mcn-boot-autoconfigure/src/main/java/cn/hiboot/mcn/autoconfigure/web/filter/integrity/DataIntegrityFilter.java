@@ -4,7 +4,7 @@ import cn.hiboot.mcn.autoconfigure.web.filter.common.JsonRequestHelper;
 import cn.hiboot.mcn.autoconfigure.web.filter.common.RequestMatcher;
 import cn.hiboot.mcn.autoconfigure.web.filter.common.RequestPayloadRequestWrapper;
 import cn.hiboot.mcn.autoconfigure.web.mvc.ResponseUtils;
-import cn.hutool.core.net.URLDecoder;
+import cn.hiboot.mcn.core.util.McnUtils;
 import cn.hutool.core.util.StrUtil;
 import org.springframework.core.Ordered;
 import org.springframework.http.MediaType;
@@ -14,7 +14,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
@@ -107,23 +106,20 @@ public class DataIntegrityFilter implements Filter, Ordered {
     }
 
     private String parseUpload(HttpServletRequest request) {
-        String str = "";
+        StringBuilder str = new StringBuilder();
         try {
             Collection<Part> parts = request.getParts();
             for (Part part : parts) {
-                String filename = part.getSubmittedFileName();
-                if (filename != null) {
-                    if (filename.startsWith("=?") && filename.endsWith("?=")) {
-                        filename = URLDecoder.decode(filename,StandardCharsets.UTF_8);
-                    }
-                    str = str.concat(filename + part.getSize());
-                }
+                str.append(DataIntegrityUtils.md5UploadFile(McnUtils.copyToByteArray(part.getInputStream()),part.getSubmittedFileName())).append("&");
             }
         }
         catch (Throwable ex) {
-            //
+            //ignore
         }
-        return str;
+        if (str.length() != 0) {
+            return str.substring(0, str.length() - 1);
+        }
+        return str.toString();
     }
 
 }

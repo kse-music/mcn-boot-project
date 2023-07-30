@@ -35,6 +35,8 @@ import java.util.zip.ZipFile;
  * @since 2018/12/22 13:23
  */
 public abstract class McnUtils {
+    private static final int BUFFER_SIZE = 4096;
+
     private static final String DOT = ".";
     private static final DateTimeFormatter PATTERN_1 = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private static final DateTimeFormatter PATTERN_2 = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -330,8 +332,49 @@ public abstract class McnUtils {
             return Files.copy(in,target);
         }catch (IOException e){
             throw ServiceException.newInstance("copy file failed",e);
+        }finally {
+            close(in);
         }
     }
+
+    public static long copyFile(byte[] bytes,Path target) {
+        return copyFile(new ByteArrayInputStream(bytes),target);
+    }
+
+    public static byte[] copyToByteArray(InputStream in) throws IOException {
+        if (in == null) {
+            return new byte[0];
+        }
+        ByteArrayOutputStream out = new ByteArrayOutputStream(BUFFER_SIZE);
+        try{
+            copy(in, out);
+            return out.toByteArray();
+        }finally {
+            close(in);
+            close(out);
+        }
+    }
+
+    private static void close(Closeable closeable) {
+        try {
+            closeable.close();
+        }catch (IOException ex) {
+            // ignore
+        }
+    }
+
+    public static int copy(InputStream in, OutputStream out) throws IOException {
+        int byteCount = 0;
+        byte[] buffer = new byte[BUFFER_SIZE];
+        int bytesRead;
+        while ((bytesRead = in.read(buffer)) != -1) {
+            out.write(buffer, 0, bytesRead);
+            byteCount += bytesRead;
+        }
+        out.flush();
+        return byteCount;
+    }
+
 
     public static void deleteFile(String filePath){
         deleteDirectory(filePath);

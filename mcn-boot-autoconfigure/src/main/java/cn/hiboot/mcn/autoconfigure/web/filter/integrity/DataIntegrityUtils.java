@@ -3,13 +3,16 @@ package cn.hiboot.mcn.autoconfigure.web.filter.integrity;
 import cn.hiboot.mcn.core.tuples.Triplet;
 import cn.hiboot.mcn.core.util.JacksonUtils;
 import cn.hiboot.mcn.core.util.McnUtils;
+import cn.hutool.core.net.URLDecoder;
 import cn.hutool.core.text.StrBuilder;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SmUtil;
+import cn.hutool.crypto.digest.DigestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
@@ -64,9 +67,19 @@ public abstract class DataIntegrityUtils {
             }
             content.append(param).append("=").append(obj).append("&");
         }
-        if (content.length() > 0) {
+        if (!content.isEmpty()) {
             return content.subString(0, content.length() - 1);
         }
         return content.toString();
+    }
+
+    public static String md5UploadFile(byte[] bytes,String filename){
+        if (filename != null) {
+            if (filename.startsWith("=?") && filename.endsWith("?=")) {
+                filename = URLDecoder.decode(filename, StandardCharsets.UTF_8);
+            }
+        }
+        String md5 = DigestUtil.md5Hex(bytes);
+        return filename + "=" + md5;
     }
 }
