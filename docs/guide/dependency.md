@@ -12,7 +12,7 @@
 | fastjson                          | fastjson.version                      |      1.2.83      |
 | fastjson2                         | fastjson2.version                     |      2.0.14      |
 | guava                             | guava.version                         |    32.1.1-jre    |
-| hutool-bom                        | hutool.version                        |      5.8.20      |
+| hutool-bom                        | hutool.version                        |      5.8.21      |
 | jsoup                             | jsoup.version                         |      1.16.1      |
 | knife4j-spring-ui                 | knife4j.version                       |      3.0.3       |
 | mapstruct                         | mapstruct.version                     |   1.5.2.Final    |

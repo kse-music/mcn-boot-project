@@ -7,7 +7,6 @@ import cn.hiboot.mcn.autoconfigure.web.filter.integrity.DataIntegrityProperties;
 import cn.hiboot.mcn.autoconfigure.web.filter.integrity.DataIntegrityUtils;
 import cn.hiboot.mcn.autoconfigure.web.reactor.ServerHttpResponseUtils;
 import cn.hiboot.mcn.core.tuples.Pair;
-import cn.hutool.core.net.URLDecoder;
 import cn.hutool.core.util.StrUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +22,6 @@ import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -114,7 +112,7 @@ public class ReactiveDataIntegrityFilter implements OrderedWebFilter {
         if (Objects.equals(signature, sign)) {
             return false;
         }
-        log.error("kv param = {},payload = {},signature = {}",params,payload,sign);
+        log.error("kv param = {},payload = {},fileInfo = {},signature = {}",params,payload,fileInfo,sign);
         return true;
     }
 
@@ -125,9 +123,12 @@ public class ReactiveDataIntegrityFilter implements OrderedWebFilter {
                 StringBuilder str = new StringBuilder();
                 m.forEach((k,v) -> {
                     for (Part part : v) {
-                        part.content().map(DataBuffer::capacity).subscribe(l -> str.append(getSubmittedFileName(part)).append(l));
+                        part.content().map(dataBuffer -> dataBuffer.asByteBuffer().array()).subscribe(bytes -> str.append(DataIntegrityUtils.md5UploadFile(bytes,getSubmittedFileName(part))).append("&"));
                     }
                 });
+                if (str.length() != 0) {
+                    return str.substring(0, str.length() - 1);
+                }
                 return str.toString();
             });
         }
@@ -148,12 +149,6 @@ public class ReactiveDataIntegrityFilter implements OrderedWebFilter {
                     }
                 }
             }
-        }
-        if(fileName == null){
-            return "";
-        }
-        if (fileName.startsWith("=?") && fileName.endsWith("?=")) {
-            fileName = URLDecoder.decode(fileName,StandardCharsets.UTF_8);
         }
         return fileName;
     }
