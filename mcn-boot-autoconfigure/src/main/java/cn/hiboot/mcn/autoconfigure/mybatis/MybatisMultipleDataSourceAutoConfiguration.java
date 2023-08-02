@@ -98,7 +98,7 @@ public class MybatisMultipleDataSourceAutoConfiguration {
             if (resourceLoader != null) {
                 scanner.setResourceLoader(resourceLoader);
             }
-            scanner.setBeanNameGenerator(new FullyQualifiedAnnotationBeanNameGenerator());
+            scanner.setBeanNameGenerator(FullyQualifiedAnnotationBeanNameGenerator.INSTANCE);
             scanner.setSqlSessionFactoryBeanName(sqlSessionFactoryName);
             scanner.registerFilters();
             scanner.doScan(pkg);
