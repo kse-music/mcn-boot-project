@@ -7,6 +7,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.SqlSessionTemplate;
+import org.mybatis.spring.boot.autoconfigure.MybatisAutoConfiguration;
 import org.mybatis.spring.boot.autoconfigure.SpringBootVFS;
 import org.mybatis.spring.mapper.ClassPathMapperScanner;
 import org.springframework.beans.factory.BeanFactory;
@@ -36,7 +37,7 @@ import java.io.IOException;
  * @author DingHao
  * @since 2022/1/2 22:21
  */
-@AutoConfiguration(after = MultipleDataSourceAutoConfiguration.class)
+@AutoConfiguration(after = {MultipleDataSourceAutoConfiguration.class, MybatisAutoConfiguration.class})
 @ConditionalOnClass({SqlSessionFactory.class, SqlSessionFactoryBean.class,HikariDataSource.class})
 @ConditionalOnProperty(prefix = ConfigProperties.MYBATIS_MULTIPLE_DATASOURCE_PREFIX,name = "enable",havingValue = "true")
 @ConditionalOnBean(MultipleDataSourceConfig.class)
@@ -59,7 +60,7 @@ public class MybatisMultipleDataSourceAutoConfiguration {
             ResourcePatternResolver pathResolver = new PathMatchingResourcePatternResolver();
             multipleDataSourceConfig.getProperties().forEach((dsName,ds) -> {
                 String sqlSessionFactoryName = dsName + "SqlSessionFactory";
-                scanMapper(registry,sqlSessionFactoryName,basePackage + ".dao." + dsName);
+                scanMapper(registry,sqlSessionFactoryName,basePackage + "." + multipleDataSourceConfig.getDaoPackageName() + "." + dsName);
                 registry.registerBeanDefinition(dsName + "SqlSessionTemplate", BeanDefinitionBuilder.genericBeanDefinition(SqlSessionTemplate.class)
                         .addConstructorArgReference(sqlSessionFactoryName)
                         .getBeanDefinition());
@@ -80,7 +81,7 @@ public class MybatisMultipleDataSourceAutoConfiguration {
                     .addPropertyValue("dataSource", new RuntimeBeanReference(ConfigProperties.getDataSourceBeanName(dsName)))
                     .addPropertyValue("vfs", SpringBootVFS.class)
                     .addPropertyValue("typeAliasesPackage", basePackage + ".bean." + dsName)
-                    .addPropertyValue("typeHandlersPackage", basePackage + ".dao.handler." + dsName)
+                    .addPropertyValue("typeHandlersPackage", basePackage + "." + multipleDataSourceConfig.getDaoPackageName() + ".handler." + dsName)
                     .addPropertyValue("configuration", conf);
             return beanDefinitionBuilder.getBeanDefinition();
         }

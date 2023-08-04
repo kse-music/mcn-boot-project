@@ -16,11 +16,13 @@ public class MultipleDataSourceConfig {
     private final Map<String, DataSourceProperties> properties;
     private final Environment environment;
     private final int vote;
+    private final String daoPackageName;
 
     public MultipleDataSourceConfig(Map<String, DataSourceProperties> properties, Environment environment){
         this.properties = properties;
         this.environment = environment;
         this.vote = checkConfig(environment);
+        this.daoPackageName = environment.getProperty(ConfigProperties.DAO_PACKAGE_NAME, "dao");
     }
 
     private int checkConfig(Environment environment) {
@@ -42,6 +44,10 @@ public class MultipleDataSourceConfig {
 
     public Map<String, DataSourceProperties> getProperties() {
         return properties;
+    }
+
+    public String getDaoPackageName() {
+        return daoPackageName;
     }
 
     boolean enableDynamicDatasource(){

@@ -78,7 +78,7 @@ public class JpaMultipleDataSourceAutoConfiguration {
                 String transactionManagerRef = dsName + "TransactionManager";
 
                 //override config
-                annotationAttributes.put("basePackages",basePackage + ".dao." + dsName);
+                annotationAttributes.put("basePackages",basePackage + "." + multipleDataSourceConfig.getDaoPackageName() + "." + dsName);
                 annotationAttributes.put("entityManagerFactoryRef",entityManagerFactoryRef);
                 annotationAttributes.put("transactionManagerRef",transactionManagerRef);
 
