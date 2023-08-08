@@ -1,6 +1,7 @@
 package cn.hiboot.mcn.autoconfigure.jdbc;
 
 import cn.hiboot.mcn.autoconfigure.config.ConfigProperties;
+import cn.hiboot.mcn.core.util.McnUtils;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.core.env.Environment;
 
@@ -17,12 +18,17 @@ public class MultipleDataSourceConfig {
     private final Environment environment;
     private final int vote;
     private final String daoPackageName;
+    private String basePackage;
 
     public MultipleDataSourceConfig(Map<String, DataSourceProperties> properties, Environment environment){
         this.properties = properties;
         this.environment = environment;
         this.vote = checkConfig(environment);
         this.daoPackageName = environment.getProperty(ConfigProperties.DAO_PACKAGE_NAME, "dao");
+        this.basePackage = environment.getProperty(ConfigProperties.BASE_PACKAGE_NAME);
+        if(McnUtils.isNullOrEmpty(basePackage)){
+            this.basePackage = environment.getProperty(ConfigProperties.APP_BASE_PACKAGE);
+        }
     }
 
     private int checkConfig(Environment environment) {
@@ -48,6 +54,10 @@ public class MultipleDataSourceConfig {
 
     public String getDaoPackageName() {
         return daoPackageName;
+    }
+
+    public String getBasePackage() {
+        return basePackage;
     }
 
     boolean enableDynamicDatasource(){

@@ -28,6 +28,8 @@ public abstract class ConfigProperties {
     public static final String MYBATIS_MULTIPLE_DATASOURCE_PREFIX = "mybatis." + MULTIPLE_DATASOURCE_PREFIX;
     public static final String DYNAMIC_DATASOURCE_PREFIX = "dynamic.datasource";
     public static final String DAO_PACKAGE_NAME = "dao.package.name";
+    public static final String BASE_PACKAGE_NAME = "base.package.name";
+
 
     private static String error_view;
 

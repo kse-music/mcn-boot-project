@@ -10,6 +10,7 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
+import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.type.AnnotationMetadata;
@@ -25,7 +26,7 @@ import java.util.Map;
  * @author DingHao
  * @since 2022/7/28 16:00
  */
-@AutoConfiguration(after = {DataSourceAutoConfiguration.class}, afterName = "org.mybatis.spring.boot.autoconfigure.MybatisAutoConfiguration")
+@AutoConfiguration(after = {DataSourceAutoConfiguration.class, HibernateJpaAutoConfiguration.class}, afterName = "org.mybatis.spring.boot.autoconfigure.MybatisAutoConfiguration")
 @ConditionalOnMultipleDataSource
 @ConditionalOnClass(HikariDataSource.class)
 @Import(MultipleDataSourceAutoConfiguration.MultipleDataSourceRegister.class)

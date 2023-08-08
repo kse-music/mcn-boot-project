@@ -69,6 +69,13 @@
       "defaultValue": false
     },
     {
+      "name": "base.package.name",
+      "type": "java.lang.String",
+      "sourceType": "cn.hiboot.mcn.autoconfigure.jdbc.MultipleDataSourceConfig",
+      "description": "base包路径(适用于mybatis和jpa多数据源).",
+      "defaultValue": "当前应用的base路径"
+    },
+    {
       "name": "dao.package.name",
       "type": "java.lang.String",
       "sourceType": "cn.hiboot.mcn.autoconfigure.jdbc.MultipleDataSourceConfig",

@@ -11,13 +11,10 @@ import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
+import org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
-import org.springframework.boot.autoconfigure.task.TaskExecutionAutoConfiguration;
 import org.springframework.boot.context.properties.bind.Binder;
-import org.springframework.context.annotation.FullyQualifiedAnnotationBeanNameGenerator;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.env.Environment;
@@ -26,7 +23,6 @@ import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.data.jpa.repository.config.JpaRepositoryConfigExtension;
-import org.springframework.data.jpa.repository.support.JpaRepositoryFactoryBean;
 import org.springframework.data.repository.config.*;
 import org.springframework.util.ReflectionUtils;
 
@@ -39,11 +35,10 @@ import java.lang.reflect.Field;
  * @author DingHao
  * @since 2022/7/26 14:45
  */
-@AutoConfiguration(before = { HibernateJpaAutoConfiguration.class, TaskExecutionAutoConfiguration.class },after = MultipleDataSourceAutoConfiguration.class)
+@AutoConfiguration(after = {MultipleDataSourceAutoConfiguration.class, JpaRepositoriesAutoConfiguration.class})
 @ConditionalOnProperty(prefix = ConfigProperties.JPA_MULTIPLE_DATASOURCE_PREFIX,name = "enable",havingValue = "true")
 @ConditionalOnClass(JpaRepository.class)
 @ConditionalOnBean(MultipleDataSourceConfig.class)
-@ConditionalOnMissingBean({ JpaRepositoryFactoryBean.class, JpaRepositoryConfigExtension.class })
 @Import(JpaMultipleDataSourceAutoConfiguration.JpaRepositoriesRegistrar.class)
 public class JpaMultipleDataSourceAutoConfiguration {
 
@@ -61,8 +56,7 @@ public class JpaMultipleDataSourceAutoConfiguration {
 
         @Override
         public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry, BeanNameGenerator generator) {
-            String basePackage = environment.getProperty(ConfigProperties.APP_BASE_PACKAGE);
-            generator = new FullyQualifiedAnnotationBeanNameGenerator();//支持同名接口
+            String basePackage = multipleDataSourceConfig.getBasePackage();
             AnnotationMetadata metadata = AnnotationMetadata.introspect(EnableJpaRepositoriesConfiguration.class);
             AnnotationRepositoryConfigurationSource configurationSource = new AnnotationRepositoryConfigurationSource(metadata,getAnnotation(), resourceLoader, environment, registry, generator);
             AnnotationAttributes annotationAttributes = getAnnotationAttributes(configurationSource);
@@ -128,10 +122,10 @@ public class JpaMultipleDataSourceAutoConfiguration {
             return new JpaRepositoryConfigExtension();
         }
 
-    }
+        @EnableJpaRepositories
+        private static class EnableJpaRepositoriesConfiguration {
 
-    @EnableJpaRepositories
-    private static class EnableJpaRepositoriesConfiguration {
+        }
 
     }
 

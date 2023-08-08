@@ -22,7 +22,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.FullyQualifiedAnnotationBeanNameGenerator;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
-import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -49,10 +48,10 @@ public class MybatisMultipleDataSourceAutoConfiguration {
         private final String basePackage;
         private final MultipleDataSourceConfig multipleDataSourceConfig;
 
-        public MybatisMultipleDataSourceConfig(ResourceLoader resourceLoader, Environment environment, BeanFactory beanFactory) {
+        public MybatisMultipleDataSourceConfig(ResourceLoader resourceLoader, BeanFactory beanFactory) {
             this.resourceLoader = resourceLoader;
-            this.basePackage = environment.getProperty(ConfigProperties.APP_BASE_PACKAGE);
             this.multipleDataSourceConfig = beanFactory.getBean(MultipleDataSourceConfig.class);
+            this.basePackage = multipleDataSourceConfig.getBasePackage();
         }
 
         @Override
