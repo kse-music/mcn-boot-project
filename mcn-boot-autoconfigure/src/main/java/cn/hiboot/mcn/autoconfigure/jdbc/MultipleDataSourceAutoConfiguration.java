@@ -2,7 +2,6 @@ package cn.hiboot.mcn.autoconfigure.jdbc;
 
 import cn.hiboot.mcn.autoconfigure.config.ConfigProperties;
 import com.zaxxer.hikari.HikariDataSource;
-import org.mybatis.spring.boot.autoconfigure.MybatisAutoConfiguration;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
@@ -26,7 +25,7 @@ import java.util.Map;
  * @author DingHao
  * @since 2022/7/28 16:00
  */
-@AutoConfiguration(after = {DataSourceAutoConfiguration.class, MybatisAutoConfiguration.class})
+@AutoConfiguration(after = {DataSourceAutoConfiguration.class}, afterName = "org.mybatis.spring.boot.autoconfigure.MybatisAutoConfiguration")
 @ConditionalOnMultipleDataSource
 @ConditionalOnClass(HikariDataSource.class)
 @Import(MultipleDataSourceAutoConfiguration.MultipleDataSourceRegister.class)
