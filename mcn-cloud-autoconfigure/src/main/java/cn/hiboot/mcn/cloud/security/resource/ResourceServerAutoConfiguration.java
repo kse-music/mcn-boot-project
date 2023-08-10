@@ -25,7 +25,6 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.core.Authentication;
@@ -87,47 +86,49 @@ public class ResourceServerAutoConfiguration {
         @ConditionalOnMissingBean(SecurityWebFilterChain.class)
         SecurityWebFilterChain resourceServerSecurityFilterChain(ServerHttpSecurity http,ResourceServerProperties ssoProperties
                 ,ObjectProvider<AuthenticationReload> authenticationReloads,ObjectProvider<TokenResolver> tokenResolvers){
-            if (McnUtils.isNotNullAndEmpty(ssoProperties.getAllowedPaths())) {
-                http.authorizeExchange().pathMatchers(ssoProperties.getAllowedPaths().toArray(new String[0])).permitAll();
-            }
-            ServerHttpSecurity.OAuth2ResourceServerSpec resourceServerConfigurer = http.oauth2ResourceServer()
-                    .accessDeniedHandler((exchange, accessDeniedException) -> handleException(accessDeniedException, exchange.getResponse()))
-                    .authenticationEntryPoint((exchange, authException) -> handleException(authException, exchange.getResponse()));
-            if(ssoProperties.isOpaqueToken()){
-                resourceServerConfigurer.opaqueToken();
-            }else {
-                resourceServerConfigurer.jwt();
-            }
-
-            tokenResolvers.ifUnique(tokenResolver -> resourceServerConfigurer.bearerTokenConverter(new ServerBearerTokenAuthenticationConverter(){
-                @Override
-                public Mono<Authentication> convert(ServerWebExchange exchange) {
-                    ServerHttpRequest request = exchange.getRequest();
-                    String tokenHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
-                    if (McnUtils.isNotNullAndEmpty(tokenHeader)) {
-                        return super.convert(exchange);
-                    }
-                    return Mono.just(tokenResolver.paramName()).flatMap(name -> {
-                        String apk = request.getHeaders().getFirst(name);
-                        if (McnUtils.isNullOrEmpty(apk)) {
-                            apk = request.getHeaders().getFirst(name);
-                        }
-                        String token = "";
-                        RestResp<LoginRsp> login = tokenResolver.resolve(apk);
-                        if (login.getData() != null) {
-                            token = login.getData().getToken().substring("Bearer".length()).trim();
-                        }
-                        if (token.isEmpty()) {
-                            return Mono.error(ServiceException.newInstance(name + "不正确"));
-                        }
-                        return Mono.just(new BearerTokenAuthenticationToken(token));
-                    });
-                }
-
-            }));
             authenticationReloads.ifUnique(authenticationReload -> http.addFilterBefore(new ReloadAuthenticationWebFilter(authenticationReload), SecurityWebFiltersOrder.ANONYMOUS_AUTHENTICATION));
             return http
-                    .authorizeExchange(requests -> requests.anyExchange().authenticated())
+                    .authorizeExchange(requests -> {
+                        if (McnUtils.isNotNullAndEmpty(ssoProperties.getAllowedPaths())) {
+                            requests.pathMatchers(ssoProperties.getAllowedPaths().toArray(new String[0])).permitAll();
+                        }
+                        requests.anyExchange().authenticated();
+                    })
+                    .oauth2ResourceServer(c -> {
+                        if(ssoProperties.isOpaqueToken()){
+                            c.opaqueToken();
+                        }else {
+                            c.jwt();
+                        }
+                        c.accessDeniedHandler((exchange, accessDeniedException) -> handleException(accessDeniedException, exchange.getResponse()))
+                                .authenticationEntryPoint((exchange, authException) -> handleException(authException, exchange.getResponse()));
+                        tokenResolvers.ifUnique(tokenResolver -> c.bearerTokenConverter(new ServerBearerTokenAuthenticationConverter(){
+                            @Override
+                            public Mono<Authentication> convert(ServerWebExchange exchange) {
+                                ServerHttpRequest request = exchange.getRequest();
+                                String tokenHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+                                if (McnUtils.isNotNullAndEmpty(tokenHeader)) {
+                                    return super.convert(exchange);
+                                }
+                                return Mono.just(tokenResolver.paramName()).flatMap(name -> {
+                                    String apk = request.getHeaders().getFirst(name);
+                                    if (McnUtils.isNullOrEmpty(apk)) {
+                                        apk = request.getHeaders().getFirst(name);
+                                    }
+                                    String token = "";
+                                    RestResp<LoginRsp> login = tokenResolver.resolve(apk);
+                                    if (login.getData() != null) {
+                                        token = login.getData().getToken().substring("Bearer".length()).trim();
+                                    }
+                                    if (token.isEmpty()) {
+                                        return Mono.error(ServiceException.newInstance(name + "不正确"));
+                                    }
+                                    return Mono.just(new BearerTokenAuthenticationToken(token));
+                                });
+                            }
+
+                        }));
+                    })
                     .build();
         }
 
@@ -186,22 +187,26 @@ public class ResourceServerAutoConfiguration {
         ServletResourceServerConfiguration(ExceptionHandler exceptionHandler) {
             this.exceptionHandler = exceptionHandler;
         }
+
         @Bean
         @ConditionalOnDefaultWebSecurity
         SecurityFilterChain resourceServerSecurityFilterChain(HttpSecurity http,ResourceServerProperties ssoProperties) throws Exception {
-            if (McnUtils.isNotNullAndEmpty(ssoProperties.getAllowedPaths())) {
-                http.authorizeRequests().antMatchers(ssoProperties.getAllowedPaths().toArray(new String[0])).permitAll();
-            }
-            OAuth2ResourceServerConfigurer<HttpSecurity> resourceServerConfigurer = http.oauth2ResourceServer()
-                    .accessDeniedHandler((request, response, accessDeniedException) -> handleException(accessDeniedException,response))
-                    .authenticationEntryPoint((request, response, authException) -> handleException(authException,response));
-            if(ssoProperties.isOpaqueToken()){
-                resourceServerConfigurer.opaqueToken();
-            }else {
-                resourceServerConfigurer.jwt();
-            }
             return http
-                    .authorizeRequests((requests) -> requests.anyRequest().authenticated())
+                    .authorizeRequests(requests -> {
+                        if (McnUtils.isNotNullAndEmpty(ssoProperties.getAllowedPaths())) {
+                            requests.antMatchers(ssoProperties.getAllowedPaths().toArray(new String[0])).permitAll();
+                        }
+                        requests.anyRequest().authenticated();
+                    })
+                    .oauth2ResourceServer(c -> {
+                        if(ssoProperties.isOpaqueToken()){
+                            c.opaqueToken();
+                        }else {
+                            c.jwt();
+                        }
+                        c.accessDeniedHandler((request, response, accessDeniedException) -> handleException(accessDeniedException,response))
+                                .authenticationEntryPoint((request, response, authException) -> handleException(authException,response));
+                    })
                     .apply(new ReloadAuthenticationConfigurer()).and()
                     .build();
         }
