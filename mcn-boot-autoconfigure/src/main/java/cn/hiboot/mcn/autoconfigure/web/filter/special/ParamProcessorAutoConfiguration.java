@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.introspect.Annotated;
 import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
 import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
@@ -88,19 +89,42 @@ public class ParamProcessorAutoConfiguration {
     }
 
     public static Object validStringValue(MethodParameter parameter, Object returnValue, ParamProcessor paramProcessor){
-        CheckParam classAnnotation = parameter.getParameterType().getAnnotation(CheckParam.class);
+        CheckParam classAnnotation = parameter.getParameterAnnotation(CheckParam.class);
         if (classAnnotation == null) {
-            classAnnotation = parameter.getParameterAnnotation(CheckParam.class);
+            classAnnotation = parameter.getParameterType().getAnnotation(CheckParam.class);
         }
-        BeanWrapper src = new BeanWrapperImpl(returnValue);
-        for (Field declaredField : returnValue.getClass().getDeclaredFields()) {
+        valid(returnValue,classAnnotation,paramProcessor);
+        return returnValue;
+    }
+
+    private static void valid(Object value, CheckParam classAnnotation ,ParamProcessor paramProcessor){
+        CheckParam usedAnnotation = classAnnotation;
+        BeanWrapper src = new BeanWrapperImpl(value);
+        for (Field declaredField : value.getClass().getDeclaredFields()) {
             String name = declaredField.getName();
             Object propertyValue = src.getPropertyValue(name);
+            if(propertyValue == null){
+                continue;
+            }
+            CheckParam fieldAnnotation = declaredField.getAnnotation(CheckParam.class);
             if (propertyValue instanceof String) {
-                paramProcessor.process(ParamProcessorAutoConfiguration.getRule(classAnnotation, declaredField.getAnnotation(CheckParam.class)), name, propertyValue.toString());
+                if(usedAnnotation.validString() || fieldAnnotation != null){
+                    paramProcessor.process(ParamProcessorAutoConfiguration.getRule(usedAnnotation, fieldAnnotation), name, propertyValue.toString());
+                }
+                continue;
+            }
+            if((usedAnnotation.validObject() || fieldAnnotation != null) && !BeanUtils.isSimpleProperty(propertyValue.getClass())){
+                if(fieldAnnotation != null){
+                    valid(propertyValue,fieldAnnotation,paramProcessor);
+                    continue;
+                }
+                CheckParam annotation = propertyValue.getClass().getAnnotation(CheckParam.class);
+                if(annotation != null){//成员变量的类型上有注解
+                    usedAnnotation = annotation;
+                }
+                valid(propertyValue,usedAnnotation,paramProcessor);
             }
         }
-        return returnValue;
     }
 
     @Bean

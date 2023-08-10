@@ -49,8 +49,7 @@ public class ReactiveParamProcessorConfiguration {
 
                     @Override
                     public boolean supportsParameter(MethodParameter parameter) {
-                        CheckParam classAnnotation = parameter.getParameterType().getAnnotation(CheckParam.class);
-                        return processor.supportsParameter(parameter) && (parameter.hasParameterAnnotation(CheckParam.class) || classAnnotation != null);
+                        return processor.supportsParameter(parameter) && (parameter.hasParameterAnnotation(CheckParam.class) || parameter.getParameterType().getAnnotation(CheckParam.class) != null);
                     }
 
                     @Override

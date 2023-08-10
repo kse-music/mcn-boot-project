@@ -17,4 +17,15 @@ public @interface CheckParam {
 
     String value() default "";
 
+    /**
+     * 是否校验所有字符串 默认true
+     * @return true
+     */
+    boolean validString() default true;
+    /**
+     * 是否校验所有复杂对象 默认false
+     * @return false
+     */
+    boolean validObject() default false;
+
 }
