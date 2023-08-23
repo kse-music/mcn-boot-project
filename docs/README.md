@@ -11,5 +11,5 @@ features:
   details: 更多的扩展功能
 - title: 兼容
   details: 更好的兼容性
-footer: MIT Licensed | Copyright © 2022 DingHao
+footer: MIT Licensed | Copyright © 2023 HiBoot
 ---
