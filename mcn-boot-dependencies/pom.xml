@@ -35,24 +35,23 @@
         <boot-admin.version>2.7.10</boot-admin.version>
         <commons-io.version>2.13.0</commons-io.version>
         <fastjson.version>1.2.83</fastjson.version>
-        <fastjson2.version>2.0.35</fastjson2.version>
-        <guava.version>32.1.1-jre</guava.version>
+        <fastjson2.version>2.0.39</fastjson2.version>
+        <guava.version>32.1.2-jre</guava.version>
         <hutool.version>5.8.21</hutool.version>
         <jsoup.version>1.16.1</jsoup.version>
         <knife4j.version>3.0.3</knife4j.version>
-        <mapstruct.version>1.5.2.Final</mapstruct.version>
-        <mybatis-spring-boot.version>2.2.2</mybatis-spring-boot.version>
+        <mapstruct.version>1.5.5.Final</mapstruct.version>
+        <mybatis-spring-boot.version>2.3.1</mybatis-spring-boot.version>
         <mysql.version>8.0.33</mysql.version>
-        <minio.version>8.4.6</minio.version>
-        <smart-doc.version>2.7.2</smart-doc.version>
-        <snakeyaml.version>2.0</snakeyaml.version>
-        <spring-boot.version>2.7.14</spring-boot.version>
+        <minio.version>8.5.5</minio.version>
+        <smart-doc.version>2.7.5</smart-doc.version>
+        <snakeyaml.version>2.1</snakeyaml.version>
+        <spring-boot.version>2.7.15</spring-boot.version>
         <spring-cloud.version>2021.0.8</spring-cloud.version>
         <spring-cloud-alibaba.version>2021.0.5.0</spring-cloud-alibaba.version>
         <spring-cloud-huawei.version>1.10.10-2021.0.x</spring-cloud-huawei.version>
         <springfox-swagger.version>3.0.0</springfox-swagger.version>
         <swagger.version>1.6.4</swagger.version>
-        <swagger-bootstrap-ui.version>1.9.6</swagger-bootstrap-ui.version>
         <xxl-job.version>2.3.1</xxl-job.version>
     </properties>
 
@@ -206,11 +205,6 @@
                 <version>${springfox-swagger.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.springfox</groupId>
-                <artifactId>springfox-swagger-ui</artifactId>
-                <version>${springfox-swagger.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>io.swagger</groupId>
                 <artifactId>swagger-annotations</artifactId>
                 <version>${swagger.version}</version>
@@ -219,11 +213,6 @@
                 <groupId>io.swagger</groupId>
                 <artifactId>swagger-models</artifactId>
                 <version>${swagger.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.github.xiaoymin</groupId>
-                <artifactId>swagger-bootstrap-ui</artifactId>
-                <version>${swagger-bootstrap-ui.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.github.xiaoymin</groupId>
