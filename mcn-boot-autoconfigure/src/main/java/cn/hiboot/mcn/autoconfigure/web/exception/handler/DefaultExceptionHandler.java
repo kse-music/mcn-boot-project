@@ -228,14 +228,16 @@ public class DefaultExceptionHandler implements ExceptionHandler{
 
     @Override
     public void logError(Throwable t){
-        if(properties.isRemoveFrameworkStack()){
-            dealCurrentStackTraceElement(t);
-            Throwable[] suppressed = t.getSuppressed();
-            for (Throwable throwable : suppressed) {
-                dealCurrentStackTraceElement(throwable);
+        if(properties.isLogExMsg()){
+            if(properties.isRemoveFrameworkStack()){
+                dealCurrentStackTraceElement(t);
+                Throwable[] suppressed = t.getSuppressed();
+                for (Throwable throwable : suppressed) {
+                    dealCurrentStackTraceElement(throwable);
+                }
             }
+            log.error("The exception information is as follows",t);
         }
-        log.error("The exception information is as follows",t);
     }
 
 

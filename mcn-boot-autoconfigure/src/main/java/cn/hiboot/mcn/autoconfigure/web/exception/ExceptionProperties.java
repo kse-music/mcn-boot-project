@@ -42,6 +42,11 @@ public class ExceptionProperties {
      * 是否允许重写内部异常消息
      */
     private boolean overrideExMsg = false;
+    /**
+     * 是否打印异常栈信息
+     */
+    private boolean logExMsg = true;
+
 
     private Map<Integer,String> errorCodeMsg;
 
@@ -101,6 +106,14 @@ public class ExceptionProperties {
 
     public void setOverrideExMsg(boolean overrideExMsg) {
         this.overrideExMsg = overrideExMsg;
+    }
+
+    public boolean isLogExMsg() {
+        return logExMsg;
+    }
+
+    public void setLogExMsg(boolean logExMsg) {
+        this.logExMsg = logExMsg;
     }
 
     public Map<Integer, String> getErrorCodeMsg() {
