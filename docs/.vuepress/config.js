@@ -4,7 +4,7 @@ module.exports = {
     lang: 'zh-CN',
     title: 'Mcn文档',
     temp:'/tmp/.temp',
-    description: '一个基于SpringBoot 2.7+版本的快速开发工具包',
+    description: '一个基于SpringBoot&Cloud的快速开发工具包',
     head: [
         ["link", {rel: "icon", href: "/favicon.ico"}]
     ],
