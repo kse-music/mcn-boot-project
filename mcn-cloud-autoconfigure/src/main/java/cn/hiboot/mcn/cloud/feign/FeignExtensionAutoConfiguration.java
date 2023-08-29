@@ -50,7 +50,7 @@ public class FeignExtensionAutoConfiguration {
 
         @Bean
         public Targeter circuitBreakerFeignTargeter(CircuitBreakerFactory circuitBreakerFactory,
-                @Value("${feign.circuitbreaker.group.enabled:false}") boolean circuitBreakerGroupEnabled,
+                @Value("${spring.cloud.openfeign.circuitbreaker.group.enabled:false}") boolean circuitBreakerGroupEnabled,
                 CircuitBreakerNameResolver circuitBreakerNameResolver) {
             return new FeignCircuitBreakerTargeter(circuitBreakerFactory, circuitBreakerGroupEnabled, circuitBreakerNameResolver);
         }
@@ -100,7 +100,7 @@ public class FeignExtensionAutoConfiguration {
             super(ConfigurationPhase.PARSE_CONFIGURATION);
         }
 
-        @ConditionalOnProperty(prefix = "feign.circuitbreaker",name = "enabled",havingValue = "true")
+        @ConditionalOnProperty(prefix = "spring.cloud.openfeign.circuitbreaker",name = "enabled",havingValue = "true")
         static class FeignCircuitbreakerEnabled {
 
         }
