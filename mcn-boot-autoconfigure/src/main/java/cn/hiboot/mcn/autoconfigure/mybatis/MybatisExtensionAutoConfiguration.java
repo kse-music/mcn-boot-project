@@ -6,6 +6,7 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.mapper.MapperScannerConfigurer;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -53,7 +54,10 @@ public class MybatisExtensionAutoConfiguration implements BeanDefinitionRegistry
 
     @Override
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
-        MultipleDataSourceConfig multipleDataSourceConfig = beanFactory.getBean(MultipleDataSourceConfig.class);
+        MultipleDataSourceConfig multipleDataSourceConfig = getBean(beanFactory);
+        if(multipleDataSourceConfig == null){
+            return;
+        }
         Map<String, DataSourceProperties> properties = multipleDataSourceConfig.getProperties();
         if(properties.isEmpty()){
             return;
@@ -63,6 +67,14 @@ public class MybatisExtensionAutoConfiguration implements BeanDefinitionRegistry
         }
         if(beanFactory.containsBean(STANDARD_SQL_SESSION_TEMPLATE_BEAN_NAME)){
             beanFactory.getBeanDefinition(STANDARD_SQL_SESSION_TEMPLATE_BEAN_NAME).setPrimary(true);
+        }
+    }
+
+    private MultipleDataSourceConfig getBean(ConfigurableListableBeanFactory beanFactory){
+        try{
+            return beanFactory.getBean(MultipleDataSourceConfig.class);
+        }catch (NoSuchBeanDefinitionException e){
+            return null;
         }
     }
 
