@@ -1,10 +1,10 @@
 package cn.hiboot.mcn.autoconfigure.web.filter.common.servlet;
 
 import cn.hiboot.mcn.autoconfigure.web.filter.common.JsonRequestHelper;
+import jakarta.servlet.ServletInputStream;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
 
-import javax.servlet.ServletInputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
 import java.io.IOException;
 
 /**

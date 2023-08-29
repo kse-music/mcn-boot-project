@@ -1,8 +1,7 @@
 package cn.hiboot.mcn.autoconfigure.web.exception.error;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
-
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * GlobalExceptionViewResolver

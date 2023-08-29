@@ -5,6 +5,7 @@ import cn.hiboot.mcn.autoconfigure.web.filter.special.CheckParam;
 import cn.hiboot.mcn.autoconfigure.web.filter.special.ParamProcessor;
 import cn.hiboot.mcn.autoconfigure.web.filter.special.ParamProcessorAutoConfiguration;
 import cn.hiboot.mcn.autoconfigure.web.filter.special.ParamProcessorProperties;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -17,7 +18,6 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.mvc.method.annotation.ServletModelAttributeMethodProcessor;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**

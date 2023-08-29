@@ -1,9 +1,9 @@
 package cn.hiboot.mcn.autoconfigure.validator.annotation;
 
 import cn.hiboot.mcn.core.util.McnUtils;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
 import java.util.regex.Pattern;
 
 /**

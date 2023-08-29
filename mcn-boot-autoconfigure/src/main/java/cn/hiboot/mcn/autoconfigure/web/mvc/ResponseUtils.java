@@ -2,9 +2,9 @@ package cn.hiboot.mcn.autoconfigure.web.mvc;
 
 import cn.hiboot.mcn.core.model.result.RestResp;
 import cn.hiboot.mcn.core.util.JacksonUtils;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.MediaType;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;

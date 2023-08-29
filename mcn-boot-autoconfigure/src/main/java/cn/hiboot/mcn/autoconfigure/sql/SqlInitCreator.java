@@ -161,7 +161,9 @@ class SqlInitCreator {
         }
 
         private void runScripts(List<Resource> resources,String separator) {
-            runScripts(resources, this.settings.isContinueOnError(), separator == null ? this.settings.getSeparator() : separator, this.settings.getEncoding());
+            runScripts(new Scripts(resources).continueOnError(this.settings.isContinueOnError())
+                    .separator(separator == null ? this.settings.getSeparator() : separator)
+                    .encoding(this.settings.getEncoding()));
         }
 
     }

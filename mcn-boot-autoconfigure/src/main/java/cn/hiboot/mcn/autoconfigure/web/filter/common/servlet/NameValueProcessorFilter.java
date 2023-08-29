@@ -3,9 +3,9 @@ package cn.hiboot.mcn.autoconfigure.web.filter.common.servlet;
 import cn.hiboot.mcn.autoconfigure.web.filter.common.NameValueProcessor;
 import cn.hiboot.mcn.autoconfigure.web.filter.common.NameValueProcessorProperties;
 import cn.hiboot.mcn.autoconfigure.web.filter.common.RequestMatcher;
+import jakarta.servlet.*;
+import jakarta.servlet.http.HttpServletRequest;
 
-import javax.servlet.*;
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
 /**

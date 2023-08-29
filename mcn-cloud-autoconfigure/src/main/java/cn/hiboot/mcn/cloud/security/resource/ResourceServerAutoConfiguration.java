@@ -11,6 +11,8 @@ import cn.hiboot.mcn.core.exception.ExceptionKeys;
 import cn.hiboot.mcn.core.exception.ServiceException;
 import cn.hiboot.mcn.core.model.result.RestResp;
 import cn.hiboot.mcn.core.util.McnUtils;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -24,6 +26,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
@@ -32,11 +35,11 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.server.resource.BearerTokenAuthenticationToken;
+import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthenticationToken;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;
 import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver;
-import org.springframework.security.oauth2.server.resource.web.server.ServerBearerTokenAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.web.server.authentication.ServerBearerTokenAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.stereotype.Component;
@@ -45,8 +48,6 @@ import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -96,9 +97,9 @@ public class ResourceServerAutoConfiguration {
                     })
                     .oauth2ResourceServer(c -> {
                         if(ssoProperties.isOpaqueToken()){
-                            c.opaqueToken();
+                            c.opaqueToken(Customizer.withDefaults());
                         }else {
-                            c.jwt();
+                            c.jwt(Customizer.withDefaults());
                         }
                         c.accessDeniedHandler((exchange, accessDeniedException) -> handleException(accessDeniedException, exchange.getResponse()))
                                 .authenticationEntryPoint((exchange, authException) -> handleException(authException, exchange.getResponse()));
@@ -191,24 +192,24 @@ public class ResourceServerAutoConfiguration {
         @Bean
         @ConditionalOnDefaultWebSecurity
         SecurityFilterChain resourceServerSecurityFilterChain(HttpSecurity http,ResourceServerProperties ssoProperties) throws Exception {
-            return http
-                    .authorizeRequests(requests -> {
-                        if (McnUtils.isNotNullAndEmpty(ssoProperties.getAllowedPaths())) {
-                            requests.antMatchers(ssoProperties.getAllowedPaths().toArray(new String[0])).permitAll();
-                        }
-                        requests.anyRequest().authenticated();
-                    })
-                    .oauth2ResourceServer(c -> {
-                        if(ssoProperties.isOpaqueToken()){
-                            c.opaqueToken();
-                        }else {
-                            c.jwt();
-                        }
-                        c.accessDeniedHandler((request, response, accessDeniedException) -> handleException(accessDeniedException,response))
-                                .authenticationEntryPoint((request, response, authException) -> handleException(authException,response));
-                    })
-                    .apply(new ReloadAuthenticationConfigurer()).and()
-                    .build();
+            http
+                .authorizeHttpRequests(requests -> {
+                    if (McnUtils.isNotNullAndEmpty(ssoProperties.getAllowedPaths())) {
+                        requests.requestMatchers(ssoProperties.getAllowedPaths().toArray(new String[0])).permitAll();
+                    }
+                    requests.anyRequest().authenticated();
+                })
+                .oauth2ResourceServer(c -> {
+                    if(ssoProperties.isOpaqueToken()){
+                        c.opaqueToken(Customizer.withDefaults());
+                    }else {
+                        c.jwt(Customizer.withDefaults());
+                    }
+                    c.accessDeniedHandler((request, response, accessDeniedException) -> handleException(accessDeniedException,response))
+                            .authenticationEntryPoint((request, response, authException) -> handleException(authException,response));
+                })
+                .apply(new ReloadAuthenticationConfigurer());
+            return http.build();
         }
 
         private void handleException(RuntimeException exception, HttpServletResponse response){

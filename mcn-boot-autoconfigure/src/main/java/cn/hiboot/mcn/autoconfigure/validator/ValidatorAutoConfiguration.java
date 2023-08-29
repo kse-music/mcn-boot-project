@@ -1,5 +1,7 @@
 package cn.hiboot.mcn.autoconfigure.validator;
 
+import jakarta.validation.Validator;
+import jakarta.validation.executable.ExecutableValidator;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -11,9 +13,6 @@ import org.springframework.boot.validation.MessageInterpolatorFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Role;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
-
-import javax.validation.Validator;
-import javax.validation.executable.ExecutableValidator;
 
 /**
  * describe about this class

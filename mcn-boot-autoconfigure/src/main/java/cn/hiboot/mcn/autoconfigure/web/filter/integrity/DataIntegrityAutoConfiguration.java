@@ -3,6 +3,7 @@ package cn.hiboot.mcn.autoconfigure.web.filter.integrity;
 import cn.hiboot.mcn.autoconfigure.web.filter.integrity.reactive.ReactiveDataIntegrityFilter;
 import cn.hiboot.mcn.autoconfigure.web.security.WebSecurityProperties;
 import cn.hutool.crypto.SmUtil;
+import jakarta.servlet.Filter;
 import org.bouncycastle.crypto.digests.SM3Digest;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -11,8 +12,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplicat
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.server.WebFilter;
-
-import javax.servlet.Filter;
 
 /**
  * DataIntegrity

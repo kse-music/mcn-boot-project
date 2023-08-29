@@ -6,11 +6,11 @@ import cn.hiboot.mcn.autoconfigure.web.filter.xss.XssProcessor;
 import cn.hiboot.mcn.autoconfigure.web.filter.xss.XssProperties;
 import cn.hiboot.mcn.core.util.McnAssert;
 import cn.hiboot.mcn.core.util.SpringBeanUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.stream.Collectors;
 

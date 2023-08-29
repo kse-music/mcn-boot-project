@@ -1,7 +1,8 @@
 package cn.hiboot.mcn.core.model.base;
 
-import javax.persistence.Column;
-import javax.persistence.MappedSuperclass;
+import jakarta.persistence.Column;
+import jakarta.persistence.MappedSuperclass;
+
 import java.util.Date;
 
 /**

@@ -3,10 +3,10 @@ package cn.hiboot.mcn.autoconfigure.web.filter.common;
 import cn.hiboot.mcn.autoconfigure.web.security.WebSecurityProperties;
 import cn.hiboot.mcn.core.util.McnAssert;
 import cn.hiboot.mcn.core.util.SpringBeanUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.AntPathMatcher;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

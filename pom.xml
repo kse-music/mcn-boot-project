@@ -12,7 +12,7 @@
     <description>MCN Boot Project</description>
 
     <properties>
-        <revision>2.7.16</revision>
+        <revision>3.0.0</revision>
         <web.url>http://www.hiboot.cn</web.url>
     </properties>
 

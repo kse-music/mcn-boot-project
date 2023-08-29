@@ -1,6 +1,6 @@
 package cn.hiboot.mcn.autoconfigure.validator.group;
 
-import javax.validation.groups.Default;
+import jakarta.validation.groups.Default;
 
 /**
  * <p>如果继承了Default，@Validated标注的注解也会校验未指定分组或者Default分组的参数，比如email</p>
