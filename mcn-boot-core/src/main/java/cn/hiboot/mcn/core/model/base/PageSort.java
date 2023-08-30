@@ -1,6 +1,7 @@
 package cn.hiboot.mcn.core.model.base;
 
 import cn.hiboot.mcn.core.util.McnAssert;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,15 +44,15 @@ public class PageSort {
     public int getPageNo() {
         return pageNo;
     }
-
+    @JsonIgnore
     public int getPageIndex() {
         return pageNo - 1;
     }
-
+    @JsonIgnore
     public int getSkip() {
         return getOffset();
     }
-
+    @JsonIgnore
     public int getOffset() {
         return getPageIndex() * getPageSize();
     }
