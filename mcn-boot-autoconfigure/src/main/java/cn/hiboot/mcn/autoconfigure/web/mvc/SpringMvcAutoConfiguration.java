@@ -78,7 +78,7 @@ public class SpringMvcAutoConfiguration {
 
     @Configuration(proxyBeanMethods = false)
     @ConditionalOnClass(MinioClient.class)
-    private static class MinioExceptionResolverConfig{
+    static class MinioExceptionResolverConfig{
 
         @Bean
         @ConditionalOnMissingBean(name = "minioExceptionResolver")
@@ -89,7 +89,7 @@ public class SpringMvcAutoConfiguration {
     }
 
     @Configuration(proxyBeanMethods = false)
-    private static class WebMvcConfig implements WebMvcConfigurer {
+    static class WebMvcConfig implements WebMvcConfigurer {
 
         @Override
         public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
@@ -101,7 +101,7 @@ public class SpringMvcAutoConfiguration {
     @SuppressWarnings("all")
     @ControllerAdvice
     @Configuration(proxyBeanMethods = false)
-    private static class RestRespDataResponseBodyAdvice implements ResponseBodyAdvice<RestResp> {
+    static class RestRespDataResponseBodyAdvice implements ResponseBodyAdvice<RestResp> {
 
         @Override
         public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {

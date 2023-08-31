@@ -31,7 +31,7 @@ public class FeignInterceptorConfiguration  {
 
     @Configuration(proxyBeanMethods = false)
     @ConditionalOnProperty(prefix = "data.integrity.interceptor",name = "enable",havingValue = "true")
-    private static class DataIntegrityFeignInterceptor implements RequestInterceptor {
+    static class DataIntegrityFeignInterceptor implements RequestInterceptor {
 
         @Override
         public void apply(RequestTemplate template) {
@@ -57,7 +57,7 @@ public class FeignInterceptorConfiguration  {
 
     @Configuration(proxyBeanMethods = false)
     @ConditionalOnProperty(prefix = "param.processor",name = "enable",havingValue = "true")
-    private static class ParamProcessorInterceptor implements RequestInterceptor {
+    static class ParamProcessorInterceptor implements RequestInterceptor {
 
         @Override
         public void apply(RequestTemplate template) {
@@ -68,7 +68,7 @@ public class FeignInterceptorConfiguration  {
 
     @Configuration(proxyBeanMethods = false)
     @ConditionalOnClass({DefaultAuthenticationEventPublisher.class, JwtAuthenticationToken.class})
-    private static class FeignRequestInterceptor implements RequestInterceptor {
+    static class FeignRequestInterceptor implements RequestInterceptor {
 
         @Override
         public void apply(RequestTemplate requestTemplate) {

@@ -64,7 +64,7 @@ public class MinioAutoConfiguration {
     @Configuration(proxyBeanMethods = false)
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
     @ConditionalOnBean(DispatcherServlet.class)
-    private static class PreviewImage{
+    static class PreviewImage{
 
         @Autowired
         private Minio minio;

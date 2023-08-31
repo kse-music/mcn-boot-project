@@ -36,7 +36,7 @@ public class SM4BootstrapConfiguration {
     @Configuration(proxyBeanMethods = false)
     @ConditionalOnClass({SymmetricCrypto.class,Hex.class})
     @ConditionalOnMissingBean(TextEncryptor.class)
-    private static class SM4Encryptor implements TextEncryptor {
+    static class SM4Encryptor implements TextEncryptor {
 
         private final boolean base64;
         private final SymmetricCrypto sm4;
@@ -90,7 +90,7 @@ public class SM4BootstrapConfiguration {
     @ConditionalOnProperty(prefix = EncryptorProperties.KEY+".sm4",name = "mode",havingValue = "cbc")
     @Import(SM4ExtendConfiguration.SM4Encryptor.class)
     @ConditionalOnMissingBean(TextEncryptor.class)
-    private static class SM4ExtendConfiguration {
+    static class SM4ExtendConfiguration {
 
         static class SM4Encryptor extends SM4Utils implements TextEncryptor {
             private final boolean continueOnError;

@@ -44,7 +44,7 @@ public class DecryptConverterAutoConfiguration {
         }
 
         @Configuration(proxyBeanMethods = false)
-        private static class WebMvcConfig implements WebMvcConfigurer {
+        static class WebMvcConfig implements WebMvcConfigurer {
 
             private final TextEncryptor textEncryptor;
 
@@ -75,7 +75,7 @@ public class DecryptConverterAutoConfiguration {
         }
 
         @Configuration(proxyBeanMethods = false)
-        private static class WebFluxConfig implements WebFluxConfigurer {
+        static class WebFluxConfig implements WebFluxConfigurer {
 
             private final TextEncryptor textEncryptor;
 
