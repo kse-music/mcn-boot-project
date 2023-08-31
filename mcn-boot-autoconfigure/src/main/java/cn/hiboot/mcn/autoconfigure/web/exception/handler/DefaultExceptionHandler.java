@@ -111,15 +111,14 @@ public class DefaultExceptionHandler implements ExceptionHandler{
     private RestResp<Object> doHandleException(Throwable exception) {
         Integer errorCode = DEFAULT_ERROR_CODE;
         List<ValidationErrorBean> data = null;
-        if(exception instanceof BaseException){
-            errorCode = ((BaseException) exception).getCode();
+        if(exception instanceof BaseException ex){
+            errorCode = ex.getCode();
         }else if(exception instanceof MethodArgumentTypeMismatchException){
             errorCode = ExceptionKeys.PARAM_TYPE_ERROR;
         }else if(exception instanceof MaxUploadSizeExceededException){
             errorCode = ExceptionKeys.UPLOAD_FILE_SIZE_ERROR;
-        }else if(exception instanceof BindException){
+        }else if(exception instanceof BindException ex){
             errorCode = ExceptionKeys.PARAM_PARSE_ERROR;
-            BindException ex = (BindException) exception;
             data = dealBindingResult(ex.getBindingResult());
         }else if(validationExceptionPresent && ValidationExceptionHandler.support(exception)){
             errorCode = ExceptionKeys.PARAM_PARSE_ERROR;
@@ -135,6 +134,10 @@ public class DefaultExceptionHandler implements ExceptionHandler{
                 errorCode = error;
             }
         }
+        return result(errorCode, exception, data);
+    }
+
+    private RestResp<Object> result(Integer errorCode, Throwable exception, List<ValidationErrorBean> data) {
         String msg = properties.isReturnOriginExMsg() ? getMessage(exception) : ErrorMsg.getErrorMsg(getErrorCode(errorCode));
         RestResp<Object> resp = RestResp.error(errorCode, msg);
         if(McnUtils.isNotNullAndEmpty(data)){
@@ -172,8 +175,7 @@ public class DefaultExceptionHandler implements ExceptionHandler{
         }
         if (beanFactory != null) {
             ExceptionResolver<Throwable> exceptionResolver = applicationContext.getBean(beanName, ExceptionResolver.class);
-            if(exceptionResolver instanceof GenericExceptionResolver){
-                GenericExceptionResolver genericExceptionResolver = (GenericExceptionResolver) exceptionResolver;
+            if(exceptionResolver instanceof GenericExceptionResolver genericExceptionResolver){
                 if(genericExceptionResolver.supportsType(exceptionType)){
                     return exceptionResolver;
                 }
@@ -207,8 +209,7 @@ public class DefaultExceptionHandler implements ExceptionHandler{
 
     private List<ValidationErrorBean> dealBindingResult(BindingResult bindingResult){
         return bindingResult.getAllErrors().stream().map(e -> {
-                    if(e instanceof FieldError){
-                        FieldError fieldError = (FieldError) e;
+                    if(e instanceof FieldError fieldError){
                         return new ValidationErrorBean(e.getDefaultMessage(),fieldError.getField(), fieldError.getRejectedValue() == null ? null : fieldError.getRejectedValue().toString());
                     }
                     return new ValidationErrorBean(e.getDefaultMessage(),e.getObjectName(), null);

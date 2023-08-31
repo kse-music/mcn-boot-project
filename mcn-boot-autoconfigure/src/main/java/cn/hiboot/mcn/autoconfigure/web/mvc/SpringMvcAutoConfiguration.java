@@ -98,10 +98,9 @@ public class SpringMvcAutoConfiguration {
 
     }
 
-    @SuppressWarnings("all")
     @ControllerAdvice
     @Configuration(proxyBeanMethods = false)
-    static class RestRespDataResponseBodyAdvice implements ResponseBodyAdvice<RestResp> {
+    static class RestRespDataResponseBodyAdvice implements ResponseBodyAdvice<RestResp<Object>> {
 
         @Override
         public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
@@ -109,9 +108,9 @@ public class SpringMvcAutoConfiguration {
         }
 
         @Override
-        public RestResp beforeBodyWrite(RestResp body, MethodParameter returnType, MediaType selectedContentType, Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
-            if(body != null && body.getData() instanceof String){
-                body.setData(JacksonUtils.fromJson(body.getData().toString(),returnType.getMethodAnnotation(StrToObj.class).value()));
+        public RestResp<Object> beforeBodyWrite(RestResp<Object> body, MethodParameter returnType, MediaType selectedContentType, Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
+            if(body != null && body.getData() instanceof String str){
+                body.setData(JacksonUtils.fromJson(str,returnType.getMethodAnnotation(StrToObj.class).value()));
             }
             return body;
         }

@@ -86,7 +86,7 @@ public class DefaultMinioClient extends MinioAsyncClient {
 
     private void upload(String url,String contentType,byte[] data){
         try {
-            okHttpClient.newCall(new Request.Builder().url(url).put(RequestBody.create(MediaType.parse(getOrDefault(contentType)),data)).build()).execute();
+            okHttpClient.newCall(new Request.Builder().url(url).put(RequestBody.create(data,MediaType.parse(getOrDefault(contentType)))).build()).execute();
         } catch (IOException e) {
             log.error("async upload failed {}",e.getMessage());
         }

@@ -31,7 +31,7 @@ public class ErrorPageController extends BasicErrorController {
     public ResponseEntity<Map<String, Object>> error(HttpServletRequest request) {
         ResponseEntity<Map<String, Object>> error = super.error(request);
         if(overrideHttpError){
-            int statusCode = error.getStatusCodeValue();
+            int statusCode = error.getStatusCode().value();
             int code = ExceptionKeys.mappingCode(statusCode);
             RestResp<Object> resp = RestResp.error(code);
             Map<String, Object> rs = new HashMap<>();

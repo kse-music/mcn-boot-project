@@ -14,7 +14,6 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.NoHandlerFoundException;
-import org.springframework.web.util.NestedServletException;
 
 import java.util.Objects;
 
@@ -49,7 +48,7 @@ public class GlobalExceptionHandler implements HttpStatusCodeResolver,Ordered {
         if(ex instanceof ServletRequestBindingException){
             return ExceptionKeys.PARAM_PARSE_ERROR;
         }else if(ex instanceof ServletException){
-            if (ex instanceof NestedServletException && ex.getCause() instanceof Error) {
+            if (ex.getCause() instanceof Error) {
                 exceptionHandler.handleError((Error) ex.getCause());
                 return ExceptionKeys.SERVICE_ERROR;
             }

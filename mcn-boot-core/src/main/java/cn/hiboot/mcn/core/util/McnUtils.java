@@ -34,6 +34,7 @@ import java.util.zip.ZipFile;
  * @author DingHao
  * @since 2018/12/22 13:23
  */
+@SuppressWarnings({"rawtypes","unchecked"})
 public abstract class McnUtils {
     private static final int BUFFER_SIZE = 4096;
 
@@ -183,20 +184,20 @@ public abstract class McnUtils {
         if(Objects.isNull(obj)){
             return true;
         }
-        if (obj instanceof Optional) {
-            return !((Optional<?>) obj).isPresent();
+        if (obj instanceof Optional<?> op) {
+            return op.isEmpty();
         }
-        if (obj instanceof CharSequence) {
-            return ((CharSequence) obj).length() == 0;
+        if (obj instanceof CharSequence cs) {
+            return cs.isEmpty();
         }
         if (obj.getClass().isArray()) {
             return Array.getLength(obj) == 0;
         }
-        if (obj instanceof Collection) {
-            return ((Collection<?>) obj).isEmpty();
+        if (obj instanceof Collection<?> col) {
+            return col.isEmpty();
         }
-        if (obj instanceof Map) {
-            return ((Map<?, ?>) obj).isEmpty();
+        if (obj instanceof Map<?, ?> map) {
+            return map.isEmpty();
         }
         return false;
     }
@@ -404,7 +405,7 @@ public abstract class McnUtils {
     public static <T> T map2bean(Map<String,Object> map, Class<T> clz) {
         T obj;
         try{
-            obj = clz.newInstance();
+            obj = clz.getDeclaredConstructor().newInstance();
             BeanInfo b = Introspector.getBeanInfo(clz,Object.class);
             PropertyDescriptor[] pds = b.getPropertyDescriptors();
             for (PropertyDescriptor pd : pds) {

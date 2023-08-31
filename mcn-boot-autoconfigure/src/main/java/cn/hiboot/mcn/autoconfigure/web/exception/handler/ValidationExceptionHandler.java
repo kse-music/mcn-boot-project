@@ -26,8 +26,7 @@ public class ValidationExceptionHandler{
 
     private static List<ValidationErrorBean> handleValidationException(ValidationException exception){
         List<ValidationErrorBean> data = null;
-        if (exception instanceof ConstraintViolationException) {
-            ConstraintViolationException cve = (ConstraintViolationException) exception;
+        if (exception instanceof ConstraintViolationException cve) {
             data = cve.getConstraintViolations().stream().map(violation ->
                     new ValidationErrorBean(violation.getMessage(), getViolationPath(violation), getViolationInvalidValue(violation.getInvalidValue()))
             ).collect(Collectors.toList());

@@ -85,12 +85,11 @@ public class ReactiveDataIntegrityFilter implements OrderedWebFilter {
                         @Override
                         public Flux<DataBuffer> getBody() {
                             return super.getBody().flatMap(dataBuffer -> {
-                                int length = dataBuffer.readableByteCount();
                                 String payload = JsonRequestHelper.getData(dataBuffer.asInputStream());
                                 if (isInValid(signature, timestamp, nonceStr, p.getValue0(), null,payload)) {
                                     return Mono.error(DataIntegrityException.newInstance("验证失败,数据被篡改"));
                                 }
-                                return Flux.just(dataBuffer.retainedSlice(0,length));
+                                return Flux.just(dataBuffer.split(0));
                             });
                         }
                     };
@@ -123,10 +122,14 @@ public class ReactiveDataIntegrityFilter implements OrderedWebFilter {
                 StringBuilder str = new StringBuilder();
                 m.forEach((k,v) -> {
                     for (Part part : v) {
-                        part.content().map(dataBuffer -> dataBuffer.asByteBuffer().array()).subscribe(bytes -> str.append(DataIntegrityUtils.md5UploadFile(bytes,getSubmittedFileName(part))).append("&"));
+                        part.content().map(dataBuffer -> {
+                            byte[] dest = new byte[dataBuffer.readableByteCount()];
+                            dataBuffer.read(dest);
+                            return dest;
+                        }).subscribe(bytes -> str.append(DataIntegrityUtils.md5UploadFile(bytes,getSubmittedFileName(part))).append("&"));
                     }
                 });
-                if (str.length() != 0) {
+                if (!str.isEmpty()) {
                     return str.substring(0, str.length() - 1);
                 }
                 return str.toString();

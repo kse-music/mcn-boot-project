@@ -18,6 +18,7 @@ import java.util.Map;
  * @author DingHao
  * @since 2021/7/4 10:43
  */
+@SuppressWarnings({"rawtypes","unchecked"})
 class FeignCircuitBreakerTargeter implements Targeter {
     private final Map<String,Method> map = new HashMap<>();
 
@@ -38,10 +39,9 @@ class FeignCircuitBreakerTargeter implements Targeter {
     @Override
     public <T> T target(FeignClientFactoryBean factory, Feign.Builder feign, FeignClientFactory context,
                         Target.HardCodedTarget<T> target) {
-        if (!(feign instanceof FeignCircuitBreaker.Builder)) {
+        if (!(feign instanceof FeignCircuitBreaker.Builder builder)) {
             return feign.target(target);
         }
-        FeignCircuitBreaker.Builder builder = (FeignCircuitBreaker.Builder) feign;
         String name = !StringUtils.hasText(factory.getContextId()) ? factory.getName() : factory.getContextId();
         Class<?> fallback = factory.getFallback();
         if (fallback != void.class) {

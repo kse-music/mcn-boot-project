@@ -13,6 +13,7 @@ import org.bouncycastle.crypto.engines.SM2Engine;
  * @author DingHao
  * @since 2022/8/11 14:14
  */
+@SuppressWarnings("deprecation")
 public class SM2Encryptor implements TextEncryptor {
     private final EncryptorProperties.SM2 config;
     private final boolean continueOnError;
