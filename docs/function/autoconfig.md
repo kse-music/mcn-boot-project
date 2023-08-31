@@ -576,10 +576,46 @@ public class TestRestApi {
 
 ```
 
-## War包模式
+## 打War包
 
-1. 在classpath的config目录下创建mcn.properties文件 
-2. 添加main.class=应用启动类(即main方法所在类) 
+1. 将pom打包类型改为war
+```xml
+<packaging>war</packaging>
+```
+2. 移除tomcat
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-web</artifactId>
+    <exclusions>
+        <exclusion>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-tomcat</artifactId>
+        </exclusion>
+    </exclusions>
+</dependency>
+
+```
+3. 加入servlet依赖
+```xml
+   <dependency>
+       <groupId>jakarta.servlet</groupId>
+       <artifactId>jakarta.servlet-api</artifactId>
+       <scope>provided</scope>
+   </dependency>
+```
+
+4. 配置war打包插件
+```xml
+<plugin>
+    <artifactId>maven-war-plugin</artifactId>
+    <configuration>
+        <failOnMissingWebXml>false</failOnMissingWebXml>
+    </configuration>
+</plugin>
+```
+5. 在classpath的config目录下创建mcn.properties文件
+6. 添加main.class=应用启动类(即main方法所在类)
 
 ## 数据库初始化
 
