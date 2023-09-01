@@ -4,8 +4,8 @@ import jakarta.validation.executable.ExecutableValidator;
 import org.hibernate.validator.internal.engine.ConfigurationImpl;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.validation.ValidationConfigurationCustomizer;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
 /**
@@ -16,14 +16,17 @@ import org.springframework.context.annotation.Bean;
  */
 @AutoConfiguration
 @ConditionalOnClass(ExecutableValidator.class)
+@EnableConfigurationProperties(ValidatorProperties.class)
 public class ValidatorAutoConfiguration {
 
     @Bean
-    @ConditionalOnMissingBean
-    ValidationConfigurationCustomizer customValidationConfigurationCustomizer(){
+    ValidationConfigurationCustomizer customValidationConfigurationCustomizer(ValidatorProperties properties){
         return configuration -> {
             if(configuration instanceof ConfigurationImpl c){
-                c.failFast(true);
+                c.failFast(properties.isFailFast())
+                        .allowOverridingMethodAlterParameterConstraint(properties.isOverridingMethodAlterParameterConstraint())
+                        .allowMultipleCascadedValidationOnReturnValues(properties.isMultipleCascadedValidationOnReturnValues())
+                        .allowParallelMethodsDefineParameterConstraints(properties.isParallelMethodsDefineParameterConstraints());
             }
         };
     }

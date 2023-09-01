@@ -250,7 +250,7 @@ public class DefaultExceptionHandler implements ExceptionHandler{
     }
 
 
-    @JsonIgnoreProperties({"cause", "stackTrace", "suppressed", "localizedMessage"})
+    @JsonIgnoreProperties({"cause", "stackTrace", "message", "suppressed", "localizedMessage"})
     static class ThrowableData extends Throwable{
         private List<ValidationErrorBean> detail;
         ThrowableData(List<ValidationErrorBean> detail) {
