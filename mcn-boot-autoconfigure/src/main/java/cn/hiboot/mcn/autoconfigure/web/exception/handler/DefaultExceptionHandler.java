@@ -11,6 +11,7 @@ import cn.hiboot.mcn.core.exception.ExceptionKeys;
 import cn.hiboot.mcn.core.model.result.RestResp;
 import cn.hiboot.mcn.core.util.McnUtils;
 import cn.hiboot.mcn.core.util.SpringBeanUtils;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,7 +67,7 @@ public class DefaultExceptionHandler implements ExceptionHandler{
 
     protected DefaultExceptionHandler(ExceptionProperties properties) {
         this.properties = properties;
-        this.validationExceptionPresent = ClassUtils.isPresent("javax.validation.ValidationException", getClass().getClassLoader());
+        this.validationExceptionPresent = ClassUtils.isPresent("jakarta.validation.ValidationException", getClass().getClassLoader());
         this.applicationContext = SpringBeanUtils.getApplicationContext();
         this.httpStatusCodeResolvers = applicationContext.getBeanProvider(HttpStatusCodeResolver.class);
         this.exceptionResolverNames = applicationContext.getBeanNamesForType(ExceptionResolver.class);
@@ -95,8 +96,7 @@ public class DefaultExceptionHandler implements ExceptionHandler{
             }
         }
         if(Objects.isNull(resp)){
-            RestResp<Object> rs = doHandleException(exception);
-            resp = RestResp.error(rs.getErrorCode(),rs.getErrorInfo());
+            resp = doHandleException(exception);
         }
         if(properties.isOverrideExMsg()){
             String message = properties.getErrorCodeMsg().get(resp.getErrorCode());
@@ -108,7 +108,7 @@ public class DefaultExceptionHandler implements ExceptionHandler{
         return resp;
     }
 
-    private RestResp<Object> doHandleException(Throwable exception) {
+    private RestResp<Throwable> doHandleException(Throwable exception) {
         Integer errorCode = DEFAULT_ERROR_CODE;
         List<ValidationErrorBean> data = null;
         if(exception instanceof BaseException ex){
@@ -137,9 +137,9 @@ public class DefaultExceptionHandler implements ExceptionHandler{
         return result(errorCode, exception, data);
     }
 
-    private RestResp<Object> result(Integer errorCode, Throwable exception, List<ValidationErrorBean> data) {
+    private RestResp<Throwable> result(Integer errorCode, Throwable exception, List<ValidationErrorBean> data) {
         String msg = properties.isReturnOriginExMsg() ? getMessage(exception) : ErrorMsg.getErrorMsg(getErrorCode(errorCode));
-        RestResp<Object> resp = RestResp.error(errorCode, msg);
+        RestResp<Throwable> resp = RestResp.error(errorCode, msg);
         if(McnUtils.isNotNullAndEmpty(data)){
             if(properties.isValidateResultToErrorInfo()){
                 ValidationErrorBean validationErrorBean = data.get(0);
@@ -147,7 +147,7 @@ public class DefaultExceptionHandler implements ExceptionHandler{
                 resp.setErrorInfo(properties.isAppendField() ? validationErrorBean.getPath().concat(message) : message);
             }
             if(properties.isReturnValidateResult()){//设置参数校验具体错误数据信息
-                resp.setData(data);
+                resp.setData(new ThrowableData(data));
             }
         }
         return resp;
@@ -247,6 +247,23 @@ public class DefaultExceptionHandler implements ExceptionHandler{
             return;
         }
         exception.setStackTrace(Arrays.stream(exception.getStackTrace()).filter(s -> s.getClassName().contains(basePackage)).toArray(StackTraceElement[]::new));
+    }
+
+
+    @JsonIgnoreProperties({"cause", "stackTrace", "suppressed", "localizedMessage"})
+    static class ThrowableData extends Throwable{
+        private List<ValidationErrorBean> detail;
+        ThrowableData(List<ValidationErrorBean> detail) {
+            this.detail = detail;
+        }
+
+        public List<ValidationErrorBean> getDetail() {
+            return detail;
+        }
+
+        public void setDetail(List<ValidationErrorBean> detail) {
+            this.detail = detail;
+        }
     }
 
 }
