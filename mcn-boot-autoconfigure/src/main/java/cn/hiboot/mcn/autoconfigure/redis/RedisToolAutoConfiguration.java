@@ -4,10 +4,7 @@ import cn.hiboot.mcn.autoconfigure.web.filter.common.JsonRequestHelper;
 import cn.hiboot.mcn.autoconfigure.web.filter.common.servlet.RequestPayloadRequestWrapper;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.boot.autoconfigure.condition.*;
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,10 +24,11 @@ import java.io.IOException;
  */
 @AutoConfiguration(after = RedisAutoConfiguration.class)
 @ConditionalOnClass(RedisOperations.class)
+@ConditionalOnBean(StringRedisTemplate.class)
 public class RedisToolAutoConfiguration {
 
     @Bean
-    @ConditionalOnBean(StringRedisTemplate.class)
+    @ConditionalOnMissingBean
     public DistributedLocker distributedLocker(StringRedisTemplate redisTemplate){
         return new RedisDistributedLocker(redisTemplate);
     }
@@ -54,8 +52,7 @@ public class RedisToolAutoConfiguration {
     protected static class RepeatCommitAspectConfiguration{
 
         @Bean
-        @ConditionalOnBean(StringRedisTemplate.class)
-        public RepeatCommitAspect repeatCommitAspect( StringRedisTemplate redisTemplate) {
+        public RepeatCommitAspect repeatCommitAspect(StringRedisTemplate redisTemplate) {
             return new RepeatCommitAspect(redisTemplate);
         }
 
