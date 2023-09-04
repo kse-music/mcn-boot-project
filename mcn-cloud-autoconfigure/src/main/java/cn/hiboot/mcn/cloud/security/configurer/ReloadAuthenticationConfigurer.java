@@ -21,6 +21,7 @@ import java.util.Map;
  */
 public class ReloadAuthenticationConfigurer extends AbstractHttpConfigurer<ReloadAuthenticationConfigurer, HttpSecurity> {
 
+    @SuppressWarnings({"unchecked","rawtypes"})
     @Override
     public void configure(HttpSecurity http) throws Exception {
         ApplicationContext applicationContext = http.getSharedObject(ApplicationContext.class);
@@ -31,15 +32,12 @@ public class ReloadAuthenticationConfigurer extends AbstractHttpConfigurer<Reloa
                 Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
                 if (authentication != null) {
                     Object principal = authentication.getPrincipal();
-                    if (principal instanceof Map) {
-                        @SuppressWarnings("unchecked")
-                        Map<String, Object> oldPrincipal = (Map<String, Object>) principal;
+                    if (principal instanceof Map oldPrincipal) {
                         Map<String, Object> newPrincipal = authenticationReload.reload(oldPrincipal);
                         if(newPrincipal != null){
                             oldPrincipal.putAll(newPrincipal);
                         }
-                    } else if (principal instanceof Jwt) {
-                        Jwt jwt0 = (Jwt) principal;
+                    } else if (principal instanceof Jwt jwt0) {
                         Map<String, Object> oldPrincipal = jwt0.getClaimAsMap(SessionHolder.USER_NAME);
                         Map<String, Object> newPrincipal = authenticationReload.reload(oldPrincipal);
                         if(newPrincipal != null){

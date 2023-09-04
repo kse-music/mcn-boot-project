@@ -90,8 +90,8 @@ public class GlobalErrorExceptionHandler extends DefaultErrorWebExceptionHandler
 
     @Override
     public Integer resolve(Throwable ex) {
-        if(ex instanceof ResponseStatusException){
-            return ExceptionKeys.mappingCode(((ResponseStatusException) ex).getBody().getStatus());
+        if(ex instanceof ResponseStatusException responseStatusException){
+            return ExceptionKeys.mappingCode(responseStatusException.getBody().getStatus());
         }
         return null;
     }

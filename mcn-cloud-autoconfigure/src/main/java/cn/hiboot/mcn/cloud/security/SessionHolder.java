@@ -50,7 +50,7 @@ public interface SessionHolder {
 
     static JwtAuthenticationToken getJwtAuthenticationToken() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return authentication instanceof JwtAuthenticationToken ? (JwtAuthenticationToken) authentication : null;
+        return authentication instanceof JwtAuthenticationToken jwtAuthenticationToken ? jwtAuthenticationToken : null;
     }
 
 }

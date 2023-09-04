@@ -36,8 +36,8 @@ public class ServiceRegisterAutoConfiguration {
 
         @Override
         public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-            if(bean instanceof AbstractAutoServiceRegistration){
-                ((AbstractAutoServiceRegistration<?>) bean).start();
+            if(bean instanceof AbstractAutoServiceRegistration<?> registration){
+                registration.start();
             }
             return bean;
         }
@@ -69,8 +69,7 @@ public class ServiceRegisterAutoConfiguration {
         public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
             if(ClassUtils.isPresent("org.springframework.web.context.WebApplicationContext",context.getClassLoader())){
                 ResourceLoader resourceLoader = context.getResourceLoader();
-                if (resourceLoader instanceof WebApplicationContext) {
-                    WebApplicationContext applicationContext = (WebApplicationContext) resourceLoader;
+                if (resourceLoader instanceof WebApplicationContext applicationContext) {
                     return applicationContext.getServletContext() != null;
                 }
             }

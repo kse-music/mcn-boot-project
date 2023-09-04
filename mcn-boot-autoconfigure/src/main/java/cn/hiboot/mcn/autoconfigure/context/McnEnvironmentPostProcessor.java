@@ -116,12 +116,12 @@ public class McnEnvironmentPostProcessor implements EnvironmentPostProcessor, Or
 
     }
 
-    private MapPropertySource loadResourcePropertySource(String name, Object resource) {
+    private MapPropertySource loadResourcePropertySource(String name, Object object) {
         try {
-            if (resource instanceof Resource) {
-                return new ResourcePropertySource(name, (Resource) resource);
+            if (object instanceof Resource resource) {
+                return new ResourcePropertySource(name, resource);
             }
-            return new ResourcePropertySource(name, resource.toString());
+            return new ResourcePropertySource(name, object.toString());
         } catch (IOException e) {
             return EMPTY_PROPERTY_SOURCE;
         }

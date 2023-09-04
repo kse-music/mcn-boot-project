@@ -49,8 +49,8 @@ public class ServiceException extends BaseException{
 	}
 
 	public static ServiceException find(Throwable t){
-		if(t instanceof ServiceException){
-			return (ServiceException) t;
+		if(t instanceof ServiceException serviceException){
+			return serviceException;
 		}
 		Throwable cause = t.getCause();
 		if(cause == null){

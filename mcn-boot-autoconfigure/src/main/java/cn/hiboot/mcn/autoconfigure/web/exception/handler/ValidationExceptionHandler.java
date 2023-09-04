@@ -39,40 +39,40 @@ public class ValidationExceptionHandler{
             return null;
         } else {
             if (invalidValue.getClass().isArray()) {
-                if (invalidValue instanceof Object[]) {
-                    return Arrays.toString((Object[]) invalidValue);
+                if (invalidValue instanceof Object[] value) {
+                    return Arrays.toString(value);
                 }
 
-                if (invalidValue instanceof boolean[]) {
-                    return Arrays.toString((boolean[]) invalidValue);
+                if (invalidValue instanceof boolean[] value) {
+                    return Arrays.toString(value);
                 }
 
-                if (invalidValue instanceof byte[]) {
-                    return Arrays.toString((byte[]) invalidValue);
+                if (invalidValue instanceof byte[] value) {
+                    return Arrays.toString(value);
                 }
 
-                if (invalidValue instanceof char[]) {
-                    return Arrays.toString((char[]) invalidValue);
+                if (invalidValue instanceof char[] value) {
+                    return Arrays.toString(value);
                 }
 
-                if (invalidValue instanceof double[]) {
-                    return Arrays.toString((double[]) invalidValue);
+                if (invalidValue instanceof double[] value) {
+                    return Arrays.toString(value);
                 }
 
-                if (invalidValue instanceof float[]) {
-                    return Arrays.toString((float[]) invalidValue);
+                if (invalidValue instanceof float[] value) {
+                    return Arrays.toString(value);
                 }
 
-                if (invalidValue instanceof int[]) {
-                    return Arrays.toString((int[]) invalidValue);
+                if (invalidValue instanceof int[] value) {
+                    return Arrays.toString(value);
                 }
 
-                if (invalidValue instanceof long[]) {
-                    return Arrays.toString((long[]) invalidValue);
+                if (invalidValue instanceof long[] value) {
+                    return Arrays.toString(value);
                 }
 
-                if (invalidValue instanceof short[]) {
-                    return Arrays.toString((short[]) invalidValue);
+                if (invalidValue instanceof short[] value) {
+                    return Arrays.toString(value);
                 }
             }
 

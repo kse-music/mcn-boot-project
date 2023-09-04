@@ -51,8 +51,7 @@ public class ComponentScanPackageCheck {
         String[] names = registry.getBeanDefinitionNames();
         for (String name : names) {
             BeanDefinition definition = registry.getBeanDefinition(name);
-            if (definition instanceof AnnotatedBeanDefinition) {
-                AnnotatedBeanDefinition annotatedDefinition = (AnnotatedBeanDefinition) definition;
+            if (definition instanceof AnnotatedBeanDefinition annotatedDefinition) {
                 addComponentScanningPackages(packages, annotatedDefinition.getMetadata());
             }
         }

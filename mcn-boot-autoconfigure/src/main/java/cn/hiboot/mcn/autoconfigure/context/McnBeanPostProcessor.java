@@ -30,19 +30,17 @@ public class McnBeanPostProcessor implements BeanPostProcessor{
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        if(bean instanceof ObjectMapper){
-            JacksonUtils.setObjectMapper((ObjectMapper) bean);
-        }else {
-            mappingDbCustomConfigToStandardConfig(bean);
-        }
+        postProcessAfterInitialization(bean);
         return bean;
     }
 
-    private void mappingDbCustomConfigToStandardConfig(Object bean){
-        if(bean instanceof MongoProperties){
-            mappingMongoConfig((MongoProperties) bean);
-        }else if(bean instanceof RedisProperties){
-            mappingRedisConfig((RedisProperties) bean);
+    private void postProcessAfterInitialization(Object bean){
+        if(bean instanceof ObjectMapper objectMapper) {
+            JacksonUtils.setObjectMapper(objectMapper);
+        }else if(bean instanceof MongoProperties mongoProperties){
+            mappingMongoConfig(mongoProperties);
+        }else if(bean instanceof RedisProperties redisProperties){
+            mappingRedisConfig(redisProperties);
         }
     }
 

@@ -39,16 +39,16 @@ public class McnApplicationListener implements GenericApplicationListener {
 
     @Override
     public void onApplicationEvent(ApplicationEvent applicationEvent) {
-        if(applicationEvent instanceof ApplicationStartingEvent){
-            onApplicationStartingEvent((ApplicationStartingEvent) applicationEvent);
-        }else if(applicationEvent instanceof ApplicationEnvironmentPreparedEvent){
-            onApplicationEnvironmentPreparedEvent((ApplicationEnvironmentPreparedEvent) applicationEvent);
-        }else if(applicationEvent instanceof ApplicationContextInitializedEvent){
-            onApplicationContextInitializedEvent((ApplicationContextInitializedEvent) applicationEvent);
-        }else if(applicationEvent instanceof ApplicationPreparedEvent){
-            onApplicationPreparedEvent((ApplicationPreparedEvent)applicationEvent);
-        }else if(applicationEvent instanceof ApplicationReadyEvent){
-            onApplicationReadyEvent((ApplicationReadyEvent) applicationEvent);
+        if(applicationEvent instanceof ApplicationStartingEvent event){
+            onApplicationStartingEvent(event);
+        }else if(applicationEvent instanceof ApplicationEnvironmentPreparedEvent event){
+            onApplicationEnvironmentPreparedEvent(event);
+        }else if(applicationEvent instanceof ApplicationContextInitializedEvent event){
+            onApplicationContextInitializedEvent(event);
+        }else if(applicationEvent instanceof ApplicationPreparedEvent event){
+            onApplicationPreparedEvent(event);
+        }else if(applicationEvent instanceof ApplicationReadyEvent event){
+            onApplicationReadyEvent(event);
         }
     }
 

@@ -48,8 +48,8 @@ public class GlobalExceptionHandler implements HttpStatusCodeResolver,Ordered {
         if(ex instanceof ServletRequestBindingException){
             return ExceptionKeys.PARAM_PARSE_ERROR;
         }else if(ex instanceof ServletException){
-            if (ex.getCause() instanceof Error) {
-                exceptionHandler.handleError((Error) ex.getCause());
+            if (ex.getCause() instanceof Error error) {
+                exceptionHandler.handleError(error);
                 return ExceptionKeys.SERVICE_ERROR;
             }
             int code = ExceptionKeys.HTTP_ERROR_500;

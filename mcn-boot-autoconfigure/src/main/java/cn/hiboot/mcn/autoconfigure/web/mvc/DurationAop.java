@@ -48,9 +48,8 @@ public class DurationAop {
                 long start = System.currentTimeMillis();
                 Object o = invocation.proceed();
                 long duration = System.currentTimeMillis() - start;
-                if (o instanceof HttpTime) {
-                    HttpTime r = (HttpTime) o;
-                    r.setDuration(duration);
+                if (o instanceof HttpTime httpTime) {
+                    httpTime.setDuration(duration);
                 }
                 return o;
             };

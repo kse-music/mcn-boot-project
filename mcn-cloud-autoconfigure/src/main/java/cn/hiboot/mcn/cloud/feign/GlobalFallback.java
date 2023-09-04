@@ -35,10 +35,9 @@ public class GlobalFallback<T> implements MethodInterceptor {
     public Object intercept(Object o, Method method, Object[] objects, MethodProxy methodProxy) throws Throwable {
         String errorMessage = cause.getMessage();
         log.error("GlobalFallback:[{}.{}] serviceId:[{}] message:[{}]", targetType.getName(), method.getName(), targetName, errorMessage);
-        if (!(cause instanceof FeignException)) {
+        if (!(cause instanceof FeignException exception)) {
             return remoteError(errorMessage);
         }
-        FeignException exception = (FeignException) cause;
         if(exception.contentUTF8().isEmpty()){
             return remoteError(errorMessage);
         }

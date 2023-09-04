@@ -107,9 +107,9 @@ public class ParamProcessorAutoConfiguration {
                 continue;
             }
             CheckParam fieldAnnotation = declaredField.getAnnotation(CheckParam.class);
-            if (propertyValue instanceof String) {
+            if (propertyValue instanceof String str) {
                 if(usedAnnotation.validString() || fieldAnnotation != null){
-                    paramProcessor.process(ParamProcessorAutoConfiguration.getRule(usedAnnotation, fieldAnnotation), name, propertyValue.toString());
+                    paramProcessor.process(ParamProcessorAutoConfiguration.getRule(usedAnnotation, fieldAnnotation), name, str);
                 }
                 continue;
             }
@@ -134,8 +134,7 @@ public class ParamProcessorAutoConfiguration {
 
             @Override
             public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-                if (bean instanceof ObjectMapper) {
-                    ObjectMapper mapper = (ObjectMapper) bean;
+                if (bean instanceof ObjectMapper mapper) {
                     AnnotationIntrospector sis = mapper.getDeserializationConfig().getAnnotationIntrospector();
                     AnnotationIntrospector pair = AnnotationIntrospectorPair.pair(sis, new ParamProcessorAnnotationIntrospector(paramProcessor));
                     mapper.setAnnotationIntrospector(pair);
@@ -155,8 +154,7 @@ public class ParamProcessorAutoConfiguration {
 
         @Override
         public Object findDeserializer(Annotated am) {
-            if (am instanceof AnnotatedMethod) {
-                AnnotatedMethod annotatedMethod = (AnnotatedMethod) am;
+            if (am instanceof AnnotatedMethod annotatedMethod) {
                 if (String.class.isAssignableFrom(annotatedMethod.getParameterType(0).getRawClass())) {
                     CheckParam annotation = am.getAnnotation(CheckParam.class);
                     CheckParam classAnnotation = annotatedMethod.getDeclaringClass().getAnnotation(CheckParam.class);

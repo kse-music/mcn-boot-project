@@ -44,7 +44,7 @@ public abstract class JacksonUtils {
     }
 
     private static String valueString(Object content){
-        return content instanceof String ? (String) content : toJson(content);
+        return content instanceof String value? value : toJson(content);
     }
 
     public static <T> T fromJson(Object content, Class<T> clazz){
