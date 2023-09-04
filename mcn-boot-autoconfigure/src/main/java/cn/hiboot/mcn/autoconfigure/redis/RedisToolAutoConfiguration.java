@@ -40,7 +40,6 @@ public class RedisToolAutoConfiguration {
     protected static class DistributedLockerAspectConfiguration{
 
         @Bean
-        @ConditionalOnBean(DistributedLocker.class)
         public DistributedLockerAspect distributedLockerAspect(DistributedLocker distributedLocker) {
             return new DistributedLockerAspect(distributedLocker);
         }
