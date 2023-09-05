@@ -9,3 +9,6 @@ org.springframework.boot.BootstrapRegistryInitializer=\
 
 org.springframework.boot.env.EnvironmentPostProcessor=\
   cn.hiboot.mcn.autoconfigure.context.McnEnvironmentPostProcessor
+
+org.springframework.boot.autoconfigure.AutoConfigurationImportFilter=\
+  cn.hiboot.mcn.autoconfigure.jdbc.OnMissingPrimaryDataSource

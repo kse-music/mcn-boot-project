@@ -15,8 +15,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.context.annotation.FullyQualifiedAnnotationBeanNameGenerator;
 import org.springframework.context.annotation.Import;
-import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.AnnotationMetadata;
@@ -24,10 +24,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.data.jpa.repository.config.JpaRepositoryConfigExtension;
 import org.springframework.data.repository.config.*;
-import org.springframework.util.ReflectionUtils;
+import org.springframework.data.util.Streamable;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * JpaMultipleDataSourceAutoConfiguration
@@ -57,12 +59,8 @@ public class JpaMultipleDataSourceAutoConfiguration {
         @Override
         public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry, BeanNameGenerator generator) {
             String basePackage = multipleDataSourceConfig.getBasePackage();
-            AnnotationMetadata metadata = AnnotationMetadata.introspect(EnableJpaRepositoriesConfiguration.class);
-            AnnotationRepositoryConfigurationSource configurationSource = new AnnotationRepositoryConfigurationSource(metadata,getAnnotation(), resourceLoader, environment, registry, generator);
-            AnnotationAttributes annotationAttributes = getAnnotationAttributes(configurationSource);
-            if(annotationAttributes == null){
-                return;
-            }
+            generator = new FullyQualifiedAnnotationBeanNameGenerator();//与标准jpa区分
+            CustomAnnotationRepositoryConfigurationSource configurationSource = getConfigurationSource(registry,generator);
             JpaProperties jpaProperties = Binder.get(environment).bind("spring.jpa", JpaProperties.class).orElse(new JpaProperties());
             RepositoryConfigurationExtension extension = getExtension();
             RepositoryConfigurationUtils.exposeRegistration(extension, registry, configurationSource);
@@ -70,11 +68,7 @@ public class JpaMultipleDataSourceAutoConfiguration {
             multipleDataSourceConfig.getProperties().forEach((dsName,ds) -> {
                 String entityManagerFactoryRef = dsName + "EntityManagerFactory";
                 String transactionManagerRef = dsName + "TransactionManager";
-
-                //override config
-                annotationAttributes.put("basePackages",basePackage + "." + multipleDataSourceConfig.getDaoPackageName() + "." + dsName);
-                annotationAttributes.put("entityManagerFactoryRef",entityManagerFactoryRef);
-                annotationAttributes.put("transactionManagerRef",transactionManagerRef);
+                String daoPackage = basePackage + "." + multipleDataSourceConfig.getDaoPackageName() + "." + dsName;
 
                 //JpaConfiguration
                 String configBeanName = dsName + "JpaConfiguration";
@@ -96,20 +90,15 @@ public class JpaMultipleDataSourceAutoConfiguration {
                         .addConstructorArgReference(BeanFactory.FACTORY_BEAN_PREFIX+entityManagerFactoryRef)
                         .getBeanDefinition());
 
+                configurationSource.basePackage(daoPackage).entityManagerFactoryRef(entityManagerFactoryRef).transactionManagerRef(transactionManagerRef);
                 delegate.registerRepositoriesIn(registry, extension);
             });
 
         }
 
-        private AnnotationAttributes getAnnotationAttributes(AnnotationRepositoryConfigurationSource configurationSource){
-            Field attributes = ReflectionUtils.findField(AnnotationRepositoryConfigurationSource.class, "attributes");
-            ReflectionUtils.makeAccessible(attributes);
-            try {
-                return (AnnotationAttributes) attributes.get(configurationSource);
-            } catch (IllegalAccessException e) {
-                //ignore
-            }
-            return null;
+        private CustomAnnotationRepositoryConfigurationSource getConfigurationSource(BeanDefinitionRegistry registry,BeanNameGenerator generator) {
+            AnnotationMetadata metadata = AnnotationMetadata.introspect(EnableJpaRepositoriesConfiguration.class);
+            return new CustomAnnotationRepositoryConfigurationSource(metadata, getAnnotation(), this.resourceLoader,this.environment, registry,generator);
         }
 
         @Override
@@ -125,6 +114,47 @@ public class JpaMultipleDataSourceAutoConfiguration {
         @EnableJpaRepositories
         private static class EnableJpaRepositoriesConfiguration {
 
+        }
+
+        static class CustomAnnotationRepositoryConfigurationSource extends AnnotationRepositoryConfigurationSource {
+
+            private String basePackage;
+            private final Map<String,String> map;
+
+            CustomAnnotationRepositoryConfigurationSource(AnnotationMetadata metadata, Class<? extends Annotation> annotation,
+                                                          ResourceLoader resourceLoader, Environment environment,
+                                                          BeanDefinitionRegistry registry,BeanNameGenerator generator) {
+                super(metadata, annotation, resourceLoader, environment, registry, generator);
+                map = new HashMap<>();
+            }
+
+            @Override
+            public Streamable<String> getBasePackages() {
+                return Streamable.of(this.basePackage);
+            }
+
+            @Override
+            public Optional<String> getAttribute(String name) {
+                if(map.containsKey(name)){
+                    return Optional.ofNullable(map.get(name));
+                }
+                return super.getAttribute(name);
+            }
+
+            public CustomAnnotationRepositoryConfigurationSource basePackage(String basePackage) {
+                this.basePackage = basePackage;
+                return this;
+            }
+
+            public CustomAnnotationRepositoryConfigurationSource entityManagerFactoryRef(String entityManagerFactoryRef) {
+                map.put("entityManagerFactoryRef",entityManagerFactoryRef);
+                return this;
+            }
+
+            public CustomAnnotationRepositoryConfigurationSource transactionManagerRef(String transactionManagerRef) {
+                map.put("transactionManagerRef",transactionManagerRef);
+                return this;
+            }
         }
 
     }

@@ -31,6 +31,7 @@ import java.util.Map;
 @ConditionalOnClass(HikariDataSource.class)
 @Import(MultipleDataSourceAutoConfiguration.MultipleDataSourceRegister.class)
 public class MultipleDataSourceAutoConfiguration {
+    private static final String DATASOURCE_BEAN_NAME = "dataSource";
 
     static class MultipleDataSourceRegister implements ImportBeanDefinitionRegistrar {
 
@@ -51,9 +52,13 @@ public class MultipleDataSourceAutoConfiguration {
             if(multipleDataSourceConfig.enableDynamicDatasource()){
                 registry.registerBeanDefinition("defaultRoutingDataSource"
                         ,BeanDefinitionBuilder.genericBeanDefinition(MultipleDataSourceRegister.class).setFactoryMethod("defaultRoutingDataSource")
-                                        .addConstructorArgValue(multipleDataSourceConfig).addConstructorArgValue(beanFactory).setPrimary(true).getBeanDefinition());
+                                .addConstructorArgValue(multipleDataSourceConfig).addConstructorArgValue(beanFactory).setPrimary(true).getBeanDefinition());
                 registry.registerBeanDefinition(SwitchSourceAdvisor.class.getName()
                         ,BeanDefinitionBuilder.genericBeanDefinition(SwitchSourceAdvisor.class).setRole(BeanDefinition.ROLE_INFRASTRUCTURE).getBeanDefinition());
+            } else {
+                if(registry.containsBeanDefinition(DATASOURCE_BEAN_NAME)){
+                    registry.getBeanDefinition(DATASOURCE_BEAN_NAME).setPrimary(true);
+                }
             }
         }
 
@@ -75,7 +80,7 @@ public class MultipleDataSourceAutoConfiguration {
                 dataSourceMap.put(s,beanName);
             }
             dataSource.setTargetDataSources(dataSourceMap);
-            dataSource.setDefaultTargetDataSource(defaultDataSource);
+            dataSource.setDefaultTargetDataSource(beanFactory.containsBean(DATASOURCE_BEAN_NAME) ? DATASOURCE_BEAN_NAME : defaultDataSource);
             return dataSource;
         }
 
