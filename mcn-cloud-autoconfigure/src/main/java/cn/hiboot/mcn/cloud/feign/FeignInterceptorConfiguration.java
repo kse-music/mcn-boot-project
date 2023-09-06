@@ -9,6 +9,7 @@ import feign.RequestTemplate;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.DefaultAuthenticationEventPublisher;
@@ -68,7 +69,7 @@ public class FeignInterceptorConfiguration  {
 
     @Configuration(proxyBeanMethods = false)
     @ConditionalOnClass({DefaultAuthenticationEventPublisher.class, JwtAuthenticationToken.class})
-    private static class FeignRequestInterceptor implements RequestInterceptor {
+    private static class FeignRequestInterceptor implements RequestInterceptor, Ordered {
 
         @Override
         public void apply(RequestTemplate requestTemplate) {
@@ -76,6 +77,11 @@ public class FeignInterceptorConfiguration  {
             if (authorization != null) {
                 requestTemplate.header(HttpHeaders.AUTHORIZATION, authorization);
             }
+        }
+
+        @Override
+        public int getOrder() {
+            return 0;
         }
 
     }

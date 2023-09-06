@@ -9,12 +9,10 @@ import cn.hiboot.mcn.cloud.security.configurer.AuthenticationReload;
 import cn.hiboot.mcn.cloud.security.configurer.ReloadAuthenticationConfigurer;
 import cn.hiboot.mcn.core.exception.ExceptionKeys;
 import cn.hiboot.mcn.core.exception.ServiceException;
-import cn.hiboot.mcn.core.model.result.RestResp;
 import cn.hiboot.mcn.core.util.McnUtils;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.security.ConditionalOnDefaultWebSecurity;
@@ -39,7 +37,6 @@ import org.springframework.security.oauth2.server.resource.web.DefaultBearerToke
 import org.springframework.security.oauth2.server.resource.web.server.ServerBearerTokenAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.server.SecurityWebFilterChain;
-import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
@@ -75,6 +72,7 @@ public class ResourceServerAutoConfiguration {
     }
 
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
+    @ConditionalOnDefaultWebSecurity
     static class ReactiveResourceServerConfiguration {
         private final ExceptionHandler exceptionHandler;
 
@@ -83,7 +81,6 @@ public class ResourceServerAutoConfiguration {
         }
 
         @Bean
-        @ConditionalOnMissingBean(SecurityWebFilterChain.class)
         SecurityWebFilterChain resourceServerSecurityFilterChain(ServerHttpSecurity http,ResourceServerProperties ssoProperties
                 ,ObjectProvider<AuthenticationReload> authenticationReloads,ObjectProvider<TokenResolver> tokenResolvers){
             authenticationReloads.ifUnique(authenticationReload -> http.addFilterBefore(new ReloadAuthenticationWebFilter(authenticationReload), SecurityWebFiltersOrder.ANONYMOUS_AUTHENTICATION));
@@ -115,12 +112,8 @@ public class ResourceServerAutoConfiguration {
                                     if (McnUtils.isNullOrEmpty(apk)) {
                                         apk = request.getHeaders().getFirst(name);
                                     }
-                                    String token = "";
-                                    RestResp<LoginRsp> login = tokenResolver.resolve(apk);
-                                    if (login.getData() != null) {
-                                        token = login.getData().getToken().substring("Bearer".length()).trim();
-                                    }
-                                    if (token.isEmpty()) {
+                                    String token = tokenResolver.jwtToken(apk);
+                                    if (token == null) {
                                         return Mono.error(ServiceException.newInstance(name + "不正确"));
                                     }
                                     return Mono.just(new BearerTokenAuthenticationToken(token));
@@ -181,6 +174,7 @@ public class ResourceServerAutoConfiguration {
     }
 
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
+    @ConditionalOnDefaultWebSecurity
     static class ServletResourceServerConfiguration {
         private final ExceptionHandler exceptionHandler;
 
@@ -189,8 +183,7 @@ public class ResourceServerAutoConfiguration {
         }
 
         @Bean
-        @ConditionalOnDefaultWebSecurity
-        SecurityFilterChain resourceServerSecurityFilterChain(HttpSecurity http,ResourceServerProperties ssoProperties) throws Exception {
+        SecurityFilterChain resourceServerSecurityFilterChain(HttpSecurity http,ResourceServerProperties ssoProperties,ObjectProvider<TokenResolver> beanProvider) throws Exception {
             return http
                     .authorizeRequests(requests -> {
                         if (McnUtils.isNotNullAndEmpty(ssoProperties.getAllowedPaths())) {
@@ -204,7 +197,7 @@ public class ResourceServerAutoConfiguration {
                         }else {
                             c.jwt();
                         }
-                        c.accessDeniedHandler((request, response, accessDeniedException) -> handleException(accessDeniedException,response))
+                        c.bearerTokenResolver(new CustomBearerTokenResolver(beanProvider)).accessDeniedHandler((request, response, accessDeniedException) -> handleException(accessDeniedException,response))
                                 .authenticationEntryPoint((request, response, authException) -> handleException(authException,response));
                     })
                     .apply(new ReloadAuthenticationConfigurer()).and()
@@ -215,7 +208,6 @@ public class ResourceServerAutoConfiguration {
             ResponseUtils.write(exceptionHandler.handleException(exception),response);
         }
 
-        @Component
         static class CustomBearerTokenResolver implements BearerTokenResolver{
             private final TokenResolver tokenResolver;
             private final BearerTokenResolver defaultBearerTokenResolver;
@@ -227,24 +219,18 @@ public class ResourceServerAutoConfiguration {
 
             @Override
             public String resolve(HttpServletRequest request) {
-                String tokenHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-                if (McnUtils.isNotNullAndEmpty(tokenHeader)) {
-                    return defaultBearerTokenResolver.resolve(request);
-                }
-                if(tokenResolver != null){
+                String token = defaultBearerTokenResolver.resolve(request);
+                if (token == null && tokenResolver != null) {
                     String name = tokenResolver.paramName();
                     String apk = request.getHeader(name);
                     if (McnUtils.isNullOrEmpty(apk)) {
                         apk = request.getParameter(name);
                     }
                     if (McnUtils.isNotNullAndEmpty(apk)) {
-                        RestResp<LoginRsp> login = tokenResolver.resolve(apk);
-                        if (login.getData() != null) {
-                            return login.getData().getToken().substring("Bearer".length()).trim();
-                        }
+                        return tokenResolver.jwtToken(apk);
                     }
                 }
-                return null;
+                return token;
             }
 
         }
