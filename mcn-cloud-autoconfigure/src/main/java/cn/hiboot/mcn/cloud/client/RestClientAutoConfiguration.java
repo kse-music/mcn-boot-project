@@ -1,6 +1,11 @@
 package cn.hiboot.mcn.cloud.client;
 
+import cn.hiboot.mcn.cloud.security.resource.LoginRsp;
+import cn.hiboot.mcn.cloud.security.resource.TokenResolver;
+import cn.hiboot.mcn.core.model.result.RestResp;
+import cn.hiboot.mcn.core.util.McnUtils;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -53,6 +58,16 @@ public class RestClientAutoConfiguration {
     @ConditionalOnMissingBean(name = "loadBalancedRestTemplate")
     RestTemplate loadBalancedRestTemplate(RestTemplateBuilder builder) {
         return restTemplate0(builder);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    TokenResolver tokenResolver(RestTemplate restTemplate,RestTemplate loadBalancedRestTemplate, @Value("${token.service}") String tokenService){
+        RestClient restClient = new RestClient(tokenService.split("\\.").length == 4 ? restTemplate : loadBalancedRestTemplate);
+        return apk -> {
+            LoginRsp rs = restClient.get("http://"+tokenService+"/sso/login/{apk}", LoginRsp.class, McnUtils.put("apk",apk));
+            return new RestResp<>(rs);
+        };
     }
 
 }
