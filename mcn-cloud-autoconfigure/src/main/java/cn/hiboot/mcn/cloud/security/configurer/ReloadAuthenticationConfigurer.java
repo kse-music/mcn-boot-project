@@ -35,7 +35,6 @@ public class ReloadAuthenticationConfigurer extends AbstractHttpConfigurer<Reloa
         }
     }
 
-    @SuppressWarnings({"unchecked"})
     public static void reloadAuthentication(SecurityContext securityContext, AuthenticationReload authenticationReload){
         Authentication authentication = securityContext.getAuthentication();
         if (authentication != null) {
