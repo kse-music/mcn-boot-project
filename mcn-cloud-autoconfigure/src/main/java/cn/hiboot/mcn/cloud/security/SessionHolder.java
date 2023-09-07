@@ -1,5 +1,6 @@
 package cn.hiboot.mcn.cloud.security;
 
+import cn.hiboot.mcn.cloud.security.resource.TokenResolver;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -15,7 +16,6 @@ import java.util.Map;
  * @since 2021/8/20 10:32
  */
 public interface SessionHolder {
-    String BEARER_PREFIX = "Bearer ";
     String USER_NAME = "user_name";
 
     static String getUserId() {
@@ -35,7 +35,7 @@ public interface SessionHolder {
 
     static String getBearerToken() {
         String token = getJwtTokenString();
-        return token == null ? null : BEARER_PREFIX.concat(token);
+        return token == null ? null : TokenResolver.TOKEN_PREFIX.concat(" ").concat(token);
     }
 
     static String getJwtTokenString() {

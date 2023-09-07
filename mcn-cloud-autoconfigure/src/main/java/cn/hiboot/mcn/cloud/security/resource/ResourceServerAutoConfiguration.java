@@ -4,7 +4,6 @@ import cn.hiboot.mcn.autoconfigure.web.exception.HttpStatusCodeResolver;
 import cn.hiboot.mcn.autoconfigure.web.exception.handler.ExceptionHandler;
 import cn.hiboot.mcn.autoconfigure.web.mvc.ResponseUtils;
 import cn.hiboot.mcn.autoconfigure.web.reactor.ServerHttpResponseUtils;
-import cn.hiboot.mcn.cloud.security.SessionHolder;
 import cn.hiboot.mcn.cloud.security.configurer.AuthenticationReload;
 import cn.hiboot.mcn.cloud.security.configurer.ReloadAuthenticationConfigurer;
 import cn.hiboot.mcn.core.exception.ExceptionKeys;
@@ -31,8 +30,6 @@ import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthenticationToken;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;
@@ -44,9 +41,6 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * ResourceServerAutoConfiguration
@@ -142,30 +136,7 @@ public class ResourceServerAutoConfiguration {
             public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
                 return ReactiveSecurityContextHolder.getContext().filter(c -> c.getAuthentication() != null)
                         .flatMap(securityContext -> {
-                            Authentication authentication = securityContext.getAuthentication();
-                            Object principal = authentication.getPrincipal();
-                            if (principal instanceof Map) {
-                                @SuppressWarnings("unchecked")
-                                Map<String, Object> oldPrincipal = (Map<String, Object>) principal;
-                                Map<String, Object> newPrincipal = authenticationReload.reload(oldPrincipal);
-                                if(newPrincipal != null){
-                                    oldPrincipal.putAll(newPrincipal);
-                                }
-                            } else if (principal instanceof Jwt) {
-                                Jwt jwt0 = (Jwt) principal;
-                                Map<String, Object> oldPrincipal = jwt0.getClaimAsMap(SessionHolder.USER_NAME);
-                                Map<String, Object> newPrincipal = authenticationReload.reload(oldPrincipal);
-                                if(newPrincipal != null){
-                                    oldPrincipal.putAll(newPrincipal);
-                                    Map<String,Object> claims = new HashMap<>(jwt0.getClaims());
-                                    claims.put(SessionHolder.USER_NAME,oldPrincipal);
-                                    JwtAuthenticationToken jwtAuthenticationToken = (JwtAuthenticationToken)authentication;
-                                    Jwt jwt = new Jwt(jwt0.getTokenValue(),jwt0.getIssuedAt(),jwt0.getExpiresAt(),jwt0.getHeaders(),claims);
-                                    JwtAuthenticationToken authenticationToken = new JwtAuthenticationToken(jwt,jwtAuthenticationToken.getAuthorities());
-                                    authenticationToken.setDetails(jwtAuthenticationToken.getDetails());
-                                    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-                                }
-                            }
+                            ReloadAuthenticationConfigurer.reloadAuthentication(securityContext,authenticationReload);
                             return Mono.empty();
                         })
                         .switchIfEmpty(chain.filter(exchange).then(Mono.empty())).then();
