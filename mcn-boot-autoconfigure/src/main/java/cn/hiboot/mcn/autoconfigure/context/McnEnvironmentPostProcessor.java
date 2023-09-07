@@ -101,7 +101,7 @@ public class McnEnvironmentPostProcessor implements EnvironmentPostProcessor, Or
         }
         mapProp.put("mcn.log.file.name", environment.getProperty("mcn.log.file.name", "error"));
         mapProp.put("mcn.version", "v" + McnUtils.getVersion(this.getClass()));
-        addLast(propertySources, new MapPropertySource("mcn-map", mapProp));
+        addLast(propertySources, new MapPropertySource(ConfigProperties.MCN_MAP_PROPERTY_SOURCE_NAME, mapProp));
 
         MapPropertySource propertySource = loadResourcePropertySource(MCN_DEFAULT_PROPERTY_SOURCE_NAME, ConfigProperties.mcnDefault());
         if(!PRESENT){

@@ -22,6 +22,7 @@ public abstract class ConfigProperties {
     private static final String DATA_SOURCE = "DataSource";
 
     public static final String APP_BASE_PACKAGE = "app.base-package";
+    public static final String MCN_MAP_PROPERTY_SOURCE_NAME = "mcn-map";
 
     public static final String MULTIPLE_DATASOURCE_PREFIX = "multiple.datasource";
     public static final String JPA_MULTIPLE_DATASOURCE_PREFIX = "jpa." + MULTIPLE_DATASOURCE_PREFIX;

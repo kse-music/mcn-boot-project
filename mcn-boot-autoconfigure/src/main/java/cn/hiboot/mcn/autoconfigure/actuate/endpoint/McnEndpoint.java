@@ -1,5 +1,6 @@
 package cn.hiboot.mcn.autoconfigure.actuate.endpoint;
 
+import cn.hiboot.mcn.autoconfigure.config.ConfigProperties;
 import cn.hiboot.mcn.core.model.result.RestResp;
 import org.springframework.boot.actuate.endpoint.annotation.*;
 import org.springframework.core.env.ConfigurableEnvironment;
@@ -32,14 +33,14 @@ public class McnEndpoint {
 
     @WriteOperation
     public RestResp<?> add(String name,Object value) {
-        MapPropertySource mapPropertySource = (MapPropertySource) environment.getPropertySources().get("mcn-map");
+        MapPropertySource mapPropertySource = (MapPropertySource) environment.getPropertySources().get(ConfigProperties.MCN_MAP_PROPERTY_SOURCE_NAME);
         mapPropertySource.getSource().put(name,value);
         return new RestResp<>();
     }
 
     @DeleteOperation
     public RestResp<?> delete(@Selector String name) {
-        MapPropertySource mapPropertySource = (MapPropertySource) environment.getPropertySources().get("mcn-map");
+        MapPropertySource mapPropertySource = (MapPropertySource) environment.getPropertySources().get(ConfigProperties.MCN_MAP_PROPERTY_SOURCE_NAME);
         return new RestResp<>(mapPropertySource.getSource().remove(name));
     }
 
