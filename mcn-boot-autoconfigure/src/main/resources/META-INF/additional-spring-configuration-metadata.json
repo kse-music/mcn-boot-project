@@ -157,6 +157,12 @@
       "sourceType": "cn.hiboot.mcn.autoconfigure.context.McnEnvironmentPostProcessor",
       "description": "加载classpath下指定的所有配置文件.",
       "defaultValue": "config/config.properties"
+    },
+    {
+      "name": "main.class",
+      "type": "java.lang.String",
+      "sourceType": "cn.hiboot.mcn.autoconfigure.config.WarConfiguration",
+      "description": "指定主配置类(仅war包模式生效)."
     }
   ],
   "hints": [
