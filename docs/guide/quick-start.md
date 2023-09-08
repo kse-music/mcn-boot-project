@@ -153,7 +153,7 @@ public class DemoRestApi {
 #一般与项目模块对应
 spring.application.name=demo
 #开启swagger
-swagger.enable=true
+swagger.enabled=true
 ```
 
 ## 运行&访问

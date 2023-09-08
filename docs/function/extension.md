@@ -37,7 +37,7 @@ server.compression.enabled=true
 
 除了mcn-global-unique之外其它属性源默认不会加引导上下文中加载
 
-1. 当配置mcn.bootstrap.eagerLoad.enable=true可启用其它三个属性源也在引导上下文中加载
+1. 当配置mcn.bootstrap.eagerLoad.enabled=true可启用其它三个属性源也在引导上下文中加载
 
 2. 当环境中存在mcn-default属性源，则mcn-default、mcn-map属性源都不会加载
 
@@ -49,4 +49,4 @@ server.compression.enabled=true
 
 调试时使用,生产应关闭！！！
 
-当环境中配置mcn.print-env.enable=true时,项目在启动时会自动打印所有可枚举的属性源。
+当环境中配置mcn.print-env.enabled=true时,项目在启动时会自动打印所有可枚举的属性源。

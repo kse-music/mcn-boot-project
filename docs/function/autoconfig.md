@@ -68,12 +68,12 @@ public class CustomExceptionResolver {
 
 ## Swagger配置
 
-1. 默认swagger自动配置关闭,可通过swagger.enable=true开启
+1. 默认swagger自动配置关闭,可通过swagger.enabled=true开启
 2. 默认将带有注解RestController的接口生成文档忽略带有注解@IgnoreApi和@ApiIgnore的接口
 
 ## 跨域配置
 
-1. 默认跨域不启动,可通过filter.cross=true启用跨域,方便开发调试
+1. 默认跨域不启动,可通过filter.cross.enabled=true启用跨域,方便开发调试
 2. 参数说明
 ```properties
 #配置允许的请求方式
@@ -92,12 +92,12 @@ mcn.cors.pattern=/**
 
 ## XSS配置
 
-1. 默认跨域不启用,可通过mcn.xss.enable=true启用
+1. 默认跨域不启用,可通过mcn.xss.enabled=true启用
 2. 如果使用security,默认顺序在安全过滤器链后执行,可通过mcn.xss.order=-101调整到其之前执行
 3. 参数说明
 ```properties
 #是否启用Xss过滤
-mcn.xss.enable=true
+mcn.xss.enabled=true
 #存在xss是否直接抛异常,默认false
 #mcn.xss.failed-fast=true
 #指定哪些接口需要处理(ant匹配模式)
@@ -159,7 +159,7 @@ multiple.datasource.world.password=123456
 2. 启用动态数据源支持
 
 ```properties
-dynamic.datasource.enable=true
+dynamic.datasource.enabled=true
 ```
 
 ### 在MyBatis和Jpa使用动态数据源
@@ -215,8 +215,8 @@ SwitchSource注解既可以用在类上也可以用在方法上，方法上的�
 1. 使用多数据源
 ```properties
 #同时只能启动一个
-#mybatis.multiple.datasource.enable=true
-jpa.multiple.datasource.enable=true
+#mybatis.multiple.datasource.enabled=true
+jpa.multiple.datasource.enabled=true
 ```
 2. 数据访问层位置
 > dao层必须在启动类所在包的子包dao下且用数据源的名称当子包名称，如下图所示
@@ -365,13 +365,13 @@ public class User{
 2. 配置说明
 ```properties
 #开启完整性校验
-data.integrity.enable=true
+data.integrity.enabled=true
 #指定哪些接口不需要校验(ant匹配模式)
 data.integrity.exclude-patterns=
 #指定哪些接口需要校验(ant匹配模式),默认/**
 data.integrity.include-patterns=/**
 #指定是否在feign调用中也校验,默认false不校验
-#data.integrity.interceptor.enable=false
+#data.integrity.interceptor.enabled=false
 ```
 
 3. 接口中使用
@@ -469,7 +469,7 @@ public class TestRestApi {
 1. 参数说明
 ```properties
 #是否启用参数处理
-param.processor.enable=true
+param.processor.enabled=true
 #指定哪些接口需要校验(ant匹配模式)
 param.processor.exclude-urls=
 #指定哪些字段不做处理(全局生效),如param.processor.exclude-fields=name,则所有接口中name字段不处理

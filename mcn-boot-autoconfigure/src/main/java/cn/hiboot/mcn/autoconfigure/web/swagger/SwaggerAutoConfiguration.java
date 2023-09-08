@@ -49,7 +49,7 @@ import java.util.stream.Collectors;
 @EnableSwagger2
 @EnableConfigurationProperties(Swagger2Properties.class)
 @ConditionalOnClass(MvcSwagger2.class)
-@ConditionalOnProperty(prefix = "swagger", name = "enable", havingValue = "true")
+@ConditionalOnProperty(prefix = "swagger", name = "enabled", havingValue = "true")
 public class SwaggerAutoConfiguration {
 
     private final Swagger2Properties swagger2Properties;
@@ -137,7 +137,7 @@ public class SwaggerAutoConfiguration {
             pars.add(new RequestParameterBuilder().name("X-XSRF-TOKEN").description("csrf token").in(ParameterType.HEADER).query(s -> s.model(m -> m.scalarModel(ScalarType.STRING))).required(true).build());
         }
         //enable data integrity
-        if(environment.getProperty("data.integrity.enable", Boolean.class, false)){
+        if(environment.getProperty("data.integrity.enabled", Boolean.class, false)){
             pars.add(new RequestParameterBuilder().name("TSM").description("时间戳").in(ParameterType.HEADER).query(s -> s.model(m -> m.scalarModel(ScalarType.LONG))).required(true).build());
             pars.add(new RequestParameterBuilder().name("nonceStr").description("随机字符串").in(ParameterType.HEADER).query(s -> s.model(m -> m.scalarModel(ScalarType.STRING))).required(true).build());
             pars.add(new RequestParameterBuilder().name("signature").description("签名").in(ParameterType.HEADER).query(s -> s.model(m -> m.scalarModel(ScalarType.STRING))).required(true).build());

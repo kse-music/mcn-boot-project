@@ -33,7 +33,7 @@ import java.util.Objects;
 public class McnEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
     private static final boolean PRESENT = ClassUtils.isPresent("ch.qos.logback.classic.LoggerContext",McnEnvironmentPostProcessor.class.getClassLoader());
     private static final MapPropertySource EMPTY_PROPERTY_SOURCE = new MapPropertySource("Empty", Collections.emptyMap());
-    private static final String BOOTSTRAP_EAGER_LOAD = "mcn.bootstrap.eagerLoad.enable";
+    private static final String BOOTSTRAP_EAGER_LOAD = "mcn.bootstrap.eagerLoad.enabled";
     private static final String MCN_SOURCE_NAME = "mcn-global-unique";
     private static final String MCN_DEFAULT_PROPERTY_SOURCE_NAME = "mcn-default";
     private static final String BOOTSTRAP_PROPERTY_SOURCE_NAME = "bootstrap";
@@ -43,7 +43,7 @@ public class McnEnvironmentPostProcessor implements EnvironmentPostProcessor, Or
         //加载全局配置
         loadMcnConfigFile(environment);
 
-        //引导上下文中默认不加载 默认配置和日志配置,但如果指定mcn.bootstrap.eagerLoad.enable=true则加载
+        //引导上下文中默认不加载 默认配置和日志配置,但如果指定mcn.bootstrap.eagerLoad.enabled=true则加载
         if (environment.getPropertySources().contains(BOOTSTRAP_PROPERTY_SOURCE_NAME) && !environment.getProperty(BOOTSTRAP_EAGER_LOAD, Boolean.class, false)) {
             return;
         }
@@ -77,7 +77,7 @@ public class McnEnvironmentPostProcessor implements EnvironmentPostProcessor, Or
 
     /**
      * <p>1.如果默认配置已加载,则不再加载</p>
-     * <p>2.如果是Spring Cloud引导上下文,则不加载,但如果指定参数mcn.bootstrap.eagerLoad.enable=true,则在引导上下文中也加载</p>
+     * <p>2.如果是Spring Cloud引导上下文,则不加载,但如果指定参数mcn.bootstrap.eagerLoad.enabled=true,则在引导上下文中也加载</p>
      *
      * @param environment 环境配置
      * @param mainApplicationClass 主类可能为null

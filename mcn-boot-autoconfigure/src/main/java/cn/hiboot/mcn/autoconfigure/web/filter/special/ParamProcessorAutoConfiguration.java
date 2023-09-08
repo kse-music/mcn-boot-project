@@ -46,7 +46,7 @@ import java.util.regex.Pattern;
  */
 @Configuration(proxyBeanMethods = false)
 @EnableConfigurationProperties({ParamProcessorProperties.class, WebSecurityProperties.class})
-@ConditionalOnProperty(prefix = "param.processor", name = "enable", havingValue = "true")
+@ConditionalOnProperty(prefix = "param.processor", name = "enabled", havingValue = "true")
 @Import({ReactiveParamProcessorConfiguration.class, ServletParamProcessorConfiguration.class})
 public class ParamProcessorAutoConfiguration {
 
