@@ -96,7 +96,7 @@ public class SwaggerAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public Docket createRestApi(Environment environment, ObjectProvider<ApiKey> apiKeys) {
-        Docket docket = new Docket(DocumentationType.SWAGGER_2).apiInfo(apiInfo()).enable(swagger2Properties.isEnable());
+        Docket docket = new Docket(DocumentationType.SWAGGER_2).apiInfo(apiInfo()).enable(true);
 
         List<ApiKey> apiKeyList = apiKeys.orderedStream().collect(Collectors.toList());
         if(Boolean.TRUE.equals(swagger2Properties.getHeader().getAuthorization()) || (swagger2Properties.getHeader().getAuthorization() == null && ClassUtils.isPresent("org.springframework.security.core.Authentication",null))){
