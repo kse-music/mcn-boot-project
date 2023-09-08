@@ -40,7 +40,7 @@ import java.io.IOException;
 @Configuration(proxyBeanMethods = false)
 @AutoConfigureAfter(MultipleDataSourceAutoConfiguration.class)
 @ConditionalOnClass({SqlSessionFactory.class, SqlSessionFactoryBean.class,HikariDataSource.class})
-@ConditionalOnProperty(prefix = ConfigProperties.MYBATIS_MULTIPLE_DATASOURCE_PREFIX,name = "enable",havingValue = "true")
+@ConditionalOnProperty(prefix = ConfigProperties.MYBATIS_MULTIPLE_DATASOURCE_PREFIX,name = "enabled",havingValue = "true")
 @ConditionalOnBean(MultipleDataSourceConfig.class)
 @Import(MybatisMultipleDataSourceAutoConfiguration.MybatisMultipleDataSourceConfig.class)
 public class MybatisMultipleDataSourceAutoConfiguration {

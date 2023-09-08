@@ -1,13 +1,6 @@
 {
   "properties": [
     {
-      "name": "feign.circuitbreaker.globalfallback.enabled",
-      "type": "java.lang.Boolean",
-      "sourceType": "cn.hiboot.mcn.cloud.feign.FeignExtensionAutoConfiguration$GlobalFallbackCondition",
-      "description": "是否启用全局fallback.",
-      "defaultValue": "true"
-    },
-    {
       "name": "gateway.fallback.enabled",
       "type": "java.lang.Boolean",
       "sourceType": "cn.hiboot.mcn.cloud.gateway.GatewayExtensionAutoConfiguration$DefaultFallbackRestController",
@@ -15,7 +8,7 @@
       "defaultValue": "true"
     },
     {
-      "name": "data.integrity.interceptor.enable",
+      "name": "data.integrity.interceptor.enabled",
       "type": "java.lang.Boolean",
       "sourceType": "cn.hiboot.mcn.cloud.feign.FeignInterceptorConfiguration$DataIntegrityFeignInterceptor",
       "description": "是否启用数据完整性feign拦截器.",

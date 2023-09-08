@@ -44,7 +44,7 @@ import java.lang.reflect.Field;
 @Configuration(proxyBeanMethods = false)
 @AutoConfigureAfter(MultipleDataSourceAutoConfiguration.class)
 @AutoConfigureBefore({HibernateJpaAutoConfiguration.class, TaskExecutionAutoConfiguration.class})
-@ConditionalOnProperty(prefix = ConfigProperties.JPA_MULTIPLE_DATASOURCE_PREFIX,name = "enable",havingValue = "true")
+@ConditionalOnProperty(prefix = ConfigProperties.JPA_MULTIPLE_DATASOURCE_PREFIX,name = "enabled",havingValue = "true")
 @ConditionalOnClass(JpaRepository.class)
 @ConditionalOnBean(MultipleDataSourceConfig.class)
 @ConditionalOnMissingBean({ JpaRepositoryFactoryBean.class, JpaRepositoryConfigExtension.class })

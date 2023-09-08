@@ -26,7 +26,7 @@ import java.util.Map;
 public class FeignInterceptorConfiguration  {
 
     @Configuration(proxyBeanMethods = false)
-    @ConditionalOnProperty(prefix = "data.integrity.interceptor",name = "enable",havingValue = "true")
+    @ConditionalOnProperty(prefix = "data.integrity.interceptor",name = "enabled",havingValue = "true")
     private static class DataIntegrityFeignInterceptor implements RequestInterceptor {
 
         @Override
@@ -52,7 +52,7 @@ public class FeignInterceptorConfiguration  {
     }
 
     @Configuration(proxyBeanMethods = false)
-    @ConditionalOnProperty(prefix = "param.processor",name = "enable",havingValue = "true")
+    @ConditionalOnProperty(prefix = "param.processor",name = "enabled",havingValue = "true")
     private static class ParamProcessorInterceptor implements RequestInterceptor {
 
         @Override

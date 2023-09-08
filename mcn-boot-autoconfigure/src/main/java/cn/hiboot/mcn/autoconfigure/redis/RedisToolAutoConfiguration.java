@@ -52,7 +52,7 @@ public class RedisToolAutoConfiguration {
     @ConditionalOnClass(Aspect.class)
     @Import(RepeatCommitAspectConfiguration.JsonDataConveyFilter.class)
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
-    @ConditionalOnProperty(prefix = "mcn.repeat", name = "enable", havingValue = "true")
+    @ConditionalOnProperty(prefix = "mcn.repeat", name = "enabled", havingValue = "true")
     protected static class RepeatCommitAspectConfiguration{
 
         @Bean

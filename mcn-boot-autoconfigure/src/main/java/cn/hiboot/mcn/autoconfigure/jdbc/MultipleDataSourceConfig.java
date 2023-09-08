@@ -25,13 +25,13 @@ public class MultipleDataSourceConfig {
 
     private int checkConfig(Environment environment) {
         int vote = 0;
-        if(environment.getProperty(ConfigProperties.JPA_MULTIPLE_DATASOURCE_PREFIX+".enable",Boolean.class,false)){
+        if(environment.getProperty(ConfigProperties.JPA_MULTIPLE_DATASOURCE_PREFIX+".enabled",Boolean.class,false)){
             vote++;
         }
-        if(environment.getProperty(ConfigProperties.MYBATIS_MULTIPLE_DATASOURCE_PREFIX+".enable",Boolean.class,false)){
+        if(environment.getProperty(ConfigProperties.MYBATIS_MULTIPLE_DATASOURCE_PREFIX+".enabled",Boolean.class,false)){
             vote++;
         }
-        if(environment.getProperty(ConfigProperties.DYNAMIC_DATASOURCE_PREFIX+".enable",Boolean.class,false)){
+        if(environment.getProperty(ConfigProperties.DYNAMIC_DATASOURCE_PREFIX+".enabled",Boolean.class,false)){
             vote++;
         }
         if(vote > 1){
@@ -45,11 +45,11 @@ public class MultipleDataSourceConfig {
     }
 
     boolean enableDynamicDatasource(){
-        Boolean enable = environment.getProperty(ConfigProperties.DYNAMIC_DATASOURCE_PREFIX + ".enable", Boolean.class);
+        Boolean enabled = environment.getProperty(ConfigProperties.DYNAMIC_DATASOURCE_PREFIX + ".enabled", Boolean.class);
         if(vote == 0){//未启用jpa和mybatis以及DynamicDatasource
-            return enable == null || enable;
+            return enabled == null || enabled;
         }
-        return Boolean.TRUE.equals(enable);
+        return Boolean.TRUE.equals(enabled);
     }
 
 }

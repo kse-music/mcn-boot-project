@@ -37,7 +37,7 @@ public class McnEnvironmentPostProcessor implements EnvironmentPostProcessor, Or
     private static final String FILE_LOG_CHARSET = "FILE_LOG_CHARSET";
 
     private static final MapPropertySource EMPTY_PROPERTY_SOURCE = new MapPropertySource("Empty", Collections.emptyMap());
-    private static final String BOOTSTRAP_EAGER_LOAD = "mcn.bootstrap.eagerLoad.enable";
+    private static final String BOOTSTRAP_EAGER_LOAD = "mcn.bootstrap.eagerLoad.enabled";
     private static final String MCN_SOURCE_NAME = "mcn-global-unique";
     private static final String MCN_DEFAULT_PROPERTY_SOURCE_NAME = "mcn-default";
     private static final String BOOTSTRAP_PROPERTY_SOURCE_NAME = "bootstrap";
@@ -47,7 +47,7 @@ public class McnEnvironmentPostProcessor implements EnvironmentPostProcessor, Or
         //加载全局配置
         loadMcnConfigFile(environment);
 
-        //引导上下文中默认不加载 默认配置和日志配置,但如果指定mcn.bootstrap.eagerLoad.enable=true则加载
+        //引导上下文中默认不加载 默认配置和日志配置,但如果指定mcn.bootstrap.eagerLoad.enabled=true则加载
         if (environment.getPropertySources().contains(BOOTSTRAP_PROPERTY_SOURCE_NAME) && !environment.getProperty(BOOTSTRAP_EAGER_LOAD, Boolean.class, false)) {
             return;
         }

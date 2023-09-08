@@ -20,7 +20,7 @@ import org.springframework.context.annotation.Configuration;
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @ConditionalOnClass({SmUtil.class, SM3Digest.class})
 @EnableConfigurationProperties({DataIntegrityProperties.class, WebSecurityProperties.class})
-@ConditionalOnProperty(prefix = "data.integrity",name = "enable",havingValue = "true")
+@ConditionalOnProperty(prefix = "data.integrity",name = "enabled",havingValue = "true")
 public class DataIntegrityAutoConfiguration {
 
     private final DataIntegrityProperties dataIntegrityProperties;

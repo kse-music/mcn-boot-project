@@ -14,20 +14,19 @@ public class GroovyWebProperties {
     /**
      * 是否启用groovy web自动配置
      */
-    private boolean enable;
+    private boolean enabled;
     private String sourceEncoding = "UTF-8";
     private String classpath;
     private boolean debug;
     private String scriptBaseClass;
     private String targetDirectory;
 
-
-    public boolean isEnable() {
-        return enable;
+    public boolean isEnabled() {
+        return enabled;
     }
 
-    public void setEnable(boolean enable) {
-        this.enable = enable;
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 
     public String getSourceEncoding() {

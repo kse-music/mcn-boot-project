@@ -53,7 +53,7 @@ import java.util.regex.Pattern;
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @EnableConfigurationProperties({ParamProcessorProperties.class, WebSecurityProperties.class})
-@ConditionalOnProperty(prefix = "param.processor",name = "enable",havingValue = "true")
+@ConditionalOnProperty(prefix = "param.processor",name = "enabled",havingValue = "true")
 public class ParamProcessorAutoConfiguration {
 
     private static final Map<String,Pattern> MAP = new HashMap<>();

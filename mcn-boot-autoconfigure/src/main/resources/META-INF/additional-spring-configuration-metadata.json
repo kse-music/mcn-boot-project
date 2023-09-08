@@ -4,14 +4,14 @@
   ],
   "properties": [
     {
-      "name": "mcn.bootstrap.eagerLoad.enable",
+      "name": "mcn.bootstrap.eagerLoad.enabled",
       "type": "java.lang.Boolean",
       "sourceType": "cn.hiboot.mcn.autoconfigure.context.McnEnvironmentPostProcessor",
       "description": "是否在引导上下文中加载.",
       "defaultValue": false
     },
     {
-      "name": "delete.default.log-file.enable",
+      "name": "delete.default.log-file.enabled",
       "type": "java.lang.Boolean",
       "sourceType": "cn.hiboot.mcn.autoconfigure.bootstrap.LogFileChecker",
       "description": "是否默认删除默认日志文件.",
@@ -54,35 +54,35 @@
       "description": "多数据源配置."
     },
     {
-      "name": "mybatis.multiple.datasource.enable",
+      "name": "mybatis.multiple.datasource.enabled",
       "type": "java.lang.Boolean",
       "sourceType": "cn.hiboot.mcn.autoconfigure.mybatis.MybatisMultipleDataSourceAutoConfiguration",
       "description": "是否启用mybatis多数据源自动配置.",
       "defaultValue": false
     },
     {
-      "name": "jpa.multiple.datasource.enable",
+      "name": "jpa.multiple.datasource.enabled",
       "type": "java.lang.Boolean",
       "sourceType": "cn.hiboot.mcn.autoconfigure.jpa.JpaMultipleDataSourceAutoConfiguration",
       "description": "是否启用jpa多数据源自动配置.",
       "defaultValue": false
     },
     {
-      "name": "dynamic.datasource.enable",
+      "name": "dynamic.datasource.enabled",
       "type": "java.lang.Boolean",
       "sourceType": "cn.hiboot.mcn.autoconfigure.jdbc.MultipleDataSourceConfig",
       "description": "是否启用动态数据源配置.",
       "defaultValue": false
     },
     {
-      "name": "filter.cross",
+      "name": "filter.cross.enabled",
       "type": "java.lang.Boolean",
       "sourceType": "cn.hiboot.mcn.autoconfigure.web.filter.cors.CorsFilterAutoConfiguration",
       "description": "是否开启跨域支持.",
       "defaultValue": false
     },
     {
-      "name": "mcn.xss.enable",
+      "name": "mcn.xss.enabled",
       "type": "java.lang.Boolean",
       "sourceType": "cn.hiboot.mcn.autoconfigure.web.filter.xss.XssAutoConfiguration",
       "description": "是否开启XSS过滤.",
@@ -96,7 +96,7 @@
       "defaultValue": ""
     },
     {
-      "name": "mcn.print-env.enable",
+      "name": "mcn.print-env.enabled",
       "type": "java.lang.Boolean",
       "sourceType": "cn.hiboot.mcn.autoconfigure.context.McnApplicationListener",
       "description": "是否打印环境配置.",
@@ -110,21 +110,21 @@
       "defaultValue": true
     },
     {
-      "name": "xxl.job.enable",
+      "name": "xxl.job.enabled",
       "type": "java.lang.Boolean",
       "sourceType": "cn.hiboot.mcn.autoconfigure.xxl.XxlJobAutoConfiguration",
       "description": "是否启用调度执行器自动配置.",
       "defaultValue": true
     },
     {
-      "name": "mcn.repeat.enable",
+      "name": "mcn.repeat.enabled",
       "type": "java.lang.Boolean",
       "sourceType": "cn.hiboot.mcn.autoconfigure.redis.RedisToolAutoConfiguration$RepeatCommitAspectConfiguration",
       "description": "是否启用防重复提交.",
       "defaultValue": false
     },
     {
-      "name": "param.processor.enable",
+      "name": "param.processor.enabled",
       "type": "java.lang.Boolean",
       "sourceType": "cn.hiboot.mcn.autoconfigure.web.filter.special.ParamProcessorAutoConfiguration",
       "description": "是否启用参数处理器.",
@@ -141,7 +141,7 @@
       "description": "Charset to use for file output."
     },
     {
-      "name": "erase.decrypted-data.enable",
+      "name": "erase.decrypted-data.enabled",
       "type": "java.lang.Boolean",
       "sourceType": "cn.hiboot.mcn.autoconfigure.context.McnApplicationListener",
       "description": "是否删除解密后的数据.",

@@ -15,7 +15,7 @@ import java.util.List;
 @ConfigurationProperties("data.integrity")
 public class DataIntegrityProperties {
 
-    private boolean enable;
+    private boolean enabled;
     private List<String> includePatterns = Collections.singletonList("/**");
     private List<String> excludePatterns = Collections.emptyList();
     private int order = -1000;
@@ -23,12 +23,12 @@ public class DataIntegrityProperties {
     private boolean checkReplay;
     private Duration timeout = Duration.ofMinutes(1);
 
-    public boolean isEnable() {
-        return enable;
+    public boolean isEnabled() {
+        return enabled;
     }
 
-    public void setEnable(boolean enable) {
-        this.enable = enable;
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 
     public List<String> getIncludePatterns() {

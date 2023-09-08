@@ -75,7 +75,7 @@ public class McnApplicationListener implements GenericApplicationListener {
     private void onApplicationContextInitializedEvent(ApplicationContextInitializedEvent event){
         ConfigurableEnvironment environment = event.getApplicationContext().getEnvironment();
         //print all EnumerablePropertySource
-        if(environment.getProperty("mcn.print-env.enable",Boolean.class,false)){
+        if(environment.getProperty("mcn.print-env.enabled",Boolean.class,false)){
             for (PropertySource<?> propertySource : environment.getPropertySources()) {
                 String name = propertySource.getName();
                 if(!(propertySource instanceof EnumerablePropertySource)){
@@ -110,7 +110,7 @@ public class McnApplicationListener implements GenericApplicationListener {
     private void onApplicationReadyEvent(ApplicationReadyEvent event) {
         ConfigurableEnvironment environment = event.getApplicationContext().getEnvironment();
         //Whether to delete the configuration after decryption
-        if(environment.getProperty("erase.decrypted-data.enable",boolean.class,false)){
+        if(environment.getProperty("erase.decrypted-data.enabled",boolean.class,false)){
             environment.getPropertySources().remove(DECRYPTED_PROPERTY_SOURCE_NAME);
         }
     }

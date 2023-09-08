@@ -11,7 +11,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties("swagger")
 public class Swagger2Properties {
 
-    private boolean enable = false;
+    private boolean enabled = false;
 
     private String title;
     private String description;
@@ -24,12 +24,12 @@ public class Swagger2Properties {
 
     private boolean csrf;
 
-    public boolean isEnable() {
-        return enable;
+    public boolean isEnabled() {
+        return enabled;
     }
 
-    public void setEnable(boolean enable) {
-        this.enable = enable;
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 
     public String getTitle() {

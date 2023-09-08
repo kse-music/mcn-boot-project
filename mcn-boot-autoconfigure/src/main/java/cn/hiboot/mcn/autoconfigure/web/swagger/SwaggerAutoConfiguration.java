@@ -41,7 +41,7 @@ import java.util.stream.Collectors;
 @EnableSwagger2
 @EnableConfigurationProperties(Swagger2Properties.class)
 @ConditionalOnClass({DispatcherServlet.class, MvcSwagger2.class})
-@ConditionalOnProperty(prefix = "swagger", name = {"enable"}, havingValue = "true")
+@ConditionalOnProperty(prefix = "swagger", name = {"enabled"}, havingValue = "true")
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 public class SwaggerAutoConfiguration {
 
@@ -62,7 +62,7 @@ public class SwaggerAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public Docket createRestApi(Environment environment, ObjectProvider<ApiKey> apiKeys) {
-        Docket docket = new Docket(DocumentationType.SWAGGER_2).apiInfo(apiInfo()).enable(swagger2Properties.isEnable());
+        Docket docket = new Docket(DocumentationType.SWAGGER_2).apiInfo(apiInfo()).enable(swagger2Properties.isEnabled());
 
         List<ApiKey> apiKeyList = apiKeys.orderedStream().collect(Collectors.toList());
         apiKeyList.add(new ApiKey("JwtToken", "Authorization", "header"));
@@ -101,7 +101,7 @@ public class SwaggerAutoConfiguration {
             pars.add(new RequestParameterBuilder().name("X-XSRF-TOKEN").description("csrf token").in(ParameterType.HEADER).query(s -> s.model(m -> m.scalarModel(ScalarType.STRING))).required(true).build());
         }
         //enable data integrity
-        if(environment.getProperty("data.integrity.enable", Boolean.class, false)){
+        if(environment.getProperty("data.integrity.enabled", Boolean.class, false)){
             pars.add(new RequestParameterBuilder().name("TSM").description("时间戳").in(ParameterType.HEADER).query(s -> s.model(m -> m.scalarModel(ScalarType.LONG))).required(true).build());
             pars.add(new RequestParameterBuilder().name("nonceStr").description("随机字符串").in(ParameterType.HEADER).query(s -> s.model(m -> m.scalarModel(ScalarType.STRING))).required(true).build());
             pars.add(new RequestParameterBuilder().name("signature").description("签名").in(ParameterType.HEADER).query(s -> s.model(m -> m.scalarModel(ScalarType.STRING))).required(true).build());

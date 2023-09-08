@@ -21,7 +21,7 @@ import org.springframework.web.util.HtmlUtils;
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
-@ConditionalOnProperty(prefix = "mcn.xss", name = "enable", havingValue = "true")
+@ConditionalOnProperty(prefix = "mcn.xss", name = "enabled", havingValue = "true")
 @EnableConfigurationProperties({XssProperties.class, WebSecurityProperties.class})
 public class XssAutoConfiguration {
 
