@@ -31,7 +31,7 @@ import java.util.Map;
 @ConditionalOnClass(GroovyObject.class)
 @ConditionalOnWebApplication
 @EnableConfigurationProperties(GroovyWebProperties.class)
-@ConditionalOnProperty(prefix = "groovy.web", value = "enable", havingValue = "true")
+@ConditionalOnProperty(prefix = "groovy.web", value = "enabled", havingValue = "true")
 public class GroovyWebAutoConfiguration {
     
     private final GroovyWebProperties groovyDebugProperties;

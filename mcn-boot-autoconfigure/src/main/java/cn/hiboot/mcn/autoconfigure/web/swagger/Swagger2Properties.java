@@ -11,8 +11,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties("swagger")
 public class Swagger2Properties {
 
-    private boolean enable = false;
-
     private String title;
     private String description;
     private String termsOfServiceUrl;
@@ -26,14 +24,6 @@ public class Swagger2Properties {
      * 是否生成请求头
      */
     private Header header = new Header();
-
-    public boolean isEnable() {
-        return enable;
-    }
-
-    public void setEnable(boolean enable) {
-        this.enable = enable;
-    }
 
     public String getTitle() {
         return title;

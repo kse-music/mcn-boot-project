@@ -38,7 +38,7 @@ import java.util.Optional;
  * @since 2022/7/26 14:45
  */
 @AutoConfiguration(after = {MultipleDataSourceAutoConfiguration.class, JpaRepositoriesAutoConfiguration.class})
-@ConditionalOnProperty(prefix = ConfigProperties.JPA_MULTIPLE_DATASOURCE_PREFIX,name = "enable",havingValue = "true")
+@ConditionalOnProperty(prefix = ConfigProperties.JPA_MULTIPLE_DATASOURCE_PREFIX,name = "enabled",havingValue = "true")
 @ConditionalOnClass(JpaRepository.class)
 @ConditionalOnBean(MultipleDataSourceConfig.class)
 @Import(JpaMultipleDataSourceAutoConfiguration.JpaRepositoriesRegistrar.class)

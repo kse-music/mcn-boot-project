@@ -34,7 +34,7 @@ import java.util.List;
 @EnableConfigurationProperties(Swagger2Properties.class)
 @ConditionalOnClass(MvcSwagger2.class)
 @Import(MvcSwagger2.class)
-@ConditionalOnProperty(prefix = "swagger", name = "enable", havingValue = "true")
+@ConditionalOnProperty(prefix = "swagger", name = "enabled", havingValue = "true")
 public class SwaggerAutoConfiguration {
 
     private final Swagger2Properties swagger2Properties;
@@ -63,7 +63,7 @@ public class SwaggerAutoConfiguration {
                     if(swagger2Properties.getHeader().isCsrf()){
                         operation.addParametersItem(new HeaderParameter().$ref("#/components/parameters/csrf"));
                     }
-                    if(environment.getProperty("data.integrity.enable", Boolean.class, false)){
+                    if(environment.getProperty("data.integrity.enabled", Boolean.class, false)){
                         operation.addParametersItem(new HeaderParameter().$ref("#/components/parameters/tsm"))
                                 .addParametersItem(new HeaderParameter().$ref("#/components/parameters/nonce"))
                                 .addParametersItem(new HeaderParameter().$ref("#/components/parameters/sign"));
@@ -81,7 +81,7 @@ public class SwaggerAutoConfiguration {
             components.addParameters("csrf",new HeaderParameter().name("X-XSRF-TOKEN").description("csrf token").in(ParameterIn.HEADER.toString()).schema(new StringSchema()).required(true));
         }
         //enable data integrity
-        if(environment.getProperty("data.integrity.enable", Boolean.class, false)){
+        if(environment.getProperty("data.integrity.enabled", Boolean.class, false)){
             components.addParameters("tsm",new HeaderParameter().name("TSM").description("时间戳").in(ParameterIn.HEADER.toString()).schema(new StringSchema()).required(true));
             components.addParameters("nonce",new HeaderParameter().name("nonceStr").description("随机字符串").in(ParameterIn.HEADER.toString()).schema(new StringSchema()).required(true));
             components.addParameters("sign",new HeaderParameter().name("signature").description("签名").in(ParameterIn.HEADER.toString()).schema(new StringSchema()).required(true));

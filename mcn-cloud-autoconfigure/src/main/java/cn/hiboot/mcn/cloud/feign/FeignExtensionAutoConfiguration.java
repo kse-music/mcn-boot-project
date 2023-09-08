@@ -72,7 +72,7 @@ public class FeignExtensionAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    @ConditionalOnProperty(prefix = "param.processor",name = "enable",havingValue = "true")
+    @ConditionalOnProperty(prefix = "param.processor",name = "enabled",havingValue = "true")
     public Decoder feignDecoder(ObjectProvider<HttpMessageConverterCustomizer> customizers, ObjectFactory<HttpMessageConverters> messageConverters) {
         return new OptionalDecoder(new ResponseEntityDecoder(new FeignClientResponseInterceptor(messageConverters, customizers)));
     }

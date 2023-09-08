@@ -21,7 +21,7 @@ import org.springframework.web.filter.CorsFilter;
 @AutoConfiguration
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @EnableConfigurationProperties(CorsProperties.class)
-@ConditionalOnProperty(prefix = "filter", name = "cross", havingValue = "true")
+@ConditionalOnProperty(prefix = "filter.cross", name = "enabled", havingValue = "true")
 public class CorsFilterAutoConfiguration {
 
     private final CorsProperties corsProperties;

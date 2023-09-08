@@ -22,7 +22,7 @@ import org.springframework.web.util.HtmlUtils;
  * @since 2022/6/6 10:10
  */
 @AutoConfiguration
-@ConditionalOnProperty(prefix = "mcn.xss", name = "enable", havingValue = "true")
+@ConditionalOnProperty(prefix = "mcn.xss", name = "enabled", havingValue = "true")
 @EnableConfigurationProperties({XssProperties.class, WebSecurityProperties.class})
 public class XssAutoConfiguration {
 

@@ -16,7 +16,7 @@ public class LogFileChecker {
     private ConfigurableEnvironment environment;
 
     public void check(){
-        if(environment.getProperty("delete.default.log-file.enable", Boolean.class, true)){
+        if(environment.getProperty("delete.default.log-file.enabled", Boolean.class, true)){
             if(ObjectUtils.nullSafeEquals(getLogFile(environment),originalLogFile)){
                 return;
             }

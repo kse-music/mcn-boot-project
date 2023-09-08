@@ -11,24 +11,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties("groovy.web")
 public class GroovyWebProperties {
 
-    /**
-     * 是否启用groovy web自动配置
-     */
-    private boolean enable;
     private String sourceEncoding = "UTF-8";
     private String classpath;
     private boolean debug;
     private String scriptBaseClass;
     private String targetDirectory;
-
-
-    public boolean isEnable() {
-        return enable;
-    }
-
-    public void setEnable(boolean enable) {
-        this.enable = enable;
-    }
 
     public String getSourceEncoding() {
         return sourceEncoding;

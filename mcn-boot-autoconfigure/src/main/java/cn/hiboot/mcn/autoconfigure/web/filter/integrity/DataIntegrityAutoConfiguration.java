@@ -22,7 +22,7 @@ import org.springframework.web.server.WebFilter;
 @AutoConfiguration
 @ConditionalOnClass({SmUtil.class, SM3Digest.class})
 @EnableConfigurationProperties({DataIntegrityProperties.class, WebSecurityProperties.class})
-@ConditionalOnProperty(prefix = "data.integrity",name = "enable",havingValue = "true")
+@ConditionalOnProperty(prefix = "data.integrity",name = "enabled",havingValue = "true")
 public class DataIntegrityAutoConfiguration {
 
 
