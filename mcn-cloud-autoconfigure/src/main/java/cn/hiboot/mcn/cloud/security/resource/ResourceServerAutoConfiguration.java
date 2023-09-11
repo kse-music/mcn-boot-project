@@ -12,9 +12,11 @@ import cn.hiboot.mcn.core.util.McnUtils;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnResource;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.security.ConditionalOnDefaultWebSecurity;
+import org.springframework.boot.autoconfigure.security.oauth2.resource.reactive.ReactiveOAuth2ResourceServerAutoConfiguration;
+import org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.OAuth2ResourceServerAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpHeaders;
@@ -48,10 +50,10 @@ import javax.servlet.http.HttpServletResponse;
  * @author DingHao
  * @since 2023/2/8 15:26
  */
-@AutoConfiguration
+@AutoConfiguration(before = {OAuth2ResourceServerAutoConfiguration.class, ReactiveOAuth2ResourceServerAutoConfiguration.class})
 @EnableConfigurationProperties(ResourceServerProperties.class)
 @ConditionalOnClass(JwtAuthenticationToken.class)
-@ConditionalOnProperty(value = "spring.security.oauth2.resourceserver.jwt.public-key-location",havingValue = "classpath:config/public.txt")
+@ConditionalOnResource(resources = "${spring.security.oauth2.resourceserver.jwt.public-key-location}")
 public class ResourceServerAutoConfiguration {
 
     @Bean
