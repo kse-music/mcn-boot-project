@@ -109,8 +109,7 @@ public class McnEnvironmentPostProcessor implements EnvironmentPostProcessor, Or
             propertySource.getSource().remove("logging.pattern.file");
         }
 
-        String additionConfigFile = environment.getProperty("mcn.config.additional-file","config/config.properties");
-        propertySource.getSource().putAll(ConfigProperties.loadConfig(null,additionConfigFile));
+        propertySource.getSource().putAll(ConfigProperties.loadConfig(null,"config/config.properties"));
 
         addLast(propertySources, propertySource);
 
