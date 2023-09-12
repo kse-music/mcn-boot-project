@@ -46,7 +46,7 @@ public class SpringWebFluxAutoConfiguration {
 
     @EnableConfigurationProperties(CorsProperties.class)
     @Configuration(proxyBeanMethods = false)
-    @ConditionalOnProperty(prefix = "filter", name = "cross", havingValue = "true")
+    @ConditionalOnProperty(prefix = "filter.cross", name = "enabled", havingValue = "true")
     protected static class CorsAutoConfiguration{
 
         @Bean
