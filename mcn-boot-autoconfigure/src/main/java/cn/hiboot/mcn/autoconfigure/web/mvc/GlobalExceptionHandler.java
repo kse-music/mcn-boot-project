@@ -9,7 +9,8 @@ import jakarta.servlet.UnavailableException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.core.Ordered;
-import org.springframework.web.HttpMediaTypeException;
+import org.springframework.web.HttpMediaTypeNotAcceptableException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -45,21 +46,23 @@ public class GlobalExceptionHandler implements HttpStatusCodeResolver,Ordered {
 
     @Override
     public Integer resolve(Throwable ex) {
-        if(ex instanceof ServletRequestBindingException){
-            return ExceptionKeys.PARAM_PARSE_ERROR;
-        }else if(ex instanceof ServletException){
+        if(ex instanceof ServletException){
             if (ex.getCause() instanceof Error error) {
                 exceptionHandler.handleError(error);
                 return ExceptionKeys.SERVICE_ERROR;
             }
             int code = ExceptionKeys.HTTP_ERROR_500;
-            if (ex instanceof NoHandlerFoundException) {
+            if(ex instanceof ServletRequestBindingException){
+                return ExceptionKeys.PARAM_PARSE_ERROR;
+            }else if (ex instanceof NoHandlerFoundException) {
                 code = ExceptionKeys.HTTP_ERROR_404;
             } else if (ex instanceof HttpRequestMethodNotSupportedException) {
                 code = ExceptionKeys.HTTP_ERROR_405;
-            } else if (ex instanceof HttpMediaTypeException) {
+            } else if (ex instanceof HttpMediaTypeNotAcceptableException) {
                 code = ExceptionKeys.HTTP_ERROR_406;
-            } else if (ex instanceof UnavailableException) {
+            }  else if (ex instanceof HttpMediaTypeNotSupportedException) {
+                code = ExceptionKeys.HTTP_ERROR_415;
+            }else if (ex instanceof UnavailableException) {
                 code = ExceptionKeys.HTTP_ERROR_503;
             }
             return code;
