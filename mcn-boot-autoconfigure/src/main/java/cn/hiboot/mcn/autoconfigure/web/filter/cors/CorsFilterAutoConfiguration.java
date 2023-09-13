@@ -1,5 +1,6 @@
 package cn.hiboot.mcn.autoconfigure.web.filter.cors;
 
+import cn.hiboot.mcn.autoconfigure.web.filter.FilterAutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -7,7 +8,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplicat
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
@@ -42,14 +42,7 @@ public class CorsFilterAutoConfiguration {
     @ConditionalOnMissingBean(name = "corsConfigurationSource")
     public CorsConfigurationSource corsConfigurationSource() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        CorsConfiguration corsConfiguration = new CorsConfiguration();
-        corsConfiguration.setAllowCredentials(corsProperties.getAllowCredentials());
-        corsConfiguration.addAllowedOrigin(corsProperties.getAllowedOrigin());
-        corsConfiguration.addAllowedHeader(corsProperties.getAllowedHeader());
-        corsConfiguration.addAllowedMethod(corsProperties.getAllowedMethod());
-        corsConfiguration.setMaxAge(corsProperties.getMaxAge());
-        corsConfiguration.setExposedHeaders(corsProperties.getExposedHeaders());
-        source.registerCorsConfiguration(corsProperties.getPattern(), corsConfiguration);
+        source.registerCorsConfiguration(corsProperties.getPattern(), FilterAutoConfiguration.corsConfiguration(corsProperties));
         return source;
     }
 

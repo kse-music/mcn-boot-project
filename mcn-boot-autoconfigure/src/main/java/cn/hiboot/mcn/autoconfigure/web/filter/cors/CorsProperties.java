@@ -20,6 +20,9 @@ public class CorsProperties {
     private String allowedOrigin = CorsConfiguration.ALL;
     private String allowedHeader = CorsConfiguration.ALL;
     private String allowedMethod = CorsConfiguration.ALL;
+    private List<String> allowedOrigins;
+    private List<String> allowedHeaders;
+    private List<String> allowedMethods;
     private List<String> exposedHeaders;
     private Long maxAge = 3600L;
     private int order = -1000;
@@ -70,6 +73,30 @@ public class CorsProperties {
 
     public void setAllowedMethod(String allowedMethod) {
         this.allowedMethod = allowedMethod;
+    }
+
+    public List<String> getAllowedOrigins() {
+        return allowedOrigins;
+    }
+
+    public void setAllowedOrigins(List<String> allowedOrigins) {
+        this.allowedOrigins = allowedOrigins;
+    }
+
+    public List<String> getAllowedHeaders() {
+        return allowedHeaders;
+    }
+
+    public void setAllowedHeaders(List<String> allowedHeaders) {
+        this.allowedHeaders = allowedHeaders;
+    }
+
+    public List<String> getAllowedMethods() {
+        return allowedMethods;
+    }
+
+    public void setAllowedMethods(List<String> allowedMethods) {
+        this.allowedMethods = allowedMethods;
     }
 
     public List<String> getExposedHeaders() {
