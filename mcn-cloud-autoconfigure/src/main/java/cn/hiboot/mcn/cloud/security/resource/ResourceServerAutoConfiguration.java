@@ -12,6 +12,7 @@ import cn.hiboot.mcn.core.util.McnUtils;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.security.ConditionalOnDefaultWebSecurity;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.reactive.ReactiveOAuth2ResourceServerAutoConfiguration;
@@ -52,6 +53,7 @@ import javax.servlet.http.HttpServletResponse;
 @AutoConfiguration(before = {OAuth2ResourceServerAutoConfiguration.class, ReactiveOAuth2ResourceServerAutoConfiguration.class})
 @EnableConfigurationProperties(ResourceServerProperties.class)
 @ConditionalOnClass(BearerTokenAuthenticationToken.class)
+@ConditionalOnProperty(prefix = "sso", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class ResourceServerAutoConfiguration {
 
     @Bean
