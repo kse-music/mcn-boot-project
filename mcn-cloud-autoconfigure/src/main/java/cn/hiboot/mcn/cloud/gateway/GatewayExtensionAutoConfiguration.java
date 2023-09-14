@@ -42,7 +42,7 @@ public class GatewayExtensionAutoConfiguration {
 
         @IgnoreApi
         @RequestMapping("fallback")
-        public Mono<RestResp<?>> fallback(ServerWebExchange exchange) {
+        public Mono<RestResp<Throwable>> fallback(ServerWebExchange exchange) {
             return Mono.fromSupplier(() -> {
                 Throwable ex = exchange.getAttribute(CIRCUITBREAKER_EXECUTION_EXCEPTION_ATTR);
                 if(ex == null){
