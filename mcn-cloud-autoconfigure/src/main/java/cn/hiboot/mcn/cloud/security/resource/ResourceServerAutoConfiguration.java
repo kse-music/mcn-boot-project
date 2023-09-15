@@ -7,11 +7,11 @@ import cn.hiboot.mcn.autoconfigure.web.reactor.ServerHttpResponseUtils;
 import cn.hiboot.mcn.cloud.security.configurer.AuthenticationReload;
 import cn.hiboot.mcn.cloud.security.configurer.ReloadAuthenticationConfigurer;
 import cn.hiboot.mcn.core.exception.ExceptionKeys;
-import cn.hiboot.mcn.core.exception.ServiceException;
 import cn.hiboot.mcn.core.util.McnUtils;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.security.ConditionalOnDefaultWebSecurity;
@@ -19,7 +19,6 @@ import org.springframework.boot.autoconfigure.security.oauth2.resource.reactive.
 import org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.OAuth2ResourceServerAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.security.access.AccessDeniedException;
@@ -70,7 +69,7 @@ public class ResourceServerAutoConfiguration {
 
     @ConditionalOnClass(EnableWebFluxSecurity.class)
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
-    @ConditionalOnDefaultWebSecurity
+    @ConditionalOnMissingBean(SecurityWebFilterChain.class)
     static class ReactiveResourceServerConfiguration {
         private final ExceptionHandler exceptionHandler;
 
@@ -80,7 +79,7 @@ public class ResourceServerAutoConfiguration {
 
         @Bean
         SecurityWebFilterChain resourceServerSecurityFilterChain(ServerHttpSecurity http,ResourceServerProperties ssoProperties
-                ,ObjectProvider<AuthenticationReload> authenticationReloads,ObjectProvider<TokenResolver> tokenResolvers){
+                ,ObjectProvider<AuthenticationReload> authenticationReloads,ObjectProvider<ApkResolver> apkResolvers){
             authenticationReloads.ifUnique(authenticationReload -> http.addFilterBefore(new ReloadAuthenticationWebFilter(authenticationReload), SecurityWebFiltersOrder.ANONYMOUS_AUTHENTICATION));
             return http
                     .authorizeExchange(requests -> {
@@ -97,30 +96,24 @@ public class ResourceServerAutoConfiguration {
                         }
                         c.accessDeniedHandler((exchange, accessDeniedException) -> handleException(accessDeniedException, exchange.getResponse()))
                                 .authenticationEntryPoint((exchange, authException) -> handleException(authException, exchange.getResponse()));
-                        tokenResolvers.ifUnique(tokenResolver -> c.bearerTokenConverter(new ServerBearerTokenAuthenticationConverter(){
+                        apkResolvers.ifUnique(apkResolver -> c.bearerTokenConverter(new ServerBearerTokenAuthenticationConverter(){
                             @Override
                             public Mono<Authentication> convert(ServerWebExchange exchange) {
                                 ServerHttpRequest request = exchange.getRequest();
-                                String tokenHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
-                                if (McnUtils.isNotNullAndEmpty(tokenHeader)) {
-                                    return super.convert(exchange);
-                                }
-                                return Mono.just(tokenResolver.paramName()).flatMap(name -> {
-                                    String apk = request.getHeaders().getFirst(name);
-                                    if (McnUtils.isNullOrEmpty(apk)) {
-                                        apk = request.getHeaders().getFirst(name);
-                                    }
-                                    String token = tokenResolver.jwtToken(apk);
-                                    if (token == null) {
-                                        return Mono.error(ServiceException.newInstance(name + "不正确"));
-                                    }
-                                    return Mono.just(new BearerTokenAuthenticationToken(token));
-                                });
+                                return super.convert(exchange).switchIfEmpty(jwtToken(apkResolver,request, apkResolver.paramName()));
                             }
 
                         }));
                     })
                     .build();
+        }
+
+        private Mono<Authentication> jwtToken(ApkResolver apkResolver,ServerHttpRequest request,String name){
+            String apk = request.getHeaders().getFirst(name);
+            if (McnUtils.isNullOrEmpty(apk)) {
+                apk = request.getQueryParams().getFirst(name);
+            }
+            return apkResolver.jwtToken(apk);
         }
 
         private Mono<Void> handleException(RuntimeException exception, ServerHttpResponse response){

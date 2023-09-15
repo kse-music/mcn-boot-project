@@ -27,7 +27,7 @@ public interface TokenResolver {
         RestResp<LoginRsp> resolve = resolve(apk);
         if(resolve.isSuccess()){
             String token = resolve.getData().getToken();
-            token = (token.length() > TOKEN_PREFIX.length() ? token.substring(TOKEN_PREFIX.length()) : token).trim();
+            token = (token.length() > tokenPrefix().length() ? token.substring(tokenPrefix().length()) : token).trim();
             return token;
         }
         return null;
