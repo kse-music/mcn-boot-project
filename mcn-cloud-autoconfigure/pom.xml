@@ -40,13 +40,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>annotations</artifactId>
-            <version>3.0.1</version>
-            <optional>true</optional>
-        </dependency>
-
-        <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-openfeign</artifactId>
             <optional>true</optional>
@@ -93,12 +86,7 @@
             <artifactId>hutool-crypto</artifactId>
             <optional>true</optional>
         </dependency>
-        <dependency>
-            <groupId>com.sgitg.sgcc</groupId>
-            <artifactId>sm</artifactId>
-            <version>1.0</version>
-            <optional>true</optional>
-        </dependency>
+
     </dependencies>
 
 </project>

@@ -5,15 +5,12 @@ import cn.hutool.crypto.Padding;
 import cn.hutool.crypto.SmUtil;
 import cn.hutool.crypto.symmetric.SM4;
 import cn.hutool.crypto.symmetric.SymmetricCrypto;
-import com.sgitg.sgcc.sm.SM4Utils;
-import org.bouncycastle.util.Strings;
 import org.bouncycastle.util.encoders.Hex;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
@@ -31,9 +28,9 @@ import java.nio.charset.StandardCharsets;
 @EnableConfigurationProperties(EncryptorProperties.class)
 @Order(0)
 @ConditionalOnProperty(prefix = EncryptorProperties.KEY+".sm4",name = "key")
+@Import(SM4BootstrapConfiguration.SM4Encryptor.class)
 public class SM4BootstrapConfiguration {
 
-    @Configuration(proxyBeanMethods = false)
     @ConditionalOnClass({SymmetricCrypto.class,Hex.class})
     @ConditionalOnMissingBean(TextEncryptor.class)
     static class SM4Encryptor implements TextEncryptor {
@@ -81,55 +78,6 @@ public class SM4BootstrapConfiguration {
                 }
             }
             return s;
-        }
-
-    }
-
-    @Configuration(proxyBeanMethods = false)
-    @ConditionalOnClass(SM4Utils.class)
-    @ConditionalOnProperty(prefix = EncryptorProperties.KEY+".sm4",name = "mode",havingValue = "cbc")
-    @Import(SM4ExtendConfiguration.SM4Encryptor.class)
-    @ConditionalOnMissingBean(TextEncryptor.class)
-    static class SM4ExtendConfiguration {
-
-        static class SM4Encryptor extends SM4Utils implements TextEncryptor {
-            private final boolean continueOnError;
-            private final byte[] key;
-            private final byte[] iv;
-
-            public SM4Encryptor(EncryptorProperties encryptorProperties) {
-                this.continueOnError = encryptorProperties.isContinueOnError();
-                this.key = generateKeyOrIV(encryptorProperties.getSm4().getKey());
-                this.iv = generateKeyOrIV(encryptorProperties.getSm4().getIv());
-            }
-
-            private byte[] generateKeyOrIV(String str) {
-                return Hex.encode(str.getBytes(StandardCharsets.UTF_8));
-            }
-
-            @Override
-            public String encrypt(String text) {
-                try {
-                    return new String(Hex.encode(encryptData_CBC(Hex.decode(iv), Hex.decode(key), Strings.toUTF8ByteArray(text))));
-                }catch (Exception e){
-                    if(!continueOnError){
-                        throw e;
-                    }
-                }
-                return text;
-            }
-
-            @Override
-            public String decrypt(String encryptedText) {
-                try {
-                    return Strings.fromUTF8ByteArray(decryptData_CBC(Hex.decode(iv), Hex.decode(key), Hex.decode(encryptedText))).trim();
-                }catch (Exception e){
-                    if(!continueOnError){
-                        throw e;
-                    }
-                }
-                return encryptedText;
-            }
         }
 
     }
