@@ -3,7 +3,7 @@ package cn.hiboot.mcn.cloud.security.resource;
 import cn.hiboot.mcn.core.exception.ServiceException;
 import cn.hiboot.mcn.core.model.result.RestResp;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthenticationToken;
+import org.springframework.security.oauth2.server.resource.BearerTokenAuthenticationToken;
 import reactor.core.publisher.Mono;
 
 /**
