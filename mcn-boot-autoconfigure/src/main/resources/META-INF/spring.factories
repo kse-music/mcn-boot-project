@@ -12,3 +12,6 @@ org.springframework.boot.env.EnvironmentPostProcessor=\
 
 org.springframework.boot.autoconfigure.AutoConfigurationImportFilter=\
   cn.hiboot.mcn.autoconfigure.jdbc.OnMissingPrimaryDataSource
+
+org.springframework.boot.diagnostics.FailureAnalyzer=\
+  cn.hiboot.mcn.autoconfigure.analyzer.SwaggerRunFailureAnalyzer
