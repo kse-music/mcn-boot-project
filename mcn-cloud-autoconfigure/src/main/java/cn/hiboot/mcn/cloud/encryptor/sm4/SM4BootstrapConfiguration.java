@@ -33,7 +33,7 @@ public class SM4BootstrapConfiguration {
 
     @ConditionalOnClass({SymmetricCrypto.class,Hex.class})
     @ConditionalOnMissingBean(TextEncryptor.class)
-    private static class SM4Encryptor implements TextEncryptor {
+    static class SM4Encryptor implements TextEncryptor {
 
         private final boolean base64;
         private final SymmetricCrypto sm4;
