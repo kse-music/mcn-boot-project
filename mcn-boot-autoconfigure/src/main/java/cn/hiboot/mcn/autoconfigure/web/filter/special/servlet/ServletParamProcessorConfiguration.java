@@ -44,7 +44,7 @@ public class ServletParamProcessorConfiguration {
             @Override
             public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
                 resolvers.add(new KeyValueArgumentResolver(paramProcessor));
-                resolvers.add(new HandlerMethodArgumentResolver() {
+                resolvers.add(new HandlerMethodArgumentResolver() {//deal annotation on Class in java bean data bind
 
                     private final ServletModelAttributeMethodProcessor processor = new ServletModelAttributeMethodProcessor(true);
 
