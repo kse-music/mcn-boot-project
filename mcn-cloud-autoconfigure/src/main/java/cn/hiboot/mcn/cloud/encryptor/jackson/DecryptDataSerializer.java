@@ -4,8 +4,8 @@ import cn.hiboot.mcn.cloud.encryptor.DecryptDataConverter;
 import cn.hiboot.mcn.cloud.encryptor.sm2.TextEncryptor;
 import cn.hiboot.mcn.core.exception.ServiceException;
 import cn.hiboot.mcn.core.util.SpringBeanUtils;
+import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import org.springframework.core.convert.ConversionService;
@@ -35,7 +35,7 @@ public class DecryptDataSerializer extends StdDeserializer<Object> {
     }
 
     @Override
-    public Object deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+    public Object deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JacksonException {
         if(converter != DecryptDataConverter.class){
             try {
                 DecryptDataConverter decryptDataConverter = ReflectionUtils.accessibleConstructor(converter).newInstance();

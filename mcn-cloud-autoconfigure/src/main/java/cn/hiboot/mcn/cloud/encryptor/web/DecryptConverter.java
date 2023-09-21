@@ -11,6 +11,7 @@ import java.util.Set;
 
 /**
  * Decrypt convert encrypt String to String or Number for key-value encode
+ * adapt java bean data bind
  *
  * @author DingHao
  * @since 2022/2/17 11:47
