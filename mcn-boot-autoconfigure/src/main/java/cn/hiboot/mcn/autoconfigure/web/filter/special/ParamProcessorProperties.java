@@ -26,6 +26,8 @@ public class ParamProcessorProperties extends NameValueProcessorProperties {
      */
     private int order = Integer.MAX_VALUE - 1;
 
+    private String rule;
+
     public String getName() {
         return name;
     }
@@ -50,4 +52,11 @@ public class ParamProcessorProperties extends NameValueProcessorProperties {
         this.order = order;
     }
 
+    public String getRule() {
+        return rule;
+    }
+
+    public void setRule(String rule) {
+        this.rule = rule;
+    }
 }
