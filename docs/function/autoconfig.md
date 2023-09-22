@@ -564,17 +564,17 @@ public class TestRestApi {
     @GetMapping("list")
     @DistributedLock("list_lock")
     public RestResp<String> list(String query) {
-        //1.方式一:需要手动释放锁
+        //方式一:需要手动释放锁
         if(distributedLocker.tryLock(LIST_LOCK_NAME,10,10)){//获取锁等待超时10秒持有超时时间10秒
             //do something
             distributedLocker.unlock(LIST_LOCK_NAME);
         }
-        //1.方式二:自动释放锁无返回值
+        //方式二:自动释放锁无返回值
         distributedLocker.tryExecute(LIST_LOCK_NAME,10,() -> {
             //do something
 
         });
-        //1.方式三:自动释放锁有返回值
+        //方式三:自动释放锁有返回值
         String value = distributedLocker.tryExecute(LIST_LOCK_NAME,10,() -> {
             //do something
             return "value";
