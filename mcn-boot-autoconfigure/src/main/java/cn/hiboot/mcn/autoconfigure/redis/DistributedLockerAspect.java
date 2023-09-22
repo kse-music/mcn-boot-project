@@ -29,7 +29,7 @@ public class DistributedLockerAspect {
     @Around(value = "pointCut(distributedLock)", argNames = "p,distributedLock")
     public Object around(ProceedingJoinPoint p, DistributedLock distributedLock)  throws Throwable {
         String value = distributedLock.value();
-        return distributedLocker.tryLock(value,() -> {
+        return distributedLocker.tryExecute(value,() -> {
             try {
                 return p.proceed();
             } catch (Throwable e) {

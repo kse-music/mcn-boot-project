@@ -17,16 +17,16 @@ public interface DistributedLocker {
 
     int DEFAULT_LEASE_TIME = 5;
 
-    default <V> V tryLock(String lockKey, Supplier<V> supplier) {
-        return tryLock(lockKey,DEFAULT_WAIT_TIME,supplier);
+    default boolean tryLock(String lockKey) {
+        return tryLock(lockKey,DEFAULT_WAIT_TIME);
     }
 
-    default <V> V tryLock(String lockKey, int waitTime,Supplier<V> supplier) {
-        return tryLock(lockKey,waitTime,DEFAULT_LEASE_TIME,supplier);
+    default boolean tryLock(String lockKey, int waitTime) {
+        return tryLock(lockKey,waitTime,DEFAULT_LEASE_TIME);
     }
 
-    default <V> V tryLock(String lockKey, int waitTime, int leaseTime,Supplier<V> supplier) {
-        return tryLock(lockKey,waitTime,leaseTime,DEFAULT_TIME_UNIT,supplier);
+    default boolean tryLock(String lockKey, int waitTime, int leaseTime) {
+        return tryLock(lockKey,waitTime,leaseTime,DEFAULT_TIME_UNIT);
     }
 
     /**
@@ -39,7 +39,41 @@ public interface DistributedLocker {
      */
     boolean tryLock(String lockKey,int waitTime, int leaseTime, TimeUnit unit);
 
-    default <V> V tryLock(String lockKey, int waitTime, int leaseTime, TimeUnit unit, Supplier<V> supplier) {
+    default void tryExecute(String lockKey, Runnable runnable) {
+        tryExecute(lockKey,DEFAULT_WAIT_TIME,runnable);
+    }
+
+    default void tryExecute(String lockKey, int waitTime, Runnable runnable) {
+        tryExecute(lockKey,waitTime,DEFAULT_LEASE_TIME,runnable);
+    }
+
+    default void tryExecute(String lockKey, int waitTime, int leaseTime, Runnable runnable) {
+        tryExecute(lockKey,waitTime,leaseTime,DEFAULT_TIME_UNIT,runnable);
+    }
+
+    default void tryExecute(String lockKey, int waitTime, int leaseTime, TimeUnit unit, Runnable runnable) {
+        if(tryLock(lockKey,waitTime,leaseTime,unit)){
+            try {
+                runnable.run();
+            } finally {
+                unlock(lockKey);
+            }
+        }
+    }
+
+    default <V> V tryExecute(String lockKey, Supplier<V> supplier) {
+        return tryExecute(lockKey,DEFAULT_WAIT_TIME,supplier);
+    }
+
+    default <V> V tryExecute(String lockKey, int waitTime, Supplier<V> supplier) {
+        return tryExecute(lockKey,waitTime,DEFAULT_LEASE_TIME,supplier);
+    }
+
+    default <V> V tryExecute(String lockKey, int waitTime, int leaseTime, Supplier<V> supplier) {
+        return tryExecute(lockKey,waitTime,leaseTime,DEFAULT_TIME_UNIT,supplier);
+    }
+
+    default <V> V tryExecute(String lockKey, int waitTime, int leaseTime, TimeUnit unit, Supplier<V> supplier) {
         if(tryLock(lockKey,waitTime,leaseTime,unit)){
             try {
                 return supplier.get();
