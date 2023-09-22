@@ -431,12 +431,15 @@ public class TestRestApi {
 ```properties
 #加密key,必须128位即16字节
 encryptor.sm4.key=abcdefghijklmnop
+encryptor.sm4.iv=abcdefghijklmnop
+encryptor.sm4.mode=cbc
+encryptor.sm4.padding=zeropadding
 ```
 3. 配置中使用
 
 如在application.properties中存在加密项spring.datasource.username,而真正使用的是解密后的值root
 ```properties
-spring.datasource.username={cipher}7eda434344898ba11617084e0f117103
+spring.datasource.username={cipher}319bafa683c86b4f5dfe91f708771d9e
 ```
 
 4. 接口中使用
