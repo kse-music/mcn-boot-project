@@ -30,7 +30,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Role;
 import org.springframework.core.MethodParameter;
-import org.springframework.core.env.Environment;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -54,10 +53,9 @@ public class ParamProcessorAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ParamProcessor defaultParamProcessor(Environment environment) {
-        String globalRulePattern = environment.getProperty("global.rule.pattern", "");
+    public ParamProcessor defaultParamProcessor(ParamProcessorProperties properties) {
         return (rule, name, value) -> {
-            String rulePattern = getRule(rule, globalRulePattern);
+            String rulePattern = getRule(rule, properties.getRule());
             if (rulePattern.isEmpty()) {
                 return value;
             }
