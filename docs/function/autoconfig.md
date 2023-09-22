@@ -536,73 +536,83 @@ public class User{
 ```
 
 ## 分布式锁
+   默认获取锁及锁持有的时间都是5秒
 
 1. 引入依赖
-```xml
-<dependencies>
-    <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-data-redis</artifactId>
-    </dependency>
-</dependencies>
-```
-2. 示例
+   ```xml
+   <dependencies>
+       <dependency>
+           <groupId>org.springframework.boot</groupId>
+           <artifactId>spring-boot-starter-data-redis</artifactId>
+       </dependency>
+   </dependencies>
+   ```
+2. 示例一：直接使用DistributedLocker接口
 
-    默认获取锁及锁持有的时间都是5秒。
-
-```java
-//方式一：使用注解@DistributedLock
-@RequestMapping("test")
-@RestController
-public class TestRestApi {
-
-    @GetMapping("list")
-    @DistributedLock("list_lock")
-    public RestResp<String> list(String query) {
-        return new RestResp<>(query);
-    }
-
-}
-
-```
-```java
-//方式二：直接使用DistributedLocker接口
-@RequestMapping("test")
-@RestController
-public class TestRestApi {
-
-    private static final String LIST_LOCK_NAME = "list_lock";
-    private final DistributedLocker distributedLocker;
-
-    public TestRestApi(DistributedLocker distributedLocker) {
-        this.distributedLocker = distributedLocker;
-    }
-
-    @GetMapping("list")
-    @DistributedLock("list_lock")
-    public RestResp<String> list(String query) {
-        //方式一:需要手动释放锁
-        if(distributedLocker.tryLock(LIST_LOCK_NAME,10,10)){//获取锁等待超时10秒持有超时时间10秒
+   ```java
+   @RequestMapping("test")
+   @RestController
+   public class TestRestApi {
+   
+      private static final String LIST_LOCK_NAME = "list_lock";
+      private final DistributedLocker distributedLocker;
+   
+      public TestRestApi(DistributedLocker distributedLocker) {
+         this.distributedLocker = distributedLocker;
+      }
+   
+      @GetMapping("list")
+      @DistributedLock("list_lock")
+      public RestResp<String> list(String query) {
+         //方式一:需要手动释放锁
+         if(distributedLocker.tryLock(LIST_LOCK_NAME,10,10)){//获取锁等待超时10秒持有超时时间10秒
             //do something
             distributedLocker.unlock(LIST_LOCK_NAME);
-        }
-        //方式二:自动释放锁无返回值
-        distributedLocker.tryExecute(LIST_LOCK_NAME,10,() -> {
+         }
+         //方式二:自动释放锁无返回值
+         distributedLocker.tryExecute(LIST_LOCK_NAME,10,() -> {
             //do something
-
-        });
-        //方式三:自动释放锁有返回值
-        String value = distributedLocker.tryExecute(LIST_LOCK_NAME,10,() -> {
+   
+         });
+         //方式三:自动释放锁有返回值
+         String value = distributedLocker.tryExecute(LIST_LOCK_NAME,10,() -> {
             //do something
             return "value";
-        });
-        return new RestResp<>(query);
-    }
+         });
+         return new RestResp<>(query);
+      }
+   
+   }
+   
+   ```
+   
+3. 示例二：使用注解@DistributedLock
 
-}
+   引入aop依赖
 
+   ```xml
+   <dependencies>
+      <dependency>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-starter-aop</artifactId>
+      </dependency>
+   </dependencies>
+   ```
 
-```
+   ```java
+   @RequestMapping("test")
+   @RestController
+   public class TestRestApi {
+   
+      @GetMapping("list")
+      @DistributedLock("list_lock")
+      public RestResp<String> list(String query) {
+         return new RestResp<>(query);
+      }
+   
+   }
+   
+   ```
 
 ## 打War包
 
