@@ -267,10 +267,12 @@ public class TestRestApi {
     </dependency>
 </dependencies>
 ```
+以下配置建议放在classpath:config/mcn.properties文件中
 ```properties
 encryptor.sm2.private-key=308193020100301306072a8648ce3d020106082a811ccf5501822d04793077020101042044880abf2572c0946e4d7a18a812fe554f20db40bc852a3b78b7e057af72344ca00a06082a811ccf5501822da14403420004258785f13a181c19fe366f13e1e4d93834944fb6b2d05b0ef58963e3cbdc3d680b228bdeab895a1f113dd6690279cd932ab85ecf694ebf34d6201b9d76055094
 encryptor.sm2.public-key=3059301306072a8648ce3d020106082a811ccf5501822d03420004258785f13a181c19fe366f13e1e4d93834944fb6b2d05b0ef58963e3cbdc3d680b228bdeab895a1f113dd6690279cd932ab85ecf694ebf34d6201b9d76055094
 ```
+
 2. 接口中使用
 
 ```java
@@ -415,6 +417,11 @@ public class TestRestApi {
         <groupId>cn.hutool</groupId>
         <artifactId>hutool-crypto</artifactId>
     </dependency>
+
+    <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-starter-bootstrap</artifactId>
+    </dependency>
 </dependencies>
 ```
 
@@ -526,12 +533,22 @@ public class User{
 ```
 
 ## 分布式锁
-默认获取锁及锁持有的时间都是5秒。
 
-### 方式一：使用注解@DistributedLock
-示例：
+1. 引入依赖
+```xml
+<dependencies>
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-data-redis</artifactId>
+    </dependency>
+</dependencies>
+```
+2. 示例
+
+    默认获取锁及锁持有的时间都是5秒。
+
 ```java
-
+//方式一：使用注解@DistributedLock
 @RequestMapping("test")
 @RestController
 public class TestRestApi {
@@ -545,11 +562,8 @@ public class TestRestApi {
 }
 
 ```
-
-### 方式二：直接使用DistributedLocker接口
-示例：
 ```java
-
+//方式二：直接使用DistributedLocker接口
 @RequestMapping("test")
 @RestController
 public class TestRestApi {
