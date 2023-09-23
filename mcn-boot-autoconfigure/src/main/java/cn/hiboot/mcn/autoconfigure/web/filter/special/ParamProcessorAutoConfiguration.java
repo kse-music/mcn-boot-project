@@ -53,9 +53,9 @@ public class ParamProcessorAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ParamProcessor defaultParamProcessor(ParamProcessorProperties properties) {
+    public ParamProcessor defaultParamProcessor() {
         return (rule, name, value) -> {
-            String rulePattern = getRule(rule, properties.getRule());
+            String rulePattern = getRule(rule, ParamProcessorProperties.globalRule);
             if (rulePattern.isEmpty()) {
                 return value;
             }

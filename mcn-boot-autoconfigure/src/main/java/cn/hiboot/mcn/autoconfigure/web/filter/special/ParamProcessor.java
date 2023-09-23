@@ -1,7 +1,6 @@
 package cn.hiboot.mcn.autoconfigure.web.filter.special;
 
 import cn.hiboot.mcn.autoconfigure.web.filter.common.NameValueProcessor;
-import cn.hiboot.mcn.core.util.SpringBeanUtils;
 
 /**
  * ParamProcessor
@@ -22,7 +21,7 @@ public interface ParamProcessor extends NameValueProcessor {
 
     @Override
     default String process(String name, String value) {
-        return process(SpringBeanUtils.getBean(ParamProcessorProperties.class).getRule(),name,value);
+        return process(ParamProcessorProperties.globalRule,name,value);
     }
 
 }
