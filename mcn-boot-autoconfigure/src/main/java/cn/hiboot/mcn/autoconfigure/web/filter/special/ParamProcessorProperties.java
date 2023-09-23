@@ -2,6 +2,8 @@ package cn.hiboot.mcn.autoconfigure.web.filter.special;
 
 import cn.hiboot.mcn.autoconfigure.web.filter.common.NameValueProcessorProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.EnvironmentAware;
+import org.springframework.core.env.Environment;
 
 /**
  * ParamProcessorProperties
@@ -10,7 +12,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * @since 2022/6/6 15:04
  */
 @ConfigurationProperties("param.processor")
-public class ParamProcessorProperties extends NameValueProcessorProperties {
+public class ParamProcessorProperties extends NameValueProcessorProperties implements EnvironmentAware {
+    public static String globalRule = "";
     /**
      * 过滤器名
      */
@@ -25,8 +28,6 @@ public class ParamProcessorProperties extends NameValueProcessorProperties {
      * 参数处理过滤器顺序默认Integer.MAX_VALUE - 1
      */
     private int order = Integer.MAX_VALUE - 1;
-
-    private String rule;
 
     public String getName() {
         return name;
@@ -52,11 +53,8 @@ public class ParamProcessorProperties extends NameValueProcessorProperties {
         this.order = order;
     }
 
-    public String getRule() {
-        return rule;
-    }
-
-    public void setRule(String rule) {
-        this.rule = rule;
+    @Override
+    public void setEnvironment(Environment environment) {
+        globalRule = environment.getProperty("global.rule.pattern", "");
     }
 }
