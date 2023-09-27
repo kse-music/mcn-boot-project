@@ -17,99 +17,167 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Remoter
+ * RestClient
  *
  * @author DingHao
  * @since 2023/6/10 12:00
  */
 public class RestClient {
 
+    public static final RestClient INSTANCE = new RestClient();
     private final Logger log = LoggerFactory.getLogger(RestClient.class);
-
+    private Class<?> wrapperClass = RestResp.class;
     private final RestTemplate restTemplate;
 
-    public RestClient() {
+    private RestClient() {
         this(new RestTemplate());
+    }
+
+    protected RestClient(Class<?> wrapperClass) {
+        this();
+        this.wrapperClass = wrapperClass;
     }
 
     public RestClient(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 
-    public <R> R get(String url, Class<?> resultClass) {
-        return get(url, resultClass, Collections.emptyMap());
+    protected RestClient(Class<?> wrapperClass, RestTemplate restTemplate) {
+        this.wrapperClass = wrapperClass;
+        this.restTemplate = restTemplate;
     }
 
-    public <R> R get(String url, Class<?> resultClass,Map<String,Object> uriVariables) {
-        return exchange(url, HttpMethod.GET, MediaType.APPLICATION_JSON, buildResultType(resultClass,false), null,uriVariables);
+    public <D> D getObject(String url, Class<D> resultClass) {
+        return getObject(url, resultClass, null);
     }
 
-    public <R> List<R> getList(String url, Class<?> resultClass) {
-        return getList(url, resultClass, Collections.emptyMap());
+    public <D> D getObject(String url, Class<D> resultClass,Map<String,Object> uriVariables) {
+        return get(url, ResolvableType.forClass(resultClass),uriVariables);
     }
 
-    public <A, R> List<R> getList(String url, Class<?> resultClass, Map<String,Object> uriVariables) {
-        return exchange(url, HttpMethod.GET, MediaType.APPLICATION_JSON, buildResultType(resultClass,true), null,uriVariables);
+    public Map<String,Object> getMap(String url) {
+        return getMap(url,null);
     }
 
-    public <A, R> R post(String url, Class<?> resultClass, A requestBody) {
-        return post(url, resultClass, requestBody,Collections.emptyMap());
+    public Map<String,Object> getMap(String url, Map<String,Object> uriVariables) {
+        return getMap(url, String.class, Object.class,uriVariables);
     }
 
-    public <A, R> R post(String url, Class<?> resultClass, A requestBody, Map<String,Object> uriVariables) {
-        return exchange(url, HttpMethod.POST, MediaType.APPLICATION_JSON, buildResultType(resultClass,false), requestBody,uriVariables);
+    public <K,V> Map<K,V> getMap(String url,Class<K> key, Class<V> value,Map<String,Object> uriVariables) {
+        return get(url, ResolvableType.forClassWithGenerics(Map.class,key, value),uriVariables);
     }
 
-    public <A, R> List<R> postList(String url, Class<?> resultClass, A requestBody) {
-        return postList(url, resultClass, requestBody,Collections.emptyMap());
+    public <D> List<D> getList(String url, Class<D> resultClass) {
+        return getList(url, resultClass, null);
     }
 
-    public <A, R> List<R> postList(String url, Class<?> resultClass, A requestBody, Map<String,Object> uriVariables) {
-        return exchange(url, HttpMethod.POST, MediaType.APPLICATION_JSON, buildResultType(resultClass,true), requestBody,uriVariables);
+    public <D> List<D> getList(String url, Class<D> resultClass, Map<String,Object> uriVariables) {
+        return get(url, ResolvableType.forClassWithGenerics(List.class,resultClass),uriVariables);
     }
 
-    public <A, R> R exchange(String url, HttpMethod method, MediaType mediaType, Class<?> resultClass, A requestBody) {
-        return exchange(url, method, mediaType, buildResultType(resultClass,false), requestBody, Collections.emptyMap());
+    public List<Map<String,Object>> getListMap(String url) {
+        return getListMap(url, null);
     }
 
-    public <A, R> List<R> exchangeList(String url, HttpMethod method, MediaType mediaType, Class<?> resultClass, A requestBody) {
-        return exchange(url, method, mediaType, buildResultType(resultClass,true), requestBody, Collections.emptyMap());
+    public List<Map<String,Object>> getListMap(String url,Map<String,Object> uriVariables) {
+        return getListMap(url, String.class, Object.class,uriVariables);
     }
 
-    public <A> Object exchangeObject(String url, HttpMethod method, MediaType mediaType, Class<?> resultClass, A requestBody) {
-        if (List.class.isAssignableFrom(resultClass)) {
-            return exchangeList(url, method, mediaType, Map.class, requestBody);
+    public <K,V> List<Map<String,Object>> getListMap(String url,Class<K> key, Class<V> value,Map<String,Object> uriVariables) {
+        return get(url, ResolvableType.forClassWithGenerics(List.class,ResolvableType.forClassWithGenerics(Map.class,key, value)),uriVariables);
+    }
+
+    public <D> D get(String url, ResolvableType resultType, Map<String,Object> uriVariables) {
+        return exchange(url, HttpMethod.GET, MediaType.APPLICATION_JSON, resultType, null,uriVariables);
+    }
+
+    public <A, D> D postObject(String url, Class<D> resultClass, A requestBody) {
+        return postObject(url, resultClass, requestBody,null);
+    }
+
+    public <A, D> D postObject(String url, Class<D> resultClass, A requestBody, Map<String,Object> uriVariables) {
+        return post(url,ResolvableType.forClass(resultClass), requestBody,uriVariables);
+    }
+
+    public <A> Map<String,Object> postMap(String url, A requestBody) {
+        return postMap(url,requestBody,null);
+    }
+
+    public <A> Map<String,Object> postMap(String url, A requestBody, Map<String,Object> uriVariables) {
+        return postMap(url, String.class, Object.class,requestBody,uriVariables);
+    }
+
+    public <A,K,V> Map<K,V> postMap(String url,Class<K> key, Class<V> value,A requestBody,Map<String,Object> uriVariables) {
+        return post(url, ResolvableType.forClassWithGenerics(Map.class,key, value),requestBody,uriVariables);
+    }
+
+    public <A, D> List<D> postList(String url, Class<D> resultClass, A requestBody) {
+        return postList(url, resultClass, requestBody,null);
+    }
+
+    public <A, D> List<D> postList(String url, Class<D> resultClass, A requestBody, Map<String,Object> uriVariables) {
+        return post(url,ResolvableType.forClassWithGenerics(List.class,resultClass), requestBody,uriVariables);
+    }
+
+    public <A> List<Map<String,Object>> postListMap(String url, A requestBody) {
+        return postListMap(url,requestBody,null);
+    }
+
+    public <A> List<Map<String,Object>> postListMap(String url, A requestBody, Map<String,Object> uriVariables) {
+        return postListMap(url, String.class, Object.class,requestBody,uriVariables);
+    }
+
+    public <A,K,V> List<Map<K,V>> postListMap(String url,Class<K> key, Class<V> value,A requestBody,Map<String,Object> uriVariables) {
+        return post(url, ResolvableType.forClassWithGenerics(List.class,ResolvableType.forClassWithGenerics(Map.class,key, value)),requestBody,uriVariables);
+    }
+
+    public <A, D> D post(String url, ResolvableType resultType, A requestBody, Map<String,Object> uriVariables) {
+        return exchange(url, HttpMethod.POST, MediaType.APPLICATION_JSON, resultType, requestBody,uriVariables);
+    }
+
+    public <A, D> D exchange(String url, HttpMethod method, MediaType mediaType, ResolvableType resultType, A requestBody, Map<String,Object> uriVariables) {
+        return doExchange(url, method, mediaType, resultType, requestBody, uriVariables);
+    }
+
+    private <A, D, W> D doExchange(String url, HttpMethod method, MediaType mediaType, ResolvableType resultType, A requestBody, Map<String, ?> uriVariables) {
+        if(uriVariables == null){
+            uriVariables = Collections.emptyMap();
         }
-        return exchange(url,method,mediaType,resultClass,requestBody);
-    }
-
-    private <T> ParameterizedTypeReference<T> buildResultType(Class<?> resultClass,boolean isList) {
-        if(isList){
-            return ParameterizedTypeReference.forType(ResolvableType.forClassWithGenerics(RestResp.class, ResolvableType.forClassWithGenerics(List.class,resultClass)).getType());
-        }
-        return ParameterizedTypeReference.forType(ResolvableType.forClassWithGenerics(RestResp.class,resultClass).getType());
-    }
-
-    private <A, R> R exchange(String url, HttpMethod method, MediaType mediaType, ParameterizedTypeReference<RestResp<R>> responseBodyType, A requestBody, Map<String, ?> uriVariables) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(mediaType);
         HttpEntity<A> entity = new HttpEntity<>(requestBody, headers);
         long startTime = System.currentTimeMillis();
-        ResponseEntity<RestResp<R>> resultEntity;
+        ResponseEntity<W> resultEntity;
         try {
-            resultEntity = restTemplate.exchange(url, method, entity, responseBodyType,uriVariables);
+            resultEntity = restTemplate.exchange(url, method, entity, ParameterizedTypeReference.forType(ResolvableType.forClassWithGenerics(wrapperClass, resultType).getType()),uriVariables);
         } catch (RestClientException e) {
             logError(url, requestBody, e.getMessage());
             throw ServiceException.newInstance(ExceptionKeys.REMOTE_SERVICE_ERROR);
         }
-        RestResp<R> body = resultEntity.getBody();
-        log.debug("url={}, cost time={}ms, inputParam={}, response={}", url, System.currentTimeMillis() - startTime, JacksonUtils.toJson(requestBody), JacksonUtils.toJson(body));
-        if (resultEntity.getStatusCode() != HttpStatus.OK || body == null || body.isFailed()) {
-            String errorInfo = body == null ? resultEntity.getStatusCode().toString() : body.getErrorInfo();
-            logError(url, requestBody, errorInfo);
-            throw ServiceException.newInstance(ExceptionKeys.REMOTE_SERVICE_ERROR,errorInfo);
+        log.debug("url={}, cost time={}ms, inputParam={}", url, System.currentTimeMillis() - startTime, JacksonUtils.toJson(requestBody));
+        if (resultEntity.getStatusCode() != HttpStatus.OK) {
+            throw ServiceException.newInstance(ExceptionKeys.REMOTE_SERVICE_ERROR);
         }
-        return body.getData();
+        try{
+            if(resultEntity.hasBody()){
+                D response = response(resultEntity.getBody());
+                log.debug("response={}",JacksonUtils.toJson(response));
+                return response;
+            }
+            return null;
+        }catch (ServiceException e){
+            logError(url, requestBody, e.getMessage());
+            throw e;
+        }
+    }
+
+    @SuppressWarnings({"unchecked","rawtypes"})
+    protected <D,W> D response(W body){
+        RestResp restResp = (RestResp)body;
+        if (restResp.isFailed()) {
+            throw ServiceException.newInstance(ExceptionKeys.REMOTE_SERVICE_ERROR,restResp.getErrorInfo());
+        }
+        return (D) restResp.getData();
     }
 
     private void logError(String url, Object requestBody, String errorMsg){
