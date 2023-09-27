@@ -4,14 +4,16 @@ import cn.hiboot.mcn.autoconfigure.web.exception.HttpStatusCodeResolver;
 import cn.hiboot.mcn.autoconfigure.web.exception.error.GlobalExceptionViewResolver;
 import cn.hiboot.mcn.autoconfigure.web.exception.handler.ExceptionHandler;
 import cn.hiboot.mcn.core.exception.ExceptionKeys;
+import cn.hiboot.mcn.core.exception.ServiceException;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.Ordered;
-import org.springframework.web.HttpMediaTypeException;
+import org.springframework.web.HttpMediaTypeNotAcceptableException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.NoHandlerFoundException;
-import org.springframework.web.util.NestedServletException;
 
 import javax.servlet.ServletException;
 import javax.servlet.UnavailableException;
@@ -26,7 +28,8 @@ import java.util.Objects;
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler implements HttpStatusCodeResolver,Ordered {
-
+    @Value("${http.error.override:true}")
+    private boolean overrideHttpError;
     private final GlobalExceptionViewResolver viewResolver;
     private final ExceptionHandler exceptionHandler;
 
@@ -46,24 +49,29 @@ public class GlobalExceptionHandler implements HttpStatusCodeResolver,Ordered {
 
     @Override
     public Integer resolve(Throwable ex) {
-        if(ex instanceof ServletRequestBindingException){
-            return ExceptionKeys.PARAM_PARSE_ERROR;
-        }else if(ex instanceof ServletException){
-            if (ex instanceof NestedServletException && ex.getCause() instanceof Error) {
+        if(ex instanceof ServletException){
+            if (ex.getCause() instanceof Error) {
                 exceptionHandler.handleError((Error) ex.getCause());
                 return ExceptionKeys.SERVICE_ERROR;
             }
-            int code = ExceptionKeys.HTTP_ERROR_500;
-            if (ex instanceof NoHandlerFoundException) {
-                code = ExceptionKeys.HTTP_ERROR_404;
-            } else if (ex instanceof HttpRequestMethodNotSupportedException) {
-                code = ExceptionKeys.HTTP_ERROR_405;
-            } else if (ex instanceof HttpMediaTypeException) {
-                code = ExceptionKeys.HTTP_ERROR_406;
-            } else if (ex instanceof UnavailableException) {
-                code = ExceptionKeys.HTTP_ERROR_503;
+            if(ex instanceof ServletRequestBindingException){
+                return ExceptionKeys.PARAM_PARSE_ERROR;
             }
-            return code;
+            if(overrideHttpError){
+                if (ex instanceof NoHandlerFoundException) {
+                    return ExceptionKeys.HTTP_ERROR_404;
+                } else if (ex instanceof HttpRequestMethodNotSupportedException) {
+                    return ExceptionKeys.HTTP_ERROR_405;
+                } else if (ex instanceof HttpMediaTypeNotAcceptableException) {
+                    return ExceptionKeys.HTTP_ERROR_406;
+                }  else if (ex instanceof HttpMediaTypeNotSupportedException) {
+                    return ExceptionKeys.HTTP_ERROR_415;
+                }else if (ex instanceof UnavailableException) {
+                    return ExceptionKeys.HTTP_ERROR_503;
+                }
+                return ExceptionKeys.HTTP_ERROR_500;
+            }
+            throw ServiceException.newInstance(ex);
         }
         return null;
     }
