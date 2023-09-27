@@ -59,7 +59,6 @@ public class DefaultExceptionHandler implements ExceptionHandler{
 
     private final boolean validationExceptionPresent;
     private final String basePackage;
-    private final boolean overrideHttpError;
     private final ExceptionProperties properties;
     private final String[] exceptionResolverNames;
     private final ApplicationContext applicationContext;
@@ -72,7 +71,6 @@ public class DefaultExceptionHandler implements ExceptionHandler{
         this.httpStatusCodeResolvers = applicationContext.getBeanProvider(HttpStatusCodeResolver.class);
         this.exceptionResolverNames = applicationContext.getBeanNamesForType(ExceptionResolver.class);
         this.basePackage = applicationContext.getEnvironment().getProperty(ConfigProperties.APP_BASE_PACKAGE);
-        this.overrideHttpError = applicationContext.getEnvironment().getProperty("http.error.override",Boolean.class,true);
     }
 
     @Override
@@ -128,11 +126,10 @@ public class DefaultExceptionHandler implements ExceptionHandler{
         }else if(exception instanceof VirtualMachineError){
             errorCode = ExceptionKeys.HTTP_ERROR_500;
             handleError((Error) exception.getCause());
-        }else if(overrideHttpError){
-            Integer error = httpStatusCodeResolvers.orderedStream().map(resolver -> resolver.resolve(exception)).filter(Objects::nonNull).findFirst().orElse(null);
-            if(error != null){
-                errorCode = error;
-            }
+        }
+        Integer error = httpStatusCodeResolvers.orderedStream().map(resolver -> resolver.resolve(exception)).filter(Objects::nonNull).findFirst().orElse(null);
+        if(error != null){
+            errorCode = error;
         }
         return result(errorCode, exception, data);
     }

@@ -5,8 +5,10 @@ import cn.hiboot.mcn.autoconfigure.web.exception.HttpStatusCodeResolver;
 import cn.hiboot.mcn.autoconfigure.web.exception.handler.DefaultExceptionHandler;
 import cn.hiboot.mcn.autoconfigure.web.exception.handler.ExceptionHandler;
 import cn.hiboot.mcn.core.exception.ExceptionKeys;
+import cn.hiboot.mcn.core.exception.ServiceException;
 import cn.hiboot.mcn.core.model.result.RestResp;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.SearchStrategy;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
@@ -39,7 +41,8 @@ import java.util.Map;
  */
 @ConditionalOnMissingBean(value = ErrorWebExceptionHandler.class, search = SearchStrategy.CURRENT)
 public class GlobalErrorExceptionHandler extends DefaultErrorWebExceptionHandler implements HttpStatusCodeResolver,EnvironmentAware, Ordered {
-
+    @Value("${http.error.override:true}")
+    private boolean overrideHttpError;
     private WebFluxProperties webFluxProperties;
     private int order;
     private ExceptionHandler exceptionHandler;
@@ -70,9 +73,7 @@ public class GlobalErrorExceptionHandler extends DefaultErrorWebExceptionHandler
         RestResp<Throwable> resp;
         try {
             resp = exceptionHandler.handleException(ex);
-        } catch (Throwable e) {
-            resp = RestResp.error(ExceptionKeys.SERVICE_ERROR);
-        }finally {
+        } finally {
             exceptionHandler.logError(ex);
         }
         return resp;
@@ -91,7 +92,10 @@ public class GlobalErrorExceptionHandler extends DefaultErrorWebExceptionHandler
     @Override
     public Integer resolve(Throwable ex) {
         if(ex instanceof ResponseStatusException responseStatusException){
-            return ExceptionKeys.mappingCode(responseStatusException.getBody().getStatus());
+            if(overrideHttpError){
+                return ExceptionKeys.mappingCode(responseStatusException.getBody().getStatus());
+            }
+            throw ServiceException.newInstance(ex);
         }
         return null;
     }
