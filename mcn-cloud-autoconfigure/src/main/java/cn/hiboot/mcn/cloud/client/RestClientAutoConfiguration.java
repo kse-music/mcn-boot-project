@@ -16,6 +16,8 @@ import org.springframework.boot.autoconfigure.web.reactive.function.client.WebCl
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
+import org.springframework.cloud.client.loadbalancer.reactive.DeferringLoadBalancerExchangeFilterFunction;
+import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerBeanPostProcessorAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
@@ -33,7 +35,7 @@ import reactor.netty.http.client.HttpClient;
  * @author DingHao
  * @since 2023/1/3 14:58
  */
-@AutoConfiguration(after = {RestTemplateAutoConfiguration.class, WebClientAutoConfiguration.class})
+@AutoConfiguration(after = {RestTemplateAutoConfiguration.class, WebClientAutoConfiguration.class, LoadBalancerBeanPostProcessorAutoConfiguration.class})
 @EnableConfigurationProperties(RestClientProperties.class)
 public class RestClientAutoConfiguration {
 
@@ -75,7 +77,7 @@ public class RestClientAutoConfiguration {
         @ConditionalOnMissingBean
         TokenResolver tokenResolver(RestTemplate restTemplate,RestTemplate loadBalancedRestTemplate, @Value("${token.service}") String tokenService){
             RestTemplate restClient = isIp(tokenService) ? restTemplate : loadBalancedRestTemplate;
-            return apk -> restClient.exchange("http://"+tokenService+"/sso/login/{apk}", HttpMethod.GET, null,loginRspType()).getBody();
+            return apk -> restClient.exchange(tokenUrl(tokenService), HttpMethod.GET, null,loginRspType()).getBody();
         }
 
     }
@@ -86,6 +88,10 @@ public class RestClientAutoConfiguration {
 
     private static ParameterizedTypeReference<RestResp<LoginRsp>> loginRspType(){
         return ParameterizedTypeReference.forType(ResolvableType.forClassWithGenerics(RestResp.class,LoginRsp.class).getType());
+    }
+
+    private static String tokenUrl(String tokenService){
+        return "http://"+tokenService+"/sso/login/{apk}";
     }
 
     @ConditionalOnClass(WebClient.class)
@@ -112,10 +118,11 @@ public class RestClientAutoConfiguration {
         }
 
         @Bean
-        @LoadBalanced
         @ConditionalOnClass(name = "org.springframework.cloud.client.loadbalancer.LoadBalanced")
         @ConditionalOnMissingBean(name = "loadBalancedWebClient")
-        WebClient loadBalancedWebClient(WebClient.Builder builder) {
+        @ConditionalOnBean(DeferringLoadBalancerExchangeFilterFunction.class)
+        WebClient loadBalancedWebClient(WebClient.Builder builder, DeferringLoadBalancerExchangeFilterFunction deferringExchangeFilterFunction) {
+            builder.filter(deferringExchangeFilterFunction);
             return webClient0(builder);
         }
 
@@ -124,7 +131,7 @@ public class RestClientAutoConfiguration {
         ApkResolver apkResolver(WebClient webClient, WebClient loadBalancedWebClient, @Value("${token.service}") String tokenService){
             WebClient restClient = isIp(tokenService) ? webClient : loadBalancedWebClient;
             return apk -> Mono.fromCallable(() -> apk).flatMap(a -> {
-               String uri = UriComponentsBuilder.fromUriString("http://"+tokenService+"/sso/login/{apk}").buildAndExpand(apk).toUriString();
+               String uri = UriComponentsBuilder.fromUriString(tokenUrl(tokenService)).buildAndExpand(apk).toUriString();
                return restClient.get().uri(uri).retrieve().bodyToMono(loginRspType());
            });
         }
