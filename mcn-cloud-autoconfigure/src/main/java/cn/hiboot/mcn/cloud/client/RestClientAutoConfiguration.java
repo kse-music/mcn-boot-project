@@ -15,9 +15,8 @@ import org.springframework.boot.autoconfigure.web.client.RestTemplateAutoConfigu
 import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.boot.web.reactive.function.client.WebClientCustomizer;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
-import org.springframework.cloud.client.loadbalancer.reactive.DeferringLoadBalancerExchangeFilterFunction;
-import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerBeanPostProcessorAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
@@ -35,7 +34,7 @@ import reactor.netty.http.client.HttpClient;
  * @author DingHao
  * @since 2023/1/3 14:58
  */
-@AutoConfiguration(after = {RestTemplateAutoConfiguration.class, WebClientAutoConfiguration.class, LoadBalancerBeanPostProcessorAutoConfiguration.class})
+@AutoConfiguration(before = WebClientAutoConfiguration.class,after = RestTemplateAutoConfiguration.class,afterName = "org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerBeanPostProcessorAutoConfiguration")
 @EnableConfigurationProperties(RestClientProperties.class)
 public class RestClientAutoConfiguration {
 
@@ -67,7 +66,7 @@ public class RestClientAutoConfiguration {
 
         @Bean
         @LoadBalanced
-        @ConditionalOnClass(name = "org.springframework.cloud.client.loadbalancer.LoadBalanced")
+        @ConditionalOnClass(LoadBalanced.class)
         @ConditionalOnMissingBean(name = "loadBalancedRestTemplate")
         RestTemplate loadBalancedRestTemplate(RestTemplateBuilder builder) {
             return restTemplate0(builder);
@@ -95,10 +94,8 @@ public class RestClientAutoConfiguration {
     }
 
     @ConditionalOnClass(WebClient.class)
-    @ConditionalOnBean(WebClient.Builder.class)
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
     static class ReactiveClientAutoConfiguration {
-
         private final RestClientProperties properties;
 
         public ReactiveClientAutoConfiguration(RestClientProperties properties) {
@@ -107,23 +104,25 @@ public class RestClientAutoConfiguration {
 
         @Bean
         @ConditionalOnMissingBean(name = "webClient")
-        WebClient webClient(WebClient.Builder builder) {
-            return webClient0(builder);
+        WebClient webClient(WebClient.Builder webClientBuilder) {
+            return webClient0(webClientBuilder);
+        }
+
+        @Bean
+        WebClient.Builder webClientBuilder(ObjectProvider<WebClientCustomizer> customizerProvider) {
+            return builder(customizerProvider);
+        }
+
+        private WebClient.Builder builder(ObjectProvider<WebClientCustomizer> customizerProvider) {
+            WebClient.Builder builder = WebClient.builder();
+            customizerProvider.orderedStream().forEach((customizer) -> customizer.customize(builder));
+            return builder;
         }
 
         private WebClient webClient0(WebClient.Builder builder) {
             HttpClient httpClient = HttpClient.create().responseTimeout(properties.getReadTimeout());
             ReactorClientHttpConnector connector = new ReactorClientHttpConnector(httpClient);
             return builder.clientConnector(connector).build();
-        }
-
-        @Bean
-        @ConditionalOnClass(name = "org.springframework.cloud.client.loadbalancer.LoadBalanced")
-        @ConditionalOnMissingBean(name = "loadBalancedWebClient")
-        @ConditionalOnBean(DeferringLoadBalancerExchangeFilterFunction.class)
-        WebClient loadBalancedWebClient(WebClient.Builder builder, DeferringLoadBalancerExchangeFilterFunction deferringExchangeFilterFunction) {
-            builder.filter(deferringExchangeFilterFunction);
-            return webClient0(builder);
         }
 
         @Bean
@@ -135,6 +134,21 @@ public class RestClientAutoConfiguration {
                return restClient.get().uri(uri).retrieve().bodyToMono(loginRspType());
            });
         }
+
+        @Bean
+        @LoadBalanced
+        @ConditionalOnClass(LoadBalanced.class)
+        WebClient.Builder loadBalancedWebClientBuilder(ObjectProvider<WebClientCustomizer> customizerProvider) {
+            return builder(customizerProvider);
+        }
+
+        @Bean
+        @ConditionalOnMissingBean(name = "loadBalancedWebClient")
+        @ConditionalOnBean(name = "loadBalancedWebClientBuilder")
+        WebClient loadBalancedWebClient(WebClient.Builder loadBalancedWebClientBuilder) {
+            return webClient0(loadBalancedWebClientBuilder);
+        }
+
     }
 
 }
