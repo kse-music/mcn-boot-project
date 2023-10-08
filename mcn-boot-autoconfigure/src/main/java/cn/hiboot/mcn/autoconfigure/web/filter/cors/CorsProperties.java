@@ -18,9 +18,12 @@ public class CorsProperties {
     private String pattern = "/**";
     private Boolean allowCredentials;
     private String allowedOrigin = CorsConfiguration.ALL;
+    private String allowedOriginPattern;
     private String allowedHeader = CorsConfiguration.ALL;
     private String allowedMethod = CorsConfiguration.ALL;
+    private String exposedHeader;
     private List<String> allowedOrigins;
+    private List<String> allowedOriginPatterns;
     private List<String> allowedHeaders;
     private List<String> allowedMethods;
     private List<String> exposedHeaders;
@@ -59,6 +62,14 @@ public class CorsProperties {
         this.allowedOrigin = allowedOrigin;
     }
 
+    public String getAllowedOriginPattern() {
+        return allowedOriginPattern;
+    }
+
+    public void setAllowedOriginPattern(String allowedOriginPattern) {
+        this.allowedOriginPattern = allowedOriginPattern;
+    }
+
     public String getAllowedHeader() {
         return allowedHeader;
     }
@@ -75,12 +86,28 @@ public class CorsProperties {
         this.allowedMethod = allowedMethod;
     }
 
+    public String getExposedHeader() {
+        return exposedHeader;
+    }
+
+    public void setExposedHeader(String exposedHeader) {
+        this.exposedHeader = exposedHeader;
+    }
+
     public List<String> getAllowedOrigins() {
         return allowedOrigins;
     }
 
     public void setAllowedOrigins(List<String> allowedOrigins) {
         this.allowedOrigins = allowedOrigins;
+    }
+
+    public List<String> getAllowedOriginPatterns() {
+        return allowedOriginPatterns;
+    }
+
+    public void setAllowedOriginPatterns(List<String> allowedOriginPatterns) {
+        this.allowedOriginPatterns = allowedOriginPatterns;
     }
 
     public List<String> getAllowedHeaders() {

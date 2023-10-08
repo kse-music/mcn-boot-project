@@ -46,13 +46,19 @@ public class FilterAutoConfiguration {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         PropertyMapper propertyMapper = PropertyMapper.get().alwaysApplyingWhenNonNull();
         propertyMapper.from(corsProperties.getAllowCredentials()).to(corsConfiguration::setAllowCredentials);
-        propertyMapper.from(corsProperties.getAllowedOrigin()).to(corsConfiguration::addAllowedOrigin);
-        propertyMapper.from(corsProperties.getAllowedOrigins()).to(corsConfiguration::setAllowedOrigins);
+        if (corsProperties.getAllowedOriginPattern() != null || corsProperties.getAllowedOriginPatterns() != null){
+            propertyMapper.from(corsProperties.getAllowedOriginPattern()).to(corsConfiguration::addAllowedOriginPattern);
+            propertyMapper.from(corsProperties.getAllowedOriginPatterns()).to(corsConfiguration::setAllowedOriginPatterns);
+        }else {
+            propertyMapper.from(corsProperties.getAllowedOrigin()).to(corsConfiguration::addAllowedOrigin);
+            propertyMapper.from(corsProperties.getAllowedOrigins()).to(corsConfiguration::setAllowedOrigins);
+        }
         propertyMapper.from(corsProperties.getAllowedHeader()).to(corsConfiguration::addAllowedHeader);
         propertyMapper.from(corsProperties.getAllowedHeaders()).to(corsConfiguration::setAllowedHeaders);
         propertyMapper.from(corsProperties.getAllowedMethod()).to(corsConfiguration::addAllowedMethod);
         propertyMapper.from(corsProperties.getAllowedMethods()).to(corsConfiguration::setAllowedMethods);
         propertyMapper.from(corsProperties.getMaxAge()).to(corsConfiguration::setMaxAge);
+        propertyMapper.from(corsProperties.getExposedHeader()).to(corsConfiguration::addExposedHeader);
         propertyMapper.from(corsProperties.getExposedHeaders()).to(corsConfiguration::setExposedHeaders);
         return corsConfiguration;
     }
