@@ -18,6 +18,7 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.cloud.client.loadbalancer.reactive.DeferringLoadBalancerExchangeFilterFunction;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpMethod;
@@ -95,6 +96,7 @@ public class RestClientAutoConfiguration {
 
     @ConditionalOnClass(WebClient.class)
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
+    @Import(ReactiveClientAutoConfiguration.LoadBalancedClientConfiguration.class)
     static class ReactiveClientAutoConfiguration {
 
         @Bean
@@ -120,7 +122,7 @@ public class RestClientAutoConfiguration {
         }
 
         @ConditionalOnBean(DeferringLoadBalancerExchangeFilterFunction.class)
-        static class ReactiveLoadBalancedClientConfiguration {
+        static class LoadBalancedClientConfiguration {
 
             @Bean
             @ConditionalOnMissingBean(name = "loadBalancedWebClient")
