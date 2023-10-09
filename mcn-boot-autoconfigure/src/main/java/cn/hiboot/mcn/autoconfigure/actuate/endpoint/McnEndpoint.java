@@ -6,6 +6,8 @@ import org.springframework.boot.actuate.endpoint.annotation.*;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
 
+import java.util.function.Function;
+
 /**
  * McnEndpoint
  *
@@ -33,15 +35,17 @@ public class McnEndpoint {
 
     @WriteOperation
     public RestResp<?> add(String name,Object value) {
+        return new RestResp<>(doAction(mapPropertySource -> mapPropertySource.getSource().put(name,value)));
+    }
+
+    private Object doAction(Function<MapPropertySource,Object> function){
         MapPropertySource mapPropertySource = (MapPropertySource) environment.getPropertySources().get(ConfigProperties.MCN_MAP_PROPERTY_SOURCE_NAME);
-        mapPropertySource.getSource().put(name,value);
-        return new RestResp<>();
+        return function.apply(mapPropertySource);
     }
 
     @DeleteOperation
     public RestResp<?> delete(@Selector String name) {
-        MapPropertySource mapPropertySource = (MapPropertySource) environment.getPropertySources().get(ConfigProperties.MCN_MAP_PROPERTY_SOURCE_NAME);
-        return new RestResp<>(mapPropertySource.getSource().remove(name));
+        return new RestResp<>(doAction(mapPropertySource -> mapPropertySource.getSource().remove(name)));
     }
 
 }
