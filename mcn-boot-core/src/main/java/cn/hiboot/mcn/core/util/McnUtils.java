@@ -51,11 +51,7 @@ public abstract class McnUtils {
     }
 
     public static String localDateToString(LocalDate date) {
-        return localDateToString(date,1);
-    }
-
-    public static String localDateToString(LocalDate date,int mod) {
-        return formatToString(date,mod);
+        return formatToString(date,2);
     }
 
     public static String localDateTimeToString(LocalDateTime dateTime) {
@@ -119,14 +115,30 @@ public abstract class McnUtils {
     }
 
     /**
+     * 获取指定日期的开始时间与结束时间
+     * @param specifiedDate 1
+     * @return start ms end ms
+     */
+    public static Pair<Long,Long> dayInMs(LocalDate specifiedDate){
+        LocalDateTime startOfDay = specifiedDate.atStartOfDay();
+        LocalDateTime endOfDay = specifiedDate.atTime(LocalTime.MAX);
+        long start = startOfDay.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+        long end = endOfDay.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+        return Pair.with(start,end);
+    }
+
+    /**
      * 近几天
      * @param days 1
      * @return firstDate endDate
      */
     public static Pair<Date,Date> lastDay(int days){
-        LocalDateTime now = LocalDateTime.now();
-        return Pair.with(Date.from(now.withHour(0).withMinute(0).withSecond(0).minusDays(days).atZone(ZoneId.systemDefault()).toInstant())
-                ,Date.from(now.withHour(23).withMinute(59).withSecond(59).atZone(ZoneId.systemDefault()).toInstant()));
+        return lastDay(LocalDateTime.now(),days);
+    }
+
+    public static Pair<Date,Date> lastDay(LocalDateTime specifiedDate,int days){
+        return Pair.with(Date.from(specifiedDate.withHour(0).withMinute(0).withSecond(0).minusDays(days).atZone(ZoneId.systemDefault()).toInstant())
+                ,Date.from(specifiedDate.withHour(23).withMinute(59).withSecond(59).atZone(ZoneId.systemDefault()).toInstant()));
     }
 
     /**
@@ -135,9 +147,12 @@ public abstract class McnUtils {
      * @return firstDate endDate
      */
     public static Pair<Date,Date> nextDay(int days){
-        LocalDateTime now = LocalDateTime.now();
-        return Pair.with(Date.from(now.withHour(0).withMinute(0).withSecond(0).atZone(ZoneId.systemDefault()).toInstant())
-                ,Date.from(now.withHour(23).withMinute(59).withSecond(59).plusDays(days).atZone(ZoneId.systemDefault()).toInstant()));
+        return nextDay(LocalDateTime.now(),days);
+    }
+
+    public static Pair<Date,Date> nextDay(LocalDateTime specifiedDate,int days){
+        return Pair.with(Date.from(specifiedDate.withHour(0).withMinute(0).withSecond(0).atZone(ZoneId.systemDefault()).toInstant())
+                ,Date.from(specifiedDate.withHour(23).withMinute(59).withSecond(59).plusDays(days).atZone(ZoneId.systemDefault()).toInstant()));
     }
 
     /**
@@ -146,7 +161,11 @@ public abstract class McnUtils {
      * @return firstDate endDate
      */
     public static Pair<Date,Date> startEndDateTimeInWeek(int week){
-        LocalDateTime now = LocalDateTime.now();
+        return startEndDateTimeInWeek(LocalDateTime.now(),week);
+    }
+
+    public static Pair<Date,Date> startEndDateTimeInWeek(LocalDateTime specifiedDate,int week){
+        LocalDateTime now = specifiedDate;
         now = (LocalDateTime) with(now,now.getDayOfWeek(),week);
         return Pair.with(Date.from(now.with(DayOfWeek.MONDAY).withHour(0).withMinute(0).withSecond(0).atZone(ZoneId.systemDefault()).toInstant())
                 ,Date.from(now.with(DayOfWeek.SUNDAY).withHour(23).withMinute(59).withSecond(59).atZone(ZoneId.systemDefault()).toInstant()));
