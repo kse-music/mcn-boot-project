@@ -3,7 +3,6 @@ package cn.hiboot.mcn.autoconfigure.web.filter;
 import cn.hiboot.mcn.autoconfigure.web.exception.ExceptionResolver;
 import cn.hiboot.mcn.autoconfigure.web.filter.common.NameValueProcessor;
 import cn.hiboot.mcn.autoconfigure.web.filter.common.NameValueProcessorJacksonConfig;
-import cn.hiboot.mcn.autoconfigure.web.filter.cors.CorsProperties;
 import cn.hiboot.mcn.autoconfigure.web.filter.special.ParamProcessorAutoConfiguration;
 import cn.hiboot.mcn.autoconfigure.web.filter.xss.XssAutoConfiguration;
 import cn.hiboot.mcn.core.exception.ExceptionKeys;
@@ -13,11 +12,9 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
-import org.springframework.boot.context.properties.PropertyMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.web.cors.CorsConfiguration;
 
 /**
  * FilterAutoConfiguration
@@ -42,25 +39,5 @@ public class FilterAutoConfiguration {
         };
     }
 
-    public static CorsConfiguration corsConfiguration(CorsProperties corsProperties){
-        CorsConfiguration corsConfiguration = new CorsConfiguration();
-        PropertyMapper propertyMapper = PropertyMapper.get().alwaysApplyingWhenNonNull();
-        propertyMapper.from(corsProperties.getAllowCredentials()).to(corsConfiguration::setAllowCredentials);
-        if (corsProperties.getAllowedOriginPattern() != null || corsProperties.getAllowedOriginPatterns() != null){
-            propertyMapper.from(corsProperties.getAllowedOriginPattern()).to(corsConfiguration::addAllowedOriginPattern);
-            propertyMapper.from(corsProperties.getAllowedOriginPatterns()).to(corsConfiguration::setAllowedOriginPatterns);
-        }else {
-            propertyMapper.from(corsProperties.getAllowedOrigin()).to(corsConfiguration::addAllowedOrigin);
-            propertyMapper.from(corsProperties.getAllowedOrigins()).to(corsConfiguration::setAllowedOrigins);
-        }
-        propertyMapper.from(corsProperties.getAllowedHeader()).to(corsConfiguration::addAllowedHeader);
-        propertyMapper.from(corsProperties.getAllowedHeaders()).to(corsConfiguration::setAllowedHeaders);
-        propertyMapper.from(corsProperties.getAllowedMethod()).to(corsConfiguration::addAllowedMethod);
-        propertyMapper.from(corsProperties.getAllowedMethods()).to(corsConfiguration::setAllowedMethods);
-        propertyMapper.from(corsProperties.getMaxAge()).to(corsConfiguration::setMaxAge);
-        propertyMapper.from(corsProperties.getExposedHeader()).to(corsConfiguration::addExposedHeader);
-        propertyMapper.from(corsProperties.getExposedHeaders()).to(corsConfiguration::setExposedHeaders);
-        return corsConfiguration;
-    }
 
 }
