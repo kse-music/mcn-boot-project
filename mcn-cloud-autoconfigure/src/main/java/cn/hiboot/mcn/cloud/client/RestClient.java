@@ -24,7 +24,6 @@ import java.util.Map;
  */
 public class RestClient {
 
-    public static final RestClient INSTANCE = new RestClient();
     private final Logger log = LoggerFactory.getLogger(RestClient.class);
     private Class<?> wrapperClass = RestResp.class;
     private final RestTemplate restTemplate;
