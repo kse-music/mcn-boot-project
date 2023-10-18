@@ -11,12 +11,12 @@
 | commons-io                           | commons-io.version           |      2.13.0      |
 | fastjson                             | fastjson.version             |      1.2.83      |
 | fastjson2                            | fastjson2.version            |      2.0.39      |
-| guava                                | guava.version                |    32.1.2-jre    |
+| guava                                | guava.version                |    32.1.3-jre    |
 | hutool-bom                           | hutool.version               |      5.8.22      |
 | jsoup                                | jsoup.version                |      1.16.1      |
 | knife4j-openapi3-ui                  | knife4j.version              |      4.3.0       |
 | mapstruct                            | mapstruct.version            |   1.5.5.Final    |
-| mybatis-spring-boot-starter          | mybatis-spring-boot.version  |      2.3.1       |
+| mybatis-spring-boot-starter          | mybatis-spring-boot.version  |      3.0.2       |
 | minio                                | minio.version                |      8.5.5       |
 | smart-doc                            | smart-doc.version            |      2.7.7       |
 | snakeyaml                            | snakeyaml.version            |       2.2        |
