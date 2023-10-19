@@ -67,7 +67,7 @@ public class RestClientAutoConfiguration {
 
         @Bean
         @LoadBalanced
-        @ConditionalOnClass(LoadBalanced.class)
+        @ConditionalOnClass(name = "org.springframework.cloud.client.loadbalancer.LoadBalanced")
         @ConditionalOnMissingBean(name = "loadBalancedRestTemplate")
         RestTemplate loadBalancedRestTemplate(RestTemplateBuilder builder) {
             return restTemplate0(builder);
