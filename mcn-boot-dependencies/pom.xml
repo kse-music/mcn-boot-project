@@ -46,7 +46,7 @@
         <minio.version>8.5.5</minio.version>
         <smart-doc.version>2.7.7</smart-doc.version>
         <snakeyaml.version>2.2</snakeyaml.version>
-        <spring-boot.version>3.1.4</spring-boot.version>
+        <spring-boot.version>3.1.5</spring-boot.version>
         <spring-cloud.version>2022.0.4</spring-cloud.version>
         <spring-cloud-alibaba.version>2022.0.0.0</spring-cloud-alibaba.version>
         <spring-cloud-huawei.version>1.10.10-2021.0.x</spring-cloud-huawei.version>
