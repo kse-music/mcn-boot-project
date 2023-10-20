@@ -49,9 +49,7 @@ public class MinioAutoConfiguration {
     @ConditionalOnMissingBean
     public DefaultMinioClient minioClient(){
         MinioAsyncClient.Builder builder = MinioAsyncClient.builder();
-        for (MinioClientBuilderCustomizer customizer : customizers) {
-            customizer.customize(builder);
-        }
+        customizers.orderedStream().forEach(customizer->customizer.customize(builder));
         return new DefaultMinioClient(config,builder);
     }
 

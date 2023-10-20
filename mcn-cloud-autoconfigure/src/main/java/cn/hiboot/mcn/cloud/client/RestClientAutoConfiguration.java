@@ -61,7 +61,7 @@ public class RestClientAutoConfiguration {
         private RestTemplate restTemplate0(RestTemplateBuilder builder) {
             builder.setReadTimeout(properties.getReadTimeout());
             builder.setConnectTimeout(properties.getConnectTimeout());
-            restTemplateBuilderCustomizers.orderedStream().forEachOrdered(b -> b.custom(builder));
+            restTemplateBuilderCustomizers.orderedStream().forEach(b -> b.custom(builder));
             return builder.build();
         }
 
