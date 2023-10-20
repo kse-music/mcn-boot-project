@@ -5,7 +5,7 @@ import cn.hiboot.mcn.autoconfigure.web.filter.common.RequestMatcher;
 import cn.hiboot.mcn.autoconfigure.web.filter.integrity.DataIntegrityException;
 import cn.hiboot.mcn.autoconfigure.web.filter.integrity.DataIntegrityProperties;
 import cn.hiboot.mcn.autoconfigure.web.filter.integrity.DataIntegrityUtils;
-import cn.hiboot.mcn.autoconfigure.web.reactor.ServerHttpResponseUtils;
+import cn.hiboot.mcn.autoconfigure.web.reactor.WebUtils;
 import cn.hiboot.mcn.core.tuples.Pair;
 import cn.hutool.core.util.StrUtil;
 import org.slf4j.Logger;
@@ -44,16 +44,12 @@ public class ReactiveDataIntegrityFilter implements OrderedWebFilter {
         this.requestMatcher = new RequestMatcher(dataIntegrityProperties.getIncludePatterns(), dataIntegrityProperties.getExcludePatterns()).enableDefaultExclude();
     }
 
-    private String getHeader(ServerHttpRequest request, String headerName) {
-        return request.getHeaders().getFirst(headerName);
-    }
-
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         return Mono.just(exchange.getRequest()).filter(requestMatcher::matches).flatMap(request -> {
-            String tsm = getHeader(request, "TSM");// 获取时间戳
+            String tsm = WebUtils.getHeader(request, "TSM");// 获取时间戳
             if (tsm == null) {
-                tsm = getHeader(request, "timestamp");
+                tsm = WebUtils.getHeader(request, "timestamp");
             }
             String timestamp = tsm;
             if (StrUtil.isEmpty(timestamp)) {
@@ -66,11 +62,11 @@ public class ReactiveDataIntegrityFilter implements OrderedWebFilter {
                     return Mono.error(DataIntegrityException.newInstance("验证失败,无效的时间戳"));
                 }
             }
-            String signature = getHeader(request, "signature");// 获取签名
+            String signature = WebUtils.getHeader(request, "signature");// 获取签名
             if (StrUtil.isEmpty(signature)) {
                 return Mono.error(DataIntegrityException.newInstance("验证失败,数据被篡改"));
             }
-            String nonceStr = getHeader(request, "nonceStr");// 获取随机字符串
+            String nonceStr = WebUtils.getHeader(request, "nonceStr");// 获取随机字符串
 
             return exchange.getFormData().map(formParams -> {
                 Map<String, Object> params = new HashMap<>();
@@ -103,7 +99,7 @@ public class ReactiveDataIntegrityFilter implements OrderedWebFilter {
             });
         }).flatMap(chain::filter).onErrorResume(DataIntegrityException.class, ex -> {
             log.error("Check DataIntegrity Failed: {}", ex.getMessage());
-            return ServerHttpResponseUtils.failed(ex.getMessage(), exchange.getResponse());
+            return WebUtils.failed(ex.getMessage(), exchange.getResponse());
         });
     }
 

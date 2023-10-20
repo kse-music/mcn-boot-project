@@ -3,7 +3,11 @@ package cn.hiboot.mcn.autoconfigure.web.mvc;
 import cn.hiboot.mcn.core.model.result.RestResp;
 import cn.hiboot.mcn.core.util.JacksonUtils;
 import org.springframework.http.MediaType;
+import org.springframework.util.ObjectUtils;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -15,7 +19,33 @@ import java.nio.charset.StandardCharsets;
  * @author DingHao
  * @since 2023/1/20 23:27
  */
-public class ResponseUtils {
+public abstract class WebUtils {
+    public static final String UNKNOWN = "unknown";
+
+    public static String getRemoteAddr(HttpServletRequest request) {
+        String ipAddress = request.getHeader("X-Forwarded-For");
+        if (ObjectUtils.isEmpty(ipAddress) || UNKNOWN.equalsIgnoreCase(ipAddress)) {
+            ipAddress = request.getHeader("Proxy-Client-IP");
+        }
+        if (ObjectUtils.isEmpty(ipAddress) || UNKNOWN.equalsIgnoreCase(ipAddress)) {
+            ipAddress = request.getHeader("WL-Proxy-Client-IP");
+        }
+        if (ObjectUtils.isEmpty(ipAddress) || UNKNOWN.equalsIgnoreCase(ipAddress)) {
+            ipAddress = request.getRemoteAddr();
+        }
+        if (ipAddress != null && ipAddress.contains(",")) {
+            ipAddress = ipAddress.split(",")[0].trim();
+        }
+        return ipAddress;
+    }
+
+    public static HttpServletRequest getHttpServletRequest() {
+        ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        if(requestAttributes == null){
+            return null;
+        }
+        return requestAttributes.getRequest();
+    }
 
     public static <T> void success(T data, HttpServletResponse response){
         write(new RestResp<>(data),response);

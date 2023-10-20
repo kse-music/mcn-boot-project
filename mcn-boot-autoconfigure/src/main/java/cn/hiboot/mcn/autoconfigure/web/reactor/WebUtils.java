@@ -5,9 +5,12 @@ import cn.hiboot.mcn.core.util.JacksonUtils;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.util.ObjectUtils;
 import reactor.core.publisher.Mono;
 
+import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -16,7 +19,33 @@ import java.nio.charset.StandardCharsets;
  * @author DingHao
  * @since 2022/5/23 23:41
  */
-public abstract class ServerHttpResponseUtils {
+public abstract class WebUtils {
+
+    public static final String UNKNOWN = cn.hiboot.mcn.autoconfigure.web.mvc.WebUtils.UNKNOWN;
+
+    public static String getRemoteAddr(ServerHttpRequest request) {
+        String ipAddress = getHeader(request,"X-Forwarded-For");
+        if (ObjectUtils.isEmpty(ipAddress) || UNKNOWN.equalsIgnoreCase(ipAddress)) {
+            ipAddress = getHeader(request,"Proxy-Client-IP");
+        }
+        if (ObjectUtils.isEmpty(ipAddress) || UNKNOWN.equalsIgnoreCase(ipAddress)) {
+            ipAddress = getHeader(request,"WL-Proxy-Client-IP");
+        }
+        if (ObjectUtils.isEmpty(ipAddress) || UNKNOWN.equalsIgnoreCase(ipAddress)) {
+            InetSocketAddress remoteAddress = request.getRemoteAddress();
+            if(remoteAddress != null){
+                ipAddress = remoteAddress.getAddress().getHostAddress();
+            }
+        }
+        if (ipAddress != null && ipAddress.contains(",")) {
+            ipAddress = ipAddress.split(",")[0].trim();
+        }
+        return ipAddress;
+    }
+
+    public static String getHeader(ServerHttpRequest request, String headerName) {
+        return request.getHeaders().getFirst(headerName);
+    }
 
     public static Mono<Void> success(ServerHttpResponse response) {
         return write(new RestResp<>(),response);
