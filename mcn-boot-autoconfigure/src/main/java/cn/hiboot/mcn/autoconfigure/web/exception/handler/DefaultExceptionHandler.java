@@ -10,17 +10,19 @@ import cn.hiboot.mcn.core.exception.ErrorMsg;
 import cn.hiboot.mcn.core.exception.ExceptionKeys;
 import cn.hiboot.mcn.core.model.result.RestResp;
 import cn.hiboot.mcn.core.util.McnUtils;
-import cn.hiboot.mcn.core.util.SpringBeanUtils;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -33,10 +35,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -46,7 +45,7 @@ import java.util.stream.Collectors;
  * @author DingHao
  * @since 2023/5/24 13:25
  */
-public class DefaultExceptionHandler implements ExceptionHandler{
+public class DefaultExceptionHandler implements ExceptionHandler, ApplicationContextAware, SmartInitializingSingleton {
     private final Logger log = LoggerFactory.getLogger(DefaultExceptionHandler.class);
 
     /**
@@ -57,20 +56,15 @@ public class DefaultExceptionHandler implements ExceptionHandler{
     private static final Map<Class<?>, List<ExceptionResolver<Throwable>>> exceptionResolverCache = new ConcurrentHashMap<>();
     private static final Map<Class<?>, ResolvableType> exceptionResolverTypeCache = new ConcurrentReferenceHashMap<>();
 
-    private final boolean validationExceptionPresent;
-    private final String basePackage;
+    private boolean validationExceptionPresent;
+    private String basePackage;
     private final ExceptionProperties properties;
-    private final String[] exceptionResolverNames;
-    private final ApplicationContext applicationContext;
-    private final ObjectProvider<HttpStatusCodeResolver> httpStatusCodeResolvers;
+    private ApplicationContext applicationContext;
+    private final List<ExceptionResolver<Throwable>> exceptionResolvers = new ArrayList<>(8);
+    private List<HttpStatusCodeResolver> httpStatusCodeResolvers;
 
     protected DefaultExceptionHandler(ExceptionProperties properties) {
         this.properties = properties;
-        this.validationExceptionPresent = ClassUtils.isPresent("jakarta.validation.ValidationException", getClass().getClassLoader());
-        this.applicationContext = SpringBeanUtils.getApplicationContext();
-        this.httpStatusCodeResolvers = applicationContext.getBeanProvider(HttpStatusCodeResolver.class);
-        this.exceptionResolverNames = applicationContext.getBeanNamesForType(ExceptionResolver.class);
-        this.basePackage = applicationContext.getEnvironment().getProperty(ConfigProperties.APP_BASE_PACKAGE);
     }
 
     @Override
@@ -81,12 +75,7 @@ public class DefaultExceptionHandler implements ExceptionHandler{
     @Override
     public RestResp<Throwable> handleException(Throwable exception) {
         RestResp<Throwable> resp = null;
-        Class<? extends Throwable> exClass = exception.getClass();
-        List<ExceptionResolver<Throwable>> exceptionResolvers = exceptionResolverCache.get(exClass);
-        if (exceptionResolvers == null) {
-            exceptionResolvers = Arrays.stream(exceptionResolverNames).map(s -> supportsExceptionType(s, exClass)).filter(Objects::nonNull).collect(Collectors.toList());
-            exceptionResolverCache.put(exClass,exceptionResolvers);
-        }
+        List<ExceptionResolver<Throwable>> exceptionResolvers = exceptionResolverCache.computeIfAbsent(exception.getClass(),exClass -> this.exceptionResolvers.stream().filter(s -> supportsExceptionType(s, ResolvableType.forClass(exClass))).collect(Collectors.toList()));
         for (ExceptionResolver<Throwable> exceptionResolver : exceptionResolvers) {
             resp = exceptionResolver.resolve(exception);
             if (resp != null) {
@@ -127,7 +116,7 @@ public class DefaultExceptionHandler implements ExceptionHandler{
             errorCode = ExceptionKeys.HTTP_ERROR_500;
             handleError((Error) exception.getCause());
         }
-        Integer error = httpStatusCodeResolvers.orderedStream().map(resolver -> resolver.resolve(exception)).filter(Objects::nonNull).findFirst().orElse(null);
+        Integer error = httpStatusCodeResolvers.stream().map(resolver -> resolver.resolve(exception)).filter(Objects::nonNull).findFirst().orElse(null);
         if(error != null){
             errorCode = error;
         }
@@ -162,46 +151,58 @@ public class DefaultExceptionHandler implements ExceptionHandler{
         return errorCode == DEFAULT_ERROR_CODE ? ExceptionKeys.SERVICE_ERROR : errorCode;
     }
 
-    @SuppressWarnings("unchecked")
-    private ExceptionResolver<Throwable> supportsExceptionType(String beanName, Class<? extends Throwable> exceptionType) {
+    private boolean supportsExceptionType(ExceptionResolver<Throwable> exceptionResolver, ResolvableType exceptionType) {
+        if(exceptionResolver instanceof GenericExceptionResolver genericExceptionResolver){
+            return genericExceptionResolver.supportsType(exceptionType);
+        }
+        if (ignoreExceptionType(exceptionResolver.getClass(),exceptionType)) {
+            Class<?> targetClass = AopUtils.getTargetClass(exceptionResolver);
+            if (targetClass != exceptionResolver.getClass()) {
+                if (ignoreExceptionType(targetClass, exceptionType)) {
+                    return false;
+                }
+            }
+            return false;
+        }
         DefaultListableBeanFactory beanFactory = null;
         if (applicationContext instanceof DefaultListableBeanFactory) {
             beanFactory = (DefaultListableBeanFactory) applicationContext;
         } else if (applicationContext instanceof GenericApplicationContext) {
             beanFactory = ((GenericApplicationContext) applicationContext).getDefaultListableBeanFactory();
         }
-        if (beanFactory != null) {
-            ExceptionResolver<Throwable> exceptionResolver = applicationContext.getBean(beanName, ExceptionResolver.class);
-            if(exceptionResolver instanceof GenericExceptionResolver genericExceptionResolver){
-                if(genericExceptionResolver.supportsType(exceptionType)){
-                    return exceptionResolver;
-                }
+        if (beanFactory == null) {
+            return true;
+        }
+        try {
+            String beanName= getBeanName(exceptionResolver);
+            if (beanName == null) {
+                return true;
             }
-            ResolvableType declaredExceptionType = resolveDeclaredExceptionType(exceptionResolver.getClass());
-            if (declaredExceptionType == null || declaredExceptionType.isAssignableFrom(Throwable.class)) {
-                Class<?> targetClass = AopUtils.getTargetClass(exceptionResolver);
-                if (targetClass != exceptionResolver.getClass()) {
-                    declaredExceptionType = resolveDeclaredExceptionType(targetClass);
-                }
-            }
-            if (declaredExceptionType == null || declaredExceptionType.isAssignableFrom(exceptionType)) {
-                try {
-                    BeanDefinition bd = beanFactory.getMergedBeanDefinition(beanName);
-                    ResolvableType genericExceptionType = bd.getResolvableType().as(ExceptionResolver.class).getGeneric();
-                    if (genericExceptionType == ResolvableType.NONE || genericExceptionType.isAssignableFrom(exceptionType)) {
-                        return exceptionResolver;
-                    }
-                } catch (NoSuchBeanDefinitionException ex) {
-                    //
-                }
-            }
+            BeanDefinition bd = beanFactory.getMergedBeanDefinition(beanName);
+            ResolvableType genericExceptionType = bd.getResolvableType().as(ExceptionResolver.class).getGeneric();
+            return genericExceptionType == ResolvableType.NONE || genericExceptionType.isAssignableFrom(exceptionType);
+        } catch (NoSuchBeanDefinitionException ex) {
+            // Ignore - no need to check resolvable type for manually registered singleton
+            return true;
+        }
+    }
+
+    private String getBeanName(Object singletonBean) {
+        String[] beanNames = applicationContext.getBeanNamesForType(singletonBean.getClass());
+        if (beanNames.length > 0) {
+            return beanNames[0];
         }
         return null;
     }
 
+    private boolean ignoreExceptionType(Class<?> exceptionResolverType, ResolvableType exceptionType) {
+        ResolvableType declaredEventType = resolveDeclaredExceptionType(exceptionResolverType);
+        return !(declaredEventType == null || declaredEventType.isAssignableFrom(exceptionType));
+    }
+
     private ResolvableType resolveDeclaredExceptionType(Class<?> exceptionResolverType) {
         ResolvableType exceptionType = exceptionResolverTypeCache.computeIfAbsent(exceptionResolverType, e -> ResolvableType.forClass(exceptionResolverType).as(ExceptionResolver.class).getGeneric());
-        return (exceptionType != ResolvableType.NONE ? exceptionType : null);
+        return exceptionType != ResolvableType.NONE ? exceptionType : null;
     }
 
     private List<ValidationErrorBean> dealBindingResult(BindingResult bindingResult){
@@ -238,7 +239,6 @@ public class DefaultExceptionHandler implements ExceptionHandler{
         }
     }
 
-
     private void dealCurrentStackTraceElement(Throwable exception){
         if(Objects.isNull(exception.getCause())){//is self
             return;
@@ -246,6 +246,19 @@ public class DefaultExceptionHandler implements ExceptionHandler{
         exception.setStackTrace(Arrays.stream(exception.getStackTrace()).filter(s -> s.getClassName().contains(basePackage)).toArray(StackTraceElement[]::new));
     }
 
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
+        this.validationExceptionPresent = ClassUtils.isPresent("jakarta.validation.ValidationException", getClass().getClassLoader());
+        this.basePackage = applicationContext.getEnvironment().getProperty(ConfigProperties.APP_BASE_PACKAGE);
+    }
+
+    @Override
+    public void afterSingletonsInstantiated() {
+        this.httpStatusCodeResolvers = applicationContext.getBeanProvider(HttpStatusCodeResolver.class).orderedStream().collect(Collectors.toList());
+        ObjectProvider<ExceptionResolver<Throwable>> beanProvider = applicationContext.getBeanProvider(ResolvableType.forClass(ExceptionResolver.class));
+        beanProvider.orderedStream().forEach(exceptionResolvers::add);
+    }
 
     @JsonIgnoreProperties({"cause", "stackTrace", "message", "suppressed", "localizedMessage"})
     static class ThrowableData extends Throwable{
