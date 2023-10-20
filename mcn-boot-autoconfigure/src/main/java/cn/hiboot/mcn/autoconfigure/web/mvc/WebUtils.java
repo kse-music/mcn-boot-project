@@ -14,13 +14,13 @@ import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 
 /**
- * ResponseUtils
+ * WebUtils
  *
  * @author DingHao
  * @since 2023/1/20 23:27
  */
 public abstract class WebUtils {
-    public static final String UNKNOWN = "unknown";
+    private static final String UNKNOWN = "unknown";
 
     public static String getRemoteAddr(HttpServletRequest request) {
         String ipAddress = request.getHeader("X-Forwarded-For");
