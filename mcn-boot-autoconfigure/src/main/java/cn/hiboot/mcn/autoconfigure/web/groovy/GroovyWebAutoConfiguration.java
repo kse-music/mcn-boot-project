@@ -54,9 +54,7 @@ public class GroovyWebAutoConfiguration {
         if(groovyDebugProperties.getClasspath() != null){
             compilerConfiguration.setClasspath(groovyDebugProperties.getClasspath());
         }
-        for (GroovyWebCustomizer customizer : customizers) {
-            customizer.customize(groovyBinding,compilerConfiguration);
-        }
+        customizers.orderedStream().forEach(customizer -> customizer.customize(groovyBinding,compilerConfiguration));
         return new GroovyShell(groovyClassLoader, groovyBinding, compilerConfiguration);
     }
 
