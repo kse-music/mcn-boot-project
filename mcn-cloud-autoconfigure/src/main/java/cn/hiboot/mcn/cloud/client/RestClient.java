@@ -24,7 +24,7 @@ import java.util.Map;
  */
 public class RestClient {
 
-    private final Logger log = LoggerFactory.getLogger(RestClient.class);
+    protected final Logger log = LoggerFactory.getLogger(RestClient.class);
     private Class<?> wrapperClass = RestResp.class;
     private final RestTemplate restTemplate;
 
@@ -146,21 +146,30 @@ public class RestClient {
         headers.setContentType(mediaType);
         HttpEntity<A> entity = new HttpEntity<>(requestBody, headers);
         long startTime = System.currentTimeMillis();
-        ResponseEntity<W> resultEntity;
+        ResponseEntity<W> responseEntity;
         try {
-            resultEntity = restTemplate.exchange(url, method, entity, ParameterizedTypeReference.forType(ResolvableType.forClassWithGenerics(wrapperClass, resultType).getType()),uriVariables);
+            responseEntity = restTemplate.exchange(url, method, entity, ParameterizedTypeReference.forType(ResolvableType.forClassWithGenerics(wrapperClass, resultType).getType()),uriVariables);
         } catch (RestClientException e) {
             logError(url, requestBody, e.getMessage());
             throw ServiceException.newInstance(ExceptionKeys.REMOTE_SERVICE_ERROR);
+        }finally {
+            if(log.isDebugEnabled()) {
+                log.debug("url={}, cost time={}ms, inputParam={}", url, System.currentTimeMillis() - startTime, JacksonUtils.toJson(requestBody));
+            }
         }
-        log.debug("url={}, cost time={}ms, inputParam={}", url, System.currentTimeMillis() - startTime, JacksonUtils.toJson(requestBody));
-        if (resultEntity.getStatusCode() != HttpStatus.OK) {
+        return processResponse(responseEntity,url,requestBody);
+    }
+
+    protected <A,D,W> D processResponse(ResponseEntity<W> responseEntity,String url,A requestBody){
+        if (responseEntity.getStatusCode() != HttpStatus.OK) {
             throw ServiceException.newInstance(ExceptionKeys.REMOTE_SERVICE_ERROR);
         }
         try{
-            if(resultEntity.hasBody()){
-                D response = response(resultEntity.getBody());
-                log.debug("response={}",JacksonUtils.toJson(response));
+            if(responseEntity.hasBody()){
+                D response = extractData(responseEntity.getBody());
+                if(log.isDebugEnabled()){
+                    log.debug("response={}",JacksonUtils.toJson(response));
+                }
                 return response;
             }
             return null;
@@ -171,7 +180,7 @@ public class RestClient {
     }
 
     @SuppressWarnings({"unchecked","rawtypes"})
-    protected <D,W> D response(W body){
+    protected <D,W> D extractData(W body){
         RestResp restResp = (RestResp)body;
         if (restResp.isFailed()) {
             throw ServiceException.newInstance(ExceptionKeys.REMOTE_SERVICE_ERROR,restResp.getErrorInfo());
@@ -180,7 +189,9 @@ public class RestClient {
     }
 
     private void logError(String url, Object requestBody, String errorMsg){
-        log.error("url={}, inputParam={}, errorInfo={}", url,JacksonUtils.toJson(requestBody), errorMsg);
+        if(log.isDebugEnabled()){
+            log.error("url={}, inputParam={}, errorInfo={}", url,JacksonUtils.toJson(requestBody), errorMsg);
+        }
     }
 
 }
