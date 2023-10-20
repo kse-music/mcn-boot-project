@@ -14,14 +14,14 @@ import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 
 /**
- * ServerHttpResponseUtils
+ * WebUtils
  *
  * @author DingHao
  * @since 2022/5/23 23:41
  */
 public abstract class WebUtils {
 
-    public static final String UNKNOWN = cn.hiboot.mcn.autoconfigure.web.mvc.WebUtils.UNKNOWN;
+    private static final String UNKNOWN = "unknown";
 
     public static String getRemoteAddr(ServerHttpRequest request) {
         String ipAddress = getHeader(request,"X-Forwarded-For");
