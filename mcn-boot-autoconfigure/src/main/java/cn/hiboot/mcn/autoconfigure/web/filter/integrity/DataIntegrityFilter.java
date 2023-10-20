@@ -3,7 +3,7 @@ package cn.hiboot.mcn.autoconfigure.web.filter.integrity;
 import cn.hiboot.mcn.autoconfigure.web.filter.common.JsonRequestHelper;
 import cn.hiboot.mcn.autoconfigure.web.filter.common.RequestMatcher;
 import cn.hiboot.mcn.autoconfigure.web.filter.common.servlet.RequestPayloadRequestWrapper;
-import cn.hiboot.mcn.autoconfigure.web.mvc.ResponseUtils;
+import cn.hiboot.mcn.autoconfigure.web.mvc.WebUtils;
 import cn.hiboot.mcn.core.util.McnUtils;
 import cn.hutool.core.util.StrUtil;
 import jakarta.servlet.*;
@@ -47,7 +47,7 @@ public class DataIntegrityFilter implements Filter, Ordered {
             String signature = request.getHeader("signature");// 获取签名
 
             if (StrUtil.isEmpty(timestamp)) {
-                ResponseUtils.failed("验证失败,无效的时间戳",(HttpServletResponse) servletResponse);
+                WebUtils.failed("验证失败,无效的时间戳",(HttpServletResponse) servletResponse);
                 return;
             }
 
@@ -55,7 +55,7 @@ public class DataIntegrityFilter implements Filter, Ordered {
                 long receiveTime = Long.parseLong(timestamp);
                 long NONCE_STR_TIMEOUT_SECONDS = dataIntegrityProperties.getTimeout().toMillis();// 判断时间是否大于 1 分钟 (防止重放攻击)
                 if (System.currentTimeMillis() - receiveTime > NONCE_STR_TIMEOUT_SECONDS) {
-                    ResponseUtils.failed("验证失败,时间戳过期",(HttpServletResponse) servletResponse);
+                    WebUtils.failed("验证失败,时间戳过期",(HttpServletResponse) servletResponse);
                     return;
                 }
             }
@@ -70,7 +70,7 @@ public class DataIntegrityFilter implements Filter, Ordered {
             }
 
             if (isInValid(signature, timestamp, nonceStr, request, payload)) {
-                ResponseUtils.failed("验证失败,数据被篡改",(HttpServletResponse)servletResponse);
+                WebUtils.failed("验证失败,数据被篡改",(HttpServletResponse)servletResponse);
                 return;
             }
         }

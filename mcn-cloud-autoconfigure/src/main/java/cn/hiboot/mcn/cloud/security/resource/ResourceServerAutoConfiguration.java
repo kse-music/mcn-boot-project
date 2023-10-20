@@ -2,8 +2,7 @@ package cn.hiboot.mcn.cloud.security.resource;
 
 import cn.hiboot.mcn.autoconfigure.web.exception.HttpStatusCodeResolver;
 import cn.hiboot.mcn.autoconfigure.web.exception.handler.ExceptionHandler;
-import cn.hiboot.mcn.autoconfigure.web.mvc.ResponseUtils;
-import cn.hiboot.mcn.autoconfigure.web.reactor.ServerHttpResponseUtils;
+import cn.hiboot.mcn.autoconfigure.web.reactor.WebUtils;
 import cn.hiboot.mcn.cloud.security.configurer.AuthenticationReload;
 import cn.hiboot.mcn.cloud.security.configurer.ReloadAuthenticationConfigurer;
 import cn.hiboot.mcn.core.exception.ExceptionKeys;
@@ -117,7 +116,7 @@ public class ResourceServerAutoConfiguration {
         }
 
         private Mono<Void> handleException(RuntimeException exception, ServerHttpResponse response){
-            return ServerHttpResponseUtils.write(exceptionHandler.handleException(exception),response);
+            return WebUtils.write(exceptionHandler.handleException(exception),response);
         }
 
         static class ReloadAuthenticationWebFilter implements WebFilter{
@@ -173,7 +172,7 @@ public class ResourceServerAutoConfiguration {
         }
 
         private void handleException(RuntimeException exception, HttpServletResponse response){
-            ResponseUtils.write(exceptionHandler.handleException(exception),response);
+            cn.hiboot.mcn.autoconfigure.web.mvc.WebUtils.write(exceptionHandler.handleException(exception),response);
         }
 
         static class CustomBearerTokenResolver implements BearerTokenResolver{
