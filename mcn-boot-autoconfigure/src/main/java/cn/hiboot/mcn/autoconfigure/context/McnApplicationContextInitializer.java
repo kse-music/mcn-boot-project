@@ -19,7 +19,7 @@ public class McnApplicationContextInitializer implements ApplicationContextIniti
 
     @Override
     public void initialize(ConfigurableApplicationContext context) {
-        context.addBeanFactoryPostProcessor(new McnBeanFactoryRegistryPostProcessor(context.getEnvironment()));
+        context.addBeanFactoryPostProcessor(new McnBeanFactoryRegistryPostProcessor(context));
     }
 
 }
