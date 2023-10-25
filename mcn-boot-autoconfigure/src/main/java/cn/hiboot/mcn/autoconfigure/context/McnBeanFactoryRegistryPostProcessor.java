@@ -5,7 +5,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
-import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.context.ApplicationContext;
 
 /**
  *
@@ -17,10 +17,10 @@ import org.springframework.core.env.ConfigurableEnvironment;
  */
 public class McnBeanFactoryRegistryPostProcessor implements BeanDefinitionRegistryPostProcessor {
 
-    private final ConfigurableEnvironment environment;
+    private final ApplicationContext context;
 
-    public McnBeanFactoryRegistryPostProcessor(ConfigurableEnvironment environment) {
-        this.environment = environment;
+    public McnBeanFactoryRegistryPostProcessor(ApplicationContext context) {
+        this.context = context;
     }
 
     @Override
@@ -30,7 +30,7 @@ public class McnBeanFactoryRegistryPostProcessor implements BeanDefinitionRegist
 
     @Override
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
-        beanFactory.addBeanPostProcessor(new McnBeanPostProcessor(environment));
+        beanFactory.addBeanPostProcessor(new McnBeanPostProcessor(context));
     }
 
 }

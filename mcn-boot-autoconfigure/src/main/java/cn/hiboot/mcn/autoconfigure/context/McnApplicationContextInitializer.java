@@ -21,8 +21,8 @@ public class McnApplicationContextInitializer implements ApplicationContextIniti
 
     @Override
     public void initialize(ConfigurableApplicationContext context) {
+        context.addBeanFactoryPostProcessor(new McnBeanFactoryRegistryPostProcessor(context));
         ConfigurableEnvironment environment = context.getEnvironment();
-        context.addBeanFactoryPostProcessor(new McnBeanFactoryRegistryPostProcessor(environment));
         Boolean swaggerEnabled = environment.getProperty("swagger.enabled", Boolean.class,false);
         if(Boolean.FALSE.equals(swaggerEnabled)){//since 3.0.0 for compatible swagger.enabled key
             environment.getPropertySources().addLast(new MapPropertySource("springDocPropertySource"

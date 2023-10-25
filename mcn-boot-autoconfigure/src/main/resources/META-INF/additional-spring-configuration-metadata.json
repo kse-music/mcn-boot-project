@@ -177,6 +177,13 @@
       "type": "java.lang.String",
       "sourceType": "cn.hiboot.mcn.autoconfigure.config.WarConfiguration",
       "description": "指定主配置类(仅war包模式生效)."
+    },
+    {
+      "name": "jackson.subtypes.package",
+      "type": "java.lang.String",
+      "sourceType": "cn.hiboot.mcn.autoconfigure.context.McnBeanPostProcessor",
+      "description": "jackson subtypes扫描包路径多个以逗号分割.",
+      "defaultValue": "主类所在包路径"
     }
   ],
   "hints": [
