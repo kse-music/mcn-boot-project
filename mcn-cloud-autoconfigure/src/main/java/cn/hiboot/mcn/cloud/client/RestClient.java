@@ -28,7 +28,7 @@ public class RestClient {
     private Class<?> wrapperClass = RestResp.class;
     private final RestTemplate restTemplate;
 
-    private RestClient() {
+    public RestClient() {
         this(new RestTemplate());
     }
 
