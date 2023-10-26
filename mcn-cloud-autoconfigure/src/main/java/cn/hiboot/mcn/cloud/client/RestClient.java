@@ -278,7 +278,7 @@ public class RestClient {
         try {
             responseEntity = restTemplate.exchange(url, method, entity, ParameterizedTypeReference.forType(ResolvableType.forClassWithGenerics(wrapperClass, resultType).getType()), uriVariables);
         } catch (RestClientException e) {
-            logError(url, requestBody, e.getMessage());
+            logError(url, requestBody, e);
             throw ServiceException.newInstance(ExceptionKeys.REMOTE_SERVICE_ERROR);
         } finally {
             if (log.isDebugEnabled()) {
@@ -302,7 +302,7 @@ public class RestClient {
             }
             return null;
         } catch (ServiceException e) {
-            logError(url, requestBody, e.getMessage());
+            logError(url, requestBody, e);
             throw e;
         }
     }
@@ -316,10 +316,8 @@ public class RestClient {
         return (D) restResp.getData();
     }
 
-    private void logError(String url, Object requestBody, String errorMsg) {
-        if (log.isDebugEnabled()) {
-            log.error("url={}, inputParam={}, errorInfo={}", url, JacksonUtils.toJson(requestBody), errorMsg);
-        }
+    private void logError(String url, Object requestBody, RuntimeException ex) {
+        log.error("url={}, inputParam={}, errorInfo={}", url, JacksonUtils.toJson(requestBody), ex.getMessage(),ex);
     }
 
 }
