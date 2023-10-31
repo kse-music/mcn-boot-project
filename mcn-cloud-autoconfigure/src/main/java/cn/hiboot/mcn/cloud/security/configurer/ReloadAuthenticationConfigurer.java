@@ -36,6 +36,9 @@ public class ReloadAuthenticationConfigurer extends AbstractHttpConfigurer<Reloa
     }
 
     public static void reloadAuthentication(SecurityContext securityContext, AuthenticationReload authenticationReload){
+        if(securityContext == null || authenticationReload == null){
+            return;
+        }
         Authentication authentication = securityContext.getAuthentication();
         if (authentication != null) {
             Object principal = authentication.getPrincipal();
