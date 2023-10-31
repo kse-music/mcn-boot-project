@@ -115,7 +115,7 @@ public class RestClientAutoConfiguration {
         @ConditionalOnMissingBean
         ApkResolver apkResolver(WebClient webClient, WebClient loadBalancedWebClient, @Value("${token.service}") String tokenService){
             WebClient restClient = isIp(tokenService) ? webClient : loadBalancedWebClient;
-            return apk -> Mono.fromCallable(() -> apk).flatMap(a -> {
+            return apk -> Mono.just(apk).flatMap(a -> {
                String uri = UriComponentsBuilder.fromUriString(tokenUrl(tokenService)).buildAndExpand(apk).toUriString();
                return restClient.get().uri(uri).retrieve().bodyToMono(loginRspType());
            });

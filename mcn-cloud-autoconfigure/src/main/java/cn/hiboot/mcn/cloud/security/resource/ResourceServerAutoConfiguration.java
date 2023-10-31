@@ -98,21 +98,22 @@ public class ResourceServerAutoConfiguration {
                         apkResolvers.ifUnique(apkResolver -> c.bearerTokenConverter(new ServerBearerTokenAuthenticationConverter(){
                             @Override
                             public Mono<Authentication> convert(ServerWebExchange exchange) {
-                                ServerHttpRequest request = exchange.getRequest();
-                                return super.convert(exchange).switchIfEmpty(jwtToken(apkResolver,request, apkResolver.paramName()));
+                                return super.convert(exchange).switchIfEmpty(jwtToken(apkResolver,exchange.getRequest()));
                             }
-
                         }));
                     })
                     .build();
         }
 
-        private Mono<Authentication> jwtToken(ApkResolver apkResolver,ServerHttpRequest request,String name){
-            String apk = request.getHeaders().getFirst(name);
-            if (McnUtils.isNullOrEmpty(apk)) {
-                apk = request.getQueryParams().getFirst(name);
-            }
-            return apkResolver.jwtToken(apk);
+        private Mono<Authentication> jwtToken(ApkResolver apkResolver,ServerHttpRequest request){
+            return Mono.defer(() -> {
+                String name = apkResolver.paramName();
+                String apk = request.getHeaders().getFirst(name);
+                if (McnUtils.isNullOrEmpty(apk)) {
+                    apk = request.getQueryParams().getFirst(name);
+                }
+                return apkResolver.jwtToken(apk);
+            });
         }
 
         private Mono<Void> handleException(RuntimeException exception, ServerHttpResponse response){
