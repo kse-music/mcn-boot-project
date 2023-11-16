@@ -20,7 +20,7 @@ enum DatabaseDriver {
         String prefix = "CREATE";
         String dbSql = "DATABASE";
         for (DatabaseDriver value : DatabaseDriver.values()) {
-            if(value.dbSql.equals(platform)){
+            if(value.name().equals(platform)){
                 dbSql = value.dbSql;
                 break;
             }
