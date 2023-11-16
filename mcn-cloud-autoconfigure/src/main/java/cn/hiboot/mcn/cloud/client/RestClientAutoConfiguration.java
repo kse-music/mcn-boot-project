@@ -5,6 +5,7 @@ import cn.hiboot.mcn.cloud.security.resource.LoginRsp;
 import cn.hiboot.mcn.cloud.security.resource.TokenResolver;
 import cn.hiboot.mcn.core.model.result.RestResp;
 import cn.hiboot.mcn.core.util.McnUtils;
+import io.netty.channel.ChannelOption;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -107,7 +108,8 @@ public class RestClientAutoConfiguration {
         }
 
         private static WebClient webClient0(WebClient.Builder builder,RestClientProperties properties) {
-            HttpClient httpClient = HttpClient.create().responseTimeout(properties.getReadTimeout());
+            HttpClient httpClient = HttpClient.create().responseTimeout(properties.getReadTimeout())
+                    .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, (int)properties.getConnectTimeout().toMillis());
             ReactorClientHttpConnector connector = new ReactorClientHttpConnector(httpClient);
             return builder.clientConnector(connector).build();
         }
