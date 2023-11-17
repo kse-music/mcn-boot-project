@@ -9,9 +9,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.*;
-import org.springframework.web.client.RestClientException;
+import org.springframework.http.client.ClientHttpRequestExecution;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +37,7 @@ public class RestClient {
     }
 
     public RestClient(RestTemplate restTemplate) {
+        restTemplate.getInterceptors().add(new HttpRequestInterceptor(log));
         this.restTemplate = restTemplate;
     }
 
@@ -272,26 +276,10 @@ public class RestClient {
         }
         HttpHeaders headers = new HttpHeaders();
         headersConsumer.accept(headers);
-        HttpEntity<A> entity = new HttpEntity<>(requestBody, headers);
-        long startTime = System.currentTimeMillis();
-        ResponseEntity<W> responseEntity;
-        try {
-            responseEntity = restTemplate.exchange(url, method, entity, ParameterizedTypeReference.forType(ResolvableType.forClassWithGenerics(wrapperClass, resultType).getType()), uriVariables);
-        } catch (RestClientException e) {
-            logError(url, requestBody, e);
-            throw ServiceException.newInstance(ExceptionKeys.REMOTE_SERVICE_ERROR);
-        } finally {
-            if (log.isDebugEnabled()) {
-                log.debug("url={}, cost time={}ms, inputParam={}", url, System.currentTimeMillis() - startTime, JacksonUtils.toJson(requestBody));
-            }
-        }
-        return processResponse(responseEntity, url, requestBody);
+        return processResponse(restTemplate.exchange(url, method, new HttpEntity<>(requestBody, headers), ParameterizedTypeReference.forType(ResolvableType.forClassWithGenerics(wrapperClass, resultType).getType()), uriVariables), url, requestBody);
     }
 
     protected <A, D, W> D processResponse(ResponseEntity<W> responseEntity, String url, A requestBody) {
-        if (responseEntity.getStatusCode() != HttpStatus.OK) {
-            throw ServiceException.newInstance(ExceptionKeys.REMOTE_SERVICE_ERROR);
-        }
         try {
             if (responseEntity.hasBody()) {
                 D response = extractData(responseEntity.getBody());
@@ -301,9 +289,9 @@ public class RestClient {
                 return response;
             }
             return null;
-        } catch (ServiceException e) {
-            logError(url, requestBody, e);
-            throw e;
+        } catch (ServiceException ex) {
+            log.error("url={}, inputParam={}, errorInfo={}", url, JacksonUtils.toJson(requestBody), ex.getMessage());
+            throw ex;
         }
     }
 
@@ -316,8 +304,32 @@ public class RestClient {
         return (D) restResp.getData();
     }
 
-    private void logError(String url, Object requestBody, RuntimeException ex) {
-        log.error("url={}, inputParam={}, errorInfo={}", url, JacksonUtils.toJson(requestBody), ex.getMessage(),ex);
+    static class HttpRequestInterceptor implements ClientHttpRequestInterceptor {
+        private final Logger log;
+
+        public HttpRequestInterceptor(Logger log) {
+            this.log = log;
+        }
+
+        @Override
+        public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution) throws IOException {
+            long startTime = System.currentTimeMillis();
+            ClientHttpResponse response;
+            try {
+                response = execution.execute(request, body);
+                if (log.isDebugEnabled()) {
+                    log.debug("url={}, cost time={}ms, inputParam={}", request.getURI(), System.currentTimeMillis() - startTime, new String(body));
+                }
+            } catch (IOException ex) {
+                log.error("url={}, cost time={}ms, inputParam={}, errorInfo={}", request.getURI(), System.currentTimeMillis() - startTime, new String(body), ex.getMessage());
+                throw ex;
+            }
+            if (response.getStatusCode() != HttpStatus.OK) {
+                log.error("url={}, cost time={}ms, inputParam={}, statusCode={}", request.getURI(), System.currentTimeMillis() - startTime, new String(body), response.getStatusCode());
+                throw ServiceException.newInstance(ExceptionKeys.REMOTE_SERVICE_ERROR);
+            }
+            return response;
+        }
     }
 
 }
