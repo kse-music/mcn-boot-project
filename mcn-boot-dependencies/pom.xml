@@ -45,7 +45,6 @@
         <mysql.version>8.0.33</mysql.version>
         <minio.version>8.5.5</minio.version>
         <smart-doc.version>2.7.7</smart-doc.version>
-        <snakeyaml.version>2.2</snakeyaml.version>
         <spring-boot.version>3.1.5</spring-boot.version>
         <spring-cloud.version>2022.0.4</spring-cloud.version>
         <spring-cloud-alibaba.version>2022.0.0.0</spring-cloud-alibaba.version>
@@ -100,12 +99,6 @@
                 <groupId>mysql</groupId>
                 <artifactId>mysql-connector-java</artifactId>
                 <version>${mysql.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.yaml</groupId>
-                <artifactId>snakeyaml</artifactId>
-                <version>${snakeyaml.version}</version>
             </dependency>
 
             <dependency>
