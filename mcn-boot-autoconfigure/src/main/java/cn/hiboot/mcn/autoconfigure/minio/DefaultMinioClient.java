@@ -18,7 +18,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * DefaultMinioClient
@@ -70,7 +72,7 @@ public class DefaultMinioClient extends MinioAsyncClient {
         int count = (int) ((length / size) + 1);
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream(intSize);
         byte[] d = new byte[intSize];
-        PreSignResult preSignResult = getPresignedObjectUrl(bucketName,objectName,contentType,count);
+        PreSignResult preSignResult = getPresignedObjectUrl(bucketName,objectName,null,contentType,count);
         int c;
         int index = 0;
         while ((c = inputStream.read(d)) != -1){
@@ -99,16 +101,17 @@ public class DefaultMinioClient extends MinioAsyncClient {
         return contentType;
     }
 
-    public PreSignResult getPresignedObjectUrl(String bucketName,String objectName,String contentType, int count) throws Exception{
+    public PreSignResult getPresignedObjectUrl(String bucketName,String objectName,String uploadId,String contentType, int count) throws Exception{
         Multimap<String, String> headers = HashMultimap.create();
         headers.put("Content-Type", getOrDefault(contentType));
         PreSignResult preSignResult = new PreSignResult(count);
         if(count == 1){
             preSignResult.getUploadUrls().add(getPresignedObjectUrl(bucketName,objectName,null));
         }else {
-            CreateMultipartUploadResponse response = createMultipartUploadAsync(bucketName, region, objectName, headers, null).get();
-            String uploadId = response.result().uploadId();
-
+            if (uploadId == null) {
+                CreateMultipartUploadResponse response = createMultipartUploadAsync(bucketName, region, objectName, headers, null).get();
+                uploadId = response.result().uploadId();
+            }
             Map<String, String> reqParams = new HashMap<>();
             reqParams.put("uploadId", uploadId);
             preSignResult.setUploadId(uploadId);
@@ -118,6 +121,11 @@ public class DefaultMinioClient extends MinioAsyncClient {
             }
         }
         return preSignResult;
+    }
+
+    public List<Integer> listParts(String bucketName, String objectName, String uploadId) throws Exception{
+        ListPartsResponse partResult = listPartsAsync(bucketName, null, objectName, MAX_PART, 0, uploadId, null, null).get();
+        return partResult.result().partList().stream().map(Part::partNumber).collect(Collectors.toList());
     }
 
     private String getPresignedObjectUrl(String bucketName,String objectName,Map<String, String> queryParams) throws Exception{
@@ -139,10 +147,9 @@ public class DefaultMinioClient extends MinioAsyncClient {
             parts[partNumber - 1] = new Part(partNumber, part.etag());
             partNumber++;
         }
-        if(partNumber == 1){
-            throw new MinioException("未找到需要合并的块");
+        if(partNumber > 1){
+            completeMultipartUploadAsync(bucketName, region, objectName, uploadId, parts, null, null).get();
         }
-        completeMultipartUploadAsync(bucketName, region, objectName, uploadId, parts, null, null).get();
     }
 
 }
