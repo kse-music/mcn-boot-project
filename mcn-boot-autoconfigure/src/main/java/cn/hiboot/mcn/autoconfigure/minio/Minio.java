@@ -31,6 +31,14 @@ public interface Minio {
 
     DefaultMinioClient getMinioClient();
 
+    default String getFilePath(String fileName) {
+        return getFilePath(getDefaultBucketName(), fileName);
+    }
+
+    default String getFilePath(String bucketName,String fileName) {
+        return String.format("%s/%s/%s", getMinioClient().getConfig().getEndpoint(), bucketName , fileName);
+    }
+
     default String getDefaultBucketName(){
         return getMinioClient().getConfig().getDefaultBucketName();
     }
@@ -101,18 +109,31 @@ public interface Minio {
         }
     }
 
-    default PreSignResult getPresignedObjectUrl(String objectName,int count){
-        return getPresignedObjectUrl(null,objectName,null,count);
+    default PreSignResult presignedObjectUrl(String objectName,String uploadId,int count){
+        return presignedObjectUrl(null,objectName,uploadId,null,count);
     }
 
-    default PreSignResult getPresignedObjectUrl(String objectName,String contentType, int count){
-        return getPresignedObjectUrl(null,objectName,contentType,count);
+    default PreSignResult presignedObjectUrl(String objectName,String uploadId,String contentType, int count){
+        return presignedObjectUrl(null,objectName,uploadId,contentType,count);
     }
 
-    default PreSignResult getPresignedObjectUrl(String bucketName,String objectName,String contentType, int count){
+    default PreSignResult presignedObjectUrl(String bucketName,String objectName,String uploadId,String contentType, int count){
         bucketName = getOrDefaultBucket(bucketName);
         try {
-            return getMinioClient().getPresignedObjectUrl(bucketName,objectName,contentType,count);
+            return getMinioClient().getPresignedObjectUrl(bucketName,objectName,uploadId,contentType,count);
+        } catch (Exception e) {
+            throw new MinioException(e);
+        }
+    }
+
+    default List<Integer> listParts(String objectName, String uploadId){
+        return listParts(null,objectName,uploadId);
+    }
+
+    default List<Integer> listParts(String bucketName, String objectName, String uploadId){
+        bucketName = getOrDefaultBucket(bucketName);
+        try {
+            return getMinioClient().listParts(bucketName,objectName,uploadId);
         } catch (Exception e) {
             throw new MinioException(e);
         }

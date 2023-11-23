@@ -11,8 +11,11 @@ import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisOperations;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.serializer.RedisSerializer;
 
 import java.io.IOException;
 
@@ -26,6 +29,17 @@ import java.io.IOException;
 @ConditionalOnClass(RedisOperations.class)
 @ConditionalOnBean(StringRedisTemplate.class)
 public class RedisToolAutoConfiguration {
+
+    @Bean
+    public RedisTemplate<String, Object> jsonRedisTemplate(RedisConnectionFactory factory) {
+        RedisTemplate<String, Object> template = new RedisTemplate<>();
+        template.setConnectionFactory(factory);
+        template.setKeySerializer(RedisSerializer.string());
+        template.setValueSerializer(RedisSerializer.json());
+        template.setHashKeySerializer(RedisSerializer.string());
+        template.setHashValueSerializer(RedisSerializer.json());
+        return template;
+    }
 
     @Bean
     @ConditionalOnMissingBean
