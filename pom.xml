@@ -28,13 +28,15 @@
     </modules>
 
     <distributionManagement>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
         <repository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+            <id>user-release</id>
+            <name>User Project Release</name>
+            <url>http://192.168.4.2:8081/repository/maven-releases/</url>
         </repository>
+        <snapshotRepository>
+            <id>user-release</id>
+            <name>User Project SNAPSHOTS</name>
+            <url>http://192.168.4.2:8081/repository/maven-snapshots/</url>
+        </snapshotRepository>
     </distributionManagement>
 </project>
