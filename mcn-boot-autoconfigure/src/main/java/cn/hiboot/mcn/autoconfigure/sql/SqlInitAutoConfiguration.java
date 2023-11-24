@@ -32,7 +32,7 @@ import java.util.List;
 public class SqlInitAutoConfiguration {
 
     @Bean
-    BeanPostProcessor dataSourceScriptDatabaseInitializerBeanPostProcessor() {
+    static BeanPostProcessor dataSourceScriptDatabaseInitializerBeanPostProcessor() {
         return new BeanPostProcessor() {
 
             @Override

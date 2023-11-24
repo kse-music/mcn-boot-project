@@ -18,6 +18,7 @@ import org.springframework.context.annotation.Role;
  * @author DingHao
  * @since 2019/7/13 11:06
  */
+@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 public class DurationAop {
 
     @Bean
