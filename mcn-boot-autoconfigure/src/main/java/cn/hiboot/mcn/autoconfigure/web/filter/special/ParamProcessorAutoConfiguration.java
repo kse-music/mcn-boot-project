@@ -1,6 +1,7 @@
 package cn.hiboot.mcn.autoconfigure.web.filter.special;
 
 
+import cn.hiboot.mcn.autoconfigure.common.RefreshPostProcessor;
 import cn.hiboot.mcn.autoconfigure.web.filter.special.reactive.ReactiveParamProcessorConfiguration;
 import cn.hiboot.mcn.autoconfigure.web.filter.special.servlet.ServletParamProcessorConfiguration;
 import cn.hiboot.mcn.autoconfigure.web.security.WebSecurityProperties;
@@ -19,16 +20,12 @@ import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Role;
 import org.springframework.core.MethodParameter;
 
 import java.io.IOException;
@@ -126,21 +123,12 @@ public class ParamProcessorAutoConfiguration {
     }
 
     @Bean
-    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
-    public static BeanPostProcessor jacksonParamProcessorConfig(ParamProcessor paramProcessor) {
-        return new BeanPostProcessor() {
-
-            @Override
-            public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-                if (bean instanceof ObjectMapper mapper) {
-                    AnnotationIntrospector sis = mapper.getDeserializationConfig().getAnnotationIntrospector();
-                    AnnotationIntrospector pair = AnnotationIntrospectorPair.pair(sis, new ParamProcessorAnnotationIntrospector(paramProcessor));
-                    mapper.setAnnotationIntrospector(pair);
-                }
-                return bean;
-            }
-
-        };
+    static RefreshPostProcessor jacksonParamProcessorConfig() {
+        return () -> RefreshPostProcessor.uniqueExecute(ObjectMapper.class,ParamProcessor.class,(mapper, paramProcessor) -> {
+            AnnotationIntrospector sis = mapper.getDeserializationConfig().getAnnotationIntrospector();
+            AnnotationIntrospector pair = AnnotationIntrospectorPair.pair(sis, new ParamProcessorAnnotationIntrospector(paramProcessor));
+            mapper.setAnnotationIntrospector(pair);
+        });
     }
 
     static class ParamProcessorAnnotationIntrospector extends JacksonAnnotationIntrospector {

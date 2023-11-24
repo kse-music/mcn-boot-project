@@ -150,24 +150,24 @@ public class ResourceServerAutoConfiguration {
 
         @Bean
         SecurityFilterChain resourceServerSecurityFilterChain(HttpSecurity http,ResourceServerProperties ssoProperties,ObjectProvider<TokenResolver> beanProvider) throws Exception {
-            http
-                .authorizeHttpRequests(requests -> {
-                    if (McnUtils.isNotNullAndEmpty(ssoProperties.getAllowedPaths())) {
-                        requests.requestMatchers(ssoProperties.getAllowedPaths().toArray(new String[0])).permitAll();
-                    }
-                    requests.anyRequest().authenticated();
-                })
-                .oauth2ResourceServer(c -> {
-                    if(ssoProperties.isOpaqueToken()){
-                        c.opaqueToken(Customizer.withDefaults());
-                    }else {
-                        c.jwt(Customizer.withDefaults());
-                    }
-                    c.bearerTokenResolver(new CustomBearerTokenResolver(beanProvider)).accessDeniedHandler((request, response, accessDeniedException) -> handleException(accessDeniedException,response))
-                            .authenticationEntryPoint((request, response, authException) -> handleException(authException,response));
-                })
-                .apply(new ReloadAuthenticationConfigurer());
-            return http.build();
+            return http
+                    .authorizeHttpRequests(requests -> {
+                        if (McnUtils.isNotNullAndEmpty(ssoProperties.getAllowedPaths())) {
+                            requests.requestMatchers(ssoProperties.getAllowedPaths().toArray(new String[0])).permitAll();
+                        }
+                        requests.anyRequest().authenticated();
+                    })
+                    .oauth2ResourceServer(c -> {
+                        if(ssoProperties.isOpaqueToken()){
+                            c.opaqueToken(Customizer.withDefaults());
+                        }else {
+                            c.jwt(Customizer.withDefaults());
+                        }
+                        c.bearerTokenResolver(new CustomBearerTokenResolver(beanProvider)).accessDeniedHandler((request, response, accessDeniedException) -> handleException(accessDeniedException,response))
+                                .authenticationEntryPoint((request, response, authException) -> handleException(authException,response));
+                    })
+                    .with(new ReloadAuthenticationConfigurer(),Customizer.withDefaults())
+                    .build();
         }
 
         private void handleException(RuntimeException exception, HttpServletResponse response){
