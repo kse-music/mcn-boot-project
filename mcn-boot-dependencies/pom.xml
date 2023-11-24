@@ -32,8 +32,9 @@
         <mcn.version>${revision}</mcn.version>
         <bcprov-jdk15on.version>1.70</bcprov-jdk15on.version>
         <bcprov-jdk18on.version>1.75</bcprov-jdk18on.version>
-        <boot-admin.version>2.7.10</boot-admin.version>
+        <boot-admin.version>2.7.13</boot-admin.version>
         <commons-io.version>2.13.0</commons-io.version>
+        <Dm8JdbcDriver18.version>8.1.3.62</Dm8JdbcDriver18.version>
         <fastjson.version>1.2.83</fastjson.version>
         <fastjson2.version>2.0.39</fastjson2.version>
         <guava.version>32.1.3-jre</guava.version>
@@ -46,7 +47,7 @@
         <minio.version>8.5.5</minio.version>
         <smart-doc.version>2.7.7</smart-doc.version>
         <snakeyaml.version>2.2</snakeyaml.version>
-        <spring-boot.version>2.7.17</spring-boot.version>
+        <spring-boot.version>2.7.18</spring-boot.version>
         <spring-cloud.version>2021.0.8</spring-cloud.version>
         <spring-cloud-alibaba.version>2021.0.5.0</spring-cloud-alibaba.version>
         <spring-cloud-huawei.version>1.10.10-2021.0.x</spring-cloud-huawei.version>
@@ -107,6 +108,16 @@
                 <groupId>mysql</groupId>
                 <artifactId>mysql-connector-java</artifactId>
                 <version>${mysql.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.dameng</groupId>
+                <artifactId>DmJdbcDriver18</artifactId>
+                <version>${Dm8JdbcDriver18.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.dameng</groupId>
+                <artifactId>DmDialect-for-hibernate5.6</artifactId>
+                <version>${Dm8JdbcDriver18.version}</version>
             </dependency>
 
             <dependency>
