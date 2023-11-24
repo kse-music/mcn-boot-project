@@ -6,8 +6,8 @@
 |--------------------------------------|:-----------------------------|:----------------:|
 | bcprov-jdk15on                       | bcprov-jdk15on.version       |       1.70       |
 | bcpkix-jdk18on                       | bcprov-jdk18on.version       |       1.75       |
-| spring-boot-admin-starter-client     | boot-admin.version           |      3.1.5       |
-| spring-boot-admin-starter-server     | boot-admin.version           |      3.1.5       |
+| spring-boot-admin-starter-client     | boot-admin.version           |      3.1.8       |
+| spring-boot-admin-starter-server     | boot-admin.version           |      3.1.8       |
 | commons-io                           | commons-io.version           |      2.13.0      |
 | fastjson                             | fastjson.version             |      1.2.83      |
 | fastjson2                            | fastjson2.version            |      2.0.39      |
@@ -19,7 +19,7 @@
 | mybatis-spring-boot-starter          | mybatis-spring-boot.version  |      3.0.2       |
 | minio                                | minio.version                |      8.5.5       |
 | smart-doc                            | smart-doc.version            |      2.7.7       |
-| spring-boot-dependencies             | spring-boot.version          |      3.1.5       |
+| spring-boot-dependencies             | spring-boot.version          |      3.2.0       |
 | spring-cloud-dependencies            | spring-cloud.version         |     2022.0.4     |
 | spring-cloud-alibaba-dependencies    | spring-cloud-alibaba.version |    2022.0.0.0    |
 | spring-cloud-huawei-bom              | spring-cloud-huawei.version  | 1.10.10-2021.0.x |
