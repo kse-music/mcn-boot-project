@@ -22,7 +22,7 @@ public class DurationAop {
 
     @Bean
     @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
-    Advisor timeAdvisor(){
+    static Advisor timeAdvisor(){
         return new TimeRecordAdvisor();
     }
 
