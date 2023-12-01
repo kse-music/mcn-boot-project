@@ -29,6 +29,7 @@ import springfox.documentation.service.*;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spi.service.RequestHandlerProvider;
 import springfox.documentation.spi.service.contexts.SecurityContext;
+import springfox.documentation.spring.web.plugins.ApiSelectorBuilder;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
@@ -95,21 +96,28 @@ public class SwaggerAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public Docket createRestApi(Environment environment, ObjectProvider<ApiKey> apiKeys) {
+    public Docket createRestApi() {
         Docket docket = new Docket(DocumentationType.SWAGGER_2).apiInfo(apiInfo()).enable(true);
+        ApiSelectorBuilder select = docket.select();
+        docketCustomizers.orderedStream().forEach(d -> {
+            if(d instanceof DocketCustomizer.SelectBuilder){
+                ((DocketCustomizer.SelectBuilder)d).customize(select);
+            }
+            d.customize(docket);
+        });
+        return select.apis(DEFAULT_REQUEST_HANDLER).paths(PathSelectors.any()).build();
+    }
 
-        List<ApiKey> apiKeyList = apiKeys.orderedStream().collect(Collectors.toList());
-        if(Boolean.TRUE.equals(swagger2Properties.getHeader().getAuthorization()) || (swagger2Properties.getHeader().getAuthorization() == null && ClassUtils.isPresent("org.springframework.security.core.Authentication",null))){
-            apiKeyList.add(new ApiKey("JwtToken", "Authorization", "header"));
-        }
-
-        configApiKey(docket, apiKeyList);
-
-        docketCustomizers.ifUnique(d -> d.customize(docket));
-
-        configRequestParameters(docket,environment);
-
-        return docket.select().apis(DEFAULT_REQUEST_HANDLER).paths(PathSelectors.any()).build();
+    @Bean
+    public DocketCustomizer defaultDocketCustomizer(Environment environment, ObjectProvider<ApiKey> apiKeys) {
+        return docket -> {
+            List<ApiKey> apiKeyList = apiKeys.orderedStream().collect(Collectors.toList());
+            if(Boolean.TRUE.equals(swagger2Properties.getHeader().getAuthorization()) || (swagger2Properties.getHeader().getAuthorization() == null && ClassUtils.isPresent("org.springframework.security.core.Authentication",null))){
+                apiKeyList.add(new ApiKey("JwtToken", "Authorization", "header"));
+            }
+            configApiKey(docket, apiKeyList);
+            configRequestParameters(docket,environment);
+        };
     }
 
     private void configApiKey(Docket docket,List<ApiKey> apiKeys) {
