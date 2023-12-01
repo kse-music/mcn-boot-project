@@ -16,6 +16,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.annotation.RestController;
@@ -51,6 +52,7 @@ import java.util.stream.Collectors;
 @EnableConfigurationProperties(Swagger2Properties.class)
 @ConditionalOnClass(MvcSwagger2.class)
 @ConditionalOnProperty(prefix = "swagger", name = "enabled", havingValue = "true")
+@Import(SwaggerAutoConfiguration.DefaultDocketCustomizer.class)
 public class SwaggerAutoConfiguration {
 
     private final Swagger2Properties swagger2Properties;
@@ -97,7 +99,7 @@ public class SwaggerAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public Docket createRestApi() {
-        Docket docket = new Docket(DocumentationType.SWAGGER_2).apiInfo(apiInfo()).enable(true);
+        Docket docket = new Docket(DocumentationType.SWAGGER_2).apiInfo(apiInfo(swagger2Properties)).enable(true);
         ApiSelectorBuilder select = docket.select();
         docketCustomizers.orderedStream().forEach(d -> {
             if(d instanceof DocketCustomizer.SelectBuilder){
@@ -108,52 +110,64 @@ public class SwaggerAutoConfiguration {
         return select.apis(DEFAULT_REQUEST_HANDLER).paths(PathSelectors.any()).build();
     }
 
-    @Bean
-    public DocketCustomizer defaultDocketCustomizer(Environment environment, ObjectProvider<ApiKey> apiKeys) {
-        return docket -> {
+    static class DefaultDocketCustomizer implements DocketCustomizer{
+
+        private final Swagger2Properties swagger2Properties;
+        private final ObjectProvider<ApiKey> apiKeys;
+        private final Environment environment;
+
+        public DefaultDocketCustomizer(Swagger2Properties swagger2Properties, ObjectProvider<ApiKey> apiKeys, Environment environment) {
+            this.swagger2Properties = swagger2Properties;
+            this.apiKeys = apiKeys;
+            this.environment = environment;
+        }
+
+        @Override
+        public void customize(Docket docket) {
             List<ApiKey> apiKeyList = apiKeys.orderedStream().collect(Collectors.toList());
             if(Boolean.TRUE.equals(swagger2Properties.getHeader().getAuthorization()) || (swagger2Properties.getHeader().getAuthorization() == null && ClassUtils.isPresent("org.springframework.security.core.Authentication",null))){
                 apiKeyList.add(new ApiKey("JwtToken", "Authorization", "header"));
             }
             configApiKey(docket, apiKeyList);
             configRequestParameters(docket,environment);
-        };
-    }
-
-    private void configApiKey(Docket docket,List<ApiKey> apiKeys) {
-        List<SecurityScheme> apiKeyList = new ArrayList<>();
-        List<SecurityReference> securityReferences = new ArrayList<>();
-        for (ApiKey apiKey : apiKeys) {
-            apiKeyList.add(apiKey);
-            securityReferences.add(buildSecurityReference(apiKey));
         }
-        SecurityContext securityContext = SecurityContext.builder().securityReferences(securityReferences).operationSelector(p -> true).build();
-        docket.securityContexts(Collections.singletonList(securityContext)).securitySchemes(apiKeyList);
-    }
 
-    private SecurityReference buildSecurityReference(ApiKey apiKey) {
-        AuthorizationScope authorizationScope = new AuthorizationScope("global", "accessEverything");
-        AuthorizationScope[] authorizationScopes = new AuthorizationScope[1];
-        authorizationScopes[0] = authorizationScope;
-        return new SecurityReference(apiKey.getName(), authorizationScopes);
-    }
-
-    private void configRequestParameters(Docket docket,Environment environment) {
-        List<RequestParameter> pars = new ArrayList<>();
-        //csrf
-        if(swagger2Properties.getHeader().isCsrf()){
-            pars.add(new RequestParameterBuilder().name("X-XSRF-TOKEN").description("csrf token").in(ParameterType.HEADER).query(s -> s.model(m -> m.scalarModel(ScalarType.STRING))).required(true).build());
+        private void configApiKey(Docket docket,List<ApiKey> apiKeys) {
+            List<SecurityScheme> apiKeyList = new ArrayList<>();
+            List<SecurityReference> securityReferences = new ArrayList<>();
+            for (ApiKey apiKey : apiKeys) {
+                apiKeyList.add(apiKey);
+                securityReferences.add(buildSecurityReference(apiKey));
+            }
+            SecurityContext securityContext = SecurityContext.builder().securityReferences(securityReferences).operationSelector(p -> true).build();
+            docket.securityContexts(Collections.singletonList(securityContext)).securitySchemes(apiKeyList);
         }
-        //enable data integrity
-        if(environment.getProperty("data.integrity.enabled", Boolean.class, false)){
-            pars.add(new RequestParameterBuilder().name("TSM").description("时间戳").in(ParameterType.HEADER).query(s -> s.model(m -> m.scalarModel(ScalarType.LONG))).required(true).build());
-            pars.add(new RequestParameterBuilder().name("nonceStr").description("随机字符串").in(ParameterType.HEADER).query(s -> s.model(m -> m.scalarModel(ScalarType.STRING))).required(true).build());
-            pars.add(new RequestParameterBuilder().name("signature").description("签名").in(ParameterType.HEADER).query(s -> s.model(m -> m.scalarModel(ScalarType.STRING))).required(true).build());
+
+        private SecurityReference buildSecurityReference(ApiKey apiKey) {
+            AuthorizationScope authorizationScope = new AuthorizationScope("global", "accessEverything");
+            AuthorizationScope[] authorizationScopes = new AuthorizationScope[1];
+            authorizationScopes[0] = authorizationScope;
+            return new SecurityReference(apiKey.getName(), authorizationScopes);
         }
-        docket.globalRequestParameters(pars);
+
+        private void configRequestParameters(Docket docket,Environment environment) {
+            List<RequestParameter> pars = new ArrayList<>();
+            //csrf
+            if(swagger2Properties.getHeader().isCsrf()){
+                pars.add(new RequestParameterBuilder().name("X-XSRF-TOKEN").description("csrf token").in(ParameterType.HEADER).query(s -> s.model(m -> m.scalarModel(ScalarType.STRING))).required(true).build());
+            }
+            //enable data integrity
+            if(environment.getProperty("data.integrity.enabled", Boolean.class, false)){
+                pars.add(new RequestParameterBuilder().name("TSM").description("时间戳").in(ParameterType.HEADER).query(s -> s.model(m -> m.scalarModel(ScalarType.LONG))).required(true).build());
+                pars.add(new RequestParameterBuilder().name("nonceStr").description("随机字符串").in(ParameterType.HEADER).query(s -> s.model(m -> m.scalarModel(ScalarType.STRING))).required(true).build());
+                pars.add(new RequestParameterBuilder().name("signature").description("签名").in(ParameterType.HEADER).query(s -> s.model(m -> m.scalarModel(ScalarType.STRING))).required(true).build());
+            }
+            docket.globalRequestParameters(pars);
+        }
+
     }
 
-    private ApiInfo apiInfo() {
+    private ApiInfo apiInfo(Swagger2Properties swagger2Properties) {
         return new ApiInfoBuilder()
                 .title(swagger2Properties.getTitle())
                 .description(swagger2Properties.getDescription())
