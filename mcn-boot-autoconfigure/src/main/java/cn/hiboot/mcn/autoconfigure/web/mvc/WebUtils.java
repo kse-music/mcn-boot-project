@@ -12,6 +12,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.function.Consumer;
 
 /**
  * WebUtils
@@ -45,6 +46,13 @@ public abstract class WebUtils {
             return null;
         }
         return requestAttributes.getRequest();
+    }
+
+    public static void requestAttributesIfNonNull(Consumer<ServletRequestAttributes> consumer) {
+        ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        if(requestAttributes != null){
+            consumer.accept(requestAttributes);
+        }
     }
 
     public static <T> void success(T data, HttpServletResponse response){
