@@ -37,10 +37,15 @@ import org.springframework.security.oauth2.server.resource.web.DefaultBearerToke
 import org.springframework.security.oauth2.server.resource.web.server.authentication.ServerBearerTokenAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.server.SecurityWebFilterChain;
+import org.springframework.security.web.server.csrf.CsrfWebFilter;
+import org.springframework.security.web.server.util.matcher.*;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
+
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 /**
  * ResourceServerAutoConfiguration
@@ -82,11 +87,10 @@ public class ResourceServerAutoConfiguration {
             authenticationReloads.ifUnique(authenticationReload -> http.addFilterBefore(new ReloadAuthenticationWebFilter(authenticationReload), SecurityWebFiltersOrder.ANONYMOUS_AUTHENTICATION));
             return http
                     .authorizeExchange(requests -> {
-                        if (McnUtils.isNotNullAndEmpty(ssoProperties.getAllowedPaths())) {
-                            requests.pathMatchers(ssoProperties.getAllowedPaths().toArray(new String[0])).permitAll();
-                        }
+                        requests.pathMatchers(ssoProperties.getAllowedPaths()).permitAll();
                         requests.anyExchange().authenticated();
                     })
+                    .csrf(c -> c.requireCsrfProtectionMatcher(registerDefaultCsrfOverride(ssoProperties.getAllowedPaths())))
                     .oauth2ResourceServer(c -> {
                         if(ssoProperties.isOpaqueToken()){
                             c.opaqueToken(Customizer.withDefaults());
@@ -105,15 +109,23 @@ public class ResourceServerAutoConfiguration {
                     .build();
         }
 
+        private ServerWebExchangeMatcher registerDefaultCsrfOverride(String[] ignorePath) {
+            if (ignorePath.length == 0) {
+                return CsrfWebFilter.DEFAULT_CSRF_MATCHER;
+            }
+            return new AndServerWebExchangeMatcher(CsrfWebFilter.DEFAULT_CSRF_MATCHER,
+                    new NegatedServerWebExchangeMatcher(new OrServerWebExchangeMatcher(Arrays.stream(ignorePath).map(PathPatternParserServerWebExchangeMatcher::new).collect(Collectors.toList()))));
+        }
+
         private Mono<Authentication> jwtToken(ApkResolver apkResolver,ServerHttpRequest request){
-            return Mono.defer(() -> {
+            return Mono.fromCallable(() -> {
                 String name = apkResolver.paramName();
                 String apk = request.getHeaders().getFirst(name);
                 if (McnUtils.isNullOrEmpty(apk)) {
                     apk = request.getQueryParams().getFirst(name);
                 }
-                return apkResolver.jwtToken(apk);
-            });
+                return apk;
+            }).flatMap(apkResolver::jwtToken);
         }
 
         private Mono<Void> handleException(RuntimeException exception, ServerHttpResponse response){
@@ -152,11 +164,10 @@ public class ResourceServerAutoConfiguration {
         SecurityFilterChain resourceServerSecurityFilterChain(HttpSecurity http,ResourceServerProperties ssoProperties,ObjectProvider<TokenResolver> beanProvider) throws Exception {
             return http
                     .authorizeHttpRequests(requests -> {
-                        if (McnUtils.isNotNullAndEmpty(ssoProperties.getAllowedPaths())) {
-                            requests.requestMatchers(ssoProperties.getAllowedPaths().toArray(new String[0])).permitAll();
-                        }
+                        requests.requestMatchers(ssoProperties.getAllowedPaths()).permitAll();
                         requests.anyRequest().authenticated();
                     })
+                    .csrf(c -> c.ignoringRequestMatchers(ssoProperties.getAllowedPaths()))
                     .oauth2ResourceServer(c -> {
                         if(ssoProperties.isOpaqueToken()){
                             c.opaqueToken(Customizer.withDefaults());
