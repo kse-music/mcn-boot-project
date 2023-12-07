@@ -2,8 +2,6 @@ package cn.hiboot.mcn.cloud.security.resource;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-import java.util.List;
-
 /**
  * ResourceServerProperties
  *
@@ -13,7 +11,7 @@ import java.util.List;
 @ConfigurationProperties(prefix = "sso")
 public class ResourceServerProperties {
     private boolean opaqueToken;
-    private List<String> allowedPaths;
+    private String[] allowedPaths = {};
 
     public boolean isOpaqueToken() {
         return opaqueToken;
@@ -23,12 +21,11 @@ public class ResourceServerProperties {
         this.opaqueToken = opaqueToken;
     }
 
-    public List<String> getAllowedPaths() {
+    public String[] getAllowedPaths() {
         return allowedPaths;
     }
 
-    public void setAllowedPaths(List<String> allowedPaths) {
+    public void setAllowedPaths(String[] allowedPaths) {
         this.allowedPaths = allowedPaths;
     }
-
 }
