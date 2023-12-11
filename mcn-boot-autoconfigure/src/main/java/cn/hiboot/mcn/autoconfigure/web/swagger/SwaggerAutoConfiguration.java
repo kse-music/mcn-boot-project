@@ -52,7 +52,7 @@ public class SwaggerAutoConfiguration {
                         .contact(new Contact().name(swagger2Properties.getName()).email(swagger2Properties.getEmail()).url(swagger2Properties.getUrl()))
                         .version(swagger2Properties.getVersion())
                         .description(swagger2Properties.getDescription()))
-                .security(List.of(new SecurityRequirement().addList("JwtToken")));
+                .security(List.of(new SecurityRequirement().addList(HttpHeaders.AUTHORIZATION)));
     }
 
     @Bean
@@ -74,7 +74,7 @@ public class SwaggerAutoConfiguration {
     private Components components(Environment environment) {
         Components components = new Components();
         if(Boolean.TRUE.equals(swagger2Properties.getHeader().getAuthorization()) || (swagger2Properties.getHeader().getAuthorization() == null && ClassUtils.isPresent("org.springframework.security.core.Authentication",null))){
-            components.addSecuritySchemes("JwtToken",new SecurityScheme().name(HttpHeaders.AUTHORIZATION).type(SecurityScheme.Type.APIKEY).in(SecurityScheme.In.HEADER));
+            components.addSecuritySchemes(HttpHeaders.AUTHORIZATION,new SecurityScheme().scheme("bearer").bearerFormat("JWT").type(SecurityScheme.Type.HTTP));
         }
         //csrf
         if(swagger2Properties.getHeader().isCsrf()){
