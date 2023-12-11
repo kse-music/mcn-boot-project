@@ -13,6 +13,7 @@ import java.lang.reflect.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.time.*;
@@ -330,9 +331,8 @@ public abstract class McnUtils {
         }
     }
 
-    public static String readLine(String path) {
-        List<String> list = readAllLine(path);
-        return list.isEmpty() ? null : list.get(0);
+    public static String readLine(String filePath) {
+        return new String(readAllBytes(filePath), StandardCharsets.UTF_8);
     }
 
     public static byte[] readAllBytes(String filePath) {
