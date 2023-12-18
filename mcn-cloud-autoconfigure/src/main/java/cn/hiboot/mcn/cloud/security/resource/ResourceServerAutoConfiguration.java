@@ -87,7 +87,9 @@ public class ResourceServerAutoConfiguration {
             authenticationReloads.ifUnique(authenticationReload -> http.addFilterBefore(new ReloadAuthenticationWebFilter(authenticationReload), SecurityWebFiltersOrder.ANONYMOUS_AUTHENTICATION));
             return http
                     .authorizeExchange(requests -> {
-                        requests.pathMatchers(ssoProperties.getAllowedPaths()).permitAll();
+                        if(McnUtils.isNotNullAndEmpty(ssoProperties.getAllowedPaths())){
+                            requests.pathMatchers(ssoProperties.getAllowedPaths()).permitAll();
+                        }
                         requests.anyExchange().authenticated();
                     })
                     .csrf(c -> c.requireCsrfProtectionMatcher(registerDefaultCsrfOverride(ssoProperties.getAllowedPaths())))
