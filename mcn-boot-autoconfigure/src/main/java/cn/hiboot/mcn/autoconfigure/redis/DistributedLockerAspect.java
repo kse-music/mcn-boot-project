@@ -1,7 +1,6 @@
 package cn.hiboot.mcn.autoconfigure.redis;
 
 import cn.hiboot.mcn.autoconfigure.redis.annotation.DistributedLock;
-import cn.hiboot.mcn.core.exception.ServiceException;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -28,13 +27,14 @@ public class DistributedLockerAspect {
 
     @Around(value = "pointCut(distributedLock)", argNames = "p,distributedLock")
     public Object around(ProceedingJoinPoint p, DistributedLock distributedLock)  throws Throwable {
-        String value = distributedLock.value();
-        return distributedLocker.tryExecute(value,() -> {
-            try {
+        String locker = distributedLock.value();
+        try{
+            if(distributedLocker.tryLock(locker)){
                 return p.proceed();
-            } catch (Throwable e) {
-                throw ServiceException.newInstance(e);
             }
-        });
+        }finally {
+            distributedLocker.unlock(locker);
+        }
+        return null;
     }
 }
