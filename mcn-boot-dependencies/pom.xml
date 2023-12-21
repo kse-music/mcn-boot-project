@@ -48,7 +48,7 @@
         <smart-doc.version>2.7.7</smart-doc.version>
         <snakeyaml.version>2.2</snakeyaml.version>
         <spring-boot.version>2.7.18</spring-boot.version>
-        <spring-cloud.version>2021.0.8</spring-cloud.version>
+        <spring-cloud.version>2021.0.9</spring-cloud.version>
         <spring-cloud-alibaba.version>2021.0.5.0</spring-cloud-alibaba.version>
         <spring-cloud-huawei.version>1.10.10-2021.0.x</spring-cloud-huawei.version>
         <springfox-swagger.version>3.0.0</springfox-swagger.version>

@@ -21,7 +21,7 @@
 | smart-doc                         | smart-doc.version                     |      2.7.7       |
 | snakeyaml                         | snakeyaml.version                     |       2.2        |
 | spring-boot-dependencies          | spring-boot.version                   |      2.7.18      |
-| spring-cloud-dependencies         | spring-cloud.version                  |     2021.0.8     |
+| spring-cloud-dependencies         | spring-cloud.version                  |     2021.0.9     |
 | spring-cloud-alibaba-dependencies | spring-cloud-alibaba.version          |    2021.0.5.0    |
 | spring-cloud-huawei-bom           | spring-cloud-huawei.version           | 1.10.10-2021.0.x |
 | springfox-swagger2                | springfox-swagger.version             |      3.0.0       |
