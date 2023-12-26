@@ -147,7 +147,7 @@ public class ResourceServerAutoConfiguration {
                 return ReactiveSecurityContextHolder.getContext().flatMap(securityContext -> {
                             ReloadAuthenticationConfigurer.reloadAuthentication(securityContext,authenticationReload);
                             return chain.filter(exchange);
-                        });
+                        }).switchIfEmpty(chain.filter(exchange));
             }
         }
 
