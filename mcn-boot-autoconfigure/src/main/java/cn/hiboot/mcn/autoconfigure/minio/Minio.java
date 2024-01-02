@@ -241,11 +241,11 @@ public interface Minio {
     }
 
     default InputStream getObject(String objectName){
-        return getObject(null,objectName);
+        return getObject(objectName,null,null);
     }
 
-    default InputStream getObject(String bucketName, String objectName) {
-        return getObject(bucketName,objectName,null,null);
+    default InputStream getObject(String objectName,Long offset,Long length) {
+        return getObject(null,objectName,offset,length);
     }
     /**
      * 获取文件
