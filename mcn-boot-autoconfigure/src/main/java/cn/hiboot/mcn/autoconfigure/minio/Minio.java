@@ -244,6 +244,9 @@ public interface Minio {
         return getObject(null,objectName);
     }
 
+    default InputStream getObject(String bucketName, String objectName) {
+        return getObject(bucketName,objectName,null,null);
+    }
     /**
      * 获取文件
      *
@@ -251,12 +254,14 @@ public interface Minio {
      * @param objectName 文件名称
      * @return 二进制流
      */
-    default InputStream getObject(String bucketName, String objectName) {
+    default InputStream getObject(String bucketName, String objectName,Long offset,Long length) {
         bucketName = getOrDefaultBucket(bucketName);
         try{
             GetObjectArgs args = GetObjectArgs.builder()
                     .bucket(bucketName)
                     .object(objectName)
+                    .offset(offset)
+                    .length(length)
                     .build();
             return getMinioClient().getObject(args).get();
         }catch (Exception e){
