@@ -11,7 +11,7 @@
 | commons-io                           | commons-io.version           |      2.15.1      |
 | fastjson                             | fastjson.version             |      1.2.83      |
 | fastjson2                            | fastjson2.version            |      2.0.43      |
-| guava                                | guava.version                |    32.1.3-jre    |
+| guava                                | guava.version                |    33.0.0-jre    |
 | hutool-bom                           | hutool.version               |      5.8.23      |
 | jsoup                                | jsoup.version                |      1.17.1      |
 | knife4j-openapi3-ui                  | knife4j.version              |      4.3.0       |
