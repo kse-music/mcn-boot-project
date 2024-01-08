@@ -4,7 +4,6 @@ import cn.hiboot.mcn.autoconfigure.config.ConfigProperties;
 import cn.hiboot.mcn.autoconfigure.web.exception.HttpStatusCodeResolver;
 import cn.hiboot.mcn.autoconfigure.web.exception.handler.DefaultExceptionHandler;
 import cn.hiboot.mcn.autoconfigure.web.exception.handler.ExceptionHandler;
-import cn.hiboot.mcn.core.exception.ExceptionKeys;
 import cn.hiboot.mcn.core.exception.ServiceException;
 import cn.hiboot.mcn.core.model.result.RestResp;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,7 +92,7 @@ public class GlobalErrorExceptionHandler extends DefaultErrorWebExceptionHandler
     public Integer resolve(Throwable ex) {
         if(ex instanceof ResponseStatusException responseStatusException){
             if(overrideHttpError){
-                return ExceptionKeys.mappingCode(responseStatusException.getBody().getStatus());
+                return mappingCode(responseStatusException.getStatusCode());
             }
             throw ServiceException.newInstance(ex);
         }

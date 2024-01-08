@@ -11,12 +11,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.Ordered;
-import org.springframework.web.HttpMediaTypeNotAcceptableException;
-import org.springframework.web.HttpMediaTypeNotSupportedException;
-import org.springframework.web.HttpRequestMethodNotSupportedException;
-import org.springframework.web.bind.ServletRequestBindingException;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.servlet.NoHandlerFoundException;
 
 import java.util.Objects;
 
@@ -54,18 +50,10 @@ public class GlobalExceptionHandler implements HttpStatusCodeResolver,Ordered {
                 exceptionHandler.handleError(error);
                 return ExceptionKeys.SERVICE_ERROR;
             }
-            if(ex instanceof ServletRequestBindingException){
-                return ExceptionKeys.PARAM_PARSE_ERROR;
-            }
+
             if(overrideHttpError){
-                if (ex instanceof NoHandlerFoundException) {
-                    return ExceptionKeys.HTTP_ERROR_404;
-                } else if (ex instanceof HttpRequestMethodNotSupportedException) {
-                    return ExceptionKeys.HTTP_ERROR_405;
-                } else if (ex instanceof HttpMediaTypeNotAcceptableException) {
-                    return ExceptionKeys.HTTP_ERROR_406;
-                }  else if (ex instanceof HttpMediaTypeNotSupportedException) {
-                    return ExceptionKeys.HTTP_ERROR_415;
+                if (ex instanceof ErrorResponse e) {
+                    return mappingCode(e.getStatusCode());
                 }else if (ex instanceof UnavailableException) {
                     return ExceptionKeys.HTTP_ERROR_503;
                 }
