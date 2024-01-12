@@ -46,7 +46,6 @@ class CustomSqlDataSourceScriptDatabaseInitializer extends SqlDataSourceScriptDa
         return applyDataScripts(locationResolver) || other || initialized;
     }
 
-    @SuppressWarnings("all")
     private void createDatabase(DataSourceProperties properties){
         String initDdName = settings.getInitDdName();
         if(ObjectUtils.isEmpty(initDdName)){
@@ -65,8 +64,7 @@ class CustomSqlDataSourceScriptDatabaseInitializer extends SqlDataSourceScriptDa
             try(Connection con = DriverManager.getConnection(url,properties.getUsername(),properties.getPassword())){
                 con.prepareStatement(DatabaseDriver.createDatabase(settings.getPlatform(),dbName)).executeUpdate();
             }
-        }catch (SQLException e){
-            //ignore
+        }catch (SQLException ignored){
         }
     }
 

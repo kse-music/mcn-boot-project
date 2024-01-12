@@ -271,8 +271,7 @@ public abstract class McnUtils {
         Properties properties = new Properties();
         try(InputStream in = getInputStream(fileName,cls)){
             properties.load(in);
-        }catch (Exception e) {
-            //ignore not found file
+        }catch (Exception ignored) {
         }
         return properties;
     }
@@ -284,8 +283,7 @@ public abstract class McnUtils {
         Properties properties = new Properties();
         try(InputStream in = clazz.getResourceAsStream(fileName)){
             properties.load(in);
-        }catch (Exception e) {
-            //ignore not found file
+        }catch (Exception ignored) {
         }
         return properties;
     }
@@ -412,8 +410,7 @@ public abstract class McnUtils {
                     return FileVisitResult.CONTINUE;
                 }
             });
-        } catch (IOException e) {
-            //ignore
+        } catch (IOException ignored) {
         }
     }
 
@@ -465,8 +462,7 @@ public abstract class McnUtils {
             declaredField.setAccessible(true);
             Map memberValues = (Map) declaredField.get(invocationHandler);
             memberValues.putAll(map);
-        } catch (Exception e) {
-            //ignore
+        } catch (Exception ignored) {
         }
     }
 

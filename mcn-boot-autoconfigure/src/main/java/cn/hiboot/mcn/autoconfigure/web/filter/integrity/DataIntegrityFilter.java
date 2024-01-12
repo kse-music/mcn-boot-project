@@ -125,10 +125,9 @@ public class DataIntegrityFilter implements Filter, Ordered {
                 str.append(DataIntegrityUtils.md5UploadFile(McnUtils.copyToByteArray(part.getInputStream()),part.getSubmittedFileName())).append("&");
             }
         }
-        catch (Throwable ex) {
-            //ignore
+        catch (Throwable ignored) {
         }
-        if (str.length() != 0) {
+        if (!str.isEmpty()) {
             return str.substring(0, str.length() - 1);
         }
         return str.toString();
