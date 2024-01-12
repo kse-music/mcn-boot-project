@@ -86,8 +86,7 @@ public abstract class WebUtils {
         try(PrintWriter out = response.getWriter()){
             out.write(str);
             out.flush();
-        } catch (IOException e) {
-            //ignore
+        } catch (IOException ignored) {
         }
     }
 

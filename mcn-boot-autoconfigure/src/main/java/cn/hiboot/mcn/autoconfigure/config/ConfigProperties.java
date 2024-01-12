@@ -37,8 +37,7 @@ public abstract class ConfigProperties {
     static {
         try {
             error_view = StreamUtils.copyToString(createResource("defaultErrorView.html", ErrorPageController.class).getInputStream(), StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            //ignore
+        } catch (IOException ignored) {
         }
     }
 
@@ -50,8 +49,7 @@ public abstract class ConfigProperties {
         Properties properties = new Properties();
         try {
             properties = PropertiesLoaderUtils.loadAllProperties(location, classLoader);
-        } catch (IOException e) {
-            //ignore
+        } catch (IOException ignored) {
         }
         return (Map) properties;
     }

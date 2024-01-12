@@ -204,8 +204,7 @@ public interface Minio {
             return StreamSupport.stream(list.spliterator(), true).map(r -> {
                 try {
                     return r.get();
-                } catch (Exception e) {
-                    //ignore
+                } catch (Exception ignored) {
                 }
                 return null;
             }).filter(Objects::nonNull).collect(Collectors.toList());
@@ -226,8 +225,7 @@ public interface Minio {
             List<DeleteObject> objectList = StreamSupport.stream(list.spliterator(), true).map(r -> {
                 try {
                     return new DeleteObject(r.get().objectName());
-                } catch (Exception e) {
-                    //ignore
+                } catch (Exception ignored) {
                 }
                 return null;
             }).filter(Objects::nonNull).collect(Collectors.toList());

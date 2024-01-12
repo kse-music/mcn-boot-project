@@ -42,8 +42,7 @@ public class MongoExtensionAutoConfiguration {
                 String key = f.getName().toLowerCase();
                 try {
                     NAMED_CONCERNS.put(key, (ReadConcern) f.get(null));
-                } catch (IllegalAccessException e) {
-                    //ignore;
+                } catch (IllegalAccessException ignored) {
                 }
             }
         }
