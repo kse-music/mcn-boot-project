@@ -32,20 +32,20 @@
         <mcn.version>${revision}</mcn.version>
         <bcprov-jdk15on.version>1.70</bcprov-jdk15on.version>
         <bcprov-jdk18on.version>1.75</bcprov-jdk18on.version>
-        <boot-admin.version>3.1.8</boot-admin.version>
+        <boot-admin.version>3.2.1</boot-admin.version>
         <commons-io.version>2.15.1</commons-io.version>
         <fastjson.version>1.2.83</fastjson.version>
         <fastjson2.version>2.0.43</fastjson2.version>
         <guava.version>33.0.0-jre</guava.version>
-        <hutool.version>5.8.23</hutool.version>
-        <jsoup.version>1.17.1</jsoup.version>
+        <hutool.version>5.8.25</hutool.version>
+        <jsoup.version>1.17.2</jsoup.version>
         <knife4j.version>4.3.0</knife4j.version>
         <mapstruct.version>1.5.5.Final</mapstruct.version>
         <mybatis-spring-boot.version>3.0.3</mybatis-spring-boot.version>
         <mysql.version>8.0.33</mysql.version>
         <minio.version>8.5.7</minio.version>
         <smart-doc.version>2.7.7</smart-doc.version>
-        <spring-boot.version>3.2.1</spring-boot.version>
+        <spring-boot.version>3.2.2</spring-boot.version>
         <spring-cloud.version>2023.0.0</spring-cloud.version>
         <spring-cloud-alibaba.version>2022.0.0.0</spring-cloud-alibaba.version>
         <spring-cloud-huawei.version>1.10.10-2021.0.x</spring-cloud-huawei.version>
