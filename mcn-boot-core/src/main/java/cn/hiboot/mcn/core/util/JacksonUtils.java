@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
@@ -44,6 +45,9 @@ public abstract class JacksonUtils {
     }
 
     private static String valueString(Object content){
+        if (content instanceof byte[] bytes) {
+            return new String(bytes, StandardCharsets.UTF_8);
+        }
         return content instanceof String value? value : toJson(content);
     }
 
