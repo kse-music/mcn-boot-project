@@ -143,10 +143,12 @@ public class ResourceServerAutoConfiguration {
 
             @Override
             public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
-                return ReactiveSecurityContextHolder.getContext().flatMap(securityContext -> {
-                            ReloadAuthenticationConfigurer.reloadAuthentication(securityContext,authenticationReload);
+                return ReactiveSecurityContextHolder.getContext()
+                        .switchIfEmpty(Mono.defer(() -> chain.filter(exchange).then(Mono.empty())))
+                        .flatMap(securityContext -> {
+                            ReloadAuthenticationConfigurer.reloadAuthentication(securityContext, authenticationReload);
                             return chain.filter(exchange);
-                        }).switchIfEmpty(chain.filter(exchange));
+                         });
             }
         }
 
