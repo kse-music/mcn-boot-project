@@ -6,7 +6,6 @@ import cn.hiboot.mcn.autoconfigure.web.exception.handler.DefaultExceptionHandler
 import cn.hiboot.mcn.autoconfigure.web.exception.handler.ExceptionHandler;
 import cn.hiboot.mcn.core.exception.ExceptionKeys;
 import cn.hiboot.mcn.core.exception.ServiceException;
-import cn.hiboot.mcn.core.model.result.RestResp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -66,17 +65,7 @@ public class GlobalErrorExceptionHandler extends DefaultErrorWebExceptionHandler
 
     @Override
     protected Mono<ServerResponse> renderErrorResponse(ServerRequest request) {
-        return ServerResponse.status(HttpStatus.OK.value()).contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(handleException(getError(request))));
-    }
-
-    private RestResp<Throwable> handleException(Throwable ex){
-        RestResp<Throwable> resp;
-        try {
-            resp = exceptionHandler.handleException(ex);
-        } finally {
-            exceptionHandler.logError(ex);
-        }
-        return resp;
+        return ServerResponse.status(HttpStatus.OK.value()).contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(exceptionHandler.handleException(getError(request))));
     }
 
     @Override
