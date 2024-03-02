@@ -9,12 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.*;
-import org.springframework.http.client.ClientHttpRequestExecution;
-import org.springframework.http.client.ClientHttpRequestInterceptor;
-import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -37,7 +33,6 @@ public class RestClient {
     }
 
     public RestClient(RestTemplate restTemplate) {
-        restTemplate.getInterceptors().add(new HttpRequestInterceptor(log));
         this.restTemplate = restTemplate;
     }
 
@@ -276,7 +271,23 @@ public class RestClient {
         }
         HttpHeaders headers = new HttpHeaders();
         headersConsumer.accept(headers);
-        return processResponse(restTemplate.exchange(url, method, new HttpEntity<>(requestBody, headers), ParameterizedTypeReference.forType(ResolvableType.forClassWithGenerics(wrapperClass, resultType).getType()), uriVariables), url, requestBody);
+        long startTime = System.currentTimeMillis();
+        ResponseEntity<W> response;
+        try {
+            response = restTemplate.exchange(url, method, new HttpEntity<>(requestBody, headers),
+                    ParameterizedTypeReference.forType(ResolvableType.forClassWithGenerics(wrapperClass, resultType).getType()), uriVariables);
+            if (log.isDebugEnabled()) {
+                log.debug("url={}, cost time={}ms, inputParam={}", url, System.currentTimeMillis() - startTime, requestBody);
+            }
+        } catch (Exception ex) {
+            log.error("url={}, cost time={}ms, inputParam={}, errorInfo={}", url, System.currentTimeMillis() - startTime, requestBody, ex.getMessage());
+            throw ex;
+        }
+        if (response.getStatusCode() != HttpStatus.OK) {
+            log.error("url={}, cost time={}ms, inputParam={}, statusCode={}", url, System.currentTimeMillis() - startTime, requestBody, response.getStatusCode());
+            throw ServiceException.newInstance(ExceptionKeys.REMOTE_SERVICE_ERROR);
+        }
+        return processResponse(response, url, requestBody);
     }
 
     protected <A, D, W> D processResponse(ResponseEntity<W> responseEntity, String url, A requestBody) {
@@ -302,34 +313,6 @@ public class RestClient {
             throw ServiceException.newInstance(ExceptionKeys.REMOTE_SERVICE_ERROR, restResp.getErrorInfo());
         }
         return (D) restResp.getData();
-    }
-
-    static class HttpRequestInterceptor implements ClientHttpRequestInterceptor {
-        private final Logger log;
-
-        public HttpRequestInterceptor(Logger log) {
-            this.log = log;
-        }
-
-        @Override
-        public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution) throws IOException {
-            long startTime = System.currentTimeMillis();
-            ClientHttpResponse response;
-            try {
-                response = execution.execute(request, body);
-                if (log.isDebugEnabled()) {
-                    log.debug("url={}, cost time={}ms, inputParam={}", request.getURI(), System.currentTimeMillis() - startTime, new String(body));
-                }
-            } catch (IOException ex) {
-                log.error("url={}, cost time={}ms, inputParam={}, errorInfo={}", request.getURI(), System.currentTimeMillis() - startTime, new String(body), ex.getMessage());
-                throw ex;
-            }
-            if (response.getStatusCode() != HttpStatus.OK) {
-                log.error("url={}, cost time={}ms, inputParam={}, statusCode={}", request.getURI(), System.currentTimeMillis() - startTime, new String(body), response.getStatusCode());
-                throw ServiceException.newInstance(ExceptionKeys.REMOTE_SERVICE_ERROR);
-            }
-            return response;
-        }
     }
 
 }
