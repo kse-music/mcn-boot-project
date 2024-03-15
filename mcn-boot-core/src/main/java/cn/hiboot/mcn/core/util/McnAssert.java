@@ -1,5 +1,7 @@
 package cn.hiboot.mcn.core.util;
 
+import cn.hiboot.mcn.core.exception.ErrorMsg;
+
 /**
  * McnAssert
  *
@@ -25,4 +27,17 @@ public interface McnAssert {
             throw new IllegalArgumentException(message);
         }
     }
+
+    static void notNull(Object object, Integer errorCode) {
+        notNull(object, ErrorMsg.getErrorMsg(errorCode));
+    }
+
+    static void hasText(String text, Integer errorCode) {
+        hasText(text, ErrorMsg.getErrorMsg(errorCode));
+    }
+
+    static void state(boolean state, Integer errorCode) {
+        state(state, ErrorMsg.getErrorMsg(errorCode));
+    }
+
 }
