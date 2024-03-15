@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -37,8 +38,16 @@ public interface BaseService<T,PK,R extends BaseRepository<T,PK>> {
         getRepository().findById(id).ifPresent(u -> getRepository().delete(u));
     }
 
+    default void deleteByIds(Collection<PK> ids){
+        getRepository().deleteAllById(ids);
+    }
+
     default T getById(PK id){
         return getRepository().findById(id).orElse(null);
+    }
+
+    default List<T> getByIds(Collection<PK> ids){
+        return getRepository().findAllById(ids);
     }
 
     default T getOne(T t){
