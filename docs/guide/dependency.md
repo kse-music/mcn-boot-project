@@ -4,7 +4,6 @@
 
 | 库                                 | 版本属性                                  |       当前版本       |
 |-----------------------------------|:--------------------------------------|:----------------:|
-| bcprov-jdk15on                    | bcprov-jdk15on.version                |       1.70       |
 | bcpkix-jdk18on                    | bcprov-jdk18on.version                |       1.75       |
 | spring-boot-admin-starter-client  | boot-admin.version                    |      2.7.13      |
 | spring-boot-admin-starter-server  | boot-admin.version                    |      2.7.13      |
