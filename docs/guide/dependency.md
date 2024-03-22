@@ -18,10 +18,10 @@
 | mybatis-spring-boot-starter          | mybatis-spring-boot.version  |      3.0.3       |
 | minio                                | minio.version                |      8.5.7       |
 | smart-doc                            | smart-doc.version            |      2.7.7       |
-| spring-boot-dependencies             | spring-boot.version          |      3.2.3       |
+| spring-boot-dependencies             | spring-boot.version          |      3.2.4       |
 | spring-cloud-dependencies            | spring-cloud.version         |     2023.0.0     |
 | spring-cloud-alibaba-dependencies    | spring-cloud-alibaba.version |    2022.0.0.0    |
-| spring-cloud-huawei-bom              | spring-cloud-huawei.version  | 1.10.10-2021.0.x |
+| spring-cloud-huawei-bom              | spring-cloud-huawei.version  | 1.11.6-2023.0.x  |
 | springdoc-openapi-starter-webmvc-ui  | springdoc.version            |      2.3.0       |
 | springdoc-openapi-starter-webflux-ui | springdoc.version            |      2.3.0       |
 | xxl-job-core                         | xxl-job.version              |      2.3.1       |
