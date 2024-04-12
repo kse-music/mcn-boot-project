@@ -1,6 +1,5 @@
 package cn.hiboot.mcn.core.model;
 
-import cn.hiboot.mcn.core.exception.ServiceException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -16,17 +15,23 @@ import java.util.function.Function;
 public class JsonObject extends ObjectNode {
 
     private static final String SLASH = "/";
-    
-    public JsonObject(ObjectNode objectNode) {
+
+    public JsonObject() {
         super(new JsonNodeFactory(false));
-        setAll(objectNode);
+    }
+
+    public JsonObject(ObjectNode objectNode) {
+        this();
+        if (objectNode != null) {
+            setAll(objectNode);
+        }
     }
 
     static JsonObject of(JsonNode jsonNode) {
         return new JsonObject((ObjectNode) jsonNode);
     }
 
-    public Integer getInt(String field){
+    public Integer getInteger(String field){
         return getValue(field, JsonNode::asInt);
     }
 
@@ -59,26 +64,18 @@ public class JsonObject extends ObjectNode {
     }
 
     private <R> R getValue(String field, Function<JsonNode,R> function){
-        JsonNode node = nextNode(field);
-        if(node.isMissingNode()){
+        JsonNode nextNode = nextNode(field);
+        if(nextNode.isMissingNode()){
             return null;
         }
-        return getValue(node,function);
-    }
-
-    private <R> R getValue(JsonNode jsonNode, Function<JsonNode,R> function){
-        if(jsonNode.isValueNode()){
-            return function.apply(jsonNode);
+        if(nextNode.isValueNode()){
+            return function.apply(nextNode);
         }
-        throw ServiceException.newInstance("当前节点不是值节点");
-    }
-
-    private ObjectNode currentNode(){
-        return this;
+        throw new IllegalArgumentException("current node is not value node");
     }
 
     private JsonNode nextNode(String field){
-        return currentNode().at(SLASH + field);
+        return at(SLASH + field);
     }
 
 }

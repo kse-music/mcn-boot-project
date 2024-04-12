@@ -27,7 +27,7 @@ public class JsonArray extends ArrayNode {
     }
 
     static JsonArray of(JsonNode jsonNode){
-        return  new JsonArray((ArrayNode) jsonNode);
+        return new JsonArray((ArrayNode) jsonNode);
     }
 
     private static List<JsonNode> jsonNodes(ArrayNode arrayNode) {
