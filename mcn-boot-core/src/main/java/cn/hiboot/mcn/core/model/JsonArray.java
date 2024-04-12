@@ -1,8 +1,11 @@
 package cn.hiboot.mcn.core.model;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Predicate;
@@ -13,61 +16,69 @@ import java.util.function.Predicate;
  * @author DingHao
  * @since 2023/3/2 11:14
  */
-public class JsonArray implements Iterable<JsonObject> {
-    private final List<JsonObject> list;
+public class JsonArray extends ArrayNode {
 
-    public JsonArray(){
-        list = new ArrayList<>();
+    public JsonArray() {
+        this(null);
     }
 
-    public JsonArray(JsonNode jsonNode) {
-        this();
-        for (JsonNode node : jsonNode) {
-            list.add(new JsonObject(node));
+    public JsonArray(ArrayNode arrayNode) {
+        super(new JsonNodeFactory(false), jsonNodes(arrayNode));
+    }
+
+    static JsonArray of(JsonNode jsonNode){
+        return new JsonArray((ArrayNode) jsonNode);
+    }
+
+    private static List<JsonNode> jsonNodes(ArrayNode arrayNode) {
+        if (arrayNode == null) {
+            return Collections.emptyList();
         }
+        List<JsonNode> list = new ArrayList<>(arrayNode.size());
+        for (JsonNode jsonNode : arrayNode) {
+            list.add(jsonNode);
+        }
+        return list;
     }
 
     public JsonArray add(JsonObject jsonObject){
-        list.add(jsonObject);
+        super.add(jsonObject);
         return this;
     }
 
-    public JsonArray add(int index,JsonObject jsonObject){
-        list.add(index,jsonObject);
+    public JsonArray add(int index, JsonObject jsonObject){
+        super.set(index,jsonObject);
         return this;
     }
 
     public JsonArray remove(int index){
-        list.remove(index);
+        super.remove(index);
         return this;
     }
 
     public JsonArray removeIf(Predicate<JsonObject> filter){
-        list.removeIf(filter);
+        Iterator<JsonNode> iterator = elements();
+        while (iterator.hasNext()){
+            if(filter.test(JsonObject.of(iterator.next()))){
+                iterator.remove();
+            }
+        }
         return this;
-    }
-
-    public JsonObject findFirst(Predicate<JsonObject> filter){
-        return list.stream().filter(filter).findFirst().orElse(null);
     }
 
     public JsonArray findAll(Predicate<JsonObject> filter){
         JsonArray jsonArray = new JsonArray();
-        list.stream().filter(filter).forEach(jsonArray::add);
+        for (JsonNode jsonNode : this) {
+            if(filter.test(JsonObject.of(jsonNode))){
+                jsonArray.add(jsonNode);
+            }
+        }
         return jsonArray;
     }
 
-    public JsonObject get(int index){
-        return list.get(index);
-    }
-
     @Override
-    public Iterator<JsonObject> iterator() {
-        return list.iterator();
-    }
-
-    public int size(){
-        return list.size();
+    public JsonObject get(int index){
+        return JsonObject.of(super.get(index));
     }
 
 }
