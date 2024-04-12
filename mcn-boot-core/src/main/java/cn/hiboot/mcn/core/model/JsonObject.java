@@ -2,6 +2,8 @@ package cn.hiboot.mcn.core.model;
 
 import cn.hiboot.mcn.core.exception.ServiceException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.util.function.Function;
 
@@ -11,115 +13,71 @@ import java.util.function.Function;
  * @author DingHao
  * @since 2023/3/2 11:14
  */
-public class JsonObject {
+public class JsonObject extends ObjectNode {
+
     private static final String SLASH = "/";
     
-    private final JsonNode jsonNode;
+    public JsonObject(ObjectNode objectNode) {
+        super(new JsonNodeFactory(false));
+        setAll(objectNode);
+    }
 
-    public JsonObject(JsonNode jsonNode) {
-        this.jsonNode = jsonNode;
+    static JsonObject of(JsonNode jsonNode) {
+        return new JsonObject((ObjectNode) jsonNode);
     }
-    
-    public int getInt(){
-        return getValue(JsonNode::intValue);
-    }
-    
+
     public Integer getInt(String field){
-        return getValue(field, JsonNode::intValue);
-    }
-
-    public long getLong(){
-        return getValue(JsonNode::longValue);
+        return getValue(field, JsonNode::asInt);
     }
 
     public Long getLong(String field){
-        return getValue(field, JsonNode::longValue);
+        return getValue(field, JsonNode::asLong);
     }
 
-    public double getDouble(){
-        return getValue(JsonNode::doubleValue);
-    }
-    
     public Double getDouble(String field){
-        return getValue(field, JsonNode::doubleValue);
+        return getValue(field, JsonNode::asDouble);
     }
 
-    public short getShort(){
-        return getValue(JsonNode::shortValue);
-    }
-    
-    public Short getShort(String field){
-        return getValue(field, JsonNode::shortValue);
-    }
-
-    public String getString(){
-        return getValue(JsonNode::asText);
-    }
-    
     public String getString(String field){
         return getValue(field, JsonNode::asText);
     }
 
-    public boolean getBoolean(){
-        return getValue(JsonNode::booleanValue);
-    }
-    
     public Boolean getBoolean(String field){
         return getValue(field, JsonNode::booleanValue);
     }
 
-    public Number readNumber(){
-        return getValue(JsonNode::numberValue);
-    }
-
-    public Number readNumber(String field){
-        return getValue(field, JsonNode::numberValue);
-    }
-
     public boolean contains(String field){
-        return !getNode(field).isMissingNode();
-    }
-
-    public JsonObject getJsonObject(){
-        return new JsonObject(currentNode());
-    }
-
-    public JsonArray getJsonArray(){
-        return new JsonArray(currentNode());
+        return !nextNode(field).isMissingNode();
     }
 
     public JsonObject getJsonObject(String field){
-        return new JsonObject(getNode(field));
+        return of(nextNode(field));
     }
 
     public JsonArray getJsonArray(String field){
-        return new JsonArray(getNode(field));
+        return JsonArray.of(nextNode(field));
     }
 
     private <R> R getValue(String field, Function<JsonNode,R> function){
-        JsonNode node = getNode(field);
+        JsonNode node = nextNode(field);
         if(node.isMissingNode()){
             return null;
         }
         return getValue(node,function);
     }
 
-    private <R> R getValue(Function<JsonNode,R> function){
-        return getValue(currentNode(),function);
-    }
-
-    private <R> R getValue(JsonNode jsonNode,Function<JsonNode,R> function){
+    private <R> R getValue(JsonNode jsonNode, Function<JsonNode,R> function){
         if(jsonNode.isValueNode()){
             return function.apply(jsonNode);
         }
         throw ServiceException.newInstance("当前节点不是值节点");
     }
 
-    private JsonNode currentNode(){
-        return jsonNode;
+    private ObjectNode currentNode(){
+        return this;
     }
 
-    private JsonNode getNode(String field){
+    private JsonNode nextNode(String field){
         return currentNode().at(SLASH + field);
     }
 

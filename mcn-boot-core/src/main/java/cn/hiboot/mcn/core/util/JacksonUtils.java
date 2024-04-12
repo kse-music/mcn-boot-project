@@ -11,6 +11,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 
 import java.nio.charset.StandardCharsets;
@@ -105,7 +107,7 @@ public abstract class JacksonUtils {
 
     public static JsonObject jsonObject(Object content){
         try {
-            return new JsonObject(getObjectMapper().readTree(valueString(content)));
+            return new JsonObject((ObjectNode) getObjectMapper().readTree(valueString(content)));
         } catch (JsonProcessingException e) {
             throw newInstance(e);
         }
@@ -113,7 +115,7 @@ public abstract class JacksonUtils {
 
     public static JsonArray jsonArray(Object content){
         try {
-            return new JsonArray(getObjectMapper().readTree(valueString(content)));
+            return new JsonArray((ArrayNode) getObjectMapper().readTree(valueString(content)));
         } catch (JsonProcessingException e) {
             throw newInstance(e);
         }
