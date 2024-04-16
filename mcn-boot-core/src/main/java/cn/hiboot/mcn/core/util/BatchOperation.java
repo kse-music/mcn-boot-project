@@ -44,7 +44,7 @@ public interface BatchOperation {
      * @param <S> 集合元素
      * @param closeWaitFinish 等待所有任务执行完关闭线程池须配合TaskThreadPool
      */
-    default <S> void operation(Iterable<S> all, Consumer<List<S>> consumer,boolean closeWaitFinish) {
+    default <S> void operation(Iterable<S> all, Consumer<List<S>> consumer, boolean closeWaitFinish) {
         if (all == null) {
             return;
         }
@@ -62,7 +62,7 @@ public interface BatchOperation {
                 tmp = new ArrayList<>();
             }
         }
-        if(tmp.size() != 0){
+        if(!tmp.isEmpty()){
             consumer.accept(tmp);
         }
         tmp.clear();
