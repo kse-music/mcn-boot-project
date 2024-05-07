@@ -127,7 +127,7 @@ public class DataIntegrityFilter implements Filter, Ordered {
         }
         catch (Throwable ignored) {
         }
-        if (!str.isEmpty()) {
+        if (str.length() != 0) {
             return str.substring(0, str.length() - 1);
         }
         return str.toString();
