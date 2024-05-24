@@ -37,6 +37,8 @@ import org.springframework.security.oauth2.server.resource.web.DefaultBearerToke
 import org.springframework.security.oauth2.server.resource.web.server.authentication.ServerBearerTokenAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.server.SecurityWebFilterChain;
+import org.springframework.security.web.server.authentication.DelegatingServerAuthenticationConverter;
+import org.springframework.security.web.server.authentication.ServerAuthenticationConverter;
 import org.springframework.security.web.server.csrf.CsrfWebFilter;
 import org.springframework.security.web.server.util.matcher.*;
 import org.springframework.web.server.ServerWebExchange;
@@ -44,7 +46,9 @@ import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -60,11 +64,11 @@ import java.util.stream.Collectors;
 public class ResourceServerAutoConfiguration {
 
     @Bean
-    HttpStatusCodeResolver resourceServerHttpStatusCodeResolver(){
+    HttpStatusCodeResolver resourceServerHttpStatusCodeResolver() {
         return exception -> {
-            if(exception instanceof AuthenticationException){
+            if (exception instanceof AuthenticationException) {
                 return ExceptionKeys.HTTP_ERROR_401;
-            }else if(exception instanceof AccessDeniedException){
+            } else if (exception instanceof AccessDeniedException) {
                 return ExceptionKeys.HTTP_ERROR_403;
             }
             return null;
@@ -82,31 +86,29 @@ public class ResourceServerAutoConfiguration {
         }
 
         @Bean
-        SecurityWebFilterChain resourceServerSecurityFilterChain(ServerHttpSecurity http,ResourceServerProperties ssoProperties
-                ,ObjectProvider<AuthenticationReload> authenticationReloads,ObjectProvider<ApkResolver> apkResolvers){
+        SecurityWebFilterChain resourceServerSecurityFilterChain(ServerHttpSecurity http, ResourceServerProperties ssoProperties
+                , ObjectProvider<AuthenticationReload> authenticationReloads, ObjectProvider<ApkResolver> apkResolvers) {
             authenticationReloads.ifUnique(authenticationReload -> http.addFilterBefore(new ReloadAuthenticationWebFilter(authenticationReload), SecurityWebFiltersOrder.ANONYMOUS_AUTHENTICATION));
             return http
                     .authorizeExchange(requests -> {
-                        if(McnUtils.isNotNullAndEmpty(ssoProperties.getAllowedPaths())){
+                        if (McnUtils.isNotNullAndEmpty(ssoProperties.getAllowedPaths())) {
                             requests.pathMatchers(ssoProperties.getAllowedPaths()).permitAll();
                         }
                         requests.anyExchange().authenticated();
                     })
                     .csrf(c -> c.requireCsrfProtectionMatcher(registerDefaultCsrfOverride(ssoProperties.getAllowedPaths())))
                     .oauth2ResourceServer(c -> {
-                        if(ssoProperties.isOpaqueToken()){
+                        if (ssoProperties.isOpaqueToken()) {
                             c.opaqueToken(Customizer.withDefaults());
-                        }else {
+                        } else {
                             c.jwt(Customizer.withDefaults());
                         }
                         c.accessDeniedHandler((exchange, accessDeniedException) -> handleException(accessDeniedException, exchange.getResponse()))
                                 .authenticationEntryPoint((exchange, authException) -> handleException(authException, exchange.getResponse()));
-                        apkResolvers.ifUnique(apkResolver -> c.bearerTokenConverter(new ServerBearerTokenAuthenticationConverter(){
-                            @Override
-                            public Mono<Authentication> convert(ServerWebExchange exchange) {
-                                return super.convert(exchange).switchIfEmpty(jwtToken(apkResolver,exchange.getRequest()));
-                            }
-                        }));
+                        List<ServerAuthenticationConverter> authenticationConverters = new ArrayList<>(2);
+                        authenticationConverters.add(new ServerBearerTokenAuthenticationConverter());
+                        apkResolvers.ifUnique(apkResolver -> authenticationConverters.add(exchange -> jwtToken(apkResolver, exchange.getRequest())));
+                        c.bearerTokenConverter(new DelegatingServerAuthenticationConverter(authenticationConverters));
                     })
                     .build();
         }
@@ -119,7 +121,7 @@ public class ResourceServerAutoConfiguration {
                     new NegatedServerWebExchangeMatcher(new OrServerWebExchangeMatcher(Arrays.stream(ignorePath).map(PathPatternParserServerWebExchangeMatcher::new).collect(Collectors.toList()))));
         }
 
-        private Mono<Authentication> jwtToken(ApkResolver apkResolver,ServerHttpRequest request){
+        private Mono<Authentication> jwtToken(ApkResolver apkResolver, ServerHttpRequest request) {
             return Mono.fromCallable(() -> {
                 String name = apkResolver.paramName();
                 String apk = request.getHeaders().getFirst(name);
@@ -130,11 +132,11 @@ public class ResourceServerAutoConfiguration {
             }).flatMap(apkResolver::jwtToken);
         }
 
-        private Mono<Void> handleException(RuntimeException exception, ServerHttpResponse response){
-            return WebUtils.write(exceptionHandler.handleException(exception),response);
+        private Mono<Void> handleException(RuntimeException exception, ServerHttpResponse response) {
+            return WebUtils.write(exceptionHandler.handleException(exception), response);
         }
 
-        static class ReloadAuthenticationWebFilter implements WebFilter{
+        static class ReloadAuthenticationWebFilter implements WebFilter {
 
             private final AuthenticationReload authenticationReload;
 
@@ -149,7 +151,7 @@ public class ResourceServerAutoConfiguration {
                         .flatMap(securityContext -> {
                             ReloadAuthenticationConfigurer.reloadAuthentication(securityContext, authenticationReload);
                             return chain.filter(exchange);
-                         });
+                        });
             }
         }
 
@@ -165,7 +167,7 @@ public class ResourceServerAutoConfiguration {
         }
 
         @Bean
-        SecurityFilterChain resourceServerSecurityFilterChain(HttpSecurity http,ResourceServerProperties ssoProperties,ObjectProvider<TokenResolver> beanProvider) throws Exception {
+        SecurityFilterChain resourceServerSecurityFilterChain(HttpSecurity http, ResourceServerProperties ssoProperties, ObjectProvider<TokenResolver> beanProvider) throws Exception {
             return http
                     .authorizeHttpRequests(requests -> {
                         requests.requestMatchers(ssoProperties.getAllowedPaths()).permitAll();
@@ -173,23 +175,23 @@ public class ResourceServerAutoConfiguration {
                     })
                     .csrf(c -> c.ignoringRequestMatchers(ssoProperties.getAllowedPaths()))
                     .oauth2ResourceServer(c -> {
-                        if(ssoProperties.isOpaqueToken()){
+                        if (ssoProperties.isOpaqueToken()) {
                             c.opaqueToken(Customizer.withDefaults());
-                        }else {
+                        } else {
                             c.jwt(Customizer.withDefaults());
                         }
-                        c.bearerTokenResolver(new CustomBearerTokenResolver(beanProvider)).accessDeniedHandler((request, response, accessDeniedException) -> handleException(accessDeniedException,response))
-                                .authenticationEntryPoint((request, response, authException) -> handleException(authException,response));
+                        c.bearerTokenResolver(new CustomBearerTokenResolver(beanProvider)).accessDeniedHandler((request, response, accessDeniedException) -> handleException(accessDeniedException, response))
+                                .authenticationEntryPoint((request, response, authException) -> handleException(authException, response));
                     })
-                    .with(new ReloadAuthenticationConfigurer(),Customizer.withDefaults())
+                    .with(new ReloadAuthenticationConfigurer(), Customizer.withDefaults())
                     .build();
         }
 
-        private void handleException(RuntimeException exception, HttpServletResponse response){
-            cn.hiboot.mcn.autoconfigure.web.mvc.WebUtils.write(exceptionHandler.handleException(exception),response);
+        private void handleException(RuntimeException exception, HttpServletResponse response) {
+            cn.hiboot.mcn.autoconfigure.web.mvc.WebUtils.write(exceptionHandler.handleException(exception), response);
         }
 
-        static class CustomBearerTokenResolver implements BearerTokenResolver{
+        static class CustomBearerTokenResolver implements BearerTokenResolver {
             private final TokenResolver tokenResolver;
             private final BearerTokenResolver defaultBearerTokenResolver;
 
