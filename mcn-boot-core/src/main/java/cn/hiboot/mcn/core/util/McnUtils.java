@@ -2,7 +2,6 @@ package cn.hiboot.mcn.core.util;
 
 import cn.hiboot.mcn.core.exception.ServiceException;
 import cn.hiboot.mcn.core.tuples.Pair;
-import org.springframework.util.ReflectionUtils;
 
 import java.beans.BeanInfo;
 import java.beans.Introspector;
@@ -568,20 +567,12 @@ public abstract class McnUtils {
         }
     }
 
-    public static void loadJar(ClassLoader classLoader, String jarDir){
-        if(classLoader instanceof URLClassLoader){
-            Method method = ReflectionUtils.findMethod(URLClassLoader.class, "addURL", URL.class);
-            if (null != method) {
-                method.setAccessible(true);
-                for (URL jar : loadFile(jarDir,".jar", McnUtils::getURL)) {
-                    ReflectionUtils.invokeMethod(method, classLoader, jar);
-                }
-            }
+    public static void addURLToClasspath(ClassLoader classLoader, String... jarPaths) {
+        URL[] urls = Arrays.stream(jarPaths).flatMap(jarPath -> loadFile(jarPath, ".jar", McnUtils::getURL).stream()).toArray(URL[]::new);
+        if (urls.length == 0) {
+            return;
         }
-    }
-
-    public static void loadJarToSystemClassLoader(String jarDir) {
-        loadJar(ClassLoader.getSystemClassLoader(), jarDir);
+        Thread.currentThread().setContextClassLoader(new URLClassLoader(urls, classLoader));
     }
 
     public static String substring(String str,int maxLength) {
