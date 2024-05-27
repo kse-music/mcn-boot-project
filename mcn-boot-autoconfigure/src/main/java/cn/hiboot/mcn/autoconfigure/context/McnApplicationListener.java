@@ -1,6 +1,7 @@
 package cn.hiboot.mcn.autoconfigure.context;
 
 import cn.hiboot.mcn.autoconfigure.bootstrap.LogFileChecker;
+import cn.hiboot.mcn.core.util.McnUtils;
 import cn.hiboot.mcn.core.util.SpringBeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,7 +11,9 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.context.event.*;
 import org.springframework.boot.context.logging.LoggingApplicationListener;
 import org.springframework.context.ApplicationEvent;
+import org.springframework.context.annotation.ClassPathBeanDefinitionScanner;
 import org.springframework.context.event.GenericApplicationListener;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.EnumerablePropertySource;
@@ -34,20 +37,20 @@ public class McnApplicationListener implements GenericApplicationListener {
 
     public static final int DEFAULT_ORDER = LoggingApplicationListener.DEFAULT_ORDER + 1;
 
-    private static final Class<?>[] EVENT_TYPES = { SpringApplicationEvent.class};
-    private static final Class<?>[] SOURCE_TYPES = { SpringApplication.class };
+    private static final Class<?>[] EVENT_TYPES = {SpringApplicationEvent.class};
+    private static final Class<?>[] SOURCE_TYPES = {SpringApplication.class};
 
     @Override
     public void onApplicationEvent(ApplicationEvent applicationEvent) {
-        if(applicationEvent instanceof ApplicationStartingEvent event){
+        if (applicationEvent instanceof ApplicationStartingEvent event) {
             onApplicationStartingEvent(event);
-        }else if(applicationEvent instanceof ApplicationEnvironmentPreparedEvent event){
+        } else if (applicationEvent instanceof ApplicationEnvironmentPreparedEvent event) {
             onApplicationEnvironmentPreparedEvent(event);
-        }else if(applicationEvent instanceof ApplicationContextInitializedEvent event){
+        } else if (applicationEvent instanceof ApplicationContextInitializedEvent event) {
             onApplicationContextInitializedEvent(event);
-        }else if(applicationEvent instanceof ApplicationPreparedEvent event){
+        } else if (applicationEvent instanceof ApplicationPreparedEvent event) {
             onApplicationPreparedEvent(event);
-        }else if(applicationEvent instanceof ApplicationReadyEvent event){
+        } else if (applicationEvent instanceof ApplicationReadyEvent event) {
             onApplicationReadyEvent(event);
         }
     }
@@ -55,9 +58,9 @@ public class McnApplicationListener implements GenericApplicationListener {
     private void onApplicationStartingEvent(ApplicationStartingEvent event) {
         //config security holder
         if (!StringUtils.hasText(System.getProperty(SECURITY_CONTEXT_HOLDER_STRATEGY_SYSTEM_PROPERTY))) {
-            if(ClassUtils.isPresent("org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken",null)
-                    && ClassUtils.isPresent("feign.Feign",null)){
-                System.setProperty(SECURITY_CONTEXT_HOLDER_STRATEGY_SYSTEM_PROPERTY,"MODE_INHERITABLETHREADLOCAL");
+            if (ClassUtils.isPresent("org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken", null)
+                    && ClassUtils.isPresent("feign.Feign", null)) {
+                System.setProperty(SECURITY_CONTEXT_HOLDER_STRATEGY_SYSTEM_PROPERTY, "MODE_INHERITABLETHREADLOCAL");
             }
         }
         //register repeat log file checker
@@ -72,33 +75,43 @@ public class McnApplicationListener implements GenericApplicationListener {
         bootstrapContext.getOrElse(LogFileChecker.class, new LogFileChecker()).setEnvironment(environment);
     }
 
-    private void onApplicationContextInitializedEvent(ApplicationContextInitializedEvent event){
+    private void onApplicationContextInitializedEvent(ApplicationContextInitializedEvent event) {
         ConfigurableEnvironment environment = event.getApplicationContext().getEnvironment();
         //print all EnumerablePropertySource
-        if(environment.getProperty("mcn.print-env.enabled",Boolean.class,false)){
+        if (environment.getProperty("mcn.print-env.enabled", Boolean.class, false)) {
             for (PropertySource<?> propertySource : environment.getPropertySources()) {
                 String name = propertySource.getName();
-                if(!(propertySource instanceof EnumerablePropertySource)){
+                if (!(propertySource instanceof EnumerablePropertySource)) {
                     System.out.println();
                     log.info("skip propertySource name = {} because it's not enumerable", name);
                     continue;
                 }
                 String[] propertyNames = ((EnumerablePropertySource<?>) propertySource).getPropertyNames();
-                if(propertyNames.length == 0){
+                if (propertyNames.length == 0) {
                     System.out.println();
-                    log.info("ignore propertySource name = {} because no config property",name);
+                    log.info("ignore propertySource name = {} because no config property", name);
                     continue;
                 }
                 System.out.println();
-                log.info("start print ------------ {} ------------ ",name);
+                log.info("start print ------------ {} ------------ ", name);
                 for (String propertyName : propertyNames) {
-                    log.info("{} = {}",propertyName,propertySource.getProperty(propertyName));
+                    log.info("{} = {}", propertyName, propertySource.getProperty(propertyName));
                 }
+            }
+        }
+        //configureAdditionClasspath
+        if (event.getApplicationContext() instanceof GenericApplicationContext context) {
+            ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context);
+            String[] jarPath = environment.getProperty("acp.jar-path", String[].class, new String[0]);
+            String[] basePackage = environment.getProperty("acp.base-package", String[].class, new String[0]);
+            McnUtils.addURLToClasspath(context.getClassLoader(), jarPath);
+            if (scanner.scan(basePackage) > 0) {
+                context.setClassLoader(Thread.currentThread().getContextClassLoader());
             }
         }
     }
 
-    private void onApplicationPreparedEvent(ApplicationPreparedEvent event){
+    private void onApplicationPreparedEvent(ApplicationPreparedEvent event) {
         //set context to SpringBeanUtils
         SpringBeanUtils.setApplicationContext(event.getApplicationContext());
     }
@@ -106,7 +119,7 @@ public class McnApplicationListener implements GenericApplicationListener {
     private void onApplicationReadyEvent(ApplicationReadyEvent event) {
         ConfigurableEnvironment environment = event.getApplicationContext().getEnvironment();
         //Whether to delete the configuration after decryption
-        if(environment.getProperty("erase.decrypted-data.enabled",boolean.class,false)){
+        if (environment.getProperty("erase.decrypted-data.enabled", boolean.class, false)) {
             environment.getPropertySources().remove(DECRYPTED_PROPERTY_SOURCE_NAME);
         }
     }
