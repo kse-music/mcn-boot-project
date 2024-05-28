@@ -49,7 +49,7 @@
         <spring-cloud-alibaba.version>2023.0.1.0</spring-cloud-alibaba.version>
         <spring-cloud-huawei.version>1.11.6-2023.0.x</spring-cloud-huawei.version>
         <springdoc.version>2.3.0</springdoc.version>
-        <xxl-job.version>2.3.1</xxl-job.version>
+        <xxl-job.version>2.4.1</xxl-job.version>
     </properties>
 
     <dependencyManagement>

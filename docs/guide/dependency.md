@@ -24,4 +24,4 @@
 | spring-cloud-huawei-bom              | spring-cloud-huawei.version  | 1.11.6-2023.0.x |
 | springdoc-openapi-starter-webmvc-ui  | springdoc.version            |      2.3.0      |
 | springdoc-openapi-starter-webflux-ui | springdoc.version            |      2.3.0      |
-| xxl-job-core                         | xxl-job.version              |      2.3.1      |
+| xxl-job-core                         | xxl-job.version              |      2.4.1      |
