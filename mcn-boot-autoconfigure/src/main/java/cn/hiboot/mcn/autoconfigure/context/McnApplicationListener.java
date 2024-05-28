@@ -100,13 +100,14 @@ public class McnApplicationListener implements GenericApplicationListener {
             }
         }
         //configureAdditionClasspath
-        if (event.getApplicationContext() instanceof GenericApplicationContext context) {
-            ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context);
-            String[] jarPath = environment.getProperty("acp.jar-path", String[].class, new String[0]);
-            String[] basePackage = environment.getProperty("acp.base-package", String[].class, new String[0]);
-            McnUtils.addURLToClasspath(context.getClassLoader(), jarPath);
-            if (scanner.scan(basePackage) > 0) {
-                context.setClassLoader(Thread.currentThread().getContextClassLoader());
+        String[] jarPath = environment.getProperty("acp.jar-path", String[].class, new String[0]);
+        String[] basePackage = environment.getProperty("acp.base-package", String[].class, new String[0]);
+        if (McnUtils.isNotNullAndEmpty(jarPath) && McnUtils.isNotNullAndEmpty(basePackage)) {
+            if (event.getApplicationContext() instanceof GenericApplicationContext context) {
+                McnUtils.addURLToClasspath(context.getClassLoader(), jarPath);
+                if (new ClassPathBeanDefinitionScanner(context).scan(basePackage) > 0) {
+                    context.setClassLoader(Thread.currentThread().getContextClassLoader());
+                }
             }
         }
     }
