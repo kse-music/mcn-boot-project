@@ -14,7 +14,7 @@ import java.util.function.Function;
  * @author DingHao
  * @since 2020/11/16 15:46
  */
-public class TaskExecutor<T>{
+public class TaskExecutor<T> {
 
     private final TaskThreadPool taskThreadPool;
     private final Iterable<T> iterable;
@@ -25,7 +25,7 @@ public class TaskExecutor<T>{
     }
 
     public TaskExecutor(Iterable<T> iterable, int perBatchSize) {
-        this(iterable,new TaskThreadPool(),perBatchSize);
+        this(iterable, TaskThreadPool.builder().build(), perBatchSize);
     }
 
     public TaskExecutor(Iterable<T> iterable, TaskThreadPool taskThreadPool, int perBatchSize) {
@@ -34,39 +34,46 @@ public class TaskExecutor<T>{
         this.taskThreadPool = taskThreadPool;
     }
 
-    public void execute(Consumer<List<T>> opr){
-        execute(Function.identity(),opr);
+    public void execute(Consumer<List<T>> consumer) {
+        execute(Function.identity(), consumer);
     }
 
-    public <S> void execute(Function<T, S> convert, Consumer<List<S>> opr) {
-        execute(convert,opr,false);
+    public <S> void execute(Function<T, S> converter, Consumer<List<S>> consumer) {
+        execute(converter, consumer, false);
     }
 
-    public <S> void execute(Function<T, S> convert, Consumer<List<S>> opr,boolean nullBreak){
-        McnAssert.notNull(convert,"convert must not be null");
+    public <S> void execute(Function<T, S> converter, Consumer<List<S>> consumer, boolean nullBreak) {
+        McnAssert.notNull(converter, "converter must not be null");
+        McnAssert.notNull(consumer, "consumer must not be null");
         List<S> data = new ArrayList<>(perBatchSize);
         for (T t : iterable) {
-            S apply = convert.apply(t);
-            if(apply == null){
-                if(nullBreak){
+            S apply = converter.apply(t);
+            if (apply == null) {
+                if (nullBreak) {
                     break;
                 }
                 continue;
             }
             data.add(apply);
-            if(data.size() == perBatchSize){
-                execute0(data,opr);
+            if (data.size() == perBatchSize) {
+                execute0(data, consumer);
                 data = new ArrayList<>();
             }
         }
-        if(!data.isEmpty()){
-            execute0(data,opr);
+        if (!data.isEmpty()) {
+            execute0(data, consumer);
         }
-        taskThreadPool.closeUntilAllTaskFinish();
+        if (taskThreadPool != null) {
+            taskThreadPool.closeUntilAllTaskFinish();
+        }
     }
 
-    private <S> void execute0(List<S> data,Consumer<List<S>> opr){
-        taskThreadPool.execute(() -> opr.accept(data));
+    private <S> void execute0(List<S> data, Consumer<List<S>> consumer) {
+        if (taskThreadPool == null) {
+            consumer.accept(data);
+            return;
+        }
+        taskThreadPool.execute(() -> consumer.accept(data));
     }
 
 }
