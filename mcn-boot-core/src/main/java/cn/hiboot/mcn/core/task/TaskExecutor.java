@@ -1,6 +1,5 @@
 package cn.hiboot.mcn.core.task;
 
-import cn.hiboot.mcn.core.util.BatchOperation;
 import cn.hiboot.mcn.core.util.McnAssert;
 
 import java.util.ArrayList;
@@ -21,11 +20,11 @@ public class TaskExecutor<T> {
     private final int perBatchSize;
 
     public TaskExecutor(Iterable<T> iterable) {
-        this(iterable, BatchOperation.DEFAULT_BATCH_SIZE);
+        this(iterable, 1000);
     }
 
     public TaskExecutor(Iterable<T> iterable, int perBatchSize) {
-        this(iterable, TaskThreadPool.builder().build(), perBatchSize);
+        this(iterable, TaskThreadPool.builder().shutdownUntilFinish(true).build(), perBatchSize);
     }
 
     public TaskExecutor(Iterable<T> iterable, TaskThreadPool taskThreadPool, int perBatchSize) {
@@ -56,19 +55,19 @@ public class TaskExecutor<T> {
             }
             data.add(apply);
             if (data.size() == perBatchSize) {
-                execute0(data, consumer);
+                doExecute(data, consumer);
                 data = new ArrayList<>();
             }
         }
         if (!data.isEmpty()) {
-            execute0(data, consumer);
+            doExecute(data, consumer);
         }
         if (taskThreadPool != null) {
-            taskThreadPool.closeUntilAllTaskFinish();
+            taskThreadPool.shutdown();
         }
     }
 
-    private <S> void execute0(List<S> data, Consumer<List<S>> consumer) {
+    private <S> void doExecute(List<S> data, Consumer<List<S>> consumer) {
         if (taskThreadPool == null) {
             consumer.accept(data);
             return;
