@@ -11,15 +11,20 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author DingHao
  * @since 2020/11/14 16:32
  */
-public class TaskThreadPool extends ThreadPoolExecutor {
+public final class TaskThreadPool extends ThreadPoolExecutor {
+
+    private boolean shutdownUntilFinish = false;
 
     private TaskThreadPool(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit, BlockingQueue<Runnable> workQueue, ThreadFactory threadFactory, RejectedExecutionHandler handler) {
         super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, threadFactory, handler);
     }
 
-    public void closeUntilAllTaskFinish(){
-        shutdown();
-        McnUtils.loopEnd(this::isTerminated);
+    @Override
+    public void shutdown() {
+        super.shutdown();
+        if (shutdownUntilFinish) {
+            McnUtils.loopEnd(this::isTerminated);
+        }
     }
 
     public static Builder builder() {
@@ -41,6 +46,8 @@ public class TaskThreadPool extends ThreadPoolExecutor {
         private int blockingQueueSize = 1000;
 
         private String threadNamePrefix = "BatchTask";
+
+        private boolean shutdownUntilFinish = false;
 
         public Builder handler(RejectedExecutionHandler handler) {
             this.handler = handler;
@@ -72,8 +79,13 @@ public class TaskThreadPool extends ThreadPoolExecutor {
             return this;
         }
 
+        public Builder shutdownUntilFinish(boolean shutdownUntilFinish) {
+            this.shutdownUntilFinish = shutdownUntilFinish;
+            return this;
+        }
+
         public TaskThreadPool build() {
-            return new TaskThreadPool(
+            TaskThreadPool taskThreadPool = new TaskThreadPool(
                     corePoolSize,
                     maximumPoolSize,
                     keepAliveTime,
@@ -82,6 +94,8 @@ public class TaskThreadPool extends ThreadPoolExecutor {
                     new TaskThreadFactory(threadNamePrefix),
                     handler
             );
+            taskThreadPool.shutdownUntilFinish = shutdownUntilFinish;
+            return taskThreadPool;
         }
 
     }
