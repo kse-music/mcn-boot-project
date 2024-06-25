@@ -53,7 +53,12 @@ public class DefaultMinioClient extends MinioAsyncClient {
                 .build());
         this.minioProperties = minioProperties;
         this.okHttpClient = minioProperties.getClient().okHttpClient();
-        this.pool = new TaskThreadPool(minioProperties.getPool().getCore(),minioProperties.getPool().getMax(),minioProperties.getPool().getQueueSize(),minioProperties.getPool().getThreadName());
+        this.pool = TaskThreadPool.builder()
+                .corePoolSize(minioProperties.getPool().getCore())
+                .maximumPoolSize(minioProperties.getPool().getMax())
+                .blockingQueueSize(minioProperties.getPool().getQueueSize())
+                .threadNamePrefix(minioProperties.getPool().getThreadName())
+                .build();
         this.size = minioProperties.getMinMultipartSize().toBytes();
         this.expire = minioProperties.getExpire();
         this.method = Method.valueOf(minioProperties.getMethod());
@@ -82,7 +87,6 @@ public class DefaultMinioClient extends MinioAsyncClient {
             String url = preSignResult.getUploadUrls().get(index++);
             pool.execute(() -> upload(url, contentType,bytes));
         }
-        pool.closeUntilAllTaskFinish();
         mergeMultipartUpload(bucketName,objectName, preSignResult.getUploadId());
     }
 

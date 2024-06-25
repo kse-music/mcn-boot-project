@@ -1,8 +1,7 @@
 package cn.hiboot.mcn.core.util;
 
-import cn.hiboot.mcn.core.task.TaskThreadPool;
+import cn.hiboot.mcn.core.task.TaskExecutor;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -18,56 +17,21 @@ public interface BatchOperation {
 
     /**
      * 默认1k执行一次
+     *
      * @return 批量大小
      */
-    default int getBatchSize(){
+    default int getBatchSize() {
         return DEFAULT_BATCH_SIZE;
     }
 
-    default TaskThreadPool getExecutor(){
-        return null;
-    }
-
     default <S> void operation(Iterable<S> all, Consumer<List<S>> consumer) {
-        operation(all,consumer,true);
+        TaskExecutor<S> taskExecutor = new TaskExecutor<>(all, null, getBatchSize());
+        taskExecutor.execute(consumer);
     }
 
     default <S> void asyncOperation(Iterable<S> all, Consumer<List<S>> consumer) {
-        operation(all,consumer,false);
+        TaskExecutor<S> taskExecutor = new TaskExecutor<>(all);
+        taskExecutor.execute(consumer);
     }
 
-    /**
-     * 多少次执行一次consumer
-     *
-     * @param all 总输入
-     * @param consumer 批量处理函数
-     * @param <S> 集合元素
-     * @param closeWaitFinish 等待所有任务执行完关闭线程池须配合TaskThreadPool
-     */
-    default <S> void operation(Iterable<S> all, Consumer<List<S>> consumer, boolean closeWaitFinish) {
-        if (all == null) {
-            return;
-        }
-        TaskThreadPool executor = getExecutor();
-        List<S> tmp = new ArrayList<>();
-        for (S next : all) {
-            tmp.add(next);
-            if (tmp.size() % getBatchSize() == 0) {
-                if(executor == null){
-                    consumer.accept(tmp);
-                }else {
-                    List<S> finalTmp = tmp;
-                    executor.execute(() -> consumer.accept(finalTmp));
-                }
-                tmp = new ArrayList<>();
-            }
-        }
-        if(!tmp.isEmpty()){
-            consumer.accept(tmp);
-        }
-        tmp.clear();
-        if(executor != null && closeWaitFinish){
-            executor.closeUntilAllTaskFinish();
-        }
-    }
 }
