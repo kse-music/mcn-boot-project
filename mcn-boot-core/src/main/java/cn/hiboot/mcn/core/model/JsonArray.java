@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**
@@ -79,6 +80,12 @@ public class JsonArray extends ArrayNode {
     @Override
     public JsonObject get(int index){
         return JsonObject.of(super.get(index));
+    }
+
+    public void loop(Consumer<JsonObject> consumer) {
+        for (JsonNode jsonNode : this) {
+            consumer.accept(JsonObject.of(jsonNode));
+        }
     }
 
 }
