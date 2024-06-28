@@ -12,10 +12,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * OnPropertyValueNumber
@@ -27,7 +24,11 @@ class OnPropertyValueNumber extends SpringBootCondition {
 
     @Override
     public ConditionOutcome getMatchOutcome(ConditionContext context, AnnotatedTypeMetadata metadata) {
-        List<AnnotationAttributes> allAnnotationAttributes = annotationAttributesFromMultiValueMap(metadata.getAllAnnotationAttributes(ConditionalOnPropertyValueNumber.class.getName()));
+        MultiValueMap<String, Object> map = metadata.getAllAnnotationAttributes(ConditionalOnPropertyValueNumber.class.getName());
+        List<AnnotationAttributes> allAnnotationAttributes = Collections.emptyList();
+        if (map != null) {
+            allAnnotationAttributes = annotationAttributesFromMultiValueMap(map);
+        }
         List<ConditionMessage> noMatch = new ArrayList<>();
         List<ConditionMessage> match = new ArrayList<>();
         for (AnnotationAttributes annotationAttributes : allAnnotationAttributes) {

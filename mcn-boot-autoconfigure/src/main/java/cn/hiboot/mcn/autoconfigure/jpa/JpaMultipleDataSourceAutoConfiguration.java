@@ -38,7 +38,7 @@ import java.util.Optional;
  * @since 2022/7/26 14:45
  */
 @AutoConfiguration(after = {MultipleDataSourceAutoConfiguration.class, JpaRepositoriesAutoConfiguration.class})
-@ConditionalOnProperty(prefix = ConfigProperties.JPA_MULTIPLE_DATASOURCE_PREFIX,name = "enabled",havingValue = "true")
+@ConditionalOnProperty(prefix = ConfigProperties.JPA_MULTIPLE_DATASOURCE_PREFIX, name = "enabled", havingValue = "true")
 @ConditionalOnClass(JpaRepository.class)
 @ConditionalOnBean(MultipleDataSourceConfig.class)
 @Import(JpaMultipleDataSourceAutoConfiguration.JpaRepositoriesRegistrar.class)
@@ -59,35 +59,35 @@ public class JpaMultipleDataSourceAutoConfiguration {
         @Override
         public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry, BeanNameGenerator generator) {
             String basePackage = multipleDataSourceConfig.getBasePackage();
-            generator = new FullyQualifiedAnnotationBeanNameGenerator();//与标准jpa区分
-            CustomAnnotationRepositoryConfigurationSource configurationSource = getConfigurationSource(registry,generator);
+            BeanNameGenerator beanNameGenerator = new FullyQualifiedAnnotationBeanNameGenerator();//与标准jpa区分
+            CustomAnnotationRepositoryConfigurationSource configurationSource = getConfigurationSource(registry, beanNameGenerator);
             JpaProperties jpaProperties = Binder.get(environment).bind("spring.jpa", JpaProperties.class).orElse(new JpaProperties());
             RepositoryConfigurationExtension extension = getExtension();
             RepositoryConfigurationUtils.exposeRegistration(extension, registry, configurationSource);
             RepositoryConfigurationDelegate delegate = new RepositoryConfigurationDelegate(configurationSource, resourceLoader, environment);
-            multipleDataSourceConfig.getProperties().forEach((dsName,ds) -> {
+            multipleDataSourceConfig.getProperties().forEach((dsName, ds) -> {
                 String entityManagerFactoryRef = dsName + "EntityManagerFactory";
                 String transactionManagerRef = dsName + "TransactionManager";
                 String daoPackage = basePackage + "." + multipleDataSourceConfig.getDaoPackageName() + "." + dsName;
 
                 //JpaConfiguration
                 String configBeanName = dsName + "JpaConfiguration";
-                registry.registerBeanDefinition(configBeanName,BeanDefinitionBuilder.genericBeanDefinition(JpaConfiguration.class)
-                                .addPropertyReference("dataSource",ConfigProperties.getDataSourceBeanName(dsName))
-                                .addPropertyValue("packages",basePackage + ".bean")
-                                .addPropertyValue("persistenceUnit",dsName)
-                                .addPropertyValue("jpaProperties",jpaProperties)
-                                .setRole(BeanDefinition.ROLE_INFRASTRUCTURE)
-                                .getBeanDefinition());
+                registry.registerBeanDefinition(configBeanName, BeanDefinitionBuilder.genericBeanDefinition(JpaConfiguration.class)
+                        .addPropertyReference("dataSource", ConfigProperties.getDataSourceBeanName(dsName))
+                        .addPropertyValue("packages", basePackage + ".bean")
+                        .addPropertyValue("persistenceUnit", dsName)
+                        .addPropertyValue("jpaProperties", jpaProperties)
+                        .setRole(BeanDefinition.ROLE_INFRASTRUCTURE)
+                        .getBeanDefinition());
 
-                registry.registerBeanDefinition(entityManagerFactoryRef,BeanDefinitionBuilder.genericBeanDefinition()
-                                .setFactoryMethodOnBean("localContainerEntityManagerFactoryBean",configBeanName)
-                                .addConstructorArgReference("entityManagerFactoryBuilder")
-                                .getBeanDefinition());
+                registry.registerBeanDefinition(entityManagerFactoryRef, BeanDefinitionBuilder.genericBeanDefinition()
+                        .setFactoryMethodOnBean("localContainerEntityManagerFactoryBean", configBeanName)
+                        .addConstructorArgReference("entityManagerFactoryBuilder")
+                        .getBeanDefinition());
 
-                registry.registerBeanDefinition(transactionManagerRef,BeanDefinitionBuilder.genericBeanDefinition()
-                        .setFactoryMethodOnBean("transactionManager",configBeanName)
-                        .addConstructorArgReference(BeanFactory.FACTORY_BEAN_PREFIX+entityManagerFactoryRef)
+                registry.registerBeanDefinition(transactionManagerRef, BeanDefinitionBuilder.genericBeanDefinition()
+                        .setFactoryMethodOnBean("transactionManager", configBeanName)
+                        .addConstructorArgReference(BeanFactory.FACTORY_BEAN_PREFIX + entityManagerFactoryRef)
                         .getBeanDefinition());
 
                 configurationSource.basePackage(daoPackage).entityManagerFactoryRef(entityManagerFactoryRef).transactionManagerRef(transactionManagerRef);
@@ -96,9 +96,9 @@ public class JpaMultipleDataSourceAutoConfiguration {
 
         }
 
-        private CustomAnnotationRepositoryConfigurationSource getConfigurationSource(BeanDefinitionRegistry registry,BeanNameGenerator generator) {
+        private CustomAnnotationRepositoryConfigurationSource getConfigurationSource(BeanDefinitionRegistry registry, BeanNameGenerator generator) {
             AnnotationMetadata metadata = AnnotationMetadata.introspect(EnableJpaRepositoriesConfiguration.class);
-            return new CustomAnnotationRepositoryConfigurationSource(metadata, getAnnotation(), this.resourceLoader,this.environment, registry,generator);
+            return new CustomAnnotationRepositoryConfigurationSource(metadata, getAnnotation(), this.resourceLoader, this.environment, registry, generator);
         }
 
         @Override
@@ -119,11 +119,11 @@ public class JpaMultipleDataSourceAutoConfiguration {
         static class CustomAnnotationRepositoryConfigurationSource extends AnnotationRepositoryConfigurationSource {
 
             private String basePackage;
-            private final Map<String,String> map;
+            private final Map<String, String> map;
 
             CustomAnnotationRepositoryConfigurationSource(AnnotationMetadata metadata, Class<? extends Annotation> annotation,
                                                           ResourceLoader resourceLoader, Environment environment,
-                                                          BeanDefinitionRegistry registry,BeanNameGenerator generator) {
+                                                          BeanDefinitionRegistry registry, BeanNameGenerator generator) {
                 super(metadata, annotation, resourceLoader, environment, registry, generator);
                 map = new HashMap<>();
             }
@@ -135,7 +135,7 @@ public class JpaMultipleDataSourceAutoConfiguration {
 
             @Override
             public Optional<String> getAttribute(String name) {
-                if(map.containsKey(name)){
+                if (map.containsKey(name)) {
                     return Optional.ofNullable(map.get(name));
                 }
                 return super.getAttribute(name);
@@ -147,12 +147,12 @@ public class JpaMultipleDataSourceAutoConfiguration {
             }
 
             public CustomAnnotationRepositoryConfigurationSource entityManagerFactoryRef(String entityManagerFactoryRef) {
-                map.put("entityManagerFactoryRef",entityManagerFactoryRef);
+                map.put("entityManagerFactoryRef", entityManagerFactoryRef);
                 return this;
             }
 
             public CustomAnnotationRepositoryConfigurationSource transactionManagerRef(String transactionManagerRef) {
-                map.put("transactionManagerRef",transactionManagerRef);
+                map.put("transactionManagerRef", transactionManagerRef);
                 return this;
             }
         }
