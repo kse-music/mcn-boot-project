@@ -68,26 +68,26 @@ public class DefaultExceptionHandler implements ExceptionHandler, ApplicationCon
     }
 
     @Override
-    public ExceptionProperties config(){
+    public ExceptionProperties config() {
         return properties;
     }
 
     @Override
     public RestResp<Throwable> handleException(Throwable exception) {
         RestResp<Throwable> resp = null;
-        List<ExceptionResolver<Throwable>> exceptionResolvers = exceptionResolverCache.computeIfAbsent(exception.getClass(),exClass -> this.exceptionResolvers.stream().filter(s -> supportsExceptionType(s, ResolvableType.forClass(exClass))).collect(Collectors.toList()));
+        List<ExceptionResolver<Throwable>> exceptionResolvers = exceptionResolverCache.computeIfAbsent(exception.getClass(), exClass -> this.exceptionResolvers.stream().filter(s -> supportsExceptionType(s, ResolvableType.forClass(exClass))).collect(Collectors.toList()));
         for (ExceptionResolver<Throwable> exceptionResolver : exceptionResolvers) {
             resp = exceptionResolver.resolve(exception);
             if (resp != null) {
                 break;
             }
         }
-        if(Objects.isNull(resp)){
+        if (Objects.isNull(resp)) {
             resp = doHandleException(exception);
         }
-        if(properties.isOverrideExMsg()){
+        if (properties.isOverrideExMsg()) {
             String message = properties.getErrorCodeMsg().get(resp.getErrorCode());
-            if(Objects.nonNull(message)){
+            if (Objects.nonNull(message)) {
                 resp.setErrorInfo(message);
             }
         }
@@ -98,26 +98,26 @@ public class DefaultExceptionHandler implements ExceptionHandler, ApplicationCon
     private RestResp<Throwable> doHandleException(Throwable exception) {
         Integer errorCode = DEFAULT_ERROR_CODE;
         List<ValidationErrorBean> data = null;
-        if(exception instanceof BaseException ex){
+        if (exception instanceof BaseException ex) {
             errorCode = ex.getCode();
-        }else if(exception instanceof MethodArgumentTypeMismatchException){
+        } else if (exception instanceof MethodArgumentTypeMismatchException) {
             errorCode = ExceptionKeys.PARAM_TYPE_ERROR;
-        }else if(exception instanceof MaxUploadSizeExceededException){
+        } else if (exception instanceof MaxUploadSizeExceededException) {
             errorCode = ExceptionKeys.UPLOAD_FILE_SIZE_ERROR;
-        }else if(exception instanceof BindException ex){
+        } else if (exception instanceof BindException ex) {
             errorCode = ExceptionKeys.PARAM_PARSE_ERROR;
             data = dealBindingResult(ex.getBindingResult());
-        }else if(validationExceptionPresent && ValidationExceptionHandler.support(exception)){
+        } else if (validationExceptionPresent && ValidationExceptionHandler.support(exception)) {
             errorCode = ExceptionKeys.PARAM_PARSE_ERROR;
             data = ValidationExceptionHandler.handle(exception);
-        }else if(exception instanceof HttpMessageNotReadableException || exception instanceof InvalidFormatException) {
+        } else if (exception instanceof HttpMessageNotReadableException || exception instanceof InvalidFormatException) {
             errorCode = ExceptionKeys.JSON_PARSE_ERROR;
-        }else if(exception instanceof VirtualMachineError){
+        } else if (exception instanceof VirtualMachineError) {
             errorCode = ExceptionKeys.HTTP_ERROR_500;
             handleError((Error) exception.getCause());
         }
         Integer error = httpStatusCodeResolvers.stream().map(resolver -> resolver.resolve(exception)).filter(Objects::nonNull).findFirst().orElse(null);
-        if(error != null){
+        if (error != null) {
             errorCode = error;
         }
         return result(errorCode, exception, data);
@@ -126,13 +126,13 @@ public class DefaultExceptionHandler implements ExceptionHandler, ApplicationCon
     private RestResp<Throwable> result(Integer errorCode, Throwable exception, List<ValidationErrorBean> data) {
         String msg = properties.isReturnOriginExMsg() ? getMessage(exception) : ErrorMsg.getErrorMsg(getErrorCode(errorCode));
         RestResp<Throwable> resp = RestResp.error(errorCode, msg);
-        if(McnUtils.isNotNullAndEmpty(data)){
-            if(properties.isValidateResultToErrorInfo()){
+        if (McnUtils.isNotNullAndEmpty(data)) {
+            if (properties.isValidateResultToErrorInfo()) {
                 ValidationErrorBean validationErrorBean = data.get(0);
                 String message = validationErrorBean.getMessage();
                 resp.setErrorInfo(properties.isAppendField() ? validationErrorBean.getPath().concat(message) : message);
             }
-            if(properties.isReturnValidateResult()){//设置参数校验具体错误数据信息
+            if (properties.isReturnValidateResult()) {//设置参数校验具体错误数据信息
                 resp.setData(new ThrowableData(data));
             }
         }
@@ -140,22 +140,25 @@ public class DefaultExceptionHandler implements ExceptionHandler, ApplicationCon
     }
 
     private String getMessage(Throwable t) {
+        if (t == null) {
+            return null;
+        }
         String msg = null;
-        if(t instanceof ResponseStatusException){
-            msg = ((ResponseStatusException) t).getReason();
+        if (t instanceof ResponseStatusException responseStatusException) {
+            msg = responseStatusException.getReason();
         }
         return msg == null ? t.getMessage() : msg;
     }
 
-    private Integer getErrorCode(Integer errorCode){
+    private Integer getErrorCode(Integer errorCode) {
         return errorCode == DEFAULT_ERROR_CODE ? ExceptionKeys.SERVICE_ERROR : errorCode;
     }
 
     private boolean supportsExceptionType(ExceptionResolver<Throwable> exceptionResolver, ResolvableType exceptionType) {
-        if(exceptionResolver instanceof GenericExceptionResolver genericExceptionResolver){
+        if (exceptionResolver instanceof GenericExceptionResolver genericExceptionResolver) {
             return genericExceptionResolver.supportsType(exceptionType);
         }
-        if (ignoreExceptionType(exceptionResolver.getClass(),exceptionType)) {
+        if (ignoreExceptionType(exceptionResolver.getClass(), exceptionType)) {
             Class<?> targetClass = AopUtils.getTargetClass(exceptionResolver);
             if (targetClass != exceptionResolver.getClass()) {
                 if (ignoreExceptionType(targetClass, exceptionType)) {
@@ -164,17 +167,14 @@ public class DefaultExceptionHandler implements ExceptionHandler, ApplicationCon
             }
             return false;
         }
-        DefaultListableBeanFactory beanFactory = null;
-        if (applicationContext instanceof DefaultListableBeanFactory) {
-            beanFactory = (DefaultListableBeanFactory) applicationContext;
-        } else if (applicationContext instanceof GenericApplicationContext) {
-            beanFactory = ((GenericApplicationContext) applicationContext).getDefaultListableBeanFactory();
-        }
+        DefaultListableBeanFactory beanFactory =
+                applicationContext instanceof DefaultListableBeanFactory bf ? bf :
+                        applicationContext instanceof GenericApplicationContext context ? context.getDefaultListableBeanFactory() : null;
         if (beanFactory == null) {
             return true;
         }
         try {
-            String beanName= getBeanName(exceptionResolver);
+            String beanName = getBeanName(exceptionResolver);
             if (beanName == null) {
                 return true;
             }
@@ -205,42 +205,42 @@ public class DefaultExceptionHandler implements ExceptionHandler, ApplicationCon
         return exceptionType != ResolvableType.NONE ? exceptionType : null;
     }
 
-    private List<ValidationErrorBean> dealBindingResult(BindingResult bindingResult){
+    private List<ValidationErrorBean> dealBindingResult(BindingResult bindingResult) {
         return bindingResult.getAllErrors().stream().map(e -> {
-                    if(e instanceof FieldError fieldError){
-                        return new ValidationErrorBean(e.getDefaultMessage(),fieldError.getField(), fieldError.getRejectedValue() == null ? null : fieldError.getRejectedValue().toString());
+                    if (e instanceof FieldError fieldError) {
+                        return new ValidationErrorBean(e.getDefaultMessage(), fieldError.getField(), fieldError.getRejectedValue() == null ? null : fieldError.getRejectedValue().toString());
                     }
-                    return new ValidationErrorBean(e.getDefaultMessage(),e.getObjectName(), null);
+                    return new ValidationErrorBean(e.getDefaultMessage(), e.getObjectName(), null);
                 }
         ).collect(Collectors.toList());
     }
 
     @Override
     public void handleError(Error error) {
-        if(error instanceof VirtualMachineError){
+        if (error instanceof VirtualMachineError) {
             ExceptionProperties.JvmError jvm = properties.getJvmError();
-            if(jvm != null && jvm.isExit()){
+            if (jvm != null && jvm.isExit()) {
                 System.exit(jvm.getStatus());
             }
         }
     }
 
     @Override
-    public void logError(Throwable t){
-        if(properties.isLogExMsg()){
-            if(properties.isRemoveFrameworkStack()){
+    public void logError(Throwable t) {
+        if (properties.isLogExMsg()) {
+            if (properties.isRemoveFrameworkStack()) {
                 dealCurrentStackTraceElement(t);
                 Throwable[] suppressed = t.getSuppressed();
                 for (Throwable throwable : suppressed) {
                     dealCurrentStackTraceElement(throwable);
                 }
             }
-            log.error("The exception information is as follows",t);
+            log.error("The exception information is as follows", t);
         }
     }
 
-    private void dealCurrentStackTraceElement(Throwable exception){
-        if(Objects.isNull(exception.getCause())){//is self
+    private void dealCurrentStackTraceElement(Throwable exception) {
+        if (Objects.isNull(exception.getCause())) {//is self
             return;
         }
         exception.setStackTrace(Arrays.stream(exception.getStackTrace()).filter(s -> s.getClassName().contains(basePackage)).toArray(StackTraceElement[]::new));
@@ -261,8 +261,9 @@ public class DefaultExceptionHandler implements ExceptionHandler, ApplicationCon
     }
 
     @JsonIgnoreProperties({"cause", "stackTrace", "message", "suppressed", "localizedMessage"})
-    static class ThrowableData extends Throwable{
+    static class ThrowableData extends Throwable {
         private List<ValidationErrorBean> detail;
+
         ThrowableData(List<ValidationErrorBean> detail) {
             this.detail = detail;
         }

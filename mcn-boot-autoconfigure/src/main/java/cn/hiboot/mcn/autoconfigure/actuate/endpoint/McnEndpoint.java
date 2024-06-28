@@ -25,7 +25,7 @@ public class McnEndpoint {
 
     @ReadOperation
     public RestResp<String> version() {
-        return new RestResp<>(environment.getProperty("mcn.version","UN_KNOW"));
+        return new RestResp<>(environment.getProperty("mcn.version", "UN_KNOW"));
     }
 
     @ReadOperation
@@ -34,17 +34,17 @@ public class McnEndpoint {
     }
 
     @WriteOperation
-    public RestResp<?> add(String name,Object value) {
-        return new RestResp<>(doAction(mapPropertySource -> mapPropertySource.getSource().put(name,value)));
+    public RestResp<Object> add(String name, Object value) {
+        return new RestResp<>(doAction(mapPropertySource -> mapPropertySource.getSource().put(name, value)));
     }
 
-    private Object doAction(Function<MapPropertySource,Object> function){
+    private Object doAction(Function<MapPropertySource, Object> function) {
         MapPropertySource mapPropertySource = (MapPropertySource) environment.getPropertySources().get(ConfigProperties.MCN_MAP_PROPERTY_SOURCE_NAME);
         return function.apply(mapPropertySource);
     }
 
     @DeleteOperation
-    public RestResp<?> delete(@Selector String name) {
+    public RestResp<Object> delete(@Selector String name) {
         return new RestResp<>(doAction(mapPropertySource -> mapPropertySource.getSource().remove(name)));
     }
 

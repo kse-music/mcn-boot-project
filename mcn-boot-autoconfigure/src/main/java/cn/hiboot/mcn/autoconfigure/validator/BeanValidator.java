@@ -16,7 +16,7 @@ import java.util.Set;
  */
 public abstract class BeanValidator {
 
-    private static volatile Validator validator;
+    private static Validator validator;
 
     public static <T> void validate(T object) {
         //获得验证器
