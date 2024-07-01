@@ -9,52 +9,44 @@ import java.util.function.Function;
 
 /**
  * 批量异步执行器
+ * 默认异步执行所有任务,等待所有任务结束并自动关闭线程池
  *
  * @author DingHao
  * @since 2020/11/16 15:46
  */
-public class TaskExecutor<T> {
+public final class TaskExecutor<T> {
 
     private final TaskThreadPool taskThreadPool;
     private final Iterable<T> iterable;
-    private final int perBatchSize;
+    private final int batchSize;
+    private final boolean autoShutdown;
 
-    public TaskExecutor(Iterable<T> iterable) {
-        this(iterable, 1000);
-    }
-
-    public TaskExecutor(Iterable<T> iterable, int perBatchSize) {
-        this(iterable, TaskThreadPool.builder().shutdownUntilFinish(true).build(), perBatchSize);
-    }
-
-    public TaskExecutor(Iterable<T> iterable, TaskThreadPool taskThreadPool, int perBatchSize) {
+    private TaskExecutor(Iterable<T> iterable, TaskThreadPool taskThreadPool, int batchSize, boolean autoShutdown) {
         this.iterable = iterable;
-        this.perBatchSize = perBatchSize;
+        this.batchSize = batchSize;
         this.taskThreadPool = taskThreadPool;
+        this.autoShutdown = autoShutdown;
     }
 
     public void execute(Consumer<List<T>> consumer) {
-        execute(Function.identity(), consumer);
+        execute(consumer, null);
     }
 
-    public <S> void execute(Function<T, S> converter, Consumer<List<S>> consumer) {
-        execute(converter, consumer, false);
-    }
-
-    public <S> void execute(Function<T, S> converter, Consumer<List<S>> consumer, boolean nullBreak) {
-        McnAssert.notNull(converter, "converter must not be null");
+    @SuppressWarnings("unchecked")
+    public <S> void execute(Consumer<List<S>> consumer, Function<T, S> converter) {
         McnAssert.notNull(consumer, "consumer must not be null");
-        List<S> data = new ArrayList<>(perBatchSize);
-        for (T t : iterable) {
-            S apply = converter.apply(t);
-            if (apply == null) {
-                if (nullBreak) {
-                    break;
+        List<S> data = new ArrayList<>(this.batchSize);
+        for (T t : this.iterable) {
+            if (converter == null) {
+                data.add((S) t);
+            } else {
+                S result = converter.apply(t);
+                if (result == null) {
+                    continue;
                 }
-                continue;
+                data.add(result);
             }
-            data.add(apply);
-            if (data.size() == perBatchSize) {
+            if (data.size() == this.batchSize) {
                 doExecute(data, consumer);
                 data = new ArrayList<>();
             }
@@ -62,17 +54,62 @@ public class TaskExecutor<T> {
         if (!data.isEmpty()) {
             doExecute(data, consumer);
         }
-        if (taskThreadPool != null) {
-            taskThreadPool.shutdown();
+        if (this.taskThreadPool != null && autoShutdown) {
+            this.taskThreadPool.shutdown();
         }
     }
 
     private <S> void doExecute(List<S> data, Consumer<List<S>> consumer) {
-        if (taskThreadPool == null) {
+        if (this.taskThreadPool == null) {
             consumer.accept(data);
             return;
         }
-        taskThreadPool.execute(() -> consumer.accept(data));
+        this.taskThreadPool.execute(() -> consumer.accept(data));
+    }
+
+    public static <B> Builder<B> data(Iterable<B> iterable) {
+        return new Builder<>(iterable);
+    }
+
+    public static class Builder<B> {
+
+        private TaskThreadPool taskThreadPool = TaskThreadPool.builder().build();
+        private final Iterable<B> iterable;
+        private int batchSize = 1000;
+        private boolean autoShutdown = true;
+        private boolean shutdownUntilFinish = true;
+
+        private Builder(Iterable<B> iterable) {
+            this.iterable = iterable;
+        }
+
+        public Builder<B> taskThreadPool(TaskThreadPool taskThreadPool) {
+            this.taskThreadPool = taskThreadPool;
+            return this;
+        }
+
+        public Builder<B> batchSize(int batchSize) {
+            this.batchSize = batchSize;
+            return this;
+        }
+
+        public Builder<B> autoShutdown(boolean autoShutdown) {
+            this.autoShutdown = autoShutdown;
+            return this;
+        }
+
+        public Builder<B> shutdownUntilFinish(boolean shutdownUntilFinish) {
+            this.shutdownUntilFinish = shutdownUntilFinish;
+            return this;
+        }
+
+        public TaskExecutor<B> build() {
+            if (this.taskThreadPool != null) {
+                this.taskThreadPool.shutdownUntilFinish = this.shutdownUntilFinish;
+            }
+            return new TaskExecutor<>(this.iterable, this.taskThreadPool, this.batchSize, this.autoShutdown);
+        }
+
     }
 
 }
