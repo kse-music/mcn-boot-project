@@ -77,7 +77,7 @@ public class RestResp<T> implements HttpTime {
 		this.data = data;
 	}
 
-    public RestResp(T data, long count) {
+    public RestResp(T data, Long count) {
         this(data);
         this.count = count;
     }
@@ -132,7 +132,7 @@ public class RestResp<T> implements HttpTime {
         return count;
     }
 
-    public void setCount(long count) {
+    public void setCount(Long count) {
         this.count = count;
     }
 
