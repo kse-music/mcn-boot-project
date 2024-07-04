@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public final class TaskThreadPool extends ThreadPoolExecutor {
 
-    boolean shutdownUntilFinish = false;
+    private boolean shutdownUntilAllTaskComplete = false;
 
     private TaskThreadPool(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit, BlockingQueue<Runnable> workQueue, ThreadFactory threadFactory, RejectedExecutionHandler handler) {
         super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, threadFactory, handler);
@@ -22,7 +22,7 @@ public final class TaskThreadPool extends ThreadPoolExecutor {
     @Override
     public void shutdown() {
         super.shutdown();
-        if (shutdownUntilFinish) {
+        if (shutdownUntilAllTaskComplete) {
             McnUtils.loopEnd(this::isTerminated);
         }
     }
@@ -47,7 +47,7 @@ public final class TaskThreadPool extends ThreadPoolExecutor {
 
         private String threadNamePrefix = "BatchTask";
 
-        private boolean shutdownUntilFinish = false;
+        private boolean shutdownUntilAllTaskComplete = false;
 
         public Builder handler(RejectedExecutionHandler handler) {
             this.handler = handler;
@@ -79,8 +79,8 @@ public final class TaskThreadPool extends ThreadPoolExecutor {
             return this;
         }
 
-        public Builder shutdownUntilFinish(boolean shutdownUntilFinish) {
-            this.shutdownUntilFinish = shutdownUntilFinish;
+        public Builder shutdownUntilAllTaskComplete(boolean shutdownUntilAllTaskComplete) {
+            this.shutdownUntilAllTaskComplete = shutdownUntilAllTaskComplete;
             return this;
         }
 
@@ -94,7 +94,7 @@ public final class TaskThreadPool extends ThreadPoolExecutor {
                     new TaskThreadFactory(threadNamePrefix),
                     handler
             );
-            taskThreadPool.shutdownUntilFinish = shutdownUntilFinish;
+            taskThreadPool.shutdownUntilAllTaskComplete = shutdownUntilAllTaskComplete;
             return taskThreadPool;
         }
 

@@ -4,39 +4,46 @@ import cn.hiboot.mcn.core.util.McnAssert;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorCompletionService;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
- * 批量异步执行器
- * 默认异步执行所有任务,等待所有任务结束并自动关闭线程池
+ * 批量异步任务执行器
  *
  * @author DingHao
  * @since 2020/11/16 15:46
  */
-public final class TaskExecutor<T> {
+public final class TaskExecutor {
 
-    private final TaskThreadPool taskThreadPool;
-    private final Iterable<T> iterable;
+    private TaskThreadPool taskThreadPool;
     private final int batchSize;
     private final boolean autoShutdown;
+    private final boolean waitAllTaskComplete;
+    private ExecutorCompletionService<Void> completionService;
 
-    private TaskExecutor(Iterable<T> iterable, TaskThreadPool taskThreadPool, int batchSize, boolean autoShutdown) {
-        this.iterable = iterable;
+    private TaskExecutor(TaskThreadPool taskThreadPool, int batchSize, boolean autoShutdown, boolean waitAllTaskComplete) {
         this.batchSize = batchSize;
         this.taskThreadPool = taskThreadPool;
         this.autoShutdown = autoShutdown;
+        this.waitAllTaskComplete = waitAllTaskComplete;
+        if (taskThreadPool != null) {
+            this.completionService = new ExecutorCompletionService<>(this.taskThreadPool);
+        }
     }
 
-    public void execute(Consumer<List<T>> consumer) {
-        execute(consumer, null);
+    public <T> void execute(Iterable<T> datum, Consumer<List<T>> consumer) {
+        execute(datum, consumer, null);
     }
 
     @SuppressWarnings("unchecked")
-    public <S> void execute(Consumer<List<S>> consumer, Function<T, S> converter) {
+    public <T, S> void execute(Iterable<T> datum, Consumer<List<S>> consumer, Function<T, S> converter) {
+        McnAssert.notNull(datum, "datum must not be null");
         McnAssert.notNull(consumer, "consumer must not be null");
         List<S> data = new ArrayList<>(this.batchSize);
-        for (T t : this.iterable) {
+        int taskCount = 0;
+        for (T t : datum) {
             if (converter == null) {
                 data.add((S) t);
             } else {
@@ -47,67 +54,81 @@ public final class TaskExecutor<T> {
                 data.add(result);
             }
             if (data.size() == this.batchSize) {
-                doExecute(data, consumer);
+                submitTask(data, consumer);
                 data = new ArrayList<>();
+                taskCount++;
             }
         }
         if (!data.isEmpty()) {
-            doExecute(data, consumer);
+            submitTask(data, consumer);
+            taskCount++;
         }
-        if (this.taskThreadPool != null && autoShutdown) {
-            this.taskThreadPool.shutdown();
+        if (this.taskThreadPool != null) {
+            if (this.waitAllTaskComplete) {
+                waitForAllTasks(taskCount);
+            }
+            if (this.autoShutdown) {
+                this.taskThreadPool.shutdown();
+                this.taskThreadPool = null;
+            }
         }
     }
 
-    private <S> void doExecute(List<S> data, Consumer<List<S>> consumer) {
+    private void waitForAllTasks(int taskCount) {
+        try {
+            for (int i = 0; i < taskCount; i++) {
+                this.completionService.take().get();
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Error while waiting for tasks to complete", e);
+        }
+    }
+
+    private <S> void submitTask(List<S> data, Consumer<List<S>> consumer) {
         if (this.taskThreadPool == null) {
             consumer.accept(data);
-            return;
+        } else {
+            this.completionService.submit(() -> {
+                consumer.accept(data);
+                return null;
+            });
         }
-        this.taskThreadPool.execute(() -> consumer.accept(data));
     }
 
-    public static <B> Builder<B> data(Iterable<B> iterable) {
-        return new Builder<>(iterable);
+    public static Builder builder() {
+        return new Builder();
     }
 
-    public static class Builder<B> {
+    public static class Builder {
 
         private TaskThreadPool taskThreadPool = TaskThreadPool.builder().build();
-        private final Iterable<B> iterable;
         private int batchSize = 1000;
-        private boolean autoShutdown = true;
-        private boolean shutdownUntilFinish = true;
+        private boolean autoShutdown = false;
+        private boolean waitAllTaskComplete = false;
 
-        private Builder(Iterable<B> iterable) {
-            this.iterable = iterable;
-        }
-
-        public Builder<B> taskThreadPool(TaskThreadPool taskThreadPool) {
+        public Builder taskThreadPool(TaskThreadPool taskThreadPool) {
             this.taskThreadPool = taskThreadPool;
             return this;
         }
 
-        public Builder<B> batchSize(int batchSize) {
+        public Builder batchSize(int batchSize) {
             this.batchSize = batchSize;
             return this;
         }
 
-        public Builder<B> autoShutdown(boolean autoShutdown) {
+        public Builder autoShutdown(boolean autoShutdown) {
             this.autoShutdown = autoShutdown;
             return this;
         }
 
-        public Builder<B> shutdownUntilFinish(boolean shutdownUntilFinish) {
-            this.shutdownUntilFinish = shutdownUntilFinish;
+        public Builder waitAllTaskComplete(boolean waitAllTaskComplete) {
+            this.waitAllTaskComplete = waitAllTaskComplete;
             return this;
         }
 
-        public TaskExecutor<B> build() {
-            if (this.taskThreadPool != null) {
-                this.taskThreadPool.shutdownUntilFinish = this.shutdownUntilFinish;
-            }
-            return new TaskExecutor<>(this.iterable, this.taskThreadPool, this.batchSize, this.autoShutdown);
+        public TaskExecutor build() {
+            return new TaskExecutor(this.taskThreadPool, this.batchSize, this.autoShutdown, this.waitAllTaskComplete);
         }
 
     }
