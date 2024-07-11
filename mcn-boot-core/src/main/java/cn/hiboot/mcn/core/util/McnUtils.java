@@ -12,6 +12,8 @@ import java.lang.reflect.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.charset.Charset;
+import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -648,6 +650,28 @@ public abstract class McnUtils {
             TimeUnit.MILLISECONDS.sleep(timeout);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public static Charset getEncoding(String filepath) {
+        EncodingDetect encodingDetect = new EncodingDetect();
+        return forName(encodingDetect.getEncoding(filepath));
+    }
+
+    public static Charset getEncoding(InputStream inputStream) throws IOException {
+        return getEncoding(copyToByteArray(inputStream));
+    }
+
+    public static Charset getEncoding(byte[] bytes) {
+        EncodingDetect encodingDetect = new EncodingDetect();
+        return forName(encodingDetect.getEncoding(bytes));
+    }
+
+    public static Charset forName(String charsetName) {
+        try {
+            return Charset.forName(charsetName);
+        } catch (IllegalCharsetNameException icne) {
+            return StandardCharsets.UTF_8;
         }
     }
 
