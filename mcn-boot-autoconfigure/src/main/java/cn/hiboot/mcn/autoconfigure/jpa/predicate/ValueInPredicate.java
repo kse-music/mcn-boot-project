@@ -1,12 +1,12 @@
 package cn.hiboot.mcn.autoconfigure.jpa.predicate;
 
 import cn.hiboot.mcn.autoconfigure.jpa.AbstractPredicateProvider;
-import cn.hiboot.mcn.core.util.McnUtils;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * ValueInPredicate
@@ -25,7 +25,7 @@ public class ValueInPredicate<T, E> extends AbstractPredicateProvider<T> {
 
     @Override
     public boolean isValid() {
-        return McnUtils.isNotNullAndEmpty(valueList);
+        return Objects.nonNull(valueList);
     }
 
     @Override

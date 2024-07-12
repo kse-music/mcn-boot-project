@@ -32,7 +32,7 @@ public class DateBetweenPredicate<T> extends AbstractPredicateProvider<T> {
 
     @Override
     protected Predicate doGetPredicate(Root<T> root, CriteriaBuilder criteriaBuilder) {
-        return criteriaBuilder.between(root.get(getFieldName()),startTime,endTime);
+        return criteriaBuilder.between(root.get(getFieldName()), startTime, endTime);
     }
 
 }
