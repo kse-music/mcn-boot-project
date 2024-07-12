@@ -19,9 +19,9 @@
 | minio                                | minio.version                |     8.5.10      |
 | smart-doc                            | smart-doc.version            |      2.7.7      |
 | spring-boot-dependencies             | spring-boot.version          |      3.3.1      |
-| spring-cloud-dependencies            | spring-cloud.version         |    2023.0.2     |
+| spring-cloud-dependencies            | spring-cloud.version         |    2023.0.3     |
 | spring-cloud-alibaba-dependencies    | spring-cloud-alibaba.version |   2023.0.1.0    |
-| spring-cloud-huawei-bom              | spring-cloud-huawei.version  | 1.11.6-2023.0.x |
+| spring-cloud-huawei-bom              | spring-cloud-huawei.version  | 1.11.8-2023.0.x |
 | springdoc-openapi-starter-webmvc-ui  | springdoc.version            |      2.3.0      |
 | springdoc-openapi-starter-webflux-ui | springdoc.version            |      2.3.0      |
 | xxl-job-core                         | xxl-job.version              |      2.4.1      |
