@@ -35,28 +35,28 @@ public class FieldLikePredicate<T> extends AbstractPredicateProvider<T> {
     @Override
     public Predicate doGetPredicate(Root<T> root, CriteriaBuilder criteriaBuilder) {
         String pattern;
-        if(prefix){
+        if (prefix) {
             pattern = LIKE + value;
-        }else if(suffix){
+        } else if (suffix) {
             pattern = value + LIKE;
-        }else {
+        } else {
             pattern = LIKE + value + LIKE;
         }
         Expression<String> as = root.get(getFieldName()).as(String.class);
-        return isNot ? criteriaBuilder.notLike(as,pattern):criteriaBuilder.like(as,pattern);
+        return isNot ? criteriaBuilder.notLike(as, pattern) : criteriaBuilder.like(as, pattern);
     }
 
-    public FieldLikePredicate<T> not(){
+    public FieldLikePredicate<T> not() {
         this.isNot = true;
         return this;
     }
 
-    private FieldLikePredicate<T> prefix(){
+    private FieldLikePredicate<T> prefix() {
         this.prefix = true;
         return this;
     }
 
-    private FieldLikePredicate<T> suffix(){
+    private FieldLikePredicate<T> suffix() {
         this.suffix = true;
         return this;
     }
