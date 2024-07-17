@@ -298,6 +298,14 @@ public abstract class McnUtils {
         return randomUUID().replace("-", "");
     }
 
+    public static long snowflakeId() {
+        return SnowflakeIdWorker.getInstance().nextId();
+    }
+
+    public static String snowflakeIdString() {
+        return SnowflakeIdWorker.getInstance().nextIdString();
+    }
+
     public static String getValueFromSystemEnvOrProp(String key) {
         String value = System.getenv(key);
         if (isNullOrEmpty(value)) {
