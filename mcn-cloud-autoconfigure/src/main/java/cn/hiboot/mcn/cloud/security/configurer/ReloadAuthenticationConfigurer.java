@@ -20,49 +20,56 @@ import java.util.Map;
  * @author DingHao
  * @since 2023/1/16 12:15
  */
-public class ReloadAuthenticationConfigurer extends AbstractHttpConfigurer<ReloadAuthenticationConfigurer, HttpSecurity> {
+public final class ReloadAuthenticationConfigurer extends AbstractHttpConfigurer<ReloadAuthenticationConfigurer, HttpSecurity> {
 
     @Override
-    public void configure(HttpSecurity http) throws Exception {
+    public void init(HttpSecurity http) throws Exception {
         ApplicationContext applicationContext = http.getSharedObject(ApplicationContext.class);
-        String[] authenticationReloadBeanNames = applicationContext.getBeanNamesForType(AuthenticationReload.class);
-        if (authenticationReloadBeanNames.length == 1) {
-            AuthenticationReload authenticationReload = applicationContext.getBean(authenticationReloadBeanNames[0], AuthenticationReload.class);
-            http.addFilterBefore((request, response, chain) -> {
-                reloadAuthentication(SecurityContextHolder.getContext(),authenticationReload);
-                chain.doFilter(request,response);
-            }, AnonymousAuthenticationFilter.class);
+        String[] beanNames = applicationContext.getBeanNamesForType(AuthenticationReload.class);
+        if (beanNames.length == 1) {
+            AuthenticationReload authenticationReload = applicationContext.getBean(beanNames[0], AuthenticationReload.class);
+            http.setSharedObject(AuthenticationReload.class, authenticationReload);
         }
     }
 
-    public static void reloadAuthentication(SecurityContext securityContext, AuthenticationReload authenticationReload){
-        if(securityContext == null || authenticationReload == null){
+    @Override
+    public void configure(HttpSecurity http) throws Exception {
+        AuthenticationReload authenticationReload = http.getSharedObject(AuthenticationReload.class);
+        if (authenticationReload == null) {
             return;
         }
+        http.addFilterBefore((request, response, chain) -> {
+            reloadAuthentication(SecurityContextHolder.getContext(), authenticationReload);
+            chain.doFilter(request, response);
+        }, AnonymousAuthenticationFilter.class);
+    }
+
+    public static void reloadAuthentication(SecurityContext securityContext, AuthenticationReload authenticationReload) {
         Authentication authentication = securityContext.getAuthentication();
-        if (authentication != null) {
-            Object principal = authentication.getPrincipal();
-            if (principal instanceof Map) {
-                @SuppressWarnings("unchecked")
-                Map<String, Object> oldPrincipal = (Map<String, Object>) principal;
-                Map<String, Object> newPrincipal = authenticationReload.reload(oldPrincipal);
-                if(newPrincipal != null){
-                    oldPrincipal.putAll(newPrincipal);
-                }
-            } else if (principal instanceof Jwt) {
-                Jwt jwt0 = (Jwt) principal;
-                Map<String, Object> oldPrincipal = jwt0.getClaimAsMap(SessionHolder.USER_NAME);
-                Map<String, Object> newPrincipal = authenticationReload.reload(oldPrincipal);
-                if(newPrincipal != null){
-                    oldPrincipal.putAll(newPrincipal);
-                    Map<String,Object> claims = new HashMap<>(jwt0.getClaims());
-                    claims.put(SessionHolder.USER_NAME,oldPrincipal);
-                    JwtAuthenticationToken jwtAuthenticationToken = (JwtAuthenticationToken)authentication;
-                    Jwt jwt = new Jwt(jwt0.getTokenValue(),jwt0.getIssuedAt(),jwt0.getExpiresAt(),jwt0.getHeaders(),claims);
-                    JwtAuthenticationToken authenticationToken = new JwtAuthenticationToken(jwt,jwtAuthenticationToken.getAuthorities());
-                    authenticationToken.setDetails(jwtAuthenticationToken.getDetails());
-                    securityContext.setAuthentication(authenticationToken);
-                }
+        if (authentication == null) {
+            return;
+        }
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof Map) {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> oldPrincipal = (Map<String, Object>) principal;
+            Map<String, Object> newPrincipal = authenticationReload.reload(oldPrincipal);
+            if (newPrincipal != null) {
+                oldPrincipal.putAll(newPrincipal);
+            }
+        } else if (principal instanceof Jwt) {
+            Jwt jwt = (Jwt) principal;
+            Map<String, Object> oldPrincipal = jwt.getClaimAsMap(SessionHolder.USER_NAME);
+            Map<String, Object> newPrincipal = authenticationReload.reload(oldPrincipal);
+            if (newPrincipal != null) {
+                oldPrincipal.putAll(newPrincipal);
+                Map<String, Object> claims = new HashMap<>(jwt.getClaims());
+                claims.put(SessionHolder.USER_NAME, oldPrincipal);
+                JwtAuthenticationToken jwtAuthenticationToken = (JwtAuthenticationToken) authentication;
+                Jwt newJwt = new Jwt(jwt.getTokenValue(), jwt.getIssuedAt(), jwt.getExpiresAt(), jwt.getHeaders(), claims);
+                JwtAuthenticationToken authenticationToken = new JwtAuthenticationToken(newJwt, jwtAuthenticationToken.getAuthorities());
+                authenticationToken.setDetails(jwtAuthenticationToken.getDetails());
+                securityContext.setAuthentication(authenticationToken);
             }
         }
     }
