@@ -18,7 +18,7 @@
 | mybatis-spring-boot-starter          | mybatis-spring-boot.version  |      3.0.3      |
 | minio                                | minio.version                |     8.5.10      |
 | smart-doc                            | smart-doc.version            |      2.7.7      |
-| spring-boot-dependencies             | spring-boot.version          |      3.3.1      |
+| spring-boot-dependencies             | spring-boot.version          |      3.3.2      |
 | spring-cloud-dependencies            | spring-cloud.version         |    2023.0.3     |
 | spring-cloud-alibaba-dependencies    | spring-cloud-alibaba.version |   2023.0.1.0    |
 | spring-cloud-huawei-bom              | spring-cloud-huawei.version  | 1.11.8-2023.0.x |
