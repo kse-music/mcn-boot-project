@@ -336,4 +336,8 @@ public interface Minio {
         }
     }
 
+    FileUploadInfo upload(FileUploadInfo fileUploadInfo);
+
+    FileUploadInfo merge(FileUploadInfo fileUploadInfo);
+
 }
