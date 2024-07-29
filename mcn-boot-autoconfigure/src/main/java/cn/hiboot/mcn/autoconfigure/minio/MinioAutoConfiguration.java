@@ -55,9 +55,16 @@ public class MinioAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public Minio minio(DefaultMinioClient minioClient){
-        return new DefaultMinio(minioClient);
+    public Minio minio(DefaultMinioClient minioClient, FileUploadInfoCache fileUploadInfoCache){
+        return new DefaultMinio(minioClient, fileUploadInfoCache);
     }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public FileUploadInfoCache fileUploadInfoCache(){
+        return new DefaultFileUploadInfoCache();
+    }
+
 
     @Configuration(proxyBeanMethods = false)
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
