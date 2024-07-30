@@ -2,29 +2,20 @@ package cn.hiboot.mcn.autoconfigure.minio;
 
 import io.minio.MinioAsyncClient;
 import io.minio.MinioClient;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
+import org.springframework.boot.autoconfigure.jdbc.JdbcTemplateAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.Ordered;
-import org.springframework.web.HttpRequestHandler;
-import org.springframework.web.servlet.DispatcherServlet;
-import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
+import org.springframework.jdbc.core.JdbcTemplate;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.Collections;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Minio文件上传
@@ -32,7 +23,7 @@ import java.util.Collections;
  * @author DingHao
  * @since 2021/6/28 22:02
  */
-@AutoConfiguration
+@AutoConfiguration(after = JdbcTemplateAutoConfiguration.class)
 @ConditionalOnClass(MinioClient.class)
 @EnableConfigurationProperties(MinioProperties.class)
 public class MinioAutoConfiguration {
@@ -59,52 +50,68 @@ public class MinioAutoConfiguration {
         return new DefaultMinio(minioClient, fileUploadInfoCache);
     }
 
-    @Bean
-    @ConditionalOnMissingBean
-    public FileUploadInfoCache fileUploadInfoCache(){
-        return new DefaultFileUploadInfoCache();
-    }
-
-
     @Configuration(proxyBeanMethods = false)
-    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
-    @ConditionalOnBean(DispatcherServlet.class)
-    static class PreviewImage{
-
-        @Autowired
-        private Minio minio;
+    @ConditionalOnMissingClass("org.springframework.jdbc.core.JdbcTemplate")
+    @ConditionalOnMissingBean(FileUploadInfoCache.class)
+    protected static class DefaultFileUploadInfoCacheConfig {
 
         @Bean
-        public SimpleUrlHandlerMapping simpleUrlHandlerMapping(){
-            return new SimpleUrlHandlerMapping(Collections.singletonMap("_imagePreview",new PreviewImageRequestHandler(minio)), Ordered.LOWEST_PRECEDENCE - 2);
+        public FileUploadInfoCache defaultFileUploadInfoCache(){
+            return new DefaultFileUploadInfoCache();
         }
 
-        private static class PreviewImageRequestHandler implements HttpRequestHandler {
-            private final Minio minio;
+    }
 
-            public PreviewImageRequestHandler(Minio minio) {
-                this.minio = minio;
-            }
+    @Configuration(proxyBeanMethods = false)
+    @ConditionalOnBean(JdbcTemplate.class)
+    @ConditionalOnMissingBean(FileUploadInfoCache.class)
+    static class JdbcFileUploadInfoCache implements FileUploadInfoCache {
 
-            @Override
-            public void handleRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-                OutputStream os = null;
-                try {
-                    BufferedImage image = ImageIO.read(minio.getObject(request.getParameter(minio.getMinioClient().getConfig().getPreviewImageParameterName())));
-                    response.setContentType("image/png");
-                    os = response.getOutputStream();
-                    if (image != null) {
-                        ImageIO.write(image, "png", os);
-                    }
-                } catch (IOException e) {
-                    //
-                } finally {
-                    if (os != null) {
-                        os.flush();
-                        os.close();
-                    }
+        private static final String SELECT_SQL = "SELECT * FROM c_files WHERE md5 = ?";
+        private static final String INSERT_SQL = "INSERT INTO c_files (upload_id, md5, filename, upload_urls, chunk_num) VALUES (?, ?, ?, ?, ?)";
+        private static final String UPDATE_SQL = "UPDATE c_files SET upload_urls = ? WHERE md5 = ?";
+        private static final String DELETE_SQL = "DELETE FROM c_files WHERE md5 = ?";
+        private final JdbcTemplate jdbcTemplate;
+
+        public JdbcFileUploadInfoCache(JdbcTemplate jdbcTemplate) {
+            this.jdbcTemplate = jdbcTemplate;
+        }
+
+        @Override
+        public FileUploadInfo get(FileUploadInfo fileUploadInfo) {
+            List<FileUploadInfo> result = jdbcTemplate.query(SELECT_SQL, (rs, rowNum) -> {
+                FileUploadInfo f = new FileUploadInfo();
+                f.setChunkNum(rs.getInt("chunk_num"));
+                f.setMd5(rs.getString("md5"));
+                f.setUploadId(rs.getString("upload_id"));
+                f.setFilename(rs.getString("filename"));
+                String urls = rs.getString("upload_urls");
+                if (urls != null) {
+                    f.setUploadUrls(Arrays.asList(urls.split(",")));
                 }
+                return f;
+            }, fileUploadInfo.getMd5());
+            if (result.isEmpty()) {
+                return null;
             }
+            return result.get(0);
+        }
+
+        @Override
+        public void put(FileUploadInfo fileUploadInfo) {
+            FileUploadInfo uploadInfo = get(fileUploadInfo);
+            String uploadUrls = null;
+            if (uploadInfo == null) {
+                uploadUrls = String.join(",", fileUploadInfo.getUploadUrls());
+                jdbcTemplate.update(INSERT_SQL, fileUploadInfo.getUploadId(), fileUploadInfo.getMd5(), fileUploadInfo.getFilename(), uploadUrls, fileUploadInfo.getChunkNum());
+            } else {
+                jdbcTemplate.update(UPDATE_SQL, uploadUrls, fileUploadInfo.getMd5());
+            }
+        }
+
+        @Override
+        public void remove(FileUploadInfo fileUploadInfo) {
+            jdbcTemplate.update(DELETE_SQL, fileUploadInfo.getMd5());
         }
 
     }
