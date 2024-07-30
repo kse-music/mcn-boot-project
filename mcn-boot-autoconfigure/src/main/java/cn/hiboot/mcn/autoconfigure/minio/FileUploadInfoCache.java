@@ -8,6 +8,8 @@ package cn.hiboot.mcn.autoconfigure.minio;
  */
 public interface FileUploadInfoCache {
 
+    FileUploadInfo get(String filename);
+
     FileUploadInfo get(FileUploadInfo fileUploadInfo);
 
     void put(FileUploadInfo fileUploadInfo);
