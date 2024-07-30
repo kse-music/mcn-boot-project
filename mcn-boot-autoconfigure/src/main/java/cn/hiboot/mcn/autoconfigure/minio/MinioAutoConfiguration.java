@@ -78,8 +78,17 @@ public class MinioAutoConfiguration {
         }
 
         @Override
+        public FileUploadInfo get(String filename) {
+            return get("SELECT * FROM c_files WHERE filename = ?", filename);
+        }
+
+        @Override
         public FileUploadInfo get(FileUploadInfo fileUploadInfo) {
-            List<FileUploadInfo> result = jdbcTemplate.query(SELECT_SQL, (rs, rowNum) -> {
+            return get(SELECT_SQL, fileUploadInfo.getMd5());
+        }
+
+        private FileUploadInfo get(String sql, String value) {
+            List<FileUploadInfo> result = jdbcTemplate.query(sql, (rs, rowNum) -> {
                 FileUploadInfo f = new FileUploadInfo();
                 f.setChunkNum(rs.getInt("chunk_num"));
                 f.setMd5(rs.getString("md5"));
@@ -90,7 +99,7 @@ public class MinioAutoConfiguration {
                     f.setUploadUrls(Arrays.asList(urls.split(",")));
                 }
                 return f;
-            }, fileUploadInfo.getMd5());
+            }, value);
             if (result.isEmpty()) {
                 return null;
             }

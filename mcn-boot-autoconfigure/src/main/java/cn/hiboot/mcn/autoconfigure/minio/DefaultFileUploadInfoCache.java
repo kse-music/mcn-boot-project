@@ -14,6 +14,11 @@ public class DefaultFileUploadInfoCache implements FileUploadInfoCache {
     private final Map<String, FileUploadInfo> cache = new ConcurrentHashMap<>();
 
     @Override
+    public FileUploadInfo get(String filename) {
+        return cache.entrySet().stream().filter(entry -> entry.getValue().getFilename().equals(filename)).findFirst().map(Map.Entry::getValue).orElse(null);
+    }
+
+    @Override
     public FileUploadInfo get(FileUploadInfo fileUploadInfo) {
         return cache.get(fileUploadInfo.getMd5());
     }
