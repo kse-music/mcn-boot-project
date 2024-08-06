@@ -55,7 +55,7 @@ public final class TaskExecutor {
             }
             if (data.size() == this.batchSize) {
                 submitTask(data, consumer);
-                data = new ArrayList<>();
+                data = new ArrayList<>(this.batchSize);
                 taskCount++;
             }
         }
@@ -94,6 +94,10 @@ public final class TaskExecutor {
                 return null;
             });
         }
+    }
+
+    public void close() {
+        this.taskThreadPool.shutdown();
     }
 
     public static Builder builder() {
