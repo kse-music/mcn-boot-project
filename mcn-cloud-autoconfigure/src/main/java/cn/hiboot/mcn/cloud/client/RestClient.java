@@ -15,6 +15,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * RestClient
@@ -25,7 +26,8 @@ import java.util.function.Consumer;
 public class RestClient {
 
     protected final Logger log = LoggerFactory.getLogger(RestClient.class);
-    private Class<?> wrapperClass = RestResp.class;
+    private final Class<?> wrapperClass;
+    private final Function<Object, Object> extractData;
     private final RestTemplate restTemplate;
 
     public RestClient() {
@@ -33,17 +35,17 @@ public class RestClient {
     }
 
     public RestClient(RestTemplate restTemplate) {
+        this(RestResp.class, null, restTemplate);
+    }
+
+    public RestClient(Class<?> wrapperClass, Function<Object, Object> extractData) {
+        this(wrapperClass, extractData, new RestTemplate());
+    }
+
+    public RestClient(Class<?> wrapperClass, Function<Object, Object> extractData, RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
-    }
-
-    protected RestClient(Class<?> wrapperClass) {
-        this();
         this.wrapperClass = wrapperClass;
-    }
-
-    protected RestClient(Class<?> wrapperClass, RestTemplate restTemplate) {
-        this(restTemplate);
-        this.wrapperClass = wrapperClass;
+        this.extractData = extractData;
     }
 
     public <D> D getObject(String url, Class<D> resultClass) {
@@ -59,7 +61,7 @@ public class RestClient {
     }
 
     public <D> D getObject(String url, Class<D> resultClass, Consumer<HttpHeaders> consumer, Map<String, Object> uriVariables) {
-        return get(url, forClass(resultClass), consumer, uriVariables);
+        return get(url, ResolvableType.forClass(resultClass), consumer, uriVariables);
     }
 
     public Map<String, Object> getMap(String url) {
@@ -131,7 +133,7 @@ public class RestClient {
     }
 
     public <K, V> List<Map<K, V>> getListMap(String url, Class<K> key, Class<V> value, Consumer<HttpHeaders> consumer, Map<String, Object> uriVariables) {
-        return get(url, forClassWithGenerics(List.class, forClassWithGenerics(Map.class, key, value)), consumer, uriVariables);
+        return get(url, ResolvableType.forClassWithGenerics(List.class, forClassWithGenerics(Map.class, key, value)), consumer, uriVariables);
     }
 
     public <D> D get(String url, ResolvableType resultType, Map<String, Object> uriVariables) {
@@ -146,15 +148,7 @@ public class RestClient {
         return exchange(url, HttpMethod.GET, consumer, resultType, null, uriVariables);
     }
 
-    private ResolvableType forClass(Class<?> clazz) {
-        return ResolvableType.forClass(clazz);
-    }
-
     private ResolvableType forClassWithGenerics(Class<?> clazz, Class<?>... generics) {
-        return ResolvableType.forClassWithGenerics(clazz, generics);
-    }
-
-    private ResolvableType forClassWithGenerics(Class<?> clazz, ResolvableType... generics) {
         return ResolvableType.forClassWithGenerics(clazz, generics);
     }
 
@@ -171,7 +165,7 @@ public class RestClient {
     }
 
     public <A, D> D postObject(String url, Class<D> resultClass, A requestBody, Consumer<HttpHeaders> consumer, Map<String, Object> uriVariables) {
-        return post(url, forClass(resultClass), requestBody, consumer, uriVariables);
+        return post(url, ResolvableType.forClass(resultClass), requestBody, consumer, uriVariables);
     }
 
     public <A> Map<String, Object> postMap(String url, A requestBody) {
@@ -243,7 +237,7 @@ public class RestClient {
     }
 
     public <A, K, V> List<Map<K, V>> postListMap(String url, Class<K> key, Class<V> value, A requestBody, Consumer<HttpHeaders> consumer, Map<String, Object> uriVariables) {
-        return post(url, forClassWithGenerics(List.class, forClassWithGenerics(Map.class, key, value)), requestBody, consumer, uriVariables);
+        return post(url, ResolvableType.forClassWithGenerics(List.class, forClassWithGenerics(Map.class, key, value)), requestBody, consumer, uriVariables);
     }
 
     public <A, D> D post(String url, ResolvableType resultType, A requestBody, Consumer<HttpHeaders> consumer) {
@@ -262,6 +256,10 @@ public class RestClient {
         return doExchange(url, method, headersConsumer, resultType, requestBody, uriVariables);
     }
 
+    private ResolvableType resultClass(ResolvableType resultType) {
+        return this.wrapperClass == null ? resultType : ResolvableType.forClassWithGenerics(this.wrapperClass, resultType);
+    }
+
     private <A, D, W> D doExchange(String url, HttpMethod method, Consumer<HttpHeaders> headersConsumer, ResolvableType resultType, A requestBody, Map<String, ?> uriVariables) {
         if (uriVariables == null) {
             uriVariables = Collections.emptyMap();
@@ -275,7 +273,7 @@ public class RestClient {
         ResponseEntity<W> response;
         try {
             response = restTemplate.exchange(url, method, new HttpEntity<>(requestBody, headers),
-                    ParameterizedTypeReference.forType(ResolvableType.forClassWithGenerics(wrapperClass, resultType).getType()), uriVariables);
+                    ParameterizedTypeReference.forType(resultClass(resultType).getType()), uriVariables);
             if (log.isDebugEnabled()) {
                 log.debug("url={}, cost time={}ms, inputParam={}", url, System.currentTimeMillis() - startTime, requestBody);
             }
@@ -306,13 +304,16 @@ public class RestClient {
         }
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings("unchecked")
     protected <D, W> D extractData(W body) {
-        RestResp restResp = (RestResp) body;
+        if (this.extractData != null) {
+            return (D) this.extractData.apply(body);
+        }
+        RestResp<D> restResp = (RestResp<D>) body;
         if (restResp.isFailed()) {
             throw ServiceException.newInstance(ExceptionKeys.REMOTE_SERVICE_ERROR, restResp.getErrorInfo());
         }
-        return (D) restResp.getData();
+        return restResp.getData();
     }
 
 }
