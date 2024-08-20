@@ -74,10 +74,9 @@ public class DefaultMinio implements Minio {
         }
         infoCache.setUploadUrls(null);
         String uploadId = infoCache.getUploadId();
-        if (uploadId == null) {
-            return infoCache;
+        if (uploadId != null) {
+            mergeMultipartUpload(infoCache.getFilename(), uploadId);
         }
-        mergeMultipartUpload(infoCache.getFilename(), uploadId);
         fileUploadInfoCache.put(infoCache);
         return infoCache;
     }
