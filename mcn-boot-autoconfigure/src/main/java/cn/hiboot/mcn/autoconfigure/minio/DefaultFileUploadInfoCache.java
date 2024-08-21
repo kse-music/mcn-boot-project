@@ -1,7 +1,10 @@
 package cn.hiboot.mcn.autoconfigure.minio;
 
+import cn.hiboot.mcn.core.util.McnUtils;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 /**
  * DefaultFileUploadInfoCache
@@ -13,6 +16,12 @@ public class DefaultFileUploadInfoCache implements FileUploadInfoCache {
 
     private final Map<String, FileUploadInfo> cache = new ConcurrentHashMap<>();
 
+    private final MinioProperties config;
+
+    public DefaultFileUploadInfoCache(MinioProperties config) {
+        this.config = config;
+    }
+
     @Override
     public FileUploadInfo get(String filename) {
         return cache.entrySet().stream().filter(entry -> entry.getValue().getFilename().equals(filename)).findFirst().map(Map.Entry::getValue).orElse(null);
@@ -20,7 +29,14 @@ public class DefaultFileUploadInfoCache implements FileUploadInfoCache {
 
     @Override
     public FileUploadInfo get(FileUploadInfo fileUploadInfo) {
-        return cache.get(fileUploadInfo.getMd5());
+        FileUploadInfo f = cache.get(fileUploadInfo.getMd5());
+        long diffInMillis = McnUtils.now().getTime() - f.getCreateAt().getTime();
+        long diffInSeconds = TimeUnit.SECONDS.toHours(diffInMillis);
+        if (McnUtils.isNotNullAndEmpty(f.getUploadUrls()) && diffInSeconds > config.getExpire()) {
+            remove(f);
+            return null;
+        }
+        return f;
     }
 
     @Override
