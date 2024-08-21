@@ -1,5 +1,6 @@
 package cn.hiboot.mcn.autoconfigure.minio;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -8,7 +9,7 @@ import java.util.List;
  * @author DingHao
  * @since 2024/7/26 15:24
  */
-public class FileUploadInfo {
+public class FileUploadInfo{
 
     private Integer chunkNum;
 
@@ -19,6 +20,8 @@ public class FileUploadInfo {
     private String filename;
 
     private List<String> uploadUrls;
+
+    private Date createAt;
 
     public Integer getChunkNum() {
         return chunkNum;
@@ -60,4 +63,11 @@ public class FileUploadInfo {
         this.uploadUrls = uploadUrls;
     }
 
+    public Date getCreateAt() {
+        return createAt;
+    }
+
+    public void setCreateAt(Date createAt) {
+        this.createAt = createAt;
+    }
 }

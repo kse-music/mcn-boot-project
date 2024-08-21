@@ -1,5 +1,6 @@
 package cn.hiboot.mcn.autoconfigure.minio;
 
+import cn.hiboot.mcn.core.util.McnUtils;
 import io.minio.MinioAsyncClient;
 import io.minio.MinioClient;
 import org.springframework.beans.factory.ObjectProvider;
@@ -16,6 +17,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Minio文件上传
@@ -56,8 +58,8 @@ public class MinioAutoConfiguration {
     protected static class DefaultFileUploadInfoCacheConfig {
 
         @Bean
-        public FileUploadInfoCache defaultFileUploadInfoCache(){
-            return new DefaultFileUploadInfoCache();
+        public FileUploadInfoCache defaultFileUploadInfoCache(MinioProperties config){
+            return new DefaultFileUploadInfoCache(config);
         }
 
     }
@@ -72,9 +74,11 @@ public class MinioAutoConfiguration {
         private static final String UPDATE_SQL = "UPDATE c_files SET upload_urls = ? WHERE md5 = ?";
         private static final String DELETE_SQL = "DELETE FROM c_files WHERE md5 = ?";
         private final JdbcTemplate jdbcTemplate;
+        private final MinioProperties config;
 
-        public JdbcFileUploadInfoCache(JdbcTemplate jdbcTemplate) {
+        public JdbcFileUploadInfoCache(JdbcTemplate jdbcTemplate, MinioProperties config) {
             this.jdbcTemplate = jdbcTemplate;
+            this.config = config;
         }
 
         @Override
@@ -84,7 +88,16 @@ public class MinioAutoConfiguration {
 
         @Override
         public FileUploadInfo get(FileUploadInfo fileUploadInfo) {
-            return get(SELECT_SQL, fileUploadInfo.getMd5());
+            FileUploadInfo f = get(SELECT_SQL, fileUploadInfo.getMd5());
+            if (f != null) {
+                long diffInMillis = McnUtils.now().getTime() - f.getCreateAt().getTime();
+                long diffInSeconds = TimeUnit.MILLISECONDS.toSeconds(diffInMillis);
+                if (McnUtils.isNotNullAndEmpty(f.getUploadUrls()) && diffInSeconds > config.getExpire()) {
+                    remove(f);
+                    return null;
+                }
+            }
+            return f;
         }
 
         private FileUploadInfo get(String sql, String value) {
@@ -94,6 +107,7 @@ public class MinioAutoConfiguration {
                 f.setMd5(rs.getString("md5"));
                 f.setUploadId(rs.getString("upload_id"));
                 f.setFilename(rs.getString("filename"));
+                f.setCreateAt(rs.getTimestamp("create_at"));
                 String urls = rs.getString("upload_urls");
                 if (urls != null) {
                     f.setUploadUrls(Arrays.asList(urls.split(",")));
