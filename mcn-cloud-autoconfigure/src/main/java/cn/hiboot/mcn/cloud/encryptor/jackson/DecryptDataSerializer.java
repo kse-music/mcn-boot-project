@@ -27,7 +27,7 @@ public class DecryptDataSerializer extends StdDeserializer<Object> {
     private final TextEncryptor textEncryptor;
     private final ConversionService conversionService;
 
-    public DecryptDataSerializer(Class<?> type,Class<? extends DecryptDataConverter> converter) {
+    public DecryptDataSerializer(Class<?> type, Class<? extends DecryptDataConverter> converter) {
         super(type);
         this.textEncryptor = SpringBeanUtils.getBean(TextEncryptor.class);
         this.conversionService = SpringBeanUtils.getBean(ConversionService.class);
@@ -36,27 +36,28 @@ public class DecryptDataSerializer extends StdDeserializer<Object> {
 
     @Override
     public Object deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JacksonException {
-        if(converter != DecryptDataConverter.class){
+        if (converter != DecryptDataConverter.class) {
             try {
                 DecryptDataConverter decryptDataConverter = ReflectionUtils.accessibleConstructor(converter).newInstance();
-                return decryptDataConverter.apply(p,textEncryptor);
-            } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                throw ServiceException.newInstance("DecryptData Converter newInstance Failed",e);
-            } catch (IOException e){
-                throw ServiceException.newInstance("Jackson deserialize Failed",e);
-            } catch (Exception e){
-                throw ServiceException.newInstance("DecryptData Converter Failed",e);
+                return decryptDataConverter.apply(p, textEncryptor);
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
+                     NoSuchMethodException e) {
+                throw ServiceException.newInstance("DecryptData Converter newInstance Failed", e);
+            } catch (IOException e) {
+                throw ServiceException.newInstance("Jackson deserialize Failed", e);
+            } catch (Exception e) {
+                throw ServiceException.newInstance("DecryptData Converter Failed", e);
             }
         }
         String currentValue = p.getText();
-        if(ObjectUtils.isEmpty(currentValue)){
+        if (ObjectUtils.isEmpty(currentValue)) {
             return currentValue;
         }
-        try{
+        try {
             currentValue = textEncryptor.decrypt(currentValue);
-        }catch (Exception e){
+        } catch (Exception e) {
             //
         }
-        return conversionService.convert(currentValue,handledType());
+        return conversionService.convert(currentValue, handledType());
     }
 }

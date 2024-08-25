@@ -27,8 +27,8 @@ public class EncryptDecryptAnnotationIntrospector extends JacksonAnnotationIntro
     public Object findDeserializer(Annotated am) {
         Decrypt annotation = am.getAnnotation(Decrypt.class);
         if (annotation != null) {
-            if(am instanceof AnnotatedMethod annotatedMethod){
-                return new DecryptDataSerializer(annotatedMethod.getRawParameterType(0),annotation.converter());
+            if (am instanceof AnnotatedMethod annotatedMethod) {
+                return new DecryptDataSerializer(annotatedMethod.getRawParameterType(0), annotation.converter());
             }
         }
         return null;
