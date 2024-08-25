@@ -4,9 +4,9 @@ import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
@@ -30,16 +30,16 @@ public class NameValueProcessorJacksonConfig implements Jackson2ObjectMapperBuil
         this.delegateValueProcessor = new DelegateNameValueProcessor(valueProcessors);
     }
 
-    public static void setFeignRequest(){
+    public static void setFeignRequest() {
         feignRequest.set(true);
     }
 
-    public static void removeFeignRequest(){
+    public static void removeFeignRequest() {
         feignRequest.remove();
     }
 
-    private String clean(String name, String text){
-        if(feignRequest.get()){//don't deal feign request
+    private String clean(String name, String text) {
+        if (feignRequest.get()) {//don't deal feign request
             return text;
         }
         return delegateValueProcessor.process(name, text);
@@ -47,24 +47,16 @@ public class NameValueProcessorJacksonConfig implements Jackson2ObjectMapperBuil
 
     @Override
     public void customize(Jackson2ObjectMapperBuilder jacksonObjectMapperBuilder) {
-        jacksonObjectMapperBuilder.serializers(new JsonSerializer<String>(){
+        jacksonObjectMapperBuilder.serializers(new StdSerializer<String>(String.class) {
             @Override
             public void serialize(String value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
-                gen.writeString(clean(null,value));
-            }
-            @Override
-            public Class<String> handledType() {
-                return String.class;
+                gen.writeString(clean(null, value));
             }
         });
-        jacksonObjectMapperBuilder.deserializers( new JsonDeserializer<String>(){
+        jacksonObjectMapperBuilder.deserializers(new StdDeserializer<String>(String.class) {
             @Override
             public String deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JacksonException {
-                return clean(p.currentName(),p.getText());
-            }
-            @Override
-            public Class<String> handledType() {
-                return String.class;
+                return clean(p.currentName(), p.getText());
             }
         });
     }

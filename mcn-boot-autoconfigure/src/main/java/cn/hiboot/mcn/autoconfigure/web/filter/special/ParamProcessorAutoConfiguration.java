@@ -83,50 +83,50 @@ public class ParamProcessorAutoConfiguration {
         return "";
     }
 
-    public static Object validStringValue(MethodParameter parameter, Object returnValue, ParamProcessor paramProcessor){
+    public static Object validStringValue(MethodParameter parameter, Object returnValue, ParamProcessor paramProcessor) {
         CheckParam classAnnotation = parameter.getParameterAnnotation(CheckParam.class);
         if (classAnnotation == null) {
             classAnnotation = parameter.getParameterType().getAnnotation(CheckParam.class);
         }
-        valid(returnValue,classAnnotation,paramProcessor);
+        valid(returnValue, classAnnotation, paramProcessor);
         return returnValue;
     }
 
-    private static void valid(Object value, CheckParam classAnnotation ,ParamProcessor paramProcessor){
+    private static void valid(Object value, CheckParam classAnnotation, ParamProcessor paramProcessor) {
         CheckParam usedAnnotation = classAnnotation;
         BeanWrapper src = new BeanWrapperImpl(value);
         for (Field declaredField : value.getClass().getDeclaredFields()) {
             String name = declaredField.getName();
             Object propertyValue = src.getPropertyValue(name);
-            if(propertyValue == null){
+            if (propertyValue == null) {
                 continue;
             }
             CheckParam fieldAnnotation = declaredField.getAnnotation(CheckParam.class);
             if (propertyValue instanceof String) {
-                if(usedAnnotation.validString() || fieldAnnotation != null){
+                if (usedAnnotation.validString() || fieldAnnotation != null) {
                     paramProcessor.process(ParamProcessorAutoConfiguration.getRule(usedAnnotation, fieldAnnotation), name, propertyValue.toString());
                 }
                 continue;
             }
-            if((usedAnnotation.validObject() || fieldAnnotation != null) && !BeanUtils.isSimpleProperty(propertyValue.getClass())){
-                if(fieldAnnotation != null){
-                    valid(propertyValue,fieldAnnotation,paramProcessor);
+            if ((usedAnnotation.validObject() || fieldAnnotation != null) && !BeanUtils.isSimpleProperty(propertyValue.getClass())) {
+                if (fieldAnnotation != null) {
+                    valid(propertyValue, fieldAnnotation, paramProcessor);
                     continue;
                 }
                 CheckParam annotation = propertyValue.getClass().getAnnotation(CheckParam.class);
-                if(annotation != null){//成员变量的类型上有注解
+                if (annotation != null) {//成员变量的类型上有注解
                     usedAnnotation = annotation;
                 }
-                valid(propertyValue,usedAnnotation,paramProcessor);
+                valid(propertyValue, usedAnnotation, paramProcessor);
             }
         }
     }
 
     @Bean
     static RefreshPostProcessor jacksonParamProcessorConfig() {
-        return () -> RefreshPostProcessor.uniqueExecute(ObjectMapper.class,ParamProcessor.class,(mapper, paramProcessor) -> {
-            AnnotationIntrospector sis = mapper.getDeserializationConfig().getAnnotationIntrospector();
-            AnnotationIntrospector pair = AnnotationIntrospectorPair.pair(sis, new ParamProcessorAnnotationIntrospector(paramProcessor));
+        return () -> RefreshPostProcessor.uniqueExecute(ObjectMapper.class, ParamProcessor.class, (mapper, paramProcessor) -> {
+            AnnotationIntrospector primary = mapper.getDeserializationConfig().getAnnotationIntrospector();
+            AnnotationIntrospector pair = AnnotationIntrospectorPair.pair(primary, new ParamProcessorAnnotationIntrospector(paramProcessor));
             mapper.setAnnotationIntrospector(pair);
         });
     }

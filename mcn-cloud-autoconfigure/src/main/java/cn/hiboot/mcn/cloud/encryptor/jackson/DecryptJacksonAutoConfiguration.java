@@ -2,13 +2,15 @@ package cn.hiboot.mcn.cloud.encryptor.jackson;
 
 import cn.hiboot.mcn.cloud.encryptor.sm2.SM2AutoConfiguration;
 import cn.hiboot.mcn.cloud.encryptor.sm2.TextEncryptor;
+import com.fasterxml.jackson.databind.AnnotationIntrospector;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
 /**
  * DecryptJacksonAutoConfiguration
@@ -18,16 +20,21 @@ import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
  */
 @AutoConfiguration(after = SM2AutoConfiguration.class)
 @ConditionalOnBean(TextEncryptor.class)
-@Import(DecryptJacksonAutoConfiguration.JacksonBuilderCustomizer.class)
+@Import(DecryptJacksonAutoConfiguration.EncryptDecryptBeanPostProcessor.class)
 @ConditionalOnClass(ObjectMapper.class)
 public class DecryptJacksonAutoConfiguration {
 
-    @ConditionalOnClass(Jackson2ObjectMapperBuilder.class)
-    static class JacksonBuilderCustomizer implements Jackson2ObjectMapperBuilderCustomizer {
+    static class EncryptDecryptBeanPostProcessor implements BeanPostProcessor {
 
         @Override
-        public void customize(Jackson2ObjectMapperBuilder jacksonObjectMapperBuilder) {
-            jacksonObjectMapperBuilder.annotationIntrospector(new EncryptDecryptAnnotationIntrospector());
+        public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+            if (bean instanceof ObjectMapper) {
+                ObjectMapper mapper = (ObjectMapper) bean;
+                AnnotationIntrospector primary = mapper.getDeserializationConfig().getAnnotationIntrospector();
+                AnnotationIntrospector pair = AnnotationIntrospectorPair.pair(primary, new EncryptDecryptAnnotationIntrospector());
+                mapper.setAnnotationIntrospector(pair);
+            }
+            return bean;
         }
 
     }

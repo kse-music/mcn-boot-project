@@ -4,11 +4,10 @@ import cn.hiboot.mcn.autoconfigure.web.filter.special.ParamProcessor;
 import cn.hiboot.mcn.autoconfigure.web.filter.special.ParamProcessorProperties;
 import cn.hiboot.mcn.autoconfigure.web.filter.xss.XssProcessor;
 import cn.hiboot.mcn.autoconfigure.web.filter.xss.XssProperties;
+import cn.hiboot.mcn.autoconfigure.web.mvc.WebUtils;
 import cn.hiboot.mcn.core.util.McnAssert;
 import cn.hiboot.mcn.core.util.SpringBeanUtils;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -67,19 +66,11 @@ class DelegateNameValueProcessor implements NameValueProcessor{
             if(excludeFields != null && excludeFields.contains(name)){
                 return false;
             }
-            HttpServletRequest httpServletRequest = getHttpRequest();
+            HttpServletRequest httpServletRequest = WebUtils.getHttpServletRequest();
             if(httpServletRequest == null){
                 return true;
             }
             return requestMatcher.matches(httpServletRequest);
-        }
-
-        private HttpServletRequest getHttpRequest(){
-            ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-            if(requestAttributes == null){
-                return null;
-            }
-            return requestAttributes.getRequest();
         }
 
         @Override
