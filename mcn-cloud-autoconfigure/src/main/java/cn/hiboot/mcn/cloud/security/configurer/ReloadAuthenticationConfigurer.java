@@ -20,7 +20,7 @@ import java.util.Map;
  * @author DingHao
  * @since 2023/1/16 12:15
  */
-public final class ReloadAuthenticationConfigurer extends AbstractHttpConfigurer<ReloadAuthenticationConfigurer, HttpSecurity> {
+public class ReloadAuthenticationConfigurer extends AbstractHttpConfigurer<ReloadAuthenticationConfigurer, HttpSecurity> {
 
     @Override
     public void init(HttpSecurity http) throws Exception {
@@ -39,9 +39,13 @@ public final class ReloadAuthenticationConfigurer extends AbstractHttpConfigurer
             return;
         }
         http.addFilterBefore((request, response, chain) -> {
-            reloadAuthentication(SecurityContextHolder.getContext(), authenticationReload);
+            reload(SecurityContextHolder.getContext(), authenticationReload);
             chain.doFilter(request, response);
         }, AnonymousAuthenticationFilter.class);
+    }
+
+    protected void reload(SecurityContext securityContext, AuthenticationReload authenticationReload) {
+        reloadAuthentication(securityContext, authenticationReload);
     }
 
     public static void reloadAuthentication(SecurityContext securityContext, AuthenticationReload authenticationReload) {
@@ -50,14 +54,7 @@ public final class ReloadAuthenticationConfigurer extends AbstractHttpConfigurer
             return;
         }
         Object principal = authentication.getPrincipal();
-        if (principal instanceof Map) {
-            @SuppressWarnings("unchecked")
-            Map<String, Object> oldPrincipal = (Map<String, Object>) principal;
-            Map<String, Object> newPrincipal = authenticationReload.reload(oldPrincipal);
-            if (newPrincipal != null) {
-                oldPrincipal.putAll(newPrincipal);
-            }
-        } else if (principal instanceof Jwt jwt) {
+        if (principal instanceof Jwt jwt) {
             Map<String, Object> oldPrincipal = jwt.getClaimAsMap(SessionHolder.USER_NAME);
             Map<String, Object> newPrincipal = authenticationReload.reload(oldPrincipal);
             if (newPrincipal != null) {
