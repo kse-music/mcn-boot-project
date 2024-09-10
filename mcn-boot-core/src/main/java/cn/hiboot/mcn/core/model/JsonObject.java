@@ -31,50 +31,50 @@ public class JsonObject extends ObjectNode {
         return new JsonObject((ObjectNode) jsonNode);
     }
 
-    public Integer getInteger(String field){
+    public Integer getInteger(String field) {
         return getValue(field, JsonNode::asInt);
     }
 
-    public Long getLong(String field){
+    public Long getLong(String field) {
         return getValue(field, JsonNode::asLong);
     }
 
-    public Double getDouble(String field){
+    public Double getDouble(String field) {
         return getValue(field, JsonNode::asDouble);
     }
 
-    public String getString(String field){
+    public String getString(String field) {
         return getValue(field, JsonNode::asText);
     }
 
-    public Boolean getBoolean(String field){
+    public Boolean getBoolean(String field) {
         return getValue(field, JsonNode::booleanValue);
     }
 
-    public boolean contains(String field){
+    public boolean contains(String field) {
         return !nextNode(field).isMissingNode();
     }
 
-    public JsonObject getJsonObject(String field){
+    public JsonObject getJsonObject(String field) {
         return of(nextNode(field));
     }
 
-    public JsonArray getJsonArray(String field){
+    public JsonArray getJsonArray(String field) {
         return JsonArray.of(nextNode(field));
     }
 
-    private <R> R getValue(String field, Function<JsonNode,R> function){
+    private <R> R getValue(String field, Function<JsonNode, R> function) {
         JsonNode nextNode = nextNode(field);
-        if(nextNode.isMissingNode()){
+        if (nextNode.isMissingNode()) {
             return null;
         }
-        if(nextNode.isValueNode()){
+        if (nextNode.isValueNode()) {
             return function.apply(nextNode);
         }
         throw new IllegalArgumentException("current node is not value node");
     }
 
-    private JsonNode nextNode(String field){
+    private JsonNode nextNode(String field) {
         return at(SLASH + field);
     }
 
