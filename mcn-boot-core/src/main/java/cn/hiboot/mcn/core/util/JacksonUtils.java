@@ -29,12 +29,12 @@ public abstract class JacksonUtils {
 
     private static ObjectMapper objectMapper;
 
-    public static void setObjectMapper(ObjectMapper objectMapper){
+    public static void setObjectMapper(ObjectMapper objectMapper) {
         JacksonUtils.objectMapper = objectMapper;
     }
 
     public static ObjectMapper getObjectMapper() {
-        if(objectMapper == null){
+        if (objectMapper == null) {
             objectMapper = new ObjectMapper();
             objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
             objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
@@ -42,20 +42,20 @@ public abstract class JacksonUtils {
         return objectMapper;
     }
 
-    public static TypeFactory getTypeFactory(){
+    public static TypeFactory getTypeFactory() {
         return getObjectMapper().getTypeFactory();
     }
 
-    private static String valueString(Object content){
+    private static String valueString(Object content) {
         if (content instanceof byte[] bytes) {
             return new String(bytes, StandardCharsets.UTF_8);
         }
-        return content instanceof String value? value : toJson(content);
+        return content instanceof String value ? value : toJson(content);
     }
 
-    public static <T> T fromJson(Object content, Class<T> clazz){
+    public static <T> T fromJson(Object content, Class<T> clazz) {
         try {
-            return getObjectMapper().readValue(valueString(content),clazz);
+            return getObjectMapper().readValue(valueString(content), clazz);
         } catch (JsonProcessingException e) {
             throw newInstance(e);
         }
@@ -69,7 +69,7 @@ public abstract class JacksonUtils {
         }
     }
 
-    public static <T> T fromJson(Object content, JavaType javaType){
+    public static <T> T fromJson(Object content, JavaType javaType) {
         try {
             return getObjectMapper().readValue(valueString(content), javaType);
         } catch (Exception e) {
@@ -77,27 +77,28 @@ public abstract class JacksonUtils {
         }
     }
 
-    public static <T> List<T> fromList(Object content,Class<T> clazz){
-        return fromJson(valueString(content),getTypeFactory().constructCollectionType(List.class, clazz));
+    public static <T> List<T> fromList(Object content, Class<T> clazz) {
+        return fromJson(valueString(content), getTypeFactory().constructCollectionType(List.class, clazz));
     }
 
-    public static List<Map<String,Object>> fromListMap(Object content){
-        return fromJson(valueString(content),getTypeFactory().constructCollectionType(List.class,Map.class));
+    public static List<Map<String, Object>> fromListMap(Object content) {
+        return fromJson(valueString(content), getTypeFactory().constructCollectionType(List.class, Map.class));
     }
 
-    public static <K, V> List<Map<K,V>> fromListMap(Object content,Class<K> keyClass,Class<V> valueClass){
-        return fromJson(valueString(content),getTypeFactory().constructCollectionType(List.class,getTypeFactory().constructMapType(Map.class,keyClass,valueClass)));
+    public static <K, V> List<Map<K, V>> fromListMap(Object content, Class<K> keyClass, Class<V> valueClass) {
+        return fromJson(valueString(content), getTypeFactory().constructCollectionType(List.class, getTypeFactory().constructMapType(Map.class, keyClass, valueClass)));
     }
 
-    public static Map<String, Object> fromMap(Object content){
-        return fromJson(valueString(content),new TypeReference<Map<String, Object>>(){});
+    public static Map<String, Object> fromMap(Object content) {
+        return fromJson(valueString(content), new TypeReference<Map<String, Object>>() {
+        });
     }
 
-    public static <K,V> Map<K, V> fromMap(Object content,Class<K> keyClass,Class<V> valueClass){
-        return fromJson(valueString(content),getTypeFactory().constructMapType(Map.class,keyClass,valueClass));
+    public static <K, V> Map<K, V> fromMap(Object content, Class<K> keyClass, Class<V> valueClass) {
+        return fromJson(valueString(content), getTypeFactory().constructMapType(Map.class, keyClass, valueClass));
     }
 
-    public static String toJson(Object value){
+    public static String toJson(Object value) {
         try {
             return getObjectMapper().writeValueAsString(value);
         } catch (JsonProcessingException e) {
@@ -105,7 +106,7 @@ public abstract class JacksonUtils {
         }
     }
 
-    public static JsonObject jsonObject(Object content){
+    public static JsonObject jsonObject(Object content) {
         try {
             return new JsonObject((ObjectNode) getObjectMapper().readTree(valueString(content)));
         } catch (JsonProcessingException e) {
@@ -113,7 +114,7 @@ public abstract class JacksonUtils {
         }
     }
 
-    public static JsonArray jsonArray(Object content){
+    public static JsonArray jsonArray(Object content) {
         try {
             return new JsonArray((ArrayNode) getObjectMapper().readTree(valueString(content)));
         } catch (JsonProcessingException e) {
@@ -121,8 +122,8 @@ public abstract class JacksonUtils {
         }
     }
 
-    private static ServiceException newInstance(Throwable cause){
-        ServiceException jsonException = ServiceException.newInstance(ErrorMsg.getErrorMsg(ExceptionKeys.JSON_PARSE_ERROR),cause);
+    private static ServiceException newInstance(Throwable cause) {
+        ServiceException jsonException = ServiceException.newInstance(ErrorMsg.getErrorMsg(ExceptionKeys.JSON_PARSE_ERROR), cause);
         jsonException.setCode(ExceptionKeys.JSON_PARSE_ERROR);
         return jsonException;
     }

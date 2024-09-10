@@ -77,9 +77,12 @@ public class JsonArray extends ArrayNode {
         return jsonArray;
     }
 
-    @Override
-    public JsonObject get(int index){
-        return JsonObject.of(super.get(index));
+    public JsonObject jsonObject(int index){
+        return JsonObject.of(get(index));
+    }
+
+    public JsonArray jsonArray(int index){
+        return JsonArray.of(get(index));
     }
 
     public void loop(Consumer<JsonObject> consumer) {
