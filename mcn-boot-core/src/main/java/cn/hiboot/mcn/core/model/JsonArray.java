@@ -77,13 +77,30 @@ public class JsonArray extends ArrayNode {
         return jsonArray;
     }
 
-    public JsonObject jsonObject(int index){
-        return JsonObject.of(get(index));
+    @SuppressWarnings("unchecked")
+    public <T> T value(int index) {
+        JsonNode jsonNode = get(index);
+        if (jsonNode == null) {
+            return null;
+        }
+        if (jsonNode.isObject()) {
+            return (T) JsonObject.of(jsonNode);
+        }
+        if (jsonNode.isArray()) {
+            return (T) JsonArray.of(jsonNode);
+        }
+        if (jsonNode.isNumber()) {
+            return (T) jsonNode.numberValue();
+        }
+        if (jsonNode.isBoolean()) {
+            return (T) Boolean.valueOf(jsonNode.booleanValue());
+        }
+        if (jsonNode.isTextual()) {
+            return (T) jsonNode.textValue();
+        }
+        return (T) jsonNode;
     }
 
-    public JsonArray jsonArray(int index){
-        return JsonArray.of(get(index));
-    }
 
     public void loop(Consumer<JsonObject> consumer) {
         for (JsonNode jsonNode : this) {
