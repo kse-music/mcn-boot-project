@@ -54,9 +54,13 @@ public final class AccumulateExecutor<T> implements Closeable {
         this.taskThreadPool.execute(() -> consumer.accept(data));
     }
 
+    public void done() {
+        execute(this.datum);
+    }
+
     @Override
     public void close() {
-        execute(this.datum);
+        done();
         if (this.syncExecute) {
             this.taskThreadPool.shutdownUntilAllTaskComplete = true;
         }
