@@ -44,6 +44,7 @@
                 <directory>src/main/java</directory>
                 <includes>
                     <include>**/*.properties</include>
+                    <include>**/*.sql</include>
                     <include>**/*.xml</include>
                     <include>**/*.html</include>
                     <include>**/*.lua</include>
