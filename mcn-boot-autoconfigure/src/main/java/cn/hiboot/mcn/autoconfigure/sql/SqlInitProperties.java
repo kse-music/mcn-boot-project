@@ -2,8 +2,6 @@ package cn.hiboot.mcn.autoconfigure.sql;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-import java.util.List;
-
 /**
  * SqlInitProperties
  *
@@ -13,13 +11,21 @@ import java.util.List;
 @ConfigurationProperties("spring.sql.init.additional")
 public class SqlInitProperties {
 
+    private boolean enabled = false;
     private String separator = "//";
     private String dir = "db";
-    private List<String> locations;
     /**
      * 用于建立连接再创建应用所使用的db
      */
     private String initDbName;
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
 
     public String getSeparator() {
         return separator;
@@ -35,14 +41,6 @@ public class SqlInitProperties {
 
     public void setDir(String dir) {
         this.dir = dir;
-    }
-
-    public List<String> getLocations() {
-        return locations;
-    }
-
-    public void setLocations(List<String> locations) {
-        this.locations = locations;
     }
 
     public String getInitDbName() {

@@ -1,9 +1,11 @@
 package cn.hiboot.mcn.autoconfigure.sql;
 
+import cn.hiboot.mcn.autoconfigure.minio.FileUploadInfoCache;
 import cn.hiboot.mcn.core.util.SpringBeanUtils;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
-import org.springframework.boot.autoconfigure.sql.init.SqlDataSourceScriptDatabaseInitializer;
+import org.springframework.boot.jdbc.init.DataSourceScriptDatabaseInitializer;
 import org.springframework.boot.sql.init.DatabaseInitializationMode;
+import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePatternResolver;
@@ -27,7 +29,8 @@ import java.util.List;
  * @author DingHao
  * @since 2023/11/15 16:29
  */
-class CustomSqlDataSourceScriptDatabaseInitializer extends SqlDataSourceScriptDatabaseInitializer {
+class CustomSqlDataSourceScriptDatabaseInitializer extends DataSourceScriptDatabaseInitializer {
+
     private static final String OPTIONAL_LOCATION_PREFIX = "optional:";
 
     private final CustomDatabaseInitializationSettings settings;
@@ -39,7 +42,14 @@ class CustomSqlDataSourceScriptDatabaseInitializer extends SqlDataSourceScriptDa
 
     @Override
     public boolean initializeDatabase() {
-        ScriptLocationResolver locationResolver = new ScriptLocationResolver(SpringBeanUtils.getApplicationContext());
+        ApplicationContext applicationContext = SpringBeanUtils.getApplicationContext();
+        for (String s : applicationContext.getBeanNamesForType(FileUploadInfoCache.class)) {
+            if (FileUploadInfoCache.class == applicationContext.getType(s)) {
+                settings.getSchemaLocations().addAll(SqlInitAutoConfiguration.buildScriptLocations("cn/hiboot/mcn/autoconfigure/minio/minio", settings.getPlatform()));
+                break;
+            }
+        }
+        ScriptLocationResolver locationResolver = new ScriptLocationResolver(applicationContext);
         createDatabase(SpringBeanUtils.getBean(DataSourceProperties.class));
         boolean initialized = applySchemaScripts(locationResolver);
         boolean other = applyOtherScripts(locationResolver);
