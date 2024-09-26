@@ -23,6 +23,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.client.RestTemplate;
@@ -33,6 +34,7 @@ import reactor.netty.http.client.HttpClient;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 
 /**
  * RestClientAutoConfiguration
@@ -44,7 +46,16 @@ import java.util.concurrent.ConcurrentHashMap;
 @EnableConfigurationProperties(RestClientProperties.class)
 public class RestClientAutoConfiguration {
 
-    private static final Map<String, TokenCache> cache = new ConcurrentHashMap<>();
+    private static TokenCache tokenCache;
+
+    public RestClientAutoConfiguration(Environment environment) {
+        Long accessTokenValidity = environment.getProperty("token.access-validity", Long.class, 7 * 24 * 60 * 60 * 1000L);
+        tokenCache = new TokenCache(accessTokenValidity);
+    }
+
+    private static TokenCache tokenCache() {
+        return tokenCache;
+    }
 
     @ConditionalOnClass(RestTemplate.class)
     @ConditionalOnBean(RestTemplateBuilder.class)
@@ -85,14 +96,7 @@ public class RestClientAutoConfiguration {
         TokenResolver tokenResolver(RestTemplate restTemplate, RestTemplate loadBalancedRestTemplate, @Value("${token.service}") String tokenService) {
             RestTemplate restClient = isIp(tokenService) ? restTemplate : loadBalancedRestTemplate;
             String url = tokenUrl(tokenService);
-            return apk -> {
-                TokenCache tokenCache = cache.get(apk);
-                if (tokenCache == null || tokenCache.exp < System.currentTimeMillis()) {
-                    tokenCache = new TokenCache(restClient.exchange(restClient.getUriTemplateHandler().expand(url, McnUtils.put("apk", apk)), HttpMethod.GET, null, loginRspType()).getBody());
-                    cache.put(apk, tokenCache);
-                }
-                return tokenCache.result;
-            };
+            return apk -> tokenCache().get(apk, () -> restClient.exchange(restClient.getUriTemplateHandler().expand(url, McnUtils.put("apk", apk)), HttpMethod.GET, null, loginRspType()).getBody());
         }
 
     }
@@ -132,16 +136,10 @@ public class RestClientAutoConfiguration {
         ApkResolver apkResolver(WebClient webClient, WebClient loadBalancedWebClient, @Value("${token.service}") String tokenService) {
             WebClient restClient = isIp(tokenService) ? webClient : loadBalancedWebClient;
             String url = tokenUrl(tokenService);
-            return apk -> Mono.fromSupplier(() -> {
-                        TokenCache tokenCache = cache.get(apk);
-                        if (tokenCache == null || tokenCache.exp < System.currentTimeMillis()) {
-                            return null;
-                        }
-                        return tokenCache.result;
-                    })
+            return apk -> Mono.fromSupplier(() -> tokenCache().get(apk))
                     .switchIfEmpty(Mono.defer(() -> {
                         String uri = UriComponentsBuilder.fromUriString(url).buildAndExpand(apk).toUriString();
-                        return restClient.get().uri(uri).retrieve().bodyToMono(loginRspType()).doOnNext(result -> cache.put(apk, new TokenCache(result)));
+                        return restClient.get().uri(uri).retrieve().bodyToMono(loginRspType()).doOnNext(result -> tokenCache().put(apk, result));
                     }));
         }
 
@@ -160,15 +158,46 @@ public class RestClientAutoConfiguration {
     }
 
     private static class TokenCache {
-        private static final long ACTIVITY = 7 * 24 * 60 * 60 * 1000;
 
-        private final RestResp<LoginRsp> result;
-        private final long exp;
+        private static final Map<String, TokenResult> cache = new ConcurrentHashMap<>();
 
-        public TokenCache(RestResp<LoginRsp> result) {
-            this.result = result;
-            this.exp = System.currentTimeMillis() + ACTIVITY;
+        private final long activity;
+
+        public TokenCache(long activity) {
+            this.activity = activity;
         }
+
+        public RestResp<LoginRsp> get(String apk) {
+            TokenResult tokenResult = cache.get(apk);
+            if (tokenResult == null || tokenResult.exp < System.currentTimeMillis()) {
+                return null;
+            }
+            return tokenResult.result;
+        }
+
+        public RestResp<LoginRsp> get(String apk, Supplier<RestResp<LoginRsp>> supplier) {
+            RestResp<LoginRsp> result = get(apk);
+            if (result == null) {
+                result = put(apk, supplier.get());
+            }
+            return result;
+        }
+
+        public RestResp<LoginRsp> put(String apk, RestResp<LoginRsp> result) {
+            cache.put(apk, new TokenResult(result, this.activity));
+            return result;
+        }
+
+        private static class TokenResult {
+            private final RestResp<LoginRsp> result;
+            private final long exp;
+
+            public TokenResult(RestResp<LoginRsp> result, Long exp) {
+                this.result = result;
+                this.exp = System.currentTimeMillis() + exp;
+            }
+        }
+
     }
 
 }
