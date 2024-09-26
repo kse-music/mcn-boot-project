@@ -23,6 +23,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.client.RestTemplate;
@@ -31,15 +32,30 @@ import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
+
 /**
  * RestClientAutoConfiguration
  *
  * @author DingHao
  * @since 2023/1/3 14:58
  */
-@AutoConfiguration(after = {WebClientAutoConfiguration.class,RestTemplateAutoConfiguration.class},afterName = "org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerBeanPostProcessorAutoConfiguration")
+@AutoConfiguration(after = {WebClientAutoConfiguration.class, RestTemplateAutoConfiguration.class}, afterName = "org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerBeanPostProcessorAutoConfiguration")
 @EnableConfigurationProperties(RestClientProperties.class)
 public class RestClientAutoConfiguration {
+
+    private static TokenCache tokenCache;
+
+    public RestClientAutoConfiguration(Environment environment) {
+        Long accessTokenValidity = environment.getProperty("token.access-validity", Long.class, 7 * 24 * 60 * 60 * 1000L);
+        tokenCache = new TokenCache(accessTokenValidity);
+    }
+
+    private static TokenCache tokenCache() {
+        return tokenCache;
+    }
 
     @ConditionalOnClass(RestTemplate.class)
     @ConditionalOnBean(RestTemplateBuilder.class)
@@ -77,23 +93,24 @@ public class RestClientAutoConfiguration {
 
         @Bean
         @ConditionalOnMissingBean
-        TokenResolver tokenResolver(RestTemplate restTemplate,RestTemplate loadBalancedRestTemplate, @Value("${token.service}") String tokenService){
+        TokenResolver tokenResolver(RestTemplate restTemplate, RestTemplate loadBalancedRestTemplate, @Value("${token.service}") String tokenService) {
             RestTemplate restClient = isIp(tokenService) ? restTemplate : loadBalancedRestTemplate;
-            return apk -> restClient.exchange(restClient.getUriTemplateHandler().expand(tokenUrl(tokenService), McnUtils.put("apk",apk)), HttpMethod.GET, null,loginRspType()).getBody();
+            String url = tokenUrl(tokenService);
+            return apk -> tokenCache().get(apk, () -> restClient.exchange(restClient.getUriTemplateHandler().expand(url, McnUtils.put("apk", apk)), HttpMethod.GET, null, loginRspType()).getBody());
         }
 
     }
 
-    private static boolean isIp(String host){
+    private static boolean isIp(String host) {
         return host.split("\\.").length == 4;
     }
 
-    private static ParameterizedTypeReference<RestResp<LoginRsp>> loginRspType(){
-        return ParameterizedTypeReference.forType(ResolvableType.forClassWithGenerics(RestResp.class,LoginRsp.class).getType());
+    private static ParameterizedTypeReference<RestResp<LoginRsp>> loginRspType() {
+        return ParameterizedTypeReference.forType(ResolvableType.forClassWithGenerics(RestResp.class, LoginRsp.class).getType());
     }
 
-    private static String tokenUrl(String tokenService){
-        return "http://"+tokenService+"/sso/login/{apk}";
+    private static String tokenUrl(String tokenService) {
+        return "http://" + tokenService + "/sso/login/{apk}";
     }
 
     @ConditionalOnClass(WebClient.class)
@@ -103,25 +120,27 @@ public class RestClientAutoConfiguration {
 
         @Bean
         @ConditionalOnMissingBean(name = "webClient")
-        WebClient webClient(WebClient.Builder webClientBuilder,RestClientProperties properties) {
-            return webClient0(webClientBuilder,properties);
+        WebClient webClient(WebClient.Builder webClientBuilder, RestClientProperties properties) {
+            return webClient0(webClientBuilder, properties);
         }
 
-        private static WebClient webClient0(WebClient.Builder builder,RestClientProperties properties) {
+        private static WebClient webClient0(WebClient.Builder builder, RestClientProperties properties) {
             HttpClient httpClient = HttpClient.create().responseTimeout(properties.getReadTimeout())
-                    .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, (int)properties.getConnectTimeout().toMillis());
+                    .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, (int) properties.getConnectTimeout().toMillis());
             ReactorClientHttpConnector connector = new ReactorClientHttpConnector(httpClient);
             return builder.clientConnector(connector).build();
         }
 
         @Bean
         @ConditionalOnMissingBean
-        ApkResolver apkResolver(WebClient webClient, WebClient loadBalancedWebClient, @Value("${token.service}") String tokenService){
+        ApkResolver apkResolver(WebClient webClient, WebClient loadBalancedWebClient, @Value("${token.service}") String tokenService) {
             WebClient restClient = isIp(tokenService) ? webClient : loadBalancedWebClient;
-            return apk -> Mono.just(apk).flatMap(a -> {
-               String uri = UriComponentsBuilder.fromUriString(tokenUrl(tokenService)).buildAndExpand(apk).toUriString();
-               return restClient.get().uri(uri).retrieve().bodyToMono(loginRspType());
-           });
+            String url = tokenUrl(tokenService);
+            return apk -> Mono.fromSupplier(() -> tokenCache().get(apk))
+                    .switchIfEmpty(Mono.defer(() -> {
+                        String uri = UriComponentsBuilder.fromUriString(url).buildAndExpand(apk).toUriString();
+                        return restClient.get().uri(uri).retrieve().bodyToMono(loginRspType()).doOnNext(result -> tokenCache().put(apk, result));
+                    }));
         }
 
         @ConditionalOnBean(DeferringLoadBalancerExchangeFilterFunction.class)
@@ -129,11 +148,54 @@ public class RestClientAutoConfiguration {
 
             @Bean
             @ConditionalOnMissingBean(name = "loadBalancedWebClient")
-            WebClient loadBalancedWebClient(WebClient.Builder webClientBuilder, RestClientProperties properties,DeferringLoadBalancerExchangeFilterFunction exchangeFilterFunction) {
+            WebClient loadBalancedWebClient(WebClient.Builder webClientBuilder, RestClientProperties properties, DeferringLoadBalancerExchangeFilterFunction exchangeFilterFunction) {
                 webClientBuilder.filter(exchangeFilterFunction);
-                return webClient0(webClientBuilder,properties);
+                return webClient0(webClientBuilder, properties);
             }
 
+        }
+
+    }
+
+    private static class TokenCache {
+
+        private static final Map<String, TokenResult> cache = new ConcurrentHashMap<>();
+
+        private final long activity;
+
+        public TokenCache(long activity) {
+            this.activity = activity;
+        }
+
+        public RestResp<LoginRsp> get(String apk) {
+            TokenResult tokenResult = cache.get(apk);
+            if (tokenResult == null || tokenResult.exp < System.currentTimeMillis()) {
+                return null;
+            }
+            return tokenResult.result;
+        }
+
+        public RestResp<LoginRsp> get(String apk, Supplier<RestResp<LoginRsp>> supplier) {
+            RestResp<LoginRsp> result = get(apk);
+            if (result == null) {
+                result = put(apk, supplier.get());
+            }
+            return result;
+        }
+
+        public RestResp<LoginRsp> put(String apk, RestResp<LoginRsp> result) {
+            cache.put(apk, new TokenResult(result, this.activity));
+            return result;
+        }
+
+        private static class TokenResult {
+            private final RestResp<LoginRsp> result;
+            private final long exp;
+
+            public TokenResult(RestResp<LoginRsp> result, Long exp) {
+                this.result = result;
+                this.exp = System.currentTimeMillis() + exp;
+            }
         }
 
     }
