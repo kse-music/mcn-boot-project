@@ -47,23 +47,23 @@ public class WebSecurityAutoConfiguration {
     static class ServletWebSecurityConfiguration {
 
         @Bean
-        public WebSecurityCustomizer webSecurityCustomizer(WebSecurityProperties webSecurityProperties){
+        public WebSecurityCustomizer webSecurityCustomizer(WebSecurityProperties webSecurityProperties) {
             return web -> {
                 List<String> urls = ignoreUrl(webSecurityProperties);
-                if(McnUtils.isNotNullAndEmpty(urls)){
+                if (McnUtils.isNotNullAndEmpty(urls)) {
                     web.ignoring().requestMatchers(new OrRequestMatcher(urls.stream().map(AntPathRequestMatcher::new).collect(Collectors.toList())));
                 }
             };
         }
     }
 
-    private static List<String> ignoreUrl(WebSecurityProperties webSecurityProperties){
+    private static List<String> ignoreUrl(WebSecurityProperties webSecurityProperties) {
         List<String> urls = new ArrayList<>();
-        if(webSecurityProperties.isEnableDefaultIgnore()){
-            Collections.addAll(urls,webSecurityProperties.getDefaultExcludeUrls());
+        if (webSecurityProperties.isEnableDefaultIgnore()) {
+            Collections.addAll(urls, webSecurityProperties.getDefaultExcludeUrls());
         }
-        if(webSecurityProperties.getExcludeUrls() != null){
-            Collections.addAll(urls,webSecurityProperties.getExcludeUrls());
+        if (webSecurityProperties.getExcludeUrls() != null) {
+            Collections.addAll(urls, webSecurityProperties.getExcludeUrls());
         }
         return urls;
     }
@@ -79,18 +79,20 @@ public class WebSecurityAutoConfiguration {
     static class ReactiveWebSecurityConfiguration {
 
         @Order(-101)
-        static class IgnoreUrlFilter implements WebFilter{
+        static class IgnoreUrlFilter implements WebFilter {
 
             private final ServerWebExchangeMatcher requiresAuthenticationMatcher;
 
-            public IgnoreUrlFilter(WebSecurityProperties webSecurityProperties){
+            public IgnoreUrlFilter(WebSecurityProperties webSecurityProperties) {
                 this.requiresAuthenticationMatcher = ServerWebExchangeMatchers.pathMatchers(ignoreUrl(webSecurityProperties).toArray(new String[0]));
             }
 
             @Override
             public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
-                return requiresAuthenticationMatcher.matches(exchange).filter(ServerWebExchangeMatcher.MatchResult::isMatch)
-                        .switchIfEmpty(chain.filter(exchange).then(Mono.empty())).flatMap(m -> ((DefaultWebFilterChain) chain).getHandler().handle(exchange));
+                return Mono.just(chain).cast(DefaultWebFilterChain.class)
+                        .filterWhen(c -> requiresAuthenticationMatcher.matches(exchange).map(ServerWebExchangeMatcher.MatchResult::isMatch))
+                        .switchIfEmpty(chain.filter(exchange).then(Mono.empty()))
+                        .flatMap(c -> c.getHandler().handle(exchange));
             }
 
         }
