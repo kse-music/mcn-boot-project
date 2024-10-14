@@ -2,7 +2,6 @@ package cn.hiboot.mcn.cloud.security.token;
 
 
 import cn.hiboot.mcn.cloud.client.RestClientAutoConfiguration;
-import cn.hiboot.mcn.cloud.security.resource.LoginRsp;
 import cn.hiboot.mcn.core.model.result.RestResp;
 import cn.hiboot.mcn.core.util.McnUtils;
 import org.springframework.beans.factory.annotation.Value;

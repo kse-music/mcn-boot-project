@@ -1,4 +1,4 @@
-package cn.hiboot.mcn.cloud.security.resource;
+package cn.hiboot.mcn.cloud.security.token;
 
 /**
  * LoginRsp

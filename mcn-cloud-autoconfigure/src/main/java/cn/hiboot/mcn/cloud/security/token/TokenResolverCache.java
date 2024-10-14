@@ -1,7 +1,5 @@
 package cn.hiboot.mcn.cloud.security.token;
 
-import cn.hiboot.mcn.cloud.security.resource.LoginRsp;
-
 import java.util.function.Supplier;
 
 /**

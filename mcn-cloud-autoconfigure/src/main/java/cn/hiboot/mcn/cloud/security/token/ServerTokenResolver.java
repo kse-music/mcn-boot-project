@@ -1,6 +1,5 @@
 package cn.hiboot.mcn.cloud.security.token;
 
-import cn.hiboot.mcn.cloud.security.resource.LoginRsp;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthenticationToken;
 import reactor.core.publisher.Mono;
