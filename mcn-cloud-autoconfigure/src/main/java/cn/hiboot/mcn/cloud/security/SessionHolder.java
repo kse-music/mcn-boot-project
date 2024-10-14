@@ -1,6 +1,6 @@
 package cn.hiboot.mcn.cloud.security;
 
-import cn.hiboot.mcn.cloud.security.resource.TokenResolver;
+import cn.hiboot.mcn.cloud.security.token.TokenResolver;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
