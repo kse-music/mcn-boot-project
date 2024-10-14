@@ -6,3 +6,4 @@ cn.hiboot.mcn.cloud.feign.FeignExtensionAutoConfiguration
 cn.hiboot.mcn.cloud.gateway.GatewayExtensionAutoConfiguration
 cn.hiboot.mcn.cloud.client.RestClientAutoConfiguration
 cn.hiboot.mcn.cloud.security.resource.ResourceServerAutoConfiguration
+cn.hiboot.mcn.cloud.security.token.TokenResolverAutoConfiguration

@@ -5,6 +5,8 @@ import cn.hiboot.mcn.autoconfigure.web.exception.handler.ExceptionHandler;
 import cn.hiboot.mcn.autoconfigure.web.reactor.WebUtils;
 import cn.hiboot.mcn.cloud.security.configurer.AuthenticationReload;
 import cn.hiboot.mcn.cloud.security.configurer.ReloadAuthenticationConfigurer;
+import cn.hiboot.mcn.cloud.security.token.ServerTokenResolver;
+import cn.hiboot.mcn.cloud.security.token.TokenResolver;
 import cn.hiboot.mcn.core.exception.ExceptionKeys;
 import cn.hiboot.mcn.core.util.McnUtils;
 import org.springframework.beans.factory.ObjectProvider;
@@ -86,7 +88,7 @@ public class ResourceServerAutoConfiguration {
 
         @Bean
         SecurityWebFilterChain resourceServerSecurityFilterChain(ServerHttpSecurity http,ResourceServerProperties ssoProperties
-                ,ObjectProvider<AuthenticationReload> authenticationReloads,ObjectProvider<ApkResolver> apkResolvers){
+                ,ObjectProvider<AuthenticationReload> authenticationReloads,ObjectProvider<ServerTokenResolver> apkResolvers){
             authenticationReloads.ifUnique(authenticationReload -> http.addFilterBefore(new ReloadAuthenticationWebFilter(authenticationReload), SecurityWebFiltersOrder.ANONYMOUS_AUTHENTICATION));
             return http
                     .authorizeExchange(requests -> {
@@ -122,7 +124,7 @@ public class ResourceServerAutoConfiguration {
                     new NegatedServerWebExchangeMatcher(new OrServerWebExchangeMatcher(Arrays.stream(ignorePath).map(PathPatternParserServerWebExchangeMatcher::new).collect(Collectors.toList()))));
         }
 
-        private Mono<Authentication> jwtToken(ApkResolver apkResolver,ServerHttpRequest request){
+        private Mono<Authentication> jwtToken(ServerTokenResolver apkResolver,ServerHttpRequest request){
             return Mono.fromCallable(() -> {
                 String name = apkResolver.paramName();
                 String apk = request.getHeaders().getFirst(name);
