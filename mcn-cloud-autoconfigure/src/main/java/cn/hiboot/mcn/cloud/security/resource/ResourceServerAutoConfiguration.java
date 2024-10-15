@@ -47,9 +47,6 @@ import org.springframework.security.web.server.util.matcher.NegatedServerWebExch
 import org.springframework.security.web.server.util.matcher.OrServerWebExchangeMatcher;
 import org.springframework.security.web.server.util.matcher.PathPatternParserServerWebExchangeMatcher;
 import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatcher;
-import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.WebFilter;
-import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
@@ -94,7 +91,10 @@ public class ResourceServerAutoConfiguration {
         @Bean
         SecurityWebFilterChain resourceServerSecurityFilterChain(ServerHttpSecurity http, ResourceServerProperties ssoProperties
                 , ObjectProvider<AuthenticationReload> authenticationReloads, ObjectProvider<ServerTokenResolver> apkResolvers) {
-            authenticationReloads.ifUnique(authenticationReload -> http.addFilterBefore(new ReloadAuthenticationWebFilter(authenticationReload), SecurityWebFiltersOrder.ANONYMOUS_AUTHENTICATION));
+            authenticationReloads.ifUnique(authenticationReload ->
+                    http.addFilterBefore((exchange, chain) ->
+                            ReactiveSecurityContextHolder.getContext().doOnNext(securityContext -> ReloadAuthenticationConfigurer.reloadAuthentication(securityContext, authenticationReload)).then(chain.filter(exchange)),
+                            SecurityWebFiltersOrder.ANONYMOUS_AUTHENTICATION));
             return http
                     .authorizeExchange(requests -> {
                         if (McnUtils.isNotNullAndEmpty(ssoProperties.getAllowedPaths())) {
@@ -142,30 +142,12 @@ public class ResourceServerAutoConfiguration {
             return WebUtils.write(exceptionHandler.handleException(exception), response);
         }
 
-        static class ReloadAuthenticationWebFilter implements WebFilter {
-
-            private final AuthenticationReload authenticationReload;
-
-            public ReloadAuthenticationWebFilter(AuthenticationReload authenticationReload) {
-                this.authenticationReload = authenticationReload;
-            }
-
-            @Override
-            public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
-                return ReactiveSecurityContextHolder.getContext()
-                        .switchIfEmpty(Mono.defer(() -> chain.filter(exchange).then(Mono.empty())))
-                        .flatMap(securityContext -> {
-                            ReloadAuthenticationConfigurer.reloadAuthentication(securityContext, authenticationReload);
-                            return chain.filter(exchange);
-                        });
-            }
-        }
-
     }
 
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
     @ConditionalOnDefaultWebSecurity
     static class ServletResourceServerConfiguration {
+
         private final ExceptionHandler exceptionHandler;
 
         ServletResourceServerConfiguration(ExceptionHandler exceptionHandler) {
