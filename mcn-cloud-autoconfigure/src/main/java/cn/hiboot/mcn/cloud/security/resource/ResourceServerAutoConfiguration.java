@@ -47,7 +47,9 @@ import reactor.core.publisher.Mono;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -153,7 +155,7 @@ public class ResourceServerAutoConfiguration {
         }
 
         @Bean
-        SecurityFilterChain resourceServerSecurityFilterChain(HttpSecurity http,ResourceServerProperties ssoProperties,ObjectProvider<TokenResolver> beanProvider) throws Exception {
+        SecurityFilterChain resourceServerSecurityFilterChain(HttpSecurity http,ResourceServerProperties ssoProperties) throws Exception {
             return http
                     .authorizeRequests(requests -> {
                         requests.antMatchers(ssoProperties.getAllowedPaths()).permitAll();
@@ -166,7 +168,7 @@ public class ResourceServerAutoConfiguration {
                         }else {
                             c.jwt();
                         }
-                        c.bearerTokenResolver(new CustomBearerTokenResolver(beanProvider)).accessDeniedHandler((request, response, accessDeniedException) -> handleException(accessDeniedException,response))
+                        c.accessDeniedHandler((request, response, accessDeniedException) -> handleException(accessDeniedException,response))
                                 .authenticationEntryPoint((request, response, authException) -> handleException(authException,response));
                     })
                     .apply(new ReloadAuthenticationConfigurer()).and()
@@ -177,19 +179,20 @@ public class ResourceServerAutoConfiguration {
             cn.hiboot.mcn.autoconfigure.web.mvc.WebUtils.write(exceptionHandler.handleException(exception),response);
         }
 
-        static class CustomBearerTokenResolver implements BearerTokenResolver{
-            private final TokenResolver tokenResolver;
-            private final BearerTokenResolver defaultBearerTokenResolver;
+        @Bean
+        @ConditionalOnMissingBean
+        BearerTokenResolver defaultBearerTokenResolver(ObjectProvider<TokenResolver> beanProvider) {
+            return new DelegatingBearerTokenResolver(beanProvider);
+        }
 
-            public CustomBearerTokenResolver(ObjectProvider<TokenResolver> beanProvider) {
-                this.tokenResolver = beanProvider.getIfUnique();
-                this.defaultBearerTokenResolver = new DefaultBearerTokenResolver();
-            }
+        static class DelegatingBearerTokenResolver implements BearerTokenResolver {
 
-            @Override
-            public String resolve(HttpServletRequest request) {
-                String token = defaultBearerTokenResolver.resolve(request);
-                if (token == null && tokenResolver != null) {
+            private final List<BearerTokenResolver> delegates;
+
+            public DelegatingBearerTokenResolver(ObjectProvider<TokenResolver> beanProvider) {
+                this.delegates = new ArrayList<>(2);
+                this.delegates.add(new DefaultBearerTokenResolver());
+                beanProvider.ifUnique(tokenResolver -> this.delegates.add(request -> {
                     String name = tokenResolver.paramName();
                     String apk = request.getHeader(name);
                     if (McnUtils.isNullOrEmpty(apk)) {
@@ -198,10 +201,20 @@ public class ResourceServerAutoConfiguration {
                     if (McnUtils.isNotNullAndEmpty(apk)) {
                         return tokenResolver.jwtToken(apk);
                     }
-                }
-                return token;
+                    return null;
+                }));
             }
 
+            @Override
+            public String resolve(HttpServletRequest request) {
+                for (BearerTokenResolver delegate : this.delegates) {
+                    String token = delegate.resolve(request);
+                    if (token != null) {
+                        return token;
+                    }
+                }
+                return null;
+            }
         }
 
     }
