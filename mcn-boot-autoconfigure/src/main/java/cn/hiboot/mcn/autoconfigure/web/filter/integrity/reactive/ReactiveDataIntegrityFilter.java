@@ -6,7 +6,6 @@ import cn.hiboot.mcn.autoconfigure.web.filter.integrity.DataIntegrityException;
 import cn.hiboot.mcn.autoconfigure.web.filter.integrity.DataIntegrityProperties;
 import cn.hiboot.mcn.autoconfigure.web.filter.integrity.DataIntegrityUtils;
 import cn.hiboot.mcn.autoconfigure.web.reactor.WebUtils;
-import cn.hiboot.mcn.core.tuples.Pair;
 import cn.hutool.core.util.StrUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,9 +13,12 @@ import org.springframework.boot.web.reactive.filter.OrderedWebFilter;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.codec.multipart.FilePart;
+import org.springframework.http.codec.multipart.FormFieldPart;
 import org.springframework.http.codec.multipart.Part;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpRequestDecorator;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Flux;
@@ -64,79 +66,79 @@ public class ReactiveDataIntegrityFilter implements OrderedWebFilter {
             }
             String signature = WebUtils.getHeader(request, "signature");// 获取签名
             if (StrUtil.isEmpty(signature)) {
-                return Mono.error(DataIntegrityException.newInstance("验证失败,数据被篡改"));
+                return error();
             }
             String nonceStr = WebUtils.getHeader(request, "nonceStr");// 获取随机字符串
 
-            return exchange.getFormData().map(formParams -> {
-                Map<String, Object> params = new HashMap<>();
-                exchange.getRequest().getQueryParams().forEach((name, value) -> params.put(name, value.get(0)));
-                formParams.forEach((name, value) -> params.put(name, value.get(0)));
-                return params;
-            })
-            .flatMap(params -> parseUpload(exchange).map(fileInfo -> Pair.with(params,fileInfo)))
-            .flatMap(p -> {
-                if (request.getMethod() == HttpMethod.POST && MediaType.APPLICATION_JSON.isCompatibleWith(request.getHeaders().getContentType())) {
-                    ServerHttpRequestDecorator decorator = new ServerHttpRequestDecorator(request) {
-                        @Override
-                        public Flux<DataBuffer> getBody() {
-                            return super.getBody().flatMap(dataBuffer -> {
-                                String payload = JsonRequestHelper.getData(dataBuffer.asInputStream());
-                                if (isInValid(signature, timestamp, nonceStr, p.getValue0(), null,payload)) {
-                                    return Mono.error(DataIntegrityException.newInstance("验证失败,数据被篡改"));
+            return exchange.getFormData()
+                    .map(formParams -> new Params(exchange.getRequest().getQueryParams(), formParams))
+                    .flatMap(params -> parseUpload(params, exchange))
+                    .flatMap(params -> {
+                        if (request.getMethod() == HttpMethod.POST && MediaType.APPLICATION_JSON.isCompatibleWith(request.getHeaders().getContentType())) {
+                            ServerHttpRequestDecorator decorator = new ServerHttpRequestDecorator(request) {
+                                @Override
+                                public Flux<DataBuffer> getBody() {
+                                    return super.getBody().flatMap(dataBuffer -> {
+                                        String payload = JsonRequestHelper.getData(dataBuffer.asInputStream());
+                                        if (isInValid(signature, timestamp, nonceStr, params.keyValues(), null, payload)) {
+                                            return error();
+                                        }
+                                        return Flux.just(dataBuffer.split(0));
+                                    });
                                 }
-                                return Flux.just(dataBuffer.split(0));
-                            });
+                            };
+                            return Mono.just(exchange.mutate().request(decorator).build());
                         }
-                    };
-                    return Mono.just(exchange.mutate().request(decorator).build());
-                }
-                if (isInValid(signature, timestamp, nonceStr, p.getValue0(), p.getValue1(),null)) {
-                    return Mono.error(DataIntegrityException.newInstance("验证失败,数据被篡改"));
-                }
-                return Mono.just(exchange);
-            });
+                        if (isInValid(signature, timestamp, nonceStr, params.keyValues(), params.fileInfo(), null)) {
+                            return error();
+                        }
+                        return Mono.just(exchange);
+                    });
         }).flatMap(chain::filter).onErrorResume(DataIntegrityException.class, ex -> {
             log.error("Check DataIntegrity Failed: {}", ex.getMessage());
             return WebUtils.failed(ex.getMessage(), exchange.getResponse());
         });
     }
 
-    private boolean isInValid(String signature, String timestamp, String nonceStr, Map<String,Object> params, String fileInfo,String payload) {
+    private boolean isInValid(String signature, String timestamp, String nonceStr, Map<String, Object> params, String fileInfo, String payload) {
         String sign = DataIntegrityUtils.signature(timestamp, nonceStr, params, fileInfo, payload);
         if (Objects.equals(signature, sign)) {
             return false;
         }
-        log.error("kv param = {},payload = {},fileInfo = {},signature = {}",params,payload,fileInfo,sign);
+        log.error("kv param = {},payload = {},fileInfo = {},signature = {}", params, payload, fileInfo, sign);
         return true;
     }
 
-    private Mono<String> parseUpload(ServerWebExchange exchange) {
+    private <T> Mono<T> error() {
+        return Mono.error(DataIntegrityException.newInstance("验证失败,数据被篡改"));
+    }
+
+    private Mono<Params> parseUpload(Params params, ServerWebExchange exchange) {
         ServerHttpRequest request = exchange.getRequest();
         if (MediaType.MULTIPART_FORM_DATA.isCompatibleWith(request.getHeaders().getContentType()) && dataIntegrityProperties.isCheckUpload()) {//maybe upload
             return exchange.getMultipartData().map(m -> {
-                StringBuilder str = new StringBuilder();
-                m.forEach((k,v) -> {
+                m.forEach((k, v) -> {
                     for (Part part : v) {
-                        part.content().map(dataBuffer -> {
-                            byte[] dest = new byte[dataBuffer.readableByteCount()];
-                            dataBuffer.read(dest);
-                            return dest;
-                        }).subscribe(bytes -> str.append(DataIntegrityUtils.md5UploadFile(bytes,getSubmittedFileName(part))).append("&"));
+                        if (part instanceof FilePart) {
+                            part.content().map(dataBuffer -> {
+                                byte[] dest = new byte[dataBuffer.readableByteCount()];
+                                dataBuffer.read(dest);
+                                return dest;
+                            }).subscribe(bytes -> params.addFileInfo(bytes, part));
+                        } else if (part instanceof FormFieldPart fieldPart) {
+                            params.addKeyValue(fieldPart.name(), fieldPart.value());
+                        }
                     }
                 });
-                if (!str.isEmpty()) {
-                    return str.substring(0, str.length() - 1);
-                }
-                return str.toString();
+                return params;
             });
         }
-        return Mono.just("");
+        return Mono.just(params);
     }
 
-    public String getSubmittedFileName(Part part) {
+    private static String getSubmittedFileName(Part part) {
         String fileName = null;
-        String cd =  part.headers().getFirst("Content-Disposition");
+        String cd = part.headers().getFirst("Content-Disposition");
         if (cd != null) {
             String cdl = cd.toLowerCase(Locale.ENGLISH);
             if (cdl.startsWith("form-data") || cdl.startsWith("attachment")) {
@@ -144,7 +146,7 @@ public class ReactiveDataIntegrityFilter implements OrderedWebFilter {
                 for (String s : split) {
                     s = s.trim();
                     if (s.startsWith("filename")) {
-                        fileName = s.split("=")[1].replace("\"","");
+                        fileName = s.split("=")[1].replace("\"", "");
                     }
                 }
             }
@@ -157,5 +159,39 @@ public class ReactiveDataIntegrityFilter implements OrderedWebFilter {
         return dataIntegrityProperties.getOrder();
     }
 
+    private static class Params {
+
+        private final Map<String, Object> keyValues = new HashMap<>();
+        private final StringBuilder fileInfo = new StringBuilder();
+
+        public Params(MultiValueMap<String, String> query, MultiValueMap<String, String> forms) {
+            for (String key : query.keySet()) {
+                keyValues.put(key, query.getFirst(key));
+            }
+            for (String key : forms.keySet()) {
+                keyValues.put(key, query.getFirst(key));
+            }
+        }
+
+        void addKeyValue(String key, Object value) {
+            keyValues.put(key, value);
+        }
+
+        void addFileInfo(byte[] bytes, Part part) {
+            fileInfo.append(DataIntegrityUtils.md5UploadFile(bytes, getSubmittedFileName(part))).append("&");
+        }
+
+        public Map<String, Object> keyValues() {
+            return keyValues;
+        }
+
+        public String fileInfo() {
+            if (!fileInfo.isEmpty()) {
+                return fileInfo.substring(0, fileInfo.length() - 1);
+            }
+            return fileInfo.toString();
+        }
+
+    }
 
 }
