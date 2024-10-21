@@ -7,6 +7,7 @@ import cn.hiboot.mcn.core.util.McnUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -14,6 +15,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.oauth2.server.resource.BearerTokenAuthenticationToken;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -26,6 +28,7 @@ import reactor.core.publisher.Mono;
  * @since 2024/10/14 11:06
  */
 @AutoConfiguration(after = RestClientAutoConfiguration.class)
+@ConditionalOnClass(BearerTokenAuthenticationToken.class)
 @EnableConfigurationProperties(TokenResolverProperties.class)
 public class TokenResolverAutoConfiguration {
 

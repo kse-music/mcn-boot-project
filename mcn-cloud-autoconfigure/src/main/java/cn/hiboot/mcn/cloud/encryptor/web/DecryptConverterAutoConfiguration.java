@@ -134,8 +134,9 @@ public class DecryptConverterAutoConfiguration {
 
                     @Override
                     public Mono<Object> resolveArgument(MethodParameter parameter, BindingContext bindingContext, ServerWebExchange exchange) {
-                        return Mono.fromSupplier(() -> exchange.getRequest().getQueryParams().getFirst(parameter.getParameterName()))
-                                .switchIfEmpty(Mono.empty()).map(textEncryptor::decrypt);
+                        return Mono.justOrEmpty(parameter.getParameterName())
+                                .mapNotNull(p -> exchange.getRequest().getQueryParams().getFirst(p))
+                                .map(textEncryptor::decrypt);
                     }
                 });
             }

@@ -4,7 +4,10 @@ import cn.hiboot.mcn.autoconfigure.web.filter.common.NameValueProcessor;
 import cn.hiboot.mcn.autoconfigure.web.filter.common.NameValueProcessorProperties;
 import cn.hiboot.mcn.autoconfigure.web.filter.common.RequestMatcher;
 import org.springframework.boot.web.reactive.filter.OrderedWebFilter;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.ServerWebExchangeDecorator;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 
@@ -29,12 +32,24 @@ public class ReactiveNameValueProcessorFilter implements OrderedWebFilter {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         if (requestMatcher.matches(exchange.getRequest())) {
-            NameValueProcessorRequestDecorator decorator = new NameValueProcessorRequestDecorator(exchange.getRequest(),valueProcessor)
+            NameValueProcessorRequestDecorator request = new NameValueProcessorRequestDecorator(exchange.getRequest(),valueProcessor)
                     .filterHeaderValue(properties.isFilterHeaderValue())
                     .filterParameterName(properties.isFilterParameterName())
                     .processPayload(properties.isProcessPayload())
                     .excludeFields(properties.getExcludeFields());
-            return exchange.getFormData().flatMap(formData -> Mono.just(decorator.process(formData))).flatMap(p -> chain.filter(exchange.mutate().request(decorator).build()));
+            exchange = new ServerWebExchangeDecorator(exchange) {
+
+                @Override
+                public ServerHttpRequest getRequest() {
+                    return request;
+                }
+
+                @Override
+                public Mono<MultiValueMap<String, String>> getFormData() {
+                    return super.getFormData().map(request::process);
+                }
+
+            };
         }
         return chain.filter(exchange);
     }
