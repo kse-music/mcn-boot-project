@@ -4,7 +4,11 @@ import cn.hiboot.mcn.core.task.TaskThreadPool;
 import cn.hiboot.mcn.core.util.McnUtils;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import io.minio.*;
+import io.minio.CreateMultipartUploadResponse;
+import io.minio.GetPresignedObjectUrlArgs;
+import io.minio.ListPartsResponse;
+import io.minio.MinioAsyncClient;
+import io.minio.ObjectWriteArgs;
 import io.minio.http.Method;
 import io.minio.messages.Part;
 import okhttp3.MediaType;
@@ -124,7 +128,15 @@ public class DefaultMinioClient extends MinioAsyncClient {
                 preSignResult.getUploadUrls().add(getPresignedObjectUrl(bucketName,objectName,reqParams));
             }
         }
+        List<String> uploadUrls = preSignResult.getUploadUrls();
+        if (uploadUrls != null && getConfig().getExternalEndpoint() != null) {
+            preSignResult.setUploadUrls(uploadUrls.stream().map(this::replace).collect(Collectors.toList()));
+        }
         return preSignResult;
+    }
+
+    private String replace(String url) {
+        return url.replace(getConfig().getEndpoint(), getConfig().getExternalEndpoint());
     }
 
     public List<Integer> listParts(String bucketName, String objectName, String uploadId) throws Exception{
