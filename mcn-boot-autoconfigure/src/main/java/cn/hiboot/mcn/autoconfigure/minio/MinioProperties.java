@@ -21,6 +21,8 @@ public class MinioProperties {
 
     private String endpoint;
 
+    private String externalEndpoint;
+
     private String accessKey;
 
     private String secretKey;
@@ -57,6 +59,14 @@ public class MinioProperties {
 
     public void setEndpoint(String endpoint) {
         this.endpoint = endpoint;
+    }
+
+    public String getExternalEndpoint() {
+        return externalEndpoint;
+    }
+
+    public void setExternalEndpoint(String externalEndpoint) {
+        this.externalEndpoint = externalEndpoint;
     }
 
     public String getAccessKey() {
