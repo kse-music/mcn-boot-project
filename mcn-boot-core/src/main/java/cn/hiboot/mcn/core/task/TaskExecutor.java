@@ -18,7 +18,7 @@ import java.util.function.Function;
 public final class TaskExecutor {
 
     private TaskThreadPool taskThreadPool;
-    private final int batchSize;
+    final int batchSize;
     private final boolean autoShutdown;
     private final boolean waitAllTaskComplete;
     private ExecutorCompletionService<Void> completionService;
@@ -97,7 +97,9 @@ public final class TaskExecutor {
     }
 
     public void close() {
-        this.taskThreadPool.shutdown();
+        if (this.taskThreadPool != null) {
+            this.taskThreadPool.shutdown();
+        }
     }
 
     public static Builder builder() {
