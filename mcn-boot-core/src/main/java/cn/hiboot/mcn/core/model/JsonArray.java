@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**
@@ -101,11 +100,21 @@ public class JsonArray extends ArrayNode {
         return (T) jsonNode;
     }
 
+    public Iterable<JsonObject> asJsonObject() {
+        Iterator<JsonNode> iterator = iterator();
+        return () -> new Iterator<>() {
 
-    public void loop(Consumer<JsonObject> consumer) {
-        for (JsonNode jsonNode : this) {
-            consumer.accept(JsonObject.of(jsonNode));
-        }
+            @Override
+            public boolean hasNext() {
+                return iterator.hasNext();
+            }
+
+            @Override
+            public JsonObject next() {
+                return JsonObject.of(iterator.next());
+            }
+
+        };
     }
 
 }
