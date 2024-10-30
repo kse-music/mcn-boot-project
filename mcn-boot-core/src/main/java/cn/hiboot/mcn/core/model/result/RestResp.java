@@ -19,63 +19,63 @@ public class RestResp<T> implements HttpTime {
 
     public enum ActionStatusMethod {
 
-		/**
-		 * 成功
-		 */
-		OK,
-		/**
-		 * 失败
-		 */
-		FAIL
+        /**
+         * 成功
+         */
+        OK,
+        /**
+         * 失败
+         */
+        FAIL
 
     }
 
-	/**
-	 * 接口响应状态:OK/FAIL
-	 */
+    /**
+     * 接口响应状态:OK/FAIL
+     */
     @JsonProperty("ActionStatus")
-	private ActionStatusMethod ActionStatus = ActionStatusMethod.OK;
+    private ActionStatusMethod ActionStatus = ActionStatusMethod.OK;
 
-	/**
-	 * 接口返回错误码
-	 *
-	 */
+    /**
+     * 接口返回错误码
+     */
     @JsonProperty("ErrorCode")
-	private Integer ErrorCode = 0;
+    private Integer ErrorCode = 0;
 
-	/**
-	 * 接口返回错误信息
-	 */
+    /**
+     * 接口返回错误信息
+     */
     @JsonProperty("ErrorInfo")
-	private String ErrorInfo = "";
+    private String ErrorInfo = "";
 
-	/**
-	 * 接口执行时间
-	 */
-	@JsonProperty("Duration")
-	private Long duration;
+    /**
+     * 接口执行时间
+     */
+    @JsonProperty("Duration")
+    private Long duration;
 
-	/**
-	 * 接口返回数据
-	 */
-	private T data;
+    /**
+     * 接口返回数据
+     */
+    private T data;
 
-	/**
-	 * 接口返回数据的总数
-	 */
-	private Long count;
+    /**
+     * 接口返回数据的总数
+     */
+    private Long count;
 
-	public RestResp() {	}
+    public RestResp() {
+    }
 
-	private RestResp(Integer code,String msg){
-		this.ActionStatus = ActionStatusMethod.FAIL;
-		this.ErrorCode = code;
-		this.ErrorInfo = msg;
-	}
-	
-	public RestResp(T data){
-		this.data = data;
-	}
+    private RestResp(Integer code, String msg) {
+        this.ActionStatus = ActionStatusMethod.FAIL;
+        this.ErrorCode = code;
+        this.ErrorInfo = msg;
+    }
+
+    public RestResp(T data) {
+        this.data = data;
+    }
 
     public RestResp(T data, Long count) {
         this(data);
@@ -83,44 +83,44 @@ public class RestResp<T> implements HttpTime {
     }
 
     @JsonIgnore
-	public ActionStatusMethod getActionStatus() {
-		return ActionStatus;
-	}
+    public ActionStatusMethod getActionStatus() {
+        return ActionStatus;
+    }
 
-	public void setActionStatus(ActionStatusMethod actionStatus) {
-		ActionStatus = actionStatus;
-	}
-	
-	@JsonIgnore
-	public Integer getErrorCode() {
-		return ErrorCode;
-	}
+    public void setActionStatus(ActionStatusMethod actionStatus) {
+        ActionStatus = actionStatus;
+    }
 
-	public void setErrorCode(Integer errorCode) {
-		ErrorCode = errorCode;
-	}
-	
-	@JsonIgnore
-	public String getErrorInfo() {
-		return ErrorInfo;
-	}
+    @JsonIgnore
+    public Integer getErrorCode() {
+        return ErrorCode;
+    }
 
-	public void setErrorInfo(String errorInfo) {
-		ErrorInfo = errorInfo;
-	}
+    public void setErrorCode(Integer errorCode) {
+        ErrorCode = errorCode;
+    }
 
-	@JsonIgnore
-	@Override
-	public Long getDuration() {
-		return duration;
-	}
+    @JsonIgnore
+    public String getErrorInfo() {
+        return ErrorInfo;
+    }
 
-	@Override
-	public void setDuration(Long duration) {
-		this.duration = duration;
-	}
+    public void setErrorInfo(String errorInfo) {
+        ErrorInfo = errorInfo;
+    }
 
-	public T getData() {
+    @JsonIgnore
+    @Override
+    public Long getDuration() {
+        return duration;
+    }
+
+    @Override
+    public void setDuration(Long duration) {
+        this.duration = duration;
+    }
+
+    public T getData() {
         return data;
     }
 
@@ -136,40 +136,48 @@ public class RestResp<T> implements HttpTime {
         this.count = count;
     }
 
-	public static <S> RestResp<S> error(Integer code,String msg){
-		return new RestResp<>(code, msg);
-	}
+    public static <D> RestResp<D> ok(D data) {
+        return new RestResp<>(data);
+    }
 
-	public static <S> RestResp<S> error(Integer code){
-		return error(code, ErrorMsg.getErrorMsg(code));
-	}
+    public static <D> RestResp<D> ok(D data, Long count) {
+        return new RestResp<>(data, count);
+    }
 
-	public static <S> RestResp<S> error(String msg){
-		return error(BaseException.DEFAULT_ERROR_CODE, msg);
-	}
+    public static <S> RestResp<S> error(Integer code, String msg) {
+        return new RestResp<>(code, msg);
+    }
 
-	@JsonIgnore
-	public boolean isSuccess(){
-		return getActionStatus() == ActionStatusMethod.OK;
-	}
+    public static <S> RestResp<S> error(Integer code) {
+        return error(code, ErrorMsg.getErrorMsg(code));
+    }
 
-	@JsonIgnore
-	public boolean isFailed(){
-		return getActionStatus() == ActionStatusMethod.FAIL;
-	}
+    public static <S> RestResp<S> error(String msg) {
+        return error(BaseException.DEFAULT_ERROR_CODE, msg);
+    }
 
-	public T remoteData(BiFunction<Integer,String,T> errorFunction){
-		if(isFailed()){
-			if(errorFunction == null){
-				throw ServiceException.newInstance(ExceptionKeys.REMOTE_SERVICE_ERROR,getErrorInfo());
-			}
-			setData(errorFunction.apply(getErrorCode(), getErrorInfo()));
-		}
-		return getData();
-	}
+    @JsonIgnore
+    public boolean isSuccess() {
+        return getActionStatus() == ActionStatusMethod.OK;
+    }
 
-	public T remoteData(){
-		return remoteData(null);
-	}
+    @JsonIgnore
+    public boolean isFailed() {
+        return getActionStatus() == ActionStatusMethod.FAIL;
+    }
+
+    public T remoteData(BiFunction<Integer, String, T> errorFunction) {
+        if (isFailed()) {
+            if (errorFunction == null) {
+                throw ServiceException.newInstance(ExceptionKeys.REMOTE_SERVICE_ERROR, getErrorInfo());
+            }
+            setData(errorFunction.apply(getErrorCode(), getErrorInfo()));
+        }
+        return getData();
+    }
+
+    public T remoteData() {
+        return remoteData(null);
+    }
 
 }
