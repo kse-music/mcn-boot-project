@@ -9,23 +9,16 @@ import feign.codec.ErrorDecoder;
 import feign.optionals.OptionalDecoder;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.AllNestedConditions;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
-import org.springframework.cloud.circuitbreaker.resilience4j.Resilience4JCircuitBreakerFactory;
-import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
-import org.springframework.cloud.openfeign.CircuitBreakerNameResolver;
 import org.springframework.cloud.openfeign.FeignAutoConfiguration;
-import org.springframework.cloud.openfeign.Targeter;
 import org.springframework.cloud.openfeign.support.HttpMessageConverterCustomizer;
 import org.springframework.cloud.openfeign.support.ResponseEntityDecoder;
 import org.springframework.cloud.openfeign.support.SpringDecoder;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
@@ -33,7 +26,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 
 /**
- * 提供全局fallback机制
+ * Feign扩展配置
  *
  * @author DingHao
  * @since 2021/9/21 13:37
@@ -43,19 +36,6 @@ import java.lang.reflect.Type;
 @Import(FeignInterceptorConfiguration.class)
 public class FeignExtensionAutoConfiguration {
 
-    @Configuration(proxyBeanMethods = false)
-    @ConditionalOnClass(Resilience4JCircuitBreakerFactory.class)
-    @Conditional(GlobalFallbackCondition.class)
-    protected static class CircuitBreakerConfiguration {
-
-        @Bean
-        public Targeter circuitBreakerFeignTargeter(CircuitBreakerFactory circuitBreakerFactory,
-                @Value("${spring.cloud.openfeign.circuitbreaker.group.enabled:false}") boolean circuitBreakerGroupEnabled,
-                CircuitBreakerNameResolver circuitBreakerNameResolver) {
-            return new FeignCircuitBreakerTargeter(circuitBreakerFactory, circuitBreakerGroupEnabled, circuitBreakerNameResolver);
-        }
-
-    }
 
     @Configuration(proxyBeanMethods = false)
     @ConditionalOnClass(ErrorDecoder.class)
@@ -69,45 +49,26 @@ public class FeignExtensionAutoConfiguration {
 
     }
 
-
     @Bean
     @ConditionalOnMissingBean
-    @ConditionalOnProperty(prefix = "param.processor",name = "enabled",havingValue = "true")
+    @ConditionalOnProperty(prefix = "param.processor", name = "enabled", havingValue = "true")
     public Decoder feignDecoder(ObjectProvider<HttpMessageConverterCustomizer> customizers, ObjectFactory<HttpMessageConverters> messageConverters) {
         return new OptionalDecoder(new ResponseEntityDecoder(new FeignClientResponseInterceptor(messageConverters, customizers)));
     }
 
     static class FeignClientResponseInterceptor extends SpringDecoder {
 
-        public FeignClientResponseInterceptor(ObjectFactory<HttpMessageConverters> messageConverters,ObjectProvider<HttpMessageConverterCustomizer> customizers) {
+        public FeignClientResponseInterceptor(ObjectFactory<HttpMessageConverters> messageConverters, ObjectProvider<HttpMessageConverterCustomizer> customizers) {
             super(messageConverters, customizers);
         }
 
         @Override
         public Object decode(final Response response, Type type) throws IOException, FeignException {
-            try{
-                return super.decode(response,type);
+            try {
+                return super.decode(response, type);
             } finally {
                 NameValueProcessorJacksonConfig.removeFeignRequest();
             }
-        }
-
-    }
-
-    static class GlobalFallbackCondition extends AllNestedConditions {
-
-        GlobalFallbackCondition() {
-            super(ConfigurationPhase.PARSE_CONFIGURATION);
-        }
-
-        @ConditionalOnProperty(prefix = "spring.cloud.openfeign.circuitbreaker",name = "enabled",havingValue = "true")
-        static class FeignCircuitbreakerEnabled {
-
-        }
-
-        @ConditionalOnProperty(prefix = "feign.circuitbreaker",name = "globalfallback.enabled", havingValue = "true", matchIfMissing = true)
-        static class FeignGlobalCircuitbreakerEnabled {
-
         }
 
     }

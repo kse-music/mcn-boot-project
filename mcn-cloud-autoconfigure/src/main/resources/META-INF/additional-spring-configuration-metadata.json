@@ -1,10 +1,10 @@
 {
   "properties": [
     {
-      "name": "feign.circuitbreaker.globalfallback.enabled",
+      "name": "mcn.circuitbreaker.default.enabled",
       "type": "java.lang.Boolean",
-      "sourceType": "cn.hiboot.mcn.cloud.feign.FeignExtensionAutoConfiguration$GlobalFallbackCondition$FeignGlobalCircuitbreakerEnabled",
-      "description": "是否启用全局fallback.",
+      "sourceType": "cn.hiboot.mcn.cloud.circuitbreaker.CircuitBreakerAutoConfiguration",
+      "description": "是否启用默认fallback.",
       "defaultValue": "true"
     },
     {
