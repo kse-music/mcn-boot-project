@@ -1,9 +1,10 @@
+cn.hiboot.mcn.cloud.circuitbreaker.CircuitBreakerAutoConfiguration
+cn.hiboot.mcn.cloud.client.RestClientAutoConfiguration
 cn.hiboot.mcn.cloud.discover.ServiceRegisterAutoConfiguration
 cn.hiboot.mcn.cloud.encryptor.jackson.DecryptJacksonAutoConfiguration
 cn.hiboot.mcn.cloud.encryptor.sm2.SM2AutoConfiguration
 cn.hiboot.mcn.cloud.encryptor.web.DecryptConverterAutoConfiguration
 cn.hiboot.mcn.cloud.feign.FeignExtensionAutoConfiguration
 cn.hiboot.mcn.cloud.gateway.GatewayExtensionAutoConfiguration
-cn.hiboot.mcn.cloud.client.RestClientAutoConfiguration
 cn.hiboot.mcn.cloud.security.resource.ResourceServerAutoConfiguration
 cn.hiboot.mcn.cloud.security.token.TokenResolverAutoConfiguration
