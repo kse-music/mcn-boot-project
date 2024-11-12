@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Predicate;
@@ -32,7 +31,7 @@ public class JsonArray extends ArrayNode {
 
     private static List<JsonNode> jsonNodes(ArrayNode arrayNode) {
         if (arrayNode == null) {
-            return Collections.emptyList();
+            return new ArrayList<>();
         }
         List<JsonNode> list = new ArrayList<>(arrayNode.size());
         for (JsonNode jsonNode : arrayNode) {
@@ -46,7 +45,7 @@ public class JsonArray extends ArrayNode {
         return this;
     }
 
-    public JsonArray add(int index, JsonObject jsonObject){
+    public JsonArray set(int index, JsonObject jsonObject){
         super.set(index,jsonObject);
         return this;
     }
