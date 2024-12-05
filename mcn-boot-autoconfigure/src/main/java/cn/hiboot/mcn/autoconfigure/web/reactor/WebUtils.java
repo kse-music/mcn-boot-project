@@ -52,7 +52,7 @@ public abstract class WebUtils {
     }
 
     public static Mono<Void> success(Object data, ServerHttpResponse response) {
-        return write(new RestResp<>(data),response);
+        return write(RestResp.ok(data),response);
     }
 
     public static Mono<Void> failed(Throwable e, ServerHttpResponse response) {

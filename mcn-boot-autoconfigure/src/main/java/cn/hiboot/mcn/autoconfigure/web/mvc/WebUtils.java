@@ -56,11 +56,11 @@ public abstract class WebUtils {
     }
 
     public static <T> void success(T data, HttpServletResponse response){
-        write(new RestResp<>(data),response);
+        write(RestResp.ok(data),response);
     }
 
     public static <T> void success(T data,Long count, HttpServletResponse response){
-        write(new RestResp<>(data,count),response);
+        write(RestResp.ok(data,count),response);
     }
 
     public static void failed(String msg, HttpServletResponse response){

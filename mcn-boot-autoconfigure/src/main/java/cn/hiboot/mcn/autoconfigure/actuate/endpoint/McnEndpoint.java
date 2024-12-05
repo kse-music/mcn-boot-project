@@ -2,7 +2,11 @@ package cn.hiboot.mcn.autoconfigure.actuate.endpoint;
 
 import cn.hiboot.mcn.autoconfigure.config.ConfigProperties;
 import cn.hiboot.mcn.core.model.result.RestResp;
-import org.springframework.boot.actuate.endpoint.annotation.*;
+import org.springframework.boot.actuate.endpoint.annotation.DeleteOperation;
+import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
+import org.springframework.boot.actuate.endpoint.annotation.ReadOperation;
+import org.springframework.boot.actuate.endpoint.annotation.Selector;
+import org.springframework.boot.actuate.endpoint.annotation.WriteOperation;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
 
@@ -25,17 +29,17 @@ public class McnEndpoint {
 
     @ReadOperation
     public RestResp<String> version() {
-        return new RestResp<>(environment.getProperty("mcn.version", "UN_KNOW"));
+        return RestResp.ok(environment.getProperty("mcn.version", "UN_KNOW"));
     }
 
     @ReadOperation
     public RestResp<String> get(@Selector String name) {
-        return new RestResp<>(environment.getProperty(name));
+        return RestResp.ok(environment.getProperty(name));
     }
 
     @WriteOperation
     public RestResp<Object> add(String name, Object value) {
-        return new RestResp<>(doAction(mapPropertySource -> mapPropertySource.getSource().put(name, value)));
+        return RestResp.ok(doAction(mapPropertySource -> mapPropertySource.getSource().put(name, value)));
     }
 
     private Object doAction(Function<MapPropertySource, Object> function) {
@@ -45,7 +49,7 @@ public class McnEndpoint {
 
     @DeleteOperation
     public RestResp<Object> delete(@Selector String name) {
-        return new RestResp<>(doAction(mapPropertySource -> mapPropertySource.getSource().remove(name)));
+        return RestResp.ok(doAction(mapPropertySource -> mapPropertySource.getSource().remove(name)));
     }
 
 }
