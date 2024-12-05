@@ -70,7 +70,7 @@ public interface BaseService<T,PK,R extends BaseRepository<T,PK>> {
         }else {
             page = getRepository().findAll(Example.of(t),pageRequest);
         }
-        return new RestResp<>(page.getContent(),page.getTotalElements());
+        return RestResp.ok(page.getContent(),page.getTotalElements());
     }
 
     default T getOne(Specification<T> s){
@@ -88,7 +88,7 @@ public interface BaseService<T,PK,R extends BaseRepository<T,PK>> {
     default RestResp<List<T>> page(Specification<T> s, PageSort pageSort){
         PageRequest pageRequest = PageRequest.of(pageSort.getPageIndex(),pageSort.getPageSize(),JpaUtils.jpaSort(pageSort.getSort()));
         Page<T> page = getRepository().findAll(s,pageRequest);
-        return new RestResp<>(page.getContent(),page.getTotalElements());
+        return RestResp.ok(page.getContent(),page.getTotalElements());
     }
 
     default void updateById(PK id,T data){
