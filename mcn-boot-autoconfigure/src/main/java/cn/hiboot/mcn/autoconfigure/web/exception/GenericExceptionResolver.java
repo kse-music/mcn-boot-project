@@ -1,6 +1,6 @@
 package cn.hiboot.mcn.autoconfigure.web.exception;
 
-import cn.hiboot.mcn.autoconfigure.common.GenericResolver;
+import org.springframework.core.ResolvableType;
 
 /**
  * GenericExceptionResolver
@@ -8,6 +8,13 @@ import cn.hiboot.mcn.autoconfigure.common.GenericResolver;
  * @author DingHao
  * @since 2023/2/6 10:10
  */
-public interface GenericExceptionResolver extends GenericResolver<Throwable>,ExceptionResolver<Throwable> {
+public interface GenericExceptionResolver extends ExceptionResolver<Throwable> {
+
+    default boolean supportsType(Class<? extends Throwable> type) {
+        return supportsType(ResolvableType.forClass(type));
+    }
+
+    boolean supportsType(ResolvableType type);
 
 }
+
