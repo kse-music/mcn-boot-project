@@ -11,7 +11,7 @@
 | fastjson                             | fastjson.version             |     1.2.83      |
 | fastjson2                            | fastjson2.version            |     2.0.50      |
 | guava                                | guava.version                |   33.3.1-jre    |
-| hutool-bom                           | hutool.version               |     5.8.32      |
+| hutool-bom                           | hutool.version               |     5.8.34      |
 | jsoup                                | jsoup.version                |     1.17.2      |
 | knife4j-openapi3-ui                  | knife4j.version              |      4.3.0      |
 | mapstruct                            | mapstruct.version            |   1.5.5.Final   |
