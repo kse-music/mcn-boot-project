@@ -10,7 +10,7 @@ import org.springframework.core.ResolvableType;
  */
 public interface GenericExceptionResolver extends ExceptionResolver<Throwable> {
 
-    default boolean supportsType(Class<Throwable> type) {
+    default boolean supportsType(Class<? extends Throwable> type) {
         return supportsType(ResolvableType.forClass(type));
     }
 
