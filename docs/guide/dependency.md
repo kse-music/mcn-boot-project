@@ -13,7 +13,7 @@
 | guava                                | guava.version                |   33.3.1-jre    |
 | hutool-bom                           | hutool.version               |     5.8.34      |
 | jsoup                                | jsoup.version                |     1.17.2      |
-| knife4j-openapi3-ui                  | knife4j.version              |      4.3.0      |
+| knife4j-openapi3-ui                  | knife4j.version              |      4.5.0      |
 | mapstruct                            | mapstruct.version            |   1.5.5.Final   |
 | mybatis-spring-boot-starter          | mybatis-spring-boot.version  |      3.0.4      |
 | minio                                | minio.version                |     8.5.13      |
@@ -22,6 +22,6 @@
 | spring-cloud-dependencies            | spring-cloud.version         |    2024.0.0     |
 | spring-cloud-alibaba-dependencies    | spring-cloud-alibaba.version |   2023.0.1.0    |
 | spring-cloud-huawei-bom              | spring-cloud-huawei.version  | 1.11.8-2023.0.x |
-| springdoc-openapi-starter-webmvc-ui  | springdoc.version            |      2.3.0      |
-| springdoc-openapi-starter-webflux-ui | springdoc.version            |      2.3.0      |
+| springdoc-openapi-starter-webmvc-ui  | springdoc.version            |      2.7.0      |
+| springdoc-openapi-starter-webflux-ui | springdoc.version            |      2.7.0      |
 | xxl-job-core                         | xxl-job.version              |      2.4.2      |

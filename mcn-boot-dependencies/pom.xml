@@ -38,7 +38,7 @@
         <guava.version>33.3.1-jre</guava.version>
         <hutool.version>5.8.34</hutool.version>
         <jsoup.version>1.17.2</jsoup.version>
-        <knife4j.version>4.3.0</knife4j.version>
+        <knife4j.version>4.5.0</knife4j.version>
         <mapstruct.version>1.5.5.Final</mapstruct.version>
         <mybatis-spring-boot.version>3.0.4</mybatis-spring-boot.version>
         <minio.version>8.5.13</minio.version>
@@ -47,7 +47,7 @@
         <spring-cloud.version>2024.0.0</spring-cloud.version>
         <spring-cloud-alibaba.version>2023.0.1.0</spring-cloud-alibaba.version>
         <spring-cloud-huawei.version>1.11.8-2023.0.x</spring-cloud-huawei.version>
-        <springdoc.version>2.3.0</springdoc.version>
+        <springdoc.version>2.7.0</springdoc.version>
         <xxl-job.version>2.4.2</xxl-job.version>
     </properties>
 
