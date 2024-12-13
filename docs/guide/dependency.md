@@ -15,7 +15,7 @@
 | jsoup                                | jsoup.version                |     1.17.2      |
 | knife4j-openapi3-ui                  | knife4j.version              |      4.3.0      |
 | mapstruct                            | mapstruct.version            |   1.5.5.Final   |
-| mybatis-spring-boot-starter          | mybatis-spring-boot.version  |      3.0.3      |
+| mybatis-spring-boot-starter          | mybatis-spring-boot.version  |      3.0.4      |
 | minio                                | minio.version                |     8.5.13      |
 | smart-doc                            | smart-doc.version            |      2.7.7      |
 | spring-boot-dependencies             | spring-boot.version          |      3.4.0      |

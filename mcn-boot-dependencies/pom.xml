@@ -40,7 +40,7 @@
         <jsoup.version>1.17.2</jsoup.version>
         <knife4j.version>4.3.0</knife4j.version>
         <mapstruct.version>1.5.5.Final</mapstruct.version>
-        <mybatis-spring-boot.version>3.0.3</mybatis-spring-boot.version>
+        <mybatis-spring-boot.version>3.0.4</mybatis-spring-boot.version>
         <minio.version>8.5.13</minio.version>
         <smart-doc.version>2.7.7</smart-doc.version>
         <spring-boot.version>3.4.0</spring-boot.version>
