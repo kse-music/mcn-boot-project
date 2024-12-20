@@ -43,7 +43,7 @@
         <mybatis-spring-boot.version>3.0.4</mybatis-spring-boot.version>
         <minio.version>8.5.13</minio.version>
         <smart-doc.version>2.7.7</smart-doc.version>
-        <spring-boot.version>3.4.0</spring-boot.version>
+        <spring-boot.version>3.4.1</spring-boot.version>
         <spring-cloud.version>2024.0.0</spring-cloud.version>
         <spring-cloud-alibaba.version>2023.0.1.0</spring-cloud-alibaba.version>
         <spring-cloud-huawei.version>1.11.8-2023.0.x</spring-cloud-huawei.version>

@@ -6,7 +6,7 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.support.AbstractPointcutAdvisor;
-import org.springframework.aop.support.ComposablePointcut;
+import org.springframework.aop.support.Pointcuts;
 import org.springframework.aop.support.annotation.AnnotationMatchingPointcut;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Bean;
@@ -32,9 +32,8 @@ public class DurationAop {
 
         public TimeRecordAdvisor() {
             Pointcut cpc = new AnnotationMatchingPointcut(Timing.class, true);
-            ComposablePointcut result = new ComposablePointcut(cpc);
             Pointcut mpc = new AnnotationMatchingPointcut(null, Timing.class, true);
-            this.pointcut = result.union(mpc);
+            this.pointcut = Pointcuts.union(cpc, mpc);
         }
 
         @Override
