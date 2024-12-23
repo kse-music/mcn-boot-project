@@ -184,6 +184,13 @@
       "sourceType": "cn.hiboot.mcn.autoconfigure.context.McnBeanPostProcessor",
       "description": "jackson subtypes扫描包路径多个以逗号分割.",
       "defaultValue": "主类所在包路径"
+    },
+    {
+      "name": "mcn.execute-time.enabled",
+      "type": "java.lang.Boolean",
+      "sourceType": "cn.hiboot.mcn.autoconfigure.web.mvc.DurationAop",
+      "description": "是否启用请求执行时间记录.",
+      "defaultValue": false
     }
   ],
   "hints": [

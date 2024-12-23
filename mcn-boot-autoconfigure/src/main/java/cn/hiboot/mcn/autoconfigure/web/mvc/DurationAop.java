@@ -9,6 +9,7 @@ import org.springframework.aop.support.AbstractPointcutAdvisor;
 import org.springframework.aop.support.Pointcuts;
 import org.springframework.aop.support.annotation.AnnotationMatchingPointcut;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Role;
 
@@ -18,6 +19,7 @@ import org.springframework.context.annotation.Role;
  * @author DingHao
  * @since 2019/7/13 11:06
  */
+@ConditionalOnProperty(prefix = "mcn.execute-time", name = "enabled", havingValue = "true")
 public class DurationAop {
 
     @Bean
