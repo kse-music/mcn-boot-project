@@ -148,6 +148,10 @@ public class RestResp<T> implements HttpTime {
         return new RestResp<>(data, count);
     }
 
+    public static <D> RestResp<D> ok(D data, Long count) {
+        return new RestResp<>(data, count);
+    }
+
     public static <S> RestResp<S> error(Integer code, String msg) {
         return new RestResp<>(code, msg);
     }
