@@ -10,8 +10,12 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  */
 @ConfigurationProperties(prefix = "sso")
 public class ResourceServerProperties {
+
     private boolean opaqueToken;
+
     private String[] allowedPaths = {};
+
+    private boolean verifyJwt = true;
 
     public boolean isOpaqueToken() {
         return opaqueToken;
@@ -27,5 +31,13 @@ public class ResourceServerProperties {
 
     public void setAllowedPaths(String[] allowedPaths) {
         this.allowedPaths = allowedPaths;
+    }
+
+    public boolean isVerifyJwt() {
+        return verifyJwt;
+    }
+
+    public void setVerifyJwt(boolean verifyJwt) {
+        this.verifyJwt = verifyJwt;
     }
 }
