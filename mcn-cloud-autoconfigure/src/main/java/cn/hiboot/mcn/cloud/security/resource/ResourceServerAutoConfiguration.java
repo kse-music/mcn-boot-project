@@ -30,6 +30,11 @@ import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
+import org.springframework.security.oauth2.core.OAuth2TokenValidatorResult;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+import org.springframework.security.oauth2.jwt.NimbusReactiveJwtDecoder;
+import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder;
 import org.springframework.security.oauth2.server.resource.BearerTokenAuthenticationToken;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;
 import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver;
@@ -80,6 +85,7 @@ public class ResourceServerAutoConfiguration {
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
     @ConditionalOnMissingBean(SecurityWebFilterChain.class)
     static class ReactiveResourceServerConfiguration {
+
         private final ExceptionHandler exceptionHandler;
 
         ReactiveResourceServerConfiguration(ExceptionHandler exceptionHandler) {
@@ -87,11 +93,12 @@ public class ResourceServerAutoConfiguration {
         }
 
         @Bean
-        SecurityWebFilterChain resourceServerSecurityFilterChain(ServerHttpSecurity http,ResourceServerProperties ssoProperties
-                ,ObjectProvider<AuthenticationReload> authenticationReloads,ObjectProvider<ServerTokenResolver> apkResolvers){
+        SecurityWebFilterChain resourceServerSecurityFilterChain(ServerHttpSecurity http,ResourceServerProperties ssoProperties,
+                                                                 ObjectProvider<ReactiveJwtDecoder> reactiveJwtDecoders,
+                                                                 ObjectProvider<AuthenticationReload> authenticationReloads,ObjectProvider<ServerTokenResolver> apkResolvers){
             authenticationReloads.ifUnique(authenticationReload ->
                     http.addFilterBefore((exchange, chain) ->
-                            ReactiveSecurityContextHolder.getContext().doOnNext(securityContext -> ReloadAuthenticationConfigurer.reloadAuthentication(securityContext, authenticationReload)).then(chain.filter(exchange)),
+                                    ReactiveSecurityContextHolder.getContext().doOnNext(securityContext -> ReloadAuthenticationConfigurer.reloadAuthentication(securityContext, authenticationReload)).then(chain.filter(exchange)),
                             SecurityWebFiltersOrder.ANONYMOUS_AUTHENTICATION));
             return http
                     .authorizeExchange(requests -> {
@@ -105,6 +112,13 @@ public class ResourceServerAutoConfiguration {
                         if(ssoProperties.isOpaqueToken()){
                             c.opaqueToken();
                         }else {
+                            if (!ssoProperties.isVerifyJwt()) {
+                                reactiveJwtDecoders.ifUnique(r -> {
+                                    if (r instanceof NimbusReactiveJwtDecoder) {
+                                        ((NimbusReactiveJwtDecoder)r).setJwtValidator(token -> OAuth2TokenValidatorResult.success());
+                                    }
+                                });
+                            }
                             c.jwt();
                         }
                         c.accessDeniedHandler((exchange, accessDeniedException) -> handleException(accessDeniedException, exchange.getResponse()))
@@ -155,7 +169,7 @@ public class ResourceServerAutoConfiguration {
         }
 
         @Bean
-        SecurityFilterChain resourceServerSecurityFilterChain(HttpSecurity http,ResourceServerProperties ssoProperties) throws Exception {
+        SecurityFilterChain resourceServerSecurityFilterChain(HttpSecurity http,ResourceServerProperties ssoProperties, ObjectProvider<JwtDecoder> jwtDecoders) throws Exception {
             return http
                     .authorizeRequests(requests -> {
                         requests.antMatchers(ssoProperties.getAllowedPaths()).permitAll();
@@ -166,6 +180,13 @@ public class ResourceServerAutoConfiguration {
                         if(ssoProperties.isOpaqueToken()){
                             c.opaqueToken();
                         }else {
+                            if (!ssoProperties.isVerifyJwt()) {
+                                jwtDecoders.ifUnique(r -> {
+                                    if (r instanceof NimbusJwtDecoder) {
+                                        ((NimbusJwtDecoder)r).setJwtValidator(token -> OAuth2TokenValidatorResult.success());
+                                    }
+                                });
+                            }
                             c.jwt();
                         }
                         c.accessDeniedHandler((request, response, accessDeniedException) -> handleException(accessDeniedException,response))
