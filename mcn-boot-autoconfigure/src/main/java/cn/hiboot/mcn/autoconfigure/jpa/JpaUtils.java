@@ -18,13 +18,16 @@ import java.util.List;
  */
 public abstract class JpaUtils {
 
-    public static Sort jpaSort(List<FieldSort> sort){
+    public static Sort jpaSort(List<FieldSort> sort) {
         Sort jpaSort = null;
         for (FieldSort fieldSort : sort) {
             Sort s = jpaSort(fieldSort);
-            if(jpaSort == null){
+            if (s == null) {
+                continue;
+            }
+            if (jpaSort == null) {
                 jpaSort = s;
-            }else {
+            } else {
                 jpaSort = jpaSort.and(s);
             }
         }
@@ -32,7 +35,7 @@ public abstract class JpaUtils {
     }
 
     public static Sort jpaSort(FieldSort fieldSort) {
-        if(fieldSort.getSort() == null){
+        if (fieldSort.getSort() == null) {
             return Sort.unsorted();
         }
         if (FieldSort.ASC.equalsIgnoreCase(fieldSort.getSort())) {
@@ -41,8 +44,8 @@ public abstract class JpaUtils {
         return Sort.by(fieldSort.getField()).descending();
     }
 
-    public static void copyTo(Object updateData,Object existData){
-        BeanUtils.copyProperties(updateData,existData,getNullPropertyNames(updateData));
+    public static void copyTo(Object updateData, Object existData) {
+        BeanUtils.copyProperties(updateData, existData, getNullPropertyNames(updateData));
     }
 
     private static String[] getNullPropertyNames(Object source) {
