@@ -22,6 +22,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.FullyQualifiedAnnotationBeanNameGenerator;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -47,10 +48,12 @@ public class MybatisMultipleDataSourceAutoConfiguration {
         private final ResourceLoader resourceLoader;
         private final String basePackage;
         private final MultipleDataSourceConfig multipleDataSourceConfig;
+        private final Environment environment;
 
-        public MybatisMultipleDataSourceConfig(ResourceLoader resourceLoader, BeanFactory beanFactory) {
+        public MybatisMultipleDataSourceConfig(ResourceLoader resourceLoader, BeanFactory beanFactory, Environment environment) {
             this.resourceLoader = resourceLoader;
             this.multipleDataSourceConfig = beanFactory.getBean(MultipleDataSourceConfig.class);
+            this.environment = environment;
             this.basePackage = multipleDataSourceConfig.getBasePackage();
         }
 
@@ -94,7 +97,7 @@ public class MybatisMultipleDataSourceAutoConfiguration {
         }
 
         private void scanMapper(BeanDefinitionRegistry registry, String sqlSessionFactoryName, String pkg){
-            ClassPathMapperScanner scanner = new ClassPathMapperScanner(registry);
+            ClassPathMapperScanner scanner = new ClassPathMapperScanner(registry, this.environment);
             if (resourceLoader != null) {
                 scanner.setResourceLoader(resourceLoader);
             }
