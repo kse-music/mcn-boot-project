@@ -12,7 +12,9 @@ import org.springframework.data.jpa.repository.query.EscapeCharacter;
 import org.springframework.lang.NonNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * ExampleSpecification
@@ -22,7 +24,7 @@ import java.util.List;
  */
 public class ExampleSpecification<T> implements Specification<T> {
 
-    private final PredicateProvider<T>[] predicateProviders;
+    private final List<PredicateProvider<T>> predicateProviders;
     private Example<T> example;
     private EscapeCharacter escapeCharacter = EscapeCharacter.DEFAULT;
     private boolean isOr;
@@ -38,7 +40,7 @@ public class ExampleSpecification<T> implements Specification<T> {
 
     @SafeVarargs
     ExampleSpecification(T bean, PredicateProvider<T>... predicateProviders) {
-        this.predicateProviders = predicateProviders;
+        this.predicateProviders = Arrays.stream(predicateProviders).filter(Objects::nonNull).toList();
         if (!McnUtils.isFieldAllNull(bean)) {
             this.example = Example.of(bean);
         }
@@ -80,11 +82,11 @@ public class ExampleSpecification<T> implements Specification<T> {
         return isOr ? criteriaBuilder.or(beanPredicate, logicPredicate) : criteriaBuilder.and(beanPredicate, logicPredicate);
     }
 
-    private Predicate[] predicates(PredicateProvider<T>[] predicateProviders, Root<T> root, CriteriaBuilder criteriaBuilder) {
+    private Predicate[] predicates(List<PredicateProvider<T>> predicateProviders, Root<T> root, CriteriaBuilder criteriaBuilder) {
         if (McnUtils.isNullOrEmpty(predicateProviders)) {
             return null;
         }
-        List<Predicate> predicates = new ArrayList<>(predicateProviders.length);
+        List<Predicate> predicates = new ArrayList<>(predicateProviders.size());
         for (PredicateProvider<T> predicateProvider : predicateProviders) {
             Predicate predicate = predicateProvider.getPredicate(root, criteriaBuilder);
             if (predicate == null) {
