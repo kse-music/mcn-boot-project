@@ -6,8 +6,6 @@ import cn.hiboot.mcn.autoconfigure.web.filter.common.NameValueProcessorJacksonCo
 import cn.hiboot.mcn.autoconfigure.web.filter.special.ParamProcessorAutoConfiguration;
 import cn.hiboot.mcn.autoconfigure.web.filter.xss.XssAutoConfiguration;
 import cn.hiboot.mcn.core.exception.ExceptionKeys;
-import cn.hiboot.mcn.core.exception.ServiceException;
-import cn.hiboot.mcn.core.model.result.RestResp;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -15,6 +13,7 @@ import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.server.ServerWebInputException;
 
 /**
  * FilterAutoConfiguration
@@ -29,15 +28,18 @@ public class FilterAutoConfiguration {
 
     @Bean
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
-    public ExceptionResolver<HttpMessageNotReadableException> specialSymbolExceptionResolver() {
-        return t -> {
-            ServiceException serviceException = ServiceException.find(t);
-            if(serviceException == null || serviceException.getCode() != ExceptionKeys.SPECIAL_SYMBOL_ERROR){
-                return null;
-            }
-            return RestResp.error(serviceException.getCode(),serviceException.getMessage());
-        };
+    public ExceptionResolver<HttpMessageNotReadableException> specialSymbolExceptionResolverServlet() {
+        return specialSymbolExceptionResolver();
     }
 
+    public <E extends Throwable> ExceptionResolver<E> specialSymbolExceptionResolver() {
+        return ExceptionResolver.serviceExceptionResolver(ExceptionKeys.SPECIAL_SYMBOL_ERROR);
+    }
+
+    @Bean
+    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
+    public ExceptionResolver<ServerWebInputException> specialSymbolExceptionResolverReactive() {
+        return specialSymbolExceptionResolver();
+    }
 
 }
