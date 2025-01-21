@@ -1,5 +1,7 @@
 package cn.hiboot.mcn.core.exception;
 
+import java.util.Objects;
+
 /**
  * ServiceException
  *
@@ -57,6 +59,14 @@ public class ServiceException extends BaseException{
 			return null;
 		}
 		return find(cause);
+	}
+
+	public static ServiceException find(Throwable t, Integer errorCode){
+		ServiceException serviceException = find(t);
+		if(serviceException == null || !Objects.equals(serviceException.getCode(), errorCode)){
+			return null;
+		}
+		return serviceException;
 	}
 
 }
