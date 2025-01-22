@@ -48,7 +48,11 @@ public class ReactiveDataIntegrityFilter implements OrderedWebFilter {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
-        return Mono.just(exchange.getRequest()).filter(requestMatcher::matches).flatMap(request -> {
+        ServerHttpRequest serverHttpRequest = exchange.getRequest();
+        if (!requestMatcher.matches(serverHttpRequest)) {
+            return chain.filter(exchange);
+        }
+        return Mono.just(exchange.getRequest()).flatMap(request -> {
             String tsm = WebUtils.getHeader(request, "TSM");// 获取时间戳
             if (tsm == null) {
                 tsm = WebUtils.getHeader(request, "timestamp");
