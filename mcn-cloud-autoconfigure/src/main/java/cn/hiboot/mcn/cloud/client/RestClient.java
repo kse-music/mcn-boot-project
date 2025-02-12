@@ -34,6 +34,7 @@ public class RestClient {
     private final Class<?> wrapperClass;
     private final Function<Object, Object> extractData;
     private final RestTemplate restTemplate;
+    private Consumer<HttpHeaders> defaultHeaders = headers -> headers.setContentType(MediaType.APPLICATION_JSON);
 
     public RestClient() {
         this(new RestTemplate());
@@ -55,6 +56,10 @@ public class RestClient {
 
     public static RestClient rawClient() {
         return new RestClient(null, s -> s);
+    }
+
+    public void setDefaultHeaders(Consumer<HttpHeaders> defaultHeaders) {
+        this.defaultHeaders = defaultHeaders;
     }
 
     public <D> D getObject(String url, Class<D> resultClass) {
@@ -273,11 +278,11 @@ public class RestClient {
         if (uriVariables == null) {
             uriVariables = Collections.emptyMap();
         }
-        if (headersConsumer == null) {
-            headersConsumer = headers -> headers.setContentType(MediaType.APPLICATION_JSON);
-        }
         HttpHeaders headers = new HttpHeaders();
-        headersConsumer.accept(headers);
+        this.defaultHeaders.accept(headers);
+        if (headersConsumer != null) {
+            headersConsumer.accept(headers);
+        }
         long startTime = System.currentTimeMillis();
         ResponseEntity<W> response;
         try {
