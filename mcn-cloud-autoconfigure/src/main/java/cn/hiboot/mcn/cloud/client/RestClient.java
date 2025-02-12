@@ -54,6 +54,10 @@ public class RestClient {
         this.extractData = extractData;
     }
 
+    public static RestClient rawClient() {
+        return new RestClient(null, s -> s);
+    }
+
     public void setDefaultHeaders(Consumer<HttpHeaders> defaultHeaders) {
         this.defaultHeaders = defaultHeaders;
     }
