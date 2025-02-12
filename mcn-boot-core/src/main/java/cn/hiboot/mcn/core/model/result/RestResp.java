@@ -5,6 +5,7 @@ import cn.hiboot.mcn.core.exception.ErrorMsg;
 import cn.hiboot.mcn.core.exception.ExceptionKeys;
 import cn.hiboot.mcn.core.exception.ServiceException;
 import cn.hiboot.mcn.core.model.HttpTime;
+import cn.hiboot.mcn.core.util.McnAssert;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -13,6 +14,9 @@ import java.util.function.BiFunction;
 
 /**
  * 接口返回数据统一格式
+ *
+ * @author DingHao
+ * @since 2020/4/24 14:16
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class RestResp<T> implements HttpTime {
@@ -68,6 +72,7 @@ public class RestResp<T> implements HttpTime {
     }
 
     private RestResp(Integer code, String msg) {
+        McnAssert.state(code > 0 , () -> "code must be > 0");
         this.ActionStatus = ActionStatusMethod.FAIL;
         this.ErrorCode = code;
         this.ErrorInfo = msg;
