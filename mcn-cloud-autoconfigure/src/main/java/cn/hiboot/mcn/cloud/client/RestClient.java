@@ -12,7 +12,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
@@ -34,7 +33,7 @@ public class RestClient {
     private final Class<?> wrapperClass;
     private final Function<Object, Object> extractData;
     private final RestTemplate restTemplate;
-    private Consumer<HttpHeaders> defaultHeaders = headers -> headers.setContentType(MediaType.APPLICATION_JSON);
+    private Consumer<HttpHeaders> defaultHeaders = headers -> {};
 
     public RestClient() {
         this(new RestTemplate());
