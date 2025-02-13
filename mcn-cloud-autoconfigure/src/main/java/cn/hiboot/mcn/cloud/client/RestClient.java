@@ -11,7 +11,6 @@ import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
@@ -294,7 +293,7 @@ public class RestClient {
             log.error("url={}, cost time={}ms, inputParam={}, errorInfo={}", url, System.currentTimeMillis() - startTime, requestBody, ex.getMessage());
             throw ex;
         }
-        if (response.getStatusCode() != HttpStatus.OK) {
+        if (!response.getStatusCode().is2xxSuccessful()) {
             log.error("url={}, cost time={}ms, inputParam={}, statusCode={}", url, System.currentTimeMillis() - startTime, requestBody, response.getStatusCode());
             throw ServiceException.newInstance(ExceptionKeys.REMOTE_SERVICE_ERROR);
         }
