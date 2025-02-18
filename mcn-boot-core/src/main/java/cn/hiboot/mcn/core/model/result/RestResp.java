@@ -87,6 +87,11 @@ public class RestResp<T> implements HttpTime {
         this.count = count;
     }
 
+    public RestResp(T data, long count) {
+        this(data);
+        this.count = count;
+    }
+
     @JsonIgnore
     public ActionStatusMethod getActionStatus() {
         return ActionStatus;
