@@ -96,4 +96,12 @@ public interface BaseService<T, PK, R extends BaseRepository<T, PK>> {
 
     }
 
+    default long count(T t) {
+        return getRepository().count(Example.of(t));
+    }
+
+    default long count(Specification<T> s) {
+        return getRepository().count(s);
+    }
+
 }
