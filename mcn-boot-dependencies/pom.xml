@@ -201,6 +201,11 @@
                 <artifactId>mvc-swagger2</artifactId>
                 <version>${mcn.version}</version>
             </dependency>
+            <dependency>
+                <groupId>cn.hiboot.mcn</groupId>
+                <artifactId>mcn-swagger3</artifactId>
+                <version>${mcn.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>com.alibaba</groupId>

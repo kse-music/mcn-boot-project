@@ -25,6 +25,7 @@
         <module>mvc-swagger2</module>
         <module>mcn-boot-starter-parent</module>
         <module>mcn-cloud-autoconfigure</module>
+        <module>mcn-swagger3</module>
     </modules>
 
     <distributionManagement>
