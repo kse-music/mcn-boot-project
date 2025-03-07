@@ -87,6 +87,12 @@
             <optional>true</optional>
         </dependency>
 
+        <dependency>
+            <groupId>cn.hiboot.mcn</groupId>
+            <artifactId>mcn-swagger3</artifactId>
+            <optional>true</optional>
+        </dependency>
+
     </dependencies>
 
 </project>

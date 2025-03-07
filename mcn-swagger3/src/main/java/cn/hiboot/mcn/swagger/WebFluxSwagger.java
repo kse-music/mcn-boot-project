@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Bean;
  * @since 2019/6/29 11:34
  */
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
-public class MvcSwagger2 {
+public class WebFluxSwagger {
 
     @Bean
     SwaggerResourceResolver swaggerResourceResolver(SwaggerUiConfigProperties swaggerUiConfigProperties) {

@@ -1,9 +1,9 @@
 package cn.hiboot.mcn.cloud.gateway;
 
 import cn.hiboot.mcn.autoconfigure.web.exception.handler.ExceptionHandler;
-import cn.hiboot.mcn.autoconfigure.web.swagger.IgnoreApi;
 import cn.hiboot.mcn.core.exception.ExceptionKeys;
 import cn.hiboot.mcn.core.model.result.RestResp;
+import cn.hiboot.mcn.swagger.IgnoreApi;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;

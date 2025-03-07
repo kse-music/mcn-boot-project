@@ -1,6 +1,6 @@
 package cn.hiboot.mcn.autoconfigure.web.groovy;
 
-import cn.hiboot.mcn.autoconfigure.web.swagger.IgnoreApi;
+import cn.hiboot.mcn.swagger.IgnoreApi;
 import groovy.lang.Binding;
 import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyObject;

@@ -1,6 +1,5 @@
-package cn.hiboot.mcn.autoconfigure.web.swagger;
+package cn.hiboot.mcn.swagger;
 
-import cn.hiboot.mcn.swagger.MvcSwagger2;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -32,8 +31,8 @@ import java.util.List;
  */
 @AutoConfiguration
 @EnableConfigurationProperties(Swagger2Properties.class)
-@ConditionalOnClass(MvcSwagger2.class)
-@Import(MvcSwagger2.class)
+@ConditionalOnClass(WebFluxSwagger.class)
+@Import(WebFluxSwagger.class)
 @ConditionalOnProperty(prefix = "swagger", name = "enabled", havingValue = "true")
 public class SwaggerAutoConfiguration {
 

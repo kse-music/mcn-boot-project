@@ -22,6 +22,6 @@
 | spring-cloud-dependencies            | spring-cloud.version         |     2024.0.0     |
 | spring-cloud-alibaba-dependencies    | spring-cloud-alibaba.version |    2023.0.3.2    |
 | spring-cloud-huawei-bom              | spring-cloud-huawei.version  | 1.11.10-2024.0.x |
-| springdoc-openapi-starter-webmvc-ui  | springdoc.version            |      2.7.0       |
-| springdoc-openapi-starter-webflux-ui | springdoc.version            |      2.7.0       |
+| springdoc-openapi-starter-webmvc-ui  | springdoc.version            |      2.8.5       |
+| springdoc-openapi-starter-webflux-ui | springdoc.version            |      2.8.5       |
 | xxl-job-core                         | xxl-job.version              |      2.4.2       |

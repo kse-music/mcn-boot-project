@@ -27,7 +27,7 @@
         </dependency>
         <dependency>
             <groupId>cn.hiboot.mcn</groupId>
-            <artifactId>mvc-swagger2</artifactId>
+            <artifactId>mcn-swagger3</artifactId>
             <optional>true</optional>
         </dependency>
 
