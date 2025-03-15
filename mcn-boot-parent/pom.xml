@@ -21,6 +21,7 @@
         <resource.delimiter>@</resource.delimiter>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <maven.deploy.skip>true</maven.deploy.skip>
         <maven.compiler.release>${java.version}</maven.compiler.release>
         <git.url>https://github.com/kse-music/mcn-boot-project</git.url>
         <git.connection>scm:git:git://github.com/kse-music/mcn-boot-project.git</git.connection>
