@@ -56,22 +56,19 @@ public class JsonObject extends ObjectNode {
     }
 
     public JsonObject getJsonObject(String field) {
-        return of(nextNode(field));
+        return getValue(field, JsonObject::of);
     }
 
     public JsonArray getJsonArray(String field) {
-        return JsonArray.of(nextNode(field));
+        return getValue(field, JsonArray::of);
     }
 
     private <R> R getValue(String field, Function<JsonNode, R> function) {
         JsonNode nextNode = nextNode(field);
-        if (nextNode.isMissingNode()) {
+        if (nextNode.isMissingNode() || nextNode.isNull()) {
             return null;
         }
-        if (nextNode.isValueNode()) {
-            return function.apply(nextNode);
-        }
-        throw new IllegalArgumentException("current node is not value node");
+        return function.apply(nextNode);
     }
 
     private JsonNode nextNode(String field) {

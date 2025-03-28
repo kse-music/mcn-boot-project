@@ -1,6 +1,7 @@
 package cn.hiboot.mcn.core.util;
 
 import cn.hiboot.mcn.core.exception.ServiceException;
+import cn.hiboot.mcn.core.model.JsonArray;
 import cn.hiboot.mcn.core.tuples.Pair;
 import org.springframework.util.ReflectionUtils;
 
@@ -255,6 +256,9 @@ public abstract class McnUtils {
         }
         if (obj instanceof Map) {
             return ((Map<?, ?>) obj).isEmpty();
+        }
+        if (obj instanceof JsonArray) {
+            return ((JsonArray) obj).isEmpty();
         }
         return false;
     }
