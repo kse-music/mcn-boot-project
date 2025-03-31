@@ -53,7 +53,7 @@ public class RestClient {
     }
 
     public static RestClient rawClient() {
-        return new RestClient(null, s -> s);
+        return new RestClient(null, Function.identity());
     }
 
     public void setDefaultHeaders(Consumer<HttpHeaders> defaultHeaders) {
