@@ -2,8 +2,12 @@ package cn.hiboot.mcn.cloud.client;
 
 import cn.hiboot.mcn.core.exception.ExceptionKeys;
 import cn.hiboot.mcn.core.exception.ServiceException;
+import cn.hiboot.mcn.core.model.JsonArray;
+import cn.hiboot.mcn.core.model.JsonObject;
 import cn.hiboot.mcn.core.model.result.RestResp;
 import cn.hiboot.mcn.core.util.JacksonUtils;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
@@ -49,7 +53,15 @@ public class RestClient {
     public RestClient(Class<?> wrapperClass, Function<Object, Object> extractData, RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
         this.wrapperClass = wrapperClass;
-        this.extractData = extractData;
+        this.extractData = data -> {
+            if (data instanceof ObjectNode) {
+                return new JsonObject((ObjectNode) data);
+            }
+            if (data instanceof ArrayNode) {
+                return new JsonArray((ArrayNode) data);
+            }
+            return extractData.apply(data);
+        };
     }
 
     public static RestClient rawClient() {
