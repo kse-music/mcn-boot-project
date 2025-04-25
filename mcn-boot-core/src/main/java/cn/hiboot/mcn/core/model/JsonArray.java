@@ -1,5 +1,6 @@
 package cn.hiboot.mcn.core.model;
 
+import cn.hiboot.mcn.core.util.JacksonUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
@@ -7,6 +8,7 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 
 /**
@@ -114,6 +116,10 @@ public class JsonArray extends ArrayNode {
             }
 
         };
+    }
+
+    public static JsonArray from(List<Map<String, Object>> list) {
+        return new JsonArray(JacksonUtils.getObjectMapper().valueToTree(list));
     }
 
 }

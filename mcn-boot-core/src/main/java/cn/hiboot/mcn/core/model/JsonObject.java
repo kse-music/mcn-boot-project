@@ -1,9 +1,11 @@
 package cn.hiboot.mcn.core.model;
 
+import cn.hiboot.mcn.core.util.JacksonUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import java.util.Map;
 import java.util.function.Function;
 
 /**
@@ -73,6 +75,10 @@ public class JsonObject extends ObjectNode {
 
     private JsonNode nextNode(String field) {
         return at(SLASH + field);
+    }
+
+    public static JsonObject from(Map<String, Object> map) {
+        return new JsonObject(JacksonUtils.getObjectMapper().valueToTree(map));
     }
 
 }
