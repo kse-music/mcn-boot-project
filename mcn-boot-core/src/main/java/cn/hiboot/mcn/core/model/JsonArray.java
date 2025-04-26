@@ -1,10 +1,14 @@
 package cn.hiboot.mcn.core.model;
 
 import cn.hiboot.mcn.core.util.JacksonUtils;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -120,6 +124,15 @@ public class JsonArray extends ArrayNode {
 
     public static JsonArray from(List<Map<String, Object>> list) {
         return new JsonArray(JacksonUtils.getObjectMapper().valueToTree(list));
+    }
+
+    public static class JsonArrayDeserializer extends JsonDeserializer<JsonArray> {
+
+        @Override
+        public JsonArray deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+            return new JsonArray(p.readValueAsTree());
+        }
+
     }
 
 }
