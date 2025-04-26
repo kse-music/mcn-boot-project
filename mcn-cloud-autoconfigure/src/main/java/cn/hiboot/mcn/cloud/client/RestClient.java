@@ -6,8 +6,7 @@ import cn.hiboot.mcn.core.model.JsonArray;
 import cn.hiboot.mcn.core.model.JsonObject;
 import cn.hiboot.mcn.core.model.result.RestResp;
 import cn.hiboot.mcn.core.util.JacksonUtils;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
@@ -16,6 +15,8 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Collections;
@@ -30,46 +31,13 @@ import java.util.function.Function;
  * @author DingHao
  * @since 2023/6/10 12:00
  */
-public class RestClient {
+public final class RestClient {
 
-    protected final Logger log = LoggerFactory.getLogger(RestClient.class);
-    private final Class<?> wrapperClass;
-    private final Function<Object, Object> extractData;
-    private final RestTemplate restTemplate;
-    private Consumer<HttpHeaders> defaultHeaders = headers -> {};
+    private final Logger log = LoggerFactory.getLogger(RestClient.class);
+    private final Builder builder;
 
-    public RestClient() {
-        this(new RestTemplate());
-    }
-
-    public RestClient(RestTemplate restTemplate) {
-        this(RestResp.class, null, restTemplate);
-    }
-
-    public RestClient(Class<?> wrapperClass, Function<Object, Object> extractData) {
-        this(wrapperClass, extractData, new RestTemplate());
-    }
-
-    public RestClient(Class<?> wrapperClass, Function<Object, Object> extractData, RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
-        this.wrapperClass = wrapperClass;
-        this.extractData = data -> {
-            if (data instanceof ObjectNode) {
-                return new JsonObject((ObjectNode) data);
-            }
-            if (data instanceof ArrayNode) {
-                return new JsonArray((ArrayNode) data);
-            }
-            return extractData.apply(data);
-        };
-    }
-
-    public static RestClient rawClient() {
-        return new RestClient(null, s -> s);
-    }
-
-    public void setDefaultHeaders(Consumer<HttpHeaders> defaultHeaders) {
-        this.defaultHeaders = defaultHeaders;
+    public RestClient(Builder builder) {
+        this.builder = builder;
     }
 
     public <D> D getObject(String url, Class<D> resultClass) {
@@ -281,7 +249,8 @@ public class RestClient {
     }
 
     private ResolvableType resultClass(ResolvableType resultType) {
-        return this.wrapperClass == null ? resultType : ResolvableType.forClassWithGenerics(this.wrapperClass, resultType);
+        Class<?> wrapperClass = this.builder.bodyWrapperClass;
+        return wrapperClass == null ? resultType : ResolvableType.forClassWithGenerics(wrapperClass, resultType);
     }
 
     private <A, D, W> D doExchange(String url, HttpMethod method, Consumer<HttpHeaders> headersConsumer, ResolvableType resultType, A requestBody, Map<String, ?> uriVariables) {
@@ -289,14 +258,14 @@ public class RestClient {
             uriVariables = Collections.emptyMap();
         }
         HttpHeaders headers = new HttpHeaders();
-        this.defaultHeaders.accept(headers);
+        this.builder.defaultHeaders.accept(headers);
         if (headersConsumer != null) {
             headersConsumer.accept(headers);
         }
         long startTime = System.currentTimeMillis();
         ResponseEntity<W> response;
         try {
-            response = restTemplate.exchange(url, method, new HttpEntity<>(requestBody, headers),
+            response = this.builder.restTemplate.exchange(url, method, new HttpEntity<>(requestBody, headers),
                     ParameterizedTypeReference.forType(resultClass(resultType).getType()), uriVariables);
             if (log.isDebugEnabled()) {
                 log.debug("url={}, cost time={}ms, inputParam={}", url, System.currentTimeMillis() - startTime, requestBody);
@@ -312,7 +281,7 @@ public class RestClient {
         return processResponse(response, url, requestBody);
     }
 
-    protected <A, D, W> D processResponse(ResponseEntity<W> responseEntity, String url, A requestBody) {
+    private <A, D, W> D processResponse(ResponseEntity<W> responseEntity, String url, A requestBody) {
         try {
             if (responseEntity.hasBody()) {
                 D response = extractData(responseEntity.getBody());
@@ -329,15 +298,89 @@ public class RestClient {
     }
 
     @SuppressWarnings("unchecked")
-    protected <D, W> D extractData(W body) {
-        if (this.extractData != null) {
-            return (D) this.extractData.apply(body);
+    private <D, W> D extractData(W body) {
+        if (this.builder.bodyConverter != null) {
+            return (D) this.builder.bodyConverter.apply(body);
         }
-        RestResp<D> restResp = (RestResp<D>) body;
-        if (restResp.isFailed()) {
-            throw ServiceException.newInstance(ExceptionKeys.REMOTE_SERVICE_ERROR, restResp.getErrorInfo());
+        D result = (D) body;
+        if (this.builder.bodyWrapperClass == RestResp.class) {
+            RestResp<D> restResp = (RestResp<D>) body;
+            if (restResp.isFailed() && this.builder.failFast) {
+                throw ServiceException.newInstance(ExceptionKeys.REMOTE_SERVICE_ERROR, restResp.getErrorInfo());
+            }
+            result = restResp.getData();
         }
-        return restResp.getData();
+        return result;
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static RestClient create() {
+        return builder().build();
+    }
+
+    public static RestClient defaults() {
+        return builder().bodyWrapperClass(RestResp.class).build();
+    }
+
+    public static class Builder {
+
+        private Class<?> bodyWrapperClass;
+        private Function<Object, Object> bodyConverter;
+        private RestTemplate restTemplate;
+        private Consumer<HttpHeaders> defaultHeaders;
+        private boolean failFast = true;
+
+        private Builder() {
+        }
+
+        public Builder bodyWrapperClass(Class<?> bodyWrapperClass) {
+            this.bodyWrapperClass = bodyWrapperClass;
+            return this;
+        }
+
+        public Builder bodyConverter(Function<Object, Object> bodyConverter) {
+            this.bodyConverter = bodyConverter;
+            return this;
+        }
+
+        public Builder restTemplate(RestTemplate restTemplate) {
+            this.restTemplate = restTemplate;
+            return this;
+        }
+
+        public Builder defaultHeaders(Consumer<HttpHeaders> defaultHeaders) {
+            this.defaultHeaders = defaultHeaders;
+            return this;
+        }
+
+        public Builder failFast(boolean failFast) {
+            this.failFast = failFast;
+            return this;
+        }
+
+        public RestClient build() {
+            if (this.defaultHeaders == null) {
+                this.defaultHeaders = headers -> {};
+            }
+            if (this.restTemplate == null) {
+                this.restTemplate = new RestTemplate();
+                for (HttpMessageConverter<?> messageConverter : this.restTemplate.getMessageConverters()) {
+                    if (messageConverter instanceof MappingJackson2HttpMessageConverter) {
+                        MappingJackson2HttpMessageConverter jackson = (MappingJackson2HttpMessageConverter) messageConverter;
+                        SimpleModule module = new SimpleModule();
+                        module.addDeserializer(JsonObject.class, new JsonObject.JsonObjectDeserializer());
+                        module.addDeserializer(JsonArray.class, new JsonArray.JsonArrayDeserializer());
+                        jackson.getObjectMapper().registerModule(module);
+                        break;
+                    }
+                }
+            }
+            return new RestClient(this);
+        }
+
     }
 
 }
