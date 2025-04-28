@@ -13,6 +13,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.mongo.MongoClientSettingsBuilderCustomizer;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.annotation.Order;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -37,7 +38,7 @@ public class MongoExtensionAutoConfiguration {
 
     static {
         NAMED_CONCERNS = new HashMap<>();
-        for (final Field f : ReadConcern.class.getFields()) {
+        for (Field f : ReadConcern.class.getFields()) {
             if (Modifier.isStatic(f.getModifiers()) && f.getType().equals(ReadConcern.class)) {
                 String key = f.getName().toLowerCase();
                 try {
@@ -49,6 +50,7 @@ public class MongoExtensionAutoConfiguration {
     }
 
     @Bean
+    @Order(100)
     MongoClientSettingsBuilderCustomizer defaultMongoClientSettingsBuilderCustomizer(MongoExtensionProperties mongo){
         return builder -> {
 
