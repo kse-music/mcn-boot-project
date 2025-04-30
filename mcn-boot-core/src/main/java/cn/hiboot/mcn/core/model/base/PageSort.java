@@ -1,6 +1,7 @@
 package cn.hiboot.mcn.core.model.base;
 
 import cn.hiboot.mcn.core.util.McnAssert;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.List;
  * @author DingHao
  * @since 2021/2/8 17:45
  */
+@JsonIgnoreProperties({"offset", "pageIndex", "skip"})
 public class PageSort {
 
     /**
