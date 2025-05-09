@@ -2,7 +2,7 @@ package cn.hiboot.mcn.autoconfigure.jpa.predicate;
 
 import cn.hiboot.mcn.autoconfigure.jpa.AbstractPredicateProvider;
 import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 
@@ -12,12 +12,12 @@ import jakarta.persistence.criteria.Root;
  * @author DingHao
  * @since 2024/12/31 11:14
  */
-public class ComparePredicate<T> extends AbstractPredicateProvider<T> {
+public class ComparePredicate<T, E extends Comparable<? super E>> extends AbstractPredicateProvider<T> {
 
     private final Operator operator;
-    private final Comparable<Object> value;
+    private final E value;
 
-    public ComparePredicate(String fieldName, Operator operator, Comparable<Object> value) {
+    public ComparePredicate(String fieldName, Operator operator, E value) {
         super(fieldName);
         this.operator = operator;
         this.value = value;
@@ -25,11 +25,12 @@ public class ComparePredicate<T> extends AbstractPredicateProvider<T> {
 
     @Override
     protected Predicate doGetPredicate(Root<T> root, CriteriaBuilder criteriaBuilder) {
-        Expression<Comparable<Object>> field = root.get(getFieldName());
+        Path<E> field = root.get(getFieldName());
         return switch (operator) {
             case lt -> criteriaBuilder.lessThan(field, this.value);
             case lte -> criteriaBuilder.lessThanOrEqualTo(field, this.value);
             case eq -> criteriaBuilder.equal(field, this.value);
+            case neq -> criteriaBuilder.notEqual(field, this.value);
             case gt -> criteriaBuilder.greaterThan(field, this.value);
             case gte -> criteriaBuilder.greaterThanOrEqualTo(field, this.value);
         };
@@ -41,7 +42,7 @@ public class ComparePredicate<T> extends AbstractPredicateProvider<T> {
     }
 
     public enum Operator {
-        lt,lte,eq,gt,gte,
+        lt,lte,eq,neq,gt,gte,
     }
 
 }
