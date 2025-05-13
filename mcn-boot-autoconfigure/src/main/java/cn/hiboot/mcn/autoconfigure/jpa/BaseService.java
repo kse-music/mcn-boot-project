@@ -19,7 +19,9 @@ import java.util.List;
  */
 public interface BaseService<T, PK, R extends BaseRepository<T, PK>> {
 
-    R getRepository();
+    default R getRepository() {
+        return JpaUtils.getRepository(this.getClass());
+    }
 
     default T save(T data) {
         beforeSave(data);
@@ -35,7 +37,7 @@ public interface BaseService<T, PK, R extends BaseRepository<T, PK>> {
     }
 
     default void deleteById(PK id) {
-        getRepository().findById(id).ifPresent(u -> getRepository().delete(u));
+        getRepository().deleteById(id);
     }
 
     default void deleteByIds(Collection<PK> ids) {
