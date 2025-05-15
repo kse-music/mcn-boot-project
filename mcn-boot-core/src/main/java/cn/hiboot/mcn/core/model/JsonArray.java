@@ -81,6 +81,15 @@ public class JsonArray extends ArrayNode {
         return jsonArray;
     }
 
+    public <T> List<T> toList(){
+        List<T> result = new ArrayList<>();
+        int size = this.size();
+        for (int i = 0; i < size; i++) {
+            result.add(value(i));
+        }
+        return result;
+    }
+
     @SuppressWarnings("unchecked")
     public <T> T value(int index) {
         JsonNode jsonNode = get(index);
