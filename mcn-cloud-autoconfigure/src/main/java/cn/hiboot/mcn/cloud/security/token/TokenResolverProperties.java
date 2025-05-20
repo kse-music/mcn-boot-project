@@ -11,7 +11,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "token.resolver")
 public class TokenResolverProperties {
 
-    private Long accessValidity = 7 * 24 * 60 * 60 * 1000L;
+    private Long accessValidity = 12 * 60 * 60 * 1000L;
 
     public Long getAccessValidity() {
         return accessValidity;

@@ -81,7 +81,12 @@ public class JsonObject extends ObjectNode {
         return at(SLASH + field);
     }
 
-    public static JsonObject from(Map<String, Object> map) {
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> toMap() {
+        return JacksonUtils.getObjectMapper().convertValue(this, Map.class);
+    }
+
+    public static JsonObject fromMap(Map<String, Object> map) {
         return new JsonObject(JacksonUtils.getObjectMapper().valueToTree(map));
     }
 
