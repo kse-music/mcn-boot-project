@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Predicate;
 
 /**
@@ -131,7 +130,7 @@ public class JsonArray extends ArrayNode {
         };
     }
 
-    public static JsonArray from(List<Map<String, Object>> list) {
+    public static JsonArray fromList(List<?> list) {
         return new JsonArray(JacksonUtils.getObjectMapper().valueToTree(list));
     }
 
