@@ -7,7 +7,6 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.sql.Types;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -16,8 +15,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * RdbManageUtil
@@ -47,7 +44,7 @@ abstract class RdbManageUtil {
         }
     }
 
-    static String buildCondition(ConnectConfig connectConfig, DataQuery dataQuery, List<FieldInfo> fieldInfos, Map<String, Object> paramMap) {
+    static String buildCondition(ConnectConfig connectConfig, DataQuery dataQuery, Map<String, Object> paramMap) {
         List<FieldQuery> query = dataQuery.getQuery();
         if (McnUtils.isNullOrEmpty(query)) {
             return "";
@@ -55,13 +52,8 @@ abstract class RdbManageUtil {
         String sqlQuote = sqlQuote(connectConfig.getDbType());
         List<String> conditions = new ArrayList<>();
         AtomicInteger index = new AtomicInteger(0);
-        Map<String, FieldInfo> fieldInfoMap = fieldInfos.stream().collect(Collectors.toMap(FieldInfo::getColumnName, Function.identity()));
         for (FieldQuery fq : query) {
             String column = fq.getName();
-            FieldInfo fieldInfo = fieldInfoMap.get(column);
-            if (fieldInfo == null) {
-                continue;
-            }
             String quotedColumn = fieldName(column, sqlQuote);
             Object value = fq.getValue();
             String operator = fq.getOperator().valueString();
@@ -127,28 +119,6 @@ abstract class RdbManageUtil {
             return value;
         });
         return map;
-    }
-
-    static FieldTypeEnum convertDataType(Integer type) {
-        switch (type) {
-            case Types.INTEGER:
-            case Types.BIGINT:
-            case Types.TINYINT:
-                return FieldTypeEnum.LONG;
-            case Types.FLOAT:
-            case Types.DOUBLE:
-            case Types.DECIMAL:
-            case Types.REAL:
-            case Types.NUMERIC:
-                return FieldTypeEnum.FLOAT;
-            case Types.DATE:
-                return FieldTypeEnum.DATE;
-            case Types.TIMESTAMP:
-            case Types.TIMESTAMP_WITH_TIMEZONE:
-                return FieldTypeEnum.DATA_TIME;
-            default:
-                return FieldTypeEnum.SHORT_TEXT;
-        }
     }
 
 }

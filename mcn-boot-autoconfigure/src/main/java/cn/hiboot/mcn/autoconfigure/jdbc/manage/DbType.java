@@ -11,7 +11,7 @@ import org.springframework.boot.jdbc.DatabaseDriver;
 enum DbType {
 
     dm("dm.jdbc.driver.DmDriver"),
-    kingbase8("com.kingbase8.Driver");
+    kingbase("com.kingbase8.Driver");
 
     private final String driverClassName;
 

@@ -37,11 +37,19 @@ public interface BaseService<T, PK, R extends BaseRepository<T, PK>> {
     }
 
     default void deleteById(PK id) {
-        getRepository().deleteById(id);
+        try {
+            getRepository().deleteById(id);
+        } catch (Exception ignored) {
+
+        }
     }
 
     default void deleteByIds(Collection<PK> ids) {
-        getRepository().deleteAllById(ids);
+        try {
+            getRepository().deleteAllById(ids);
+        } catch (Exception ignored) {
+
+        }
     }
 
     default T getById(PK id) {
