@@ -14,7 +14,6 @@ public class FieldInfo {
     private String catalog;
     private String tableSchema;
     private String tableName;
-    private Integer type;
     private Integer dataType;
     private String columnName;
     private Integer columnSize;
@@ -29,7 +28,6 @@ public class FieldInfo {
         this.tableSchema = rs.getString("TABLE_SCHEM");
         this.tableName = rs.getString("TABLE_NAME");
         this.dataType = rs.getInt("DATA_TYPE");
-        this.type = RdbManageUtil.convertDataType(this.dataType).getId();
         this.columnName = rs.getString("COLUMN_NAME");
         this.columnSize = rs.getInt("COLUMN_SIZE");
         this.dataTypeName = rs.getString("TYPE_NAME");
@@ -66,14 +64,6 @@ public class FieldInfo {
 
     public void setDataType(Integer dataType) {
         this.dataType = dataType;
-    }
-
-    public Integer getType() {
-        return type;
-    }
-
-    public void setType(Integer type) {
-        this.type = type;
     }
 
     public String getColumnName() {

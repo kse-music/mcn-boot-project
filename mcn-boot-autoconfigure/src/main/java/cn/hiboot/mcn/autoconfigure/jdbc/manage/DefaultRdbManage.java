@@ -63,10 +63,10 @@ class DefaultRdbManage implements RdbManage {
             tableSchema = dq.getTableSchema();
         }
         if (dq.getTableName() != null) {
-            tableNamePattern += dq.getTableName() + "%";
+            tableNamePattern = dq.getTableName();
         }
         if (dq.getColumnNamePattern() != null) {
-            columnNamePattern += dq.getColumnNamePattern() + "%";
+            columnNamePattern = dq.getColumnNamePattern();
         }
         DbQuery dbQuery = new DbQuery();
         dbQuery.setCatalog(catalog);
@@ -128,12 +128,8 @@ class DefaultRdbManage implements RdbManage {
 
     private RestResp<List<Map<String, Object>>> queryData(ConnectConfig connectConfig, DataQuery dataQuery, boolean data, boolean count) {
         DataSourceManage dataSourceManage = rdbMetaDataManage(connectConfig);
-        List<FieldInfo> fieldInfo = dataSourceManage.withConnection(connection -> {
-            DatabaseMetaData metaData = connection.getMetaData();
-            return fieldInfo(metaData, connectConfig.getCatalog(), connectConfig.getSchema(), dataQuery.getTableName(), "%");
-        });
         Map<String, Object> paramMap = new HashMap<>();
-        String condition = RdbManageUtil.buildCondition(connectConfig, dataQuery, fieldInfo, paramMap);
+        String condition = RdbManageUtil.buildCondition(connectConfig, dataQuery, paramMap);
         String tableName = fromTable(connectConfig, dataQuery.getTableName());
         NamedParameterJdbcTemplate namedParameterJdbcTemplate = dataSourceManage.namedParameterJdbcTemplate();
         RestResp<List<Map<String, Object>>> result = RestResp.ok();
