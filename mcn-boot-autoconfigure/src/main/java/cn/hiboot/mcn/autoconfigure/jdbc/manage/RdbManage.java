@@ -24,6 +24,11 @@ public interface RdbManage {
     }
 
     /*
+     * 获取表模式信息
+     */
+    List<SchemaInfo> schemaInfo(ConnectConfig connectConfig, DbQuery dbQuery);
+
+    /*
      * 获取表信息
      */
     List<TableInfo> tableInfo(ConnectConfig connectConfig, DbQuery dbQuery);
@@ -43,9 +48,6 @@ public interface RdbManage {
      */
     List<Map<String, Object>> listData(ConnectConfig connectConfig, DataQuery dataQuery);
 
-    /*
-     * count
-     */
     Long countData(ConnectConfig connectConfig, DataQuery dataQuery);
 
     RestResp<List<Map<String, Object>>> pageData(ConnectConfig connectConfig, DataQuery dataQuery);
