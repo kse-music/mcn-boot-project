@@ -21,17 +21,14 @@ class DataSourceManage {
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     public DataSourceManage(ConnectConfig connectConfig) {
+        DbType dbType = connectConfig.dbType();
         this.dataSource = DataSourceBuilder.create()
                 .type(HikariDataSource.class)
-                .driverClassName(DbType.driverClassName(connectConfig.getDbType()))
-                .url(determineUrl(connectConfig))
+                .driverClassName(dbType.getDriverClassName())
+                .url(dbType.url(connectConfig))
                 .username(connectConfig.getUserName())
                 .password(connectConfig.getPassword()).build();
         this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(this.dataSource);
-    }
-
-    private String determineUrl(ConnectConfig connectConfig) {
-        return "jdbc:" + connectConfig.getDbType() + "://" + connectConfig.getIp() + ":" + connectConfig.getPort() + "/" + connectConfig.getCatalog();
     }
 
     <T> T withConnection(CheckedFunction<Connection, T> function) {

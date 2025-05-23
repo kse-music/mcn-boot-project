@@ -1,45 +1,51 @@
 package cn.hiboot.mcn.autoconfigure.jdbc.manage;
 
-import org.springframework.boot.jdbc.DatabaseDriver;
-
 /**
  * DbType
  *
  * @author DingHao
  * @since 2025/5/15 14:11
  */
-enum DbType {
+public enum DbType {
 
+    mysql("com.mysql.cj.jdbc.Driver"),
+    oracle("oracle:thin:@", "oracle.jdbc.OracleDriver"),
+    postgresql("org.postgresql.Driver"),
+    sqlserver("com.microsoft.sqlserver.jdbc.SQLServerDriver"),
+    mariadb("org.mariadb.jdbc.Driver"),
     dm("dm.jdbc.driver.DmDriver"),
-    kingbase("com.kingbase8.Driver");
+    kingbase("kingbase8","com.kingbase8.Driver");
 
+    private final String platform;
     private final String driverClassName;
 
     DbType(String driverClassName) {
+        this(null, driverClassName);
+    }
+
+    DbType(String platform, String driverClassName) {
+        this.platform = platform;
         this.driverClassName = driverClassName;
     }
 
-    public static String fromTable(String dbType, String schema, String table) {
-        try {
-            valueOf(dbType);
-            return schema + "." + table;
-        } catch (Exception ignored) {
-
-        }
-        return table;
+    private String getPlatform() {
+        return platform == null ? this.name() : platform;
     }
 
-    public static String driverClassName(String type) {
-        try {
-            return valueOf(type).driverClassName;
-        } catch (Exception e) {
-            for (DatabaseDriver value : DatabaseDriver.values()) {
-                if (value.name().equalsIgnoreCase(type)) {
-                    return value.getDriverClassName();
-                }
-            }
-            throw new IllegalArgumentException(type + " is not supported");
+    public String url(ConnectConfig connectConfig) {
+        String platform = getPlatform();
+        String colon = this == oracle ? "" : ":";
+        String url = "jdbc:" + platform + colon + "//" + connectConfig.getIp() + ":" + connectConfig.getPort() + "/";
+        if (this == dm) {
+            url += connectConfig.getSchema();
+        }else {
+            url += connectConfig.getCatalog();
         }
+        return url;
+    }
+
+    public String getDriverClassName() {
+        return driverClassName;
     }
 
 }

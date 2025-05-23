@@ -78,16 +78,20 @@ public class ConnectConfig {
         this.schema = schema;
     }
 
+    public DbType dbType() {
+        return DbType.valueOf(getDbType());
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         ConnectConfig that = (ConnectConfig) o;
-        return Objects.equals(ip, that.ip) && Objects.equals(port, that.port) && Objects.equals(userName, that.userName);
+        return Objects.equals(ip, that.ip) && Objects.equals(port, that.port) && Objects.equals(userName, that.userName) && Objects.equals(password, that.password) && Objects.equals(dbType, that.dbType) && Objects.equals(catalog, that.catalog) && Objects.equals(schema, that.schema);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(ip, port, userName);
+        return Objects.hash(ip, port, userName, password, dbType, catalog, schema);
     }
 
 }
