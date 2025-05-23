@@ -3,9 +3,6 @@ package cn.hiboot.mcn.autoconfigure.jdbc.manage;
 import cn.hiboot.mcn.core.model.base.FieldSort;
 import cn.hiboot.mcn.core.util.McnUtils;
 
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -27,34 +24,17 @@ abstract class RdbManageUtil {
     private static final ThreadLocal<SimpleDateFormat> sdfWt = ThreadLocal.withInitial(() -> new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
     private static final ThreadLocal<SimpleDateFormat> sdfNt = ThreadLocal.withInitial(() -> new SimpleDateFormat("yyyy-MM-dd"));
 
-    void printMetaData(ResultSet rs) throws SQLException {
-        ResultSetMetaData rsMetaData = rs.getMetaData();
-        int columnCount = rsMetaData.getColumnCount();
-        while (rs.next()) {
-            StringBuilder row = new StringBuilder();
-            for (int i = 1; i <= columnCount; i++) {
-                String columnName = rsMetaData.getColumnName(i);
-                Object value = rs.getObject(i);
-                row.append(columnName).append(":").append(value);
-                if (i < columnCount) {
-                    row.append(", ");
-                }
-            }
-            System.out.println(row);
-        }
-    }
-
     static String buildCondition(ConnectConfig connectConfig, DataQuery dataQuery, Map<String, Object> paramMap) {
         List<FieldQuery> query = dataQuery.getQuery();
         if (McnUtils.isNullOrEmpty(query)) {
             return "";
         }
-        String sqlQuote = sqlQuote(connectConfig.getDbType());
+        String sqlQuote = connectConfig.dbType().sqlQuote();
         List<String> conditions = new ArrayList<>();
         AtomicInteger index = new AtomicInteger(0);
         for (FieldQuery fq : query) {
             String column = fq.getName();
-            String quotedColumn = fieldName(column, sqlQuote);
+            String quotedColumn =sqlQuote + column + sqlQuote;
             Object value = fq.getValue();
             String operator = fq.getOperator().valueString();
             String paramKey = column + "_" + index.getAndIncrement();
@@ -73,17 +53,6 @@ abstract class RdbManageUtil {
             }
         }
         return conditions.isEmpty() ? "" : " WHERE " + String.join(" AND ", conditions);
-    }
-
-    private static String sqlQuote(String dbType) {
-        if (dbType.equals("mysql")) {
-            return "`";
-        }
-        return "\"";
-    }
-
-    private static String fieldName(String columnName, String sqlQuote) {
-        return sqlQuote + columnName + sqlQuote;
     }
 
     static String buildSort(DataQuery dataQuery) {

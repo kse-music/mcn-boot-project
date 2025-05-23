@@ -26,7 +26,17 @@ class DefaultRdbManage implements RdbManage {
     private static final Map<ConnectConfig, DataSourceManage> rdbManageMap = new ConcurrentHashMap<>();
 
     private DataSourceManage rdbMetaDataManage(ConnectConfig config) {
-        return rdbManageMap.computeIfAbsent(config, k -> new DataSourceManage(config));
+        if (rdbManageMap.containsKey(config)) {
+            return rdbManageMap.get(config);
+        }
+        DataSourceManage dataSourceManage = new DataSourceManage(config);
+        try {
+            dataSourceManage.withConnection(connection -> null);
+        } catch (Exception e) {
+            throw new RuntimeException("connect error", e);
+        }
+        rdbManageMap.put(config, dataSourceManage);
+        return dataSourceManage;
     }
 
     @Override
@@ -38,12 +48,24 @@ class DefaultRdbManage implements RdbManage {
     }
 
     @Override
+    public List<SchemaInfo> schemaInfo(ConnectConfig connectConfig, DbQuery dbQuery) {
+        return rdbMetaDataManage(connectConfig).withConnection(connection -> {
+            List<SchemaInfo> result = new ArrayList<>();
+            DbQuery dq = buildDbQuery(connectConfig, dbQuery);
+            ResultSet rs = connection.getMetaData().getSchemas(dq.getCatalog(), dq.getTableSchema());
+            while (rs.next()) {
+                result.add(new SchemaInfo(rs));
+            }
+            return result;
+        });
+    }
+
+    @Override
     public List<TableInfo> tableInfo(ConnectConfig connectConfig, DbQuery dbQuery) {
         return rdbMetaDataManage(connectConfig).withConnection(connection -> {
             List<TableInfo> result = new ArrayList<>();
-            DatabaseMetaData metaData = connection.getMetaData();
             DbQuery dq = buildDbQuery(connectConfig, dbQuery);
-            ResultSet rs = metaData.getTables(dq.getCatalog(), dq.getTableSchema(), dq.getTableName(), dq.types());
+            ResultSet rs = connection.getMetaData().getTables(dq.getCatalog(), dq.getTableSchema(), dq.getTableName(), dq.types());
             while (rs.next()) {
                 result.add(new TableInfo(rs));
             }
@@ -80,9 +102,8 @@ class DefaultRdbManage implements RdbManage {
     @Override
     public List<FieldInfo> findFieldInfo(ConnectConfig connectConfig, DbQuery dbQuery) {
         return rdbMetaDataManage(connectConfig).withConnection(connection -> {
-            DatabaseMetaData metaData = connection.getMetaData();
             DbQuery dq = buildDbQuery(connectConfig, dbQuery);
-            return fieldInfo(metaData, dq.getCatalog(), dq.getTableSchema(), dq.getTableName(), dq.getColumnNamePattern());
+            return fieldInfo(connection.getMetaData(), dq.getCatalog(), dq.getTableSchema(), dq.getTableName(), dq.getColumnNamePattern());
         });
     }
 
@@ -100,8 +121,7 @@ class DefaultRdbManage implements RdbManage {
     public List<ImportedKeyInfo> findImportedKeys(ConnectConfig connectConfig, DbQuery dbQuery) {
         return rdbMetaDataManage(connectConfig).withConnection(connection -> {
             List<ImportedKeyInfo> result = new ArrayList<>();
-            DatabaseMetaData metaData = connection.getMetaData();
-            ResultSet rs = metaData.getImportedKeys(connection.getCatalog(), dbQuery.getTableSchema(), dbQuery.getTableName());
+            ResultSet rs = connection.getMetaData().getImportedKeys(connection.getCatalog(), dbQuery.getTableSchema(), dbQuery.getTableName());
             while (rs.next()) {
                 result.add(new ImportedKeyInfo(rs));
             }
@@ -129,14 +149,16 @@ class DefaultRdbManage implements RdbManage {
     private RestResp<List<Map<String, Object>>> queryData(ConnectConfig connectConfig, DataQuery dataQuery, boolean data, boolean count) {
         DataSourceManage dataSourceManage = rdbMetaDataManage(connectConfig);
         Map<String, Object> paramMap = new HashMap<>();
+        DbQuery dq = buildDbQuery(connectConfig, dataQuery);
         String condition = RdbManageUtil.buildCondition(connectConfig, dataQuery, paramMap);
-        String tableName = fromTable(connectConfig, dataQuery.getTableName());
+        String tableName = fromTable(dq, dataQuery.getTableName());
         NamedParameterJdbcTemplate namedParameterJdbcTemplate = dataSourceManage.namedParameterJdbcTemplate();
         RestResp<List<Map<String, Object>>> result = RestResp.ok();
         if (data) {
             String sql = "SELECT * FROM " + tableName + condition + RdbManageUtil.buildSort(dataQuery);
             Integer skip = dataQuery.getSkip();
             Integer limit = dataQuery.getLimit();
+            boolean isOracle = connectConfig.dbType() == DbType.oracle;
             if (skip != null || limit != null) {
                 if (skip == null || skip < 0) {
                     skip = 0;
@@ -146,9 +168,14 @@ class DefaultRdbManage implements RdbManage {
                 }
                 paramMap.put("skip", skip);
                 paramMap.put("pageSize", limit);
-                sql += " limit :skip,:pageSize";
+                sql = connectConfig.dbType().pageSql(sql, skip, limit);
             }
-            result.setData(namedParameterJdbcTemplate.queryForList(sql, paramMap).stream().map(RdbManageUtil::tranMap).collect(Collectors.toList()));
+            result.setData(namedParameterJdbcTemplate.queryForList(sql, paramMap).stream().map(d -> {
+                if (isOracle) {
+                    d.remove("RN");
+                }
+                return RdbManageUtil.tranMap(d);
+            }).collect(Collectors.toList()));
         }
         if (count) {
             String sqlCount = "SELECT count(*) FROM " + tableName + condition;
@@ -157,8 +184,12 @@ class DefaultRdbManage implements RdbManage {
         return result;
     }
 
-    private String fromTable(ConnectConfig connectConfig, String tableName) {
-        return DbType.fromTable(connectConfig.getDbType(), connectConfig.getSchema(), tableName);
+    private String fromTable(DbQuery dq, String tableName) {
+        String schema = dq.getTableSchema();
+        if (schema != null) {
+            return schema + "." + tableName;
+        }
+        return dq.getCatalog() + "." + tableName;
     }
 
 }
