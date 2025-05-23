@@ -77,8 +77,8 @@ class JpaConfiguration {
     public EntityManagerFactoryBuilder entityManagerFactoryBuilder(JpaVendorAdapter jpaVendorAdapter,
                                                                    ObjectProvider<PersistenceUnitManager> persistenceUnitManager,
                                                                    ObjectProvider<EntityManagerFactoryBuilderCustomizer> customizers) {
-        EntityManagerFactoryBuilder builder = new EntityManagerFactoryBuilder(jpaVendorAdapter,
-                this.properties.getProperties(), persistenceUnitManager.getIfAvailable());
+        EntityManagerFactoryBuilder builder = new EntityManagerFactoryBuilder(jpaVendorAdapter, dataSource -> this.properties.getProperties(),
+                persistenceUnitManager.getIfAvailable(), null);
         customizers.orderedStream().forEach((customizer) -> customizer.customize(builder));
         return builder;
     }

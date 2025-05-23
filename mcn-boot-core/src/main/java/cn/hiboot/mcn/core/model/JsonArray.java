@@ -60,16 +60,6 @@ public class JsonArray extends ArrayNode {
         return this;
     }
 
-    public JsonArray removeIf(Predicate<JsonObject> filter){
-        Iterator<JsonNode> iterator = elements();
-        while (iterator.hasNext()){
-            if(filter.test(JsonObject.of(iterator.next()))){
-                iterator.remove();
-            }
-        }
-        return this;
-    }
-
     public JsonArray findAll(Predicate<JsonObject> filter){
         JsonArray jsonArray = new JsonArray();
         for (JsonNode jsonNode : this) {

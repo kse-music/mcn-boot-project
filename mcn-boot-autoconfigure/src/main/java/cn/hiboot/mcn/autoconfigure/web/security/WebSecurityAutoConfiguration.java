@@ -17,7 +17,7 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatcher;
 import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatchers;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
@@ -51,7 +51,8 @@ public class WebSecurityAutoConfiguration {
             return web -> {
                 List<String> urls = ignoreUrl(webSecurityProperties);
                 if (McnUtils.isNotNullAndEmpty(urls)) {
-                    web.ignoring().requestMatchers(new OrRequestMatcher(urls.stream().map(AntPathRequestMatcher::new).collect(Collectors.toList())));
+                    web.ignoring().requestMatchers(new OrRequestMatcher(urls.stream().map(url -> PathPatternRequestMatcher.withDefaults().matcher(url))
+                            .collect(Collectors.toList())));
                 }
             };
         }
