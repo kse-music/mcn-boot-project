@@ -82,12 +82,6 @@ public class DefaultExceptionHandler implements ExceptionHandler, ApplicationCon
                 break;
             }
         }
-        for (ExceptionResolver<Throwable> exceptionResolver : exceptionResolvers) {
-            resp = exceptionResolver.resolve(exception);
-            if (resp != null) {
-                break;
-            }
-        }
         if(Objects.isNull(resp)){
             resp = doHandleException(exception);
         }
