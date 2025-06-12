@@ -5,8 +5,8 @@
 | 库                                    | 版本属性                         |       当前版本       |
 |--------------------------------------|:-----------------------------|:----------------:|
 | bcpkix-jdk18on                       | bcprov-jdk18on.version       |      1.78.1      |
-| spring-boot-admin-starter-client     | boot-admin.version           |      3.4.3       |
-| spring-boot-admin-starter-server     | boot-admin.version           |      3.4.3       |
+| spring-boot-admin-starter-client     | boot-admin.version           |      3.5.0       |
+| spring-boot-admin-starter-server     | boot-admin.version           |      3.5.0       |
 | commons-io                           | commons-io.version           |      2.18.0      |
 | fastjson                             | fastjson.version             |      1.2.83      |
 | fastjson2                            | fastjson2.version            |      2.0.50      |
