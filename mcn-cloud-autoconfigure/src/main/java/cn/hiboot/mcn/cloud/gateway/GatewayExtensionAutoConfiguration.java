@@ -27,9 +27,6 @@ import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.G
 @ConditionalOnClass(GatewayAutoConfiguration.class)
 public class GatewayExtensionAutoConfiguration {
 
-    /**
-     * @ignore
-     */
     @RestController
     @ConditionalOnProperty(prefix = "gateway.fallback",name = "enabled",havingValue = "true",matchIfMissing = true)
     protected static class DefaultFallbackRestController{

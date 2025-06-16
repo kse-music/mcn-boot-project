@@ -42,7 +42,6 @@
         <mapstruct.version>1.5.5.Final</mapstruct.version>
         <mybatis-spring-boot.version>3.0.4</mybatis-spring-boot.version>
         <minio.version>8.5.17</minio.version>
-        <smart-doc.version>2.7.7</smart-doc.version>
         <spring-boot.version>3.5.0</spring-boot.version>
         <spring-cloud.version>2025.0.0</spring-cloud.version>
         <spring-cloud-alibaba.version>2023.0.3.3</spring-cloud-alibaba.version>
@@ -229,12 +228,6 @@
                 <version>${xxl-job.version}</version>
             </dependency>
 
-            <dependency>
-                <groupId>com.github.shalousun</groupId>
-                <artifactId>smart-doc</artifactId>
-                <version>${smart-doc.version}</version>
-            </dependency>
-
         </dependencies>
 
     </dependencyManagement>
@@ -338,14 +331,6 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-deploy-plugin</artifactId>
                     <version>3.1.1</version>
-                </plugin>
-                <plugin>
-                    <groupId>com.github.shalousun</groupId>
-                    <artifactId>smart-doc-maven-plugin</artifactId>
-                    <version>${smart-doc.version}</version>
-                    <configuration>
-                        <configFile>src/main/resources/config/smart-doc.json</configFile>
-                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.graalvm.buildtools</groupId>

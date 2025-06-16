@@ -69,9 +69,6 @@ public class GroovyWebAutoConfiguration {
         return groovyBinding;
     }
 
-    /**
-     * @ignore
-     */
     @RestController
     @IgnoreApi
     static class GroovyWebController {
