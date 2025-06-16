@@ -15,14 +15,12 @@ public class FieldSort {
 
     /**
      * 排序字段名称
-     * @mock age
      */
     private String field;
 
     /**
      * asc:升序
      * desc:降序
-     * @mock desc
      */
     private String sort;
 

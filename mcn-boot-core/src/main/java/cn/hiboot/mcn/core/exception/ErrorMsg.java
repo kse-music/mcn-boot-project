@@ -13,7 +13,7 @@ import java.util.Map;
  */
 public abstract class ErrorMsg {
 
-    static final Map<Integer,String> errMsg;
+    private static final Map<Integer,String> errMsg;
 
     static {
         errMsg = new HashMap<>(4);
@@ -28,7 +28,5 @@ public abstract class ErrorMsg {
     public static String getErrorMsg(Integer code){
         return errMsg.getOrDefault(code,"");
     }
-
-
 
 }
