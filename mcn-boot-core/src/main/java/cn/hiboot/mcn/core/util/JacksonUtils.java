@@ -46,80 +46,79 @@ public abstract class JacksonUtils {
         return getObjectMapper().getTypeFactory();
     }
 
-    private static String valueString(Object content) {
-        if (content instanceof byte[] bytes) {
-            return new String(bytes, StandardCharsets.UTF_8);
-        }
-        return content instanceof String value ? value : toJson(content);
+    public static <T> T fromJson(Object input, Class<T> clazz) {
+        return fromJson(input, getTypeFactory().constructType(clazz));
     }
 
-    public static <T> T fromJson(Object content, Class<T> clazz) {
-        try {
-            return getObjectMapper().readValue(valueString(content), clazz);
-        } catch (JsonProcessingException e) {
-            throw newInstance(e);
-        }
+    public static <T> T fromJson(Object input, TypeReference<T> typeRef) {
+        return fromJson(input, getTypeFactory().constructType(typeRef));
     }
 
-    public static <T> T fromJson(Object content, TypeReference<T> reference) {
+    public static <T> T fromJson(Object input, JavaType javaType) {
+        ObjectMapper mapper = getObjectMapper();
         try {
-            return getObjectMapper().readValue(valueString(content), reference);
+            if (input instanceof String str) {
+                return mapper.readValue(str, javaType);
+            } else if (input instanceof byte[] bytes) {
+                return mapper.readValue(bytes, javaType);
+            } else {
+                return mapper.convertValue(input, javaType);
+            }
         } catch (Exception e) {
             throw newInstance(e);
         }
     }
 
-    public static <T> T fromJson(Object content, JavaType javaType) {
-        try {
-            return getObjectMapper().readValue(valueString(content), javaType);
-        } catch (Exception e) {
-            throw newInstance(e);
-        }
+    public static <T> List<T> fromList(Object input, Class<T> clazz) {
+        return fromJson(input, getTypeFactory().constructCollectionType(List.class, clazz));
     }
 
-    public static <T> List<T> fromList(Object content, Class<T> clazz) {
-        return fromJson(valueString(content), getTypeFactory().constructCollectionType(List.class, clazz));
+    public static List<Map<String, Object>> fromListMap(Object input) {
+        return fromJson(input, getTypeFactory().constructCollectionType(List.class, Map.class));
     }
 
-    public static List<Map<String, Object>> fromListMap(Object content) {
-        return fromJson(valueString(content), getTypeFactory().constructCollectionType(List.class, Map.class));
+    public static <K, V> List<Map<K, V>> fromListMap(Object input, Class<K> keyClass, Class<V> valueClass) {
+        return fromJson(input, getTypeFactory().constructCollectionType(List.class, getTypeFactory().constructMapType(Map.class, keyClass, valueClass)));
     }
 
-    public static <K, V> List<Map<K, V>> fromListMap(Object content, Class<K> keyClass, Class<V> valueClass) {
-        return fromJson(valueString(content), getTypeFactory().constructCollectionType(List.class, getTypeFactory().constructMapType(Map.class, keyClass, valueClass)));
-    }
-
-    public static Map<String, Object> fromMap(Object content) {
-        return fromJson(valueString(content), new TypeReference<Map<String, Object>>() {
+    public static Map<String, Object> fromMap(Object input) {
+        return fromJson(input, new TypeReference<Map<String, Object>>() {
         });
     }
 
-    public static <K, V> Map<K, V> fromMap(Object content, Class<K> keyClass, Class<V> valueClass) {
-        return fromJson(valueString(content), getTypeFactory().constructMapType(Map.class, keyClass, valueClass));
+    public static <K, V> Map<K, V> fromMap(Object input, Class<K> keyClass, Class<V> valueClass) {
+        return fromJson(input, getTypeFactory().constructMapType(Map.class, keyClass, valueClass));
     }
 
-    public static String toJson(Object value) {
+    public static String toJson(Object input) {
         try {
-            return getObjectMapper().writeValueAsString(value);
+            return getObjectMapper().writeValueAsString(input);
         } catch (JsonProcessingException e) {
             throw newInstance(e);
         }
     }
 
-    public static JsonObject jsonObject(Object content) {
+    public static JsonObject jsonObject(Object input) {
         try {
-            return new JsonObject((ObjectNode) getObjectMapper().readTree(valueString(content)));
+            return new JsonObject((ObjectNode) getObjectMapper().readTree(valueString(input)));
         } catch (JsonProcessingException e) {
             throw newInstance(e);
         }
     }
 
-    public static JsonArray jsonArray(Object content) {
+    public static JsonArray jsonArray(Object input) {
         try {
-            return new JsonArray((ArrayNode) getObjectMapper().readTree(valueString(content)));
+            return new JsonArray((ArrayNode) getObjectMapper().readTree(valueString(input)));
         } catch (JsonProcessingException e) {
             throw newInstance(e);
         }
+    }
+
+    private static String valueString(Object input) {
+        if (input instanceof byte[] bytes) {
+            return new String(bytes, StandardCharsets.UTF_8);
+        }
+        return input instanceof String value ? value : toJson(input);
     }
 
     private static ServiceException newInstance(Throwable cause) {
