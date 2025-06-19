@@ -54,11 +54,12 @@ public enum DbType {
         return pageSql;
     }
 
-    public String sqlQuote() {
+    public String sqlQuote(String str) {
+        String sqlQuote = "\"";
         if (this == mysql || this == mariadb) {
-            return "`";
+            sqlQuote = "`";
         }
-        return "\"";
+        return sqlQuote + str + sqlQuote;
     }
 
 }
