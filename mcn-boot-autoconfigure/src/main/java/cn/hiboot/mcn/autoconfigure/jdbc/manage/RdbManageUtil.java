@@ -29,12 +29,12 @@ abstract class RdbManageUtil {
         if (McnUtils.isNullOrEmpty(query)) {
             return "";
         }
-        String sqlQuote = connectConfig.dbType().sqlQuote();
+        DbType dbType = connectConfig.dbType();
         List<String> conditions = new ArrayList<>();
         AtomicInteger index = new AtomicInteger(0);
         for (FieldQuery fq : query) {
             String column = fq.getName();
-            String quotedColumn =sqlQuote + column + sqlQuote;
+            String quotedColumn = dbType.sqlQuote(column);
             Object value = fq.getValue();
             String operator = fq.getOperator().valueString();
             String paramKey = column + "_" + index.getAndIncrement();

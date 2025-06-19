@@ -151,7 +151,7 @@ class DefaultRdbManage implements RdbManage {
         Map<String, Object> paramMap = new HashMap<>();
         DbQuery dq = buildDbQuery(connectConfig, dataQuery);
         String condition = RdbManageUtil.buildCondition(connectConfig, dataQuery, paramMap);
-        String tableName = fromTable(dq, dataQuery.getTableName());
+        String tableName = fromTable(connectConfig.dbType(), dq, dataQuery.getTableName());
         NamedParameterJdbcTemplate namedParameterJdbcTemplate = dataSourceManage.namedParameterJdbcTemplate();
         RestResp<List<Map<String, Object>>> result = RestResp.ok();
         if (data) {
@@ -184,12 +184,13 @@ class DefaultRdbManage implements RdbManage {
         return result;
     }
 
-    private String fromTable(DbQuery dq, String tableName) {
+    private String fromTable(DbType dbType, DbQuery dq, String tableName) {
         String schema = dq.getTableSchema();
+        tableName = dbType.sqlQuote(tableName);
         if (schema != null) {
-            return schema + "." + tableName;
+            return dbType.sqlQuote(schema) + "." + tableName;
         }
-        return dq.getCatalog() + "." + tableName;
+        return dbType.sqlQuote(dq.getCatalog()) + "." + tableName;
     }
 
 }
