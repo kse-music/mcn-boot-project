@@ -111,7 +111,7 @@ public class SpringMvcAutoConfiguration {
         @Override
         public RestResp beforeBodyWrite(RestResp body, MethodParameter returnType, MediaType selectedContentType, Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
             if(body != null && body.getData() instanceof String){
-                body.setData(JacksonUtils.fromJson(body.getData().toString(),returnType.getMethodAnnotation(StrToObj.class).value()));
+                body.setData(JacksonUtils.toBean(body.getData().toString(),returnType.getMethodAnnotation(StrToObj.class).value()));
             }
             return body;
         }

@@ -46,15 +46,15 @@ public abstract class JacksonUtils {
         return getObjectMapper().getTypeFactory();
     }
 
-    public static <T> T fromJson(Object input, Class<T> clazz) {
-        return fromJson(input, getTypeFactory().constructType(clazz));
+    public static <T> T toBean(Object input, Class<T> clazz) {
+        return toBean(input, getTypeFactory().constructType(clazz));
     }
 
-    public static <T> T fromJson(Object input, TypeReference<T> typeRef) {
-        return fromJson(input, getTypeFactory().constructType(typeRef));
+    public static <T> T toBean(Object input, TypeReference<T> typeRef) {
+        return toBean(input, getTypeFactory().constructType(typeRef));
     }
 
-    public static <T> T fromJson(Object input, JavaType javaType) {
+    public static <T> T toBean(Object input, JavaType javaType) {
         ObjectMapper mapper = getObjectMapper();
         try {
             if (input instanceof String) {
@@ -69,25 +69,25 @@ public abstract class JacksonUtils {
         }
     }
 
-    public static <T> List<T> fromList(Object input, Class<T> clazz) {
-        return fromJson(input, getTypeFactory().constructCollectionType(List.class, clazz));
+    public static <T> List<T> toList(Object input, Class<T> clazz) {
+        return toBean(input, getTypeFactory().constructCollectionType(List.class, clazz));
     }
 
-    public static List<Map<String, Object>> fromListMap(Object input) {
-        return fromJson(input, getTypeFactory().constructCollectionType(List.class, Map.class));
+    public static List<Map<String, Object>> toListMap(Object input) {
+        return toBean(input, getTypeFactory().constructCollectionType(List.class, Map.class));
     }
 
-    public static <K, V> List<Map<K, V>> fromListMap(Object input, Class<K> keyClass, Class<V> valueClass) {
-        return fromJson(input, getTypeFactory().constructCollectionType(List.class, getTypeFactory().constructMapType(Map.class, keyClass, valueClass)));
+    public static <K, V> List<Map<K, V>> toListMap(Object input, Class<K> keyClass, Class<V> valueClass) {
+        return toBean(input, getTypeFactory().constructCollectionType(List.class, getTypeFactory().constructMapType(Map.class, keyClass, valueClass)));
     }
 
-    public static Map<String, Object> fromMap(Object input) {
-        return fromJson(input, new TypeReference<Map<String, Object>>() {
+    public static Map<String, Object> toMap(Object input) {
+        return toBean(input, new TypeReference<Map<String, Object>>() {
         });
     }
 
-    public static <K, V> Map<K, V> fromMap(Object input, Class<K> keyClass, Class<V> valueClass) {
-        return fromJson(input, getTypeFactory().constructMapType(Map.class, keyClass, valueClass));
+    public static <K, V> Map<K, V> toMap(Object input, Class<K> keyClass, Class<V> valueClass) {
+        return toBean(input, getTypeFactory().constructMapType(Map.class, keyClass, valueClass));
     }
 
     public static String toJson(Object input) {
@@ -98,7 +98,7 @@ public abstract class JacksonUtils {
         }
     }
 
-    public static JsonObject jsonObject(Object input) {
+    public static JsonObject toJsonObject(Object input) {
         try {
             return new JsonObject((ObjectNode) getObjectMapper().readTree(valueString(input)));
         } catch (JsonProcessingException e) {
@@ -106,7 +106,7 @@ public abstract class JacksonUtils {
         }
     }
 
-    public static JsonArray jsonArray(Object input) {
+    public static JsonArray toJsonArray(Object input) {
         try {
             return new JsonArray((ArrayNode) getObjectMapper().readTree(valueString(input)));
         } catch (JsonProcessingException e) {
