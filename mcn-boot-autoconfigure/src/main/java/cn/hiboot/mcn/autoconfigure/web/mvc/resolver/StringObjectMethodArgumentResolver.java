@@ -27,6 +27,6 @@ public class StringObjectMethodArgumentResolver implements HandlerMethodArgument
         if(request == null){
             return null;
         }
-        return JacksonUtils.fromJson(request.getParameter(parameter.getParameterName()),parameter.getParameterType());
+        return JacksonUtils.toBean(request.getParameter(parameter.getParameterName()),parameter.getParameterType());
     }
 }

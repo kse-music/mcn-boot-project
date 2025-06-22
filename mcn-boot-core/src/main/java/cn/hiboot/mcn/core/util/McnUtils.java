@@ -4,9 +4,6 @@ import cn.hiboot.mcn.core.exception.ServiceException;
 import cn.hiboot.mcn.core.model.JsonArray;
 import cn.hiboot.mcn.core.tuples.Pair;
 
-import java.beans.BeanInfo;
-import java.beans.Introspector;
-import java.beans.PropertyDescriptor;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
@@ -20,7 +17,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -455,7 +451,7 @@ public abstract class McnUtils {
 
     public static void deleteDirectory(String dirPath) {
         try {
-            Files.walkFileTree(Paths.get(dirPath), new SimpleFileVisitor<Path>() {
+            Files.walkFileTree(Paths.get(dirPath), new SimpleFileVisitor<>() {
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                     Files.delete(file);
                     return FileVisitResult.CONTINUE;
@@ -472,42 +468,6 @@ public abstract class McnUtils {
 
     public static String getVersion(Class<?> clazz) {
         return clazz.getPackage().getImplementationVersion();
-    }
-
-    public static <T> T map2bean(Map<String, Object> map, Class<T> clz) {
-        T obj;
-        try {
-            obj = clz.getDeclaredConstructor().newInstance();
-            BeanInfo b = Introspector.getBeanInfo(clz, Object.class);
-            PropertyDescriptor[] pds = b.getPropertyDescriptors();
-            for (PropertyDescriptor pd : pds) {
-                Method setter = pd.getWriteMethod();
-                setter.invoke(obj, map.get(pd.getName()));
-            }
-        } catch (Exception e) {
-            throw ServiceException.newInstance(e);
-        }
-        return obj;
-    }
-
-    public static Map<String, Object> bean2map(Object bean) {
-        Map<String, Object> map = new HashMap<>();
-        try {
-            BeanInfo b = Introspector.getBeanInfo(bean.getClass(), Object.class);
-            PropertyDescriptor[] pds = b.getPropertyDescriptors();
-            for (PropertyDescriptor pd : pds) {
-                String propertyName = pd.getName();
-                Method m = pd.getReadMethod();
-                Object properValue = m.invoke(bean);
-                if (properValue == null) {
-                    continue;
-                }
-                map.put(propertyName, properValue);
-            }
-        } catch (Exception e) {
-            throw ServiceException.newInstance(e);
-        }
-        return map;
     }
 
     public static void replaceAnnotationValue(Object proxy, Map<String, Object> map) {

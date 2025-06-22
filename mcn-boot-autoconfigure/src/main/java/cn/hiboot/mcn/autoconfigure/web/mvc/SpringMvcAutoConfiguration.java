@@ -12,7 +12,11 @@ import cn.hiboot.mcn.core.util.JacksonUtils;
 import io.minio.MinioClient;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.*;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.boot.autoconfigure.condition.SearchStrategy;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.servlet.error.ErrorViewResolver;
@@ -110,7 +114,7 @@ public class SpringMvcAutoConfiguration {
         @Override
         public RestResp<Object> beforeBodyWrite(RestResp<Object> body, MethodParameter returnType, MediaType selectedContentType, Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
             if(body != null && body.getData() instanceof String str){
-                body.setData(JacksonUtils.fromJson(str,returnType.getMethodAnnotation(StrToObj.class).value()));
+                body.setData(JacksonUtils.toBean(str,returnType.getMethodAnnotation(StrToObj.class).value()));
             }
             return body;
         }
