@@ -9,6 +9,7 @@ import io.swagger.v3.oas.models.media.StringSchema;
 import io.swagger.v3.oas.models.parameters.HeaderParameter;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.servers.Server;
 import org.springdoc.core.customizers.GlobalOpenApiCustomizer;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -30,16 +31,16 @@ import java.util.List;
  * @since 2022/1/13 22:04
  */
 @AutoConfiguration
-@EnableConfigurationProperties(Swagger2Properties.class)
+@EnableConfigurationProperties(Swagger3Properties.class)
 @ConditionalOnClass(WebFluxSwagger.class)
 @Import(WebFluxSwagger.class)
 @ConditionalOnProperty(prefix = "swagger", name = "enabled", havingValue = "true")
 public class SwaggerAutoConfiguration {
 
-    private final Swagger2Properties swagger2Properties;
+    private final Swagger3Properties swaggerProperties;
 
-    public SwaggerAutoConfiguration(Swagger2Properties swagger2Properties) {
-        this.swagger2Properties = swagger2Properties;
+    public SwaggerAutoConfiguration(Swagger3Properties swaggerProperties) {
+        this.swaggerProperties = swaggerProperties;
     }
 
     @Bean
@@ -47,36 +48,46 @@ public class SwaggerAutoConfiguration {
     public OpenAPI openApi(Environment environment) {
         return new OpenAPI()
                 .components(components(environment))
-                .info(new Info().title(swagger2Properties.getTitle())
-                        .contact(new Contact().name(swagger2Properties.getName()).email(swagger2Properties.getEmail()).url(swagger2Properties.getUrl()))
-                        .version(swagger2Properties.getVersion())
-                        .description(swagger2Properties.getDescription()))
+                .info(new Info().title(swaggerProperties.getTitle())
+                        .contact(new Contact().name(swaggerProperties.getName()).email(swaggerProperties.getEmail()).url(swaggerProperties.getUrl()))
+                        .version(swaggerProperties.getVersion())
+                        .description(swaggerProperties.getDescription()))
                 .security(List.of(new SecurityRequirement().addList(HttpHeaders.AUTHORIZATION)));
     }
 
     @Bean
     GlobalOpenApiCustomizer mcnGlobalOpenApiCustomizer(Environment environment) {
-        return openApi -> openApi.getPaths().values().stream().flatMap(pathItem -> pathItem.readOperations().stream())
-                .forEach(operation -> {
-                    operation.security(openApi.getSecurity());
-                    if(swagger2Properties.getHeader().isCsrf()){
-                        operation.addParametersItem(new HeaderParameter().$ref("#/components/parameters/csrf"));
-                    }
-                    if(environment.getProperty("data.integrity.enabled", Boolean.class, false)){
-                        operation.addParametersItem(new HeaderParameter().$ref("#/components/parameters/tsm"))
-                                .addParametersItem(new HeaderParameter().$ref("#/components/parameters/nonce"))
-                                .addParametersItem(new HeaderParameter().$ref("#/components/parameters/sign"));
-                    }
-                });
+        return openApi -> {
+            Swagger3Properties.Server server = swaggerProperties.getServer();
+            if (server != null) {
+                Server serversItem = new Server();
+                serversItem.setUrl(server.getUrl());
+                serversItem.setDescription(server.getDescription());
+                openApi.setServers(List.of(serversItem));
+            }
+            openApi.getPaths().values().stream().flatMap(pathItem -> pathItem.readOperations().stream())
+                    .forEach(operation -> {
+                        operation.security(openApi.getSecurity());
+                        if(swaggerProperties.getHeader().isCsrf()){
+                            operation.addParametersItem(new HeaderParameter().$ref("#/components/parameters/csrf"));
+                        }
+                        if(environment.getProperty("data.integrity.enabled", Boolean.class, false)){
+                            operation.addParametersItem(new HeaderParameter().$ref("#/components/parameters/tsm"))
+                                    .addParametersItem(new HeaderParameter().$ref("#/components/parameters/nonce"))
+                                    .addParametersItem(new HeaderParameter().$ref("#/components/parameters/sign"));
+                        }
+                    });
+        };
     }
 
     private Components components(Environment environment) {
         Components components = new Components();
-        if(Boolean.TRUE.equals(swagger2Properties.getHeader().getAuthorization()) || (swagger2Properties.getHeader().getAuthorization() == null && ClassUtils.isPresent("org.springframework.security.core.Authentication",null))){
+        Swagger3Properties.Header header = swaggerProperties.getHeader();
+        if(Boolean.TRUE.equals(header.getAuthorization()) || (header.getAuthorization() == null && ClassUtils.isPresent("org.springframework.security.core.Authentication",null))){
             components.addSecuritySchemes(HttpHeaders.AUTHORIZATION,new SecurityScheme().scheme("bearer").bearerFormat("JWT").type(SecurityScheme.Type.HTTP));
         }
         //csrf
-        if(swagger2Properties.getHeader().isCsrf()){
+        if(header.isCsrf()){
             components.addParameters("csrf",new HeaderParameter().name("X-XSRF-TOKEN").description("csrf token").in(ParameterIn.HEADER.toString()).schema(new StringSchema()).required(true));
         }
         //enable data integrity

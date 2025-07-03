@@ -9,7 +9,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * @since 2019/3/27 14:04
  */
 @ConfigurationProperties("swagger")
-public class Swagger2Properties {
+public class Swagger3Properties {
 
     private String title;
     private String description;
@@ -24,6 +24,8 @@ public class Swagger2Properties {
      * 是否生成请求头
      */
     private Header header = new Header();
+
+    private Server server;
 
     public String getTitle() {
         return title;
@@ -89,6 +91,14 @@ public class Swagger2Properties {
         this.header = header;
     }
 
+    public Server getServer() {
+        return server;
+    }
+
+    public void setServer(Server server) {
+        this.server = server;
+    }
+
     public static class Header {
         /**
          * 是否生成csrf请求参数头
@@ -115,4 +125,28 @@ public class Swagger2Properties {
             this.authorization = authorization;
         }
     }
+
+    public static class Server {
+
+        private String url;
+        private String description;
+
+        public String getUrl() {
+            return url;
+        }
+
+        public void setUrl(String url) {
+            this.url = url;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+        public void setDescription(String description) {
+            this.description = description;
+        }
+
+    }
+
 }
