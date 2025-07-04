@@ -81,9 +81,8 @@ public class JsonObject extends ObjectNode {
         return at(SLASH + field);
     }
 
-    @SuppressWarnings("unchecked")
     public Map<String, Object> toMap() {
-        return JacksonUtils.getObjectMapper().convertValue(this, Map.class);
+        return JacksonUtils.toMap(this);
     }
 
     public static JsonObject fromMap(Map<String, Object> map) {
