@@ -98,6 +98,14 @@ public abstract class JacksonUtils {
         }
     }
 
+    public static byte[] toBytes(Object input) {
+        try {
+            return getObjectMapper().writeValueAsBytes(input);
+        } catch (JsonProcessingException e) {
+            throw newInstance(e);
+        }
+    }
+
     public static JsonObject toJsonObject(Object input) {
         try {
             return new JsonObject((ObjectNode) getObjectMapper().readTree(valueString(input)));
