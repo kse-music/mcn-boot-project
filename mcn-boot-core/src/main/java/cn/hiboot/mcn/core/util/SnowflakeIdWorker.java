@@ -100,6 +100,11 @@ public class SnowflakeIdWorker {
         return System.currentTimeMillis();
     }
 
+    public Date createTime(long id) {
+        long timestampPart = (id >> timestampLeftShift);
+        long timestamp = timestampPart + twepoch;
+        return new Date(timestamp);
+    }
 
 }
 
