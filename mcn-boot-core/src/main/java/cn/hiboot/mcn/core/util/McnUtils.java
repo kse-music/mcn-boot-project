@@ -31,6 +31,7 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.security.SecureRandom;
 import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -72,11 +73,13 @@ import java.util.zip.ZipFile;
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public abstract class McnUtils {
-    private static final int BUFFER_SIZE = 4096;
 
+    private static final int BUFFER_SIZE = 4096;
     private static final String DOT = ".";
+
     private static final DateTimeFormatter PATTERN_1 = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private static final DateTimeFormatter PATTERN_2 = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static final SecureRandom random = new SecureRandom();
 
     public static String formatNowDate() {
         return localDateToString(LocalDate.now());
@@ -345,6 +348,10 @@ public abstract class McnUtils {
 
     public static String snowflakeIdString() {
         return SnowflakeIdWorker.getInstance().nextIdString();
+    }
+
+    public static Date snowflakeIdDate(long id) {
+        return SnowflakeIdWorker.getInstance().createTime(id);
     }
 
     public static String getValueFromSystemEnvOrProp(String key) {
