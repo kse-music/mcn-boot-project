@@ -9,16 +9,12 @@ package cn.hiboot.mcn.autoconfigure.jpa;
 public interface Specifications {
 
     static <S> ExampleSpecification<S> of(PredicateProvider<S> predicateProviders){
-        return new ExampleSpecification<S>(predicateProviders);
-    }
-
-    static <S> ExampleSpecification<S> withOf(S t, PredicateProvider<S> predicateProviders){
-        return new ExampleSpecification<>(t,predicateProviders);
+        return and(predicateProviders);
     }
 
     @SafeVarargs
     static <S> ExampleSpecification<S> and(PredicateProvider<S>... predicateProviders){
-        return new ExampleSpecification<>(predicateProviders);
+        return withAnd(null, predicateProviders);
     }
 
     @SafeVarargs
@@ -28,7 +24,7 @@ public interface Specifications {
 
     @SafeVarargs
     static <S> ExampleSpecification<S> or(PredicateProvider<S>... predicateProviders){
-        return new ExampleSpecification<>(predicateProviders).or();
+        return withOr(null, predicateProviders);
     }
 
     @SafeVarargs
