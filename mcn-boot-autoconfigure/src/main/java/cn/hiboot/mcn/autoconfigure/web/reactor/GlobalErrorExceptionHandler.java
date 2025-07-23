@@ -4,9 +4,8 @@ import cn.hiboot.mcn.autoconfigure.config.ConfigProperties;
 import cn.hiboot.mcn.autoconfigure.web.exception.HttpStatusCodeResolver;
 import cn.hiboot.mcn.autoconfigure.web.exception.handler.DefaultExceptionHandler;
 import cn.hiboot.mcn.autoconfigure.web.exception.handler.ExceptionHandler;
-import cn.hiboot.mcn.core.exception.ServiceException;
+import cn.hiboot.mcn.core.model.result.RestResp;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.SearchStrategy;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
@@ -38,8 +37,8 @@ import java.util.Map;
  * @since 2022/5/23 23:08
  */
 @ConditionalOnMissingBean(value = ErrorWebExceptionHandler.class, search = SearchStrategy.CURRENT)
-public class GlobalErrorExceptionHandler extends DefaultErrorWebExceptionHandler implements HttpStatusCodeResolver,EnvironmentAware, Ordered {
-    @Value("${http.error.override:true}")
+public class GlobalErrorExceptionHandler extends DefaultErrorWebExceptionHandler implements HttpStatusCodeResolver, EnvironmentAware, Ordered {
+
     private boolean overrideHttpError;
     private WebFluxProperties webFluxProperties;
     private int order;
@@ -64,12 +63,22 @@ public class GlobalErrorExceptionHandler extends DefaultErrorWebExceptionHandler
 
     @Override
     protected Mono<ServerResponse> renderErrorResponse(ServerRequest request) {
-        return ServerResponse.status(HttpStatus.OK.value()).contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(exceptionHandler.handleException(getError(request))));
+        RestResp<Throwable> resp = exceptionHandler.handleException(getError(request));
+        if (this.overrideHttpError) {
+            return ServerResponse.status(HttpStatus.OK.value()).contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(resp));
+        }
+        if (resp != null) {
+            Map<String, Object> errorAttributes = this.getErrorAttributes(request, this.getErrorAttributeOptions(request, MediaType.ALL));
+            Integer status = (Integer) errorAttributes.get("status");
+            return ServerResponse.status(status).contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(resp));
+        }
+        return super.renderErrorResponse(request);
     }
 
     @Override
     public void setEnvironment(Environment environment) {
-        this.order = environment.getProperty("mcn.exception.handler.reactor.order",Integer.class, -1);
+        this.overrideHttpError = environment.getProperty("http.error.override", Boolean.class,true);
+        this.order = environment.getProperty("mcn.exception.handler.reactor.order", Integer.class, -1);
     }
 
     @Override
@@ -80,10 +89,7 @@ public class GlobalErrorExceptionHandler extends DefaultErrorWebExceptionHandler
     @Override
     public Integer resolve(Throwable ex) {
         if(ex instanceof ResponseStatusException responseStatusException){
-            if(overrideHttpError){
-                return mappingCode(responseStatusException.getStatusCode());
-            }
-            throw ServiceException.newInstance(ex);
+            return mappingCode(responseStatusException.getStatusCode());
         }
         return null;
     }
