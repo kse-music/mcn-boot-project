@@ -5,6 +5,7 @@ import cn.hiboot.mcn.autoconfigure.web.exception.error.GlobalExceptionViewResolv
 import cn.hiboot.mcn.autoconfigure.web.exception.handler.ExceptionHandler;
 import cn.hiboot.mcn.core.exception.ExceptionKeys;
 import cn.hiboot.mcn.core.exception.ServiceException;
+import cn.hiboot.mcn.core.model.result.RestResp;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.Ordered;
@@ -28,7 +29,8 @@ import java.util.Objects;
  * @since 2021/5/8 17:27
  */
 @RestControllerAdvice
-public class GlobalExceptionHandler implements HttpStatusCodeResolver,Ordered {
+public class GlobalExceptionHandler implements HttpStatusCodeResolver, Ordered {
+
     @Value("${http.error.override:true}")
     private boolean overrideHttpError;
     private final GlobalExceptionViewResolver viewResolver;
@@ -45,7 +47,12 @@ public class GlobalExceptionHandler implements HttpStatusCodeResolver,Ordered {
             exceptionHandler.logError(exception);
             return viewResolver.view(request, exception);
         }
-        return exceptionHandler.handleException(exception);
+        RestResp<Throwable> resp = exceptionHandler.handleException(exception);
+        if (overrideHttpError) {
+            return resp;
+        }
+        request.setAttribute(ExceptionHandler.EXCEPTION_HANDLE_RESULT_ATTRIBUTE, resp);
+        throw ServiceException.newInstance(exception);
     }
 
     @Override

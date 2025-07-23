@@ -253,6 +253,7 @@ public final class RestClient {
         return wrapperClass == null ? resultType : ResolvableType.forClassWithGenerics(wrapperClass, resultType);
     }
 
+    @SuppressWarnings("unchecked")
     private <A, D, W> D doExchange(String url, HttpMethod method, Consumer<HttpHeaders> headersConsumer, ResolvableType resultType, A requestBody, Map<String, ?> uriVariables) {
         if (uriVariables == null) {
             uriVariables = Collections.emptyMap();

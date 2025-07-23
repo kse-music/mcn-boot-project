@@ -6,6 +6,7 @@ import cn.hiboot.mcn.autoconfigure.web.exception.handler.DefaultExceptionHandler
 import cn.hiboot.mcn.autoconfigure.web.exception.handler.ExceptionHandler;
 import cn.hiboot.mcn.core.exception.ExceptionKeys;
 import cn.hiboot.mcn.core.exception.ServiceException;
+import cn.hiboot.mcn.core.model.result.RestResp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -40,6 +41,7 @@ import java.util.Map;
  */
 @ConditionalOnMissingBean(value = ErrorWebExceptionHandler.class, search = SearchStrategy.CURRENT)
 public class GlobalErrorExceptionHandler extends DefaultErrorWebExceptionHandler implements HttpStatusCodeResolver,EnvironmentAware, Ordered {
+
     @Value("${http.error.override:true}")
     private boolean overrideHttpError;
     private WebFluxProperties webFluxProperties;
@@ -65,7 +67,16 @@ public class GlobalErrorExceptionHandler extends DefaultErrorWebExceptionHandler
 
     @Override
     protected Mono<ServerResponse> renderErrorResponse(ServerRequest request) {
-        return ServerResponse.status(HttpStatus.OK.value()).contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(exceptionHandler.handleException(getError(request))));
+        RestResp<Throwable> resp = exceptionHandler.handleException(getError(request));
+        if (this.overrideHttpError) {
+            return ServerResponse.status(HttpStatus.OK.value()).contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(resp));
+        }
+        if (resp != null) {
+            Map<String, Object> errorAttributes = this.getErrorAttributes(request, this.getErrorAttributeOptions(request, MediaType.ALL));
+            Integer status = (Integer) errorAttributes.get("status");
+            return ServerResponse.status(status).contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(resp));
+        }
+        return super.renderErrorResponse(request);
     }
 
     @Override
