@@ -58,7 +58,7 @@ public abstract class JacksonUtils {
         ObjectMapper mapper = getObjectMapper();
         try {
             if (input instanceof String) {
-                return mapper.readValue(input.toString(), javaType);
+                return mapper.readValue((String) input, javaType);
             } else if (input instanceof byte[]) {
                 return mapper.readValue((byte[]) input, javaType);
             } else {
@@ -78,7 +78,13 @@ public abstract class JacksonUtils {
     }
 
     public static <K, V> List<Map<K, V>> toListMap(Object input, Class<K> keyClass, Class<V> valueClass) {
-        return toBean(input, getTypeFactory().constructCollectionType(List.class, getTypeFactory().constructMapType(Map.class, keyClass, valueClass)));
+        TypeFactory typeFactory = getTypeFactory();
+        return toBean(input, typeFactory.constructCollectionType(List.class, typeFactory.constructMapType(Map.class, keyClass, valueClass)));
+    }
+
+    public static <K, V> List<Map<K, V>> toListMap(Object input, JavaType keyType, JavaType valueType) {
+        TypeFactory typeFactory = getTypeFactory();
+        return toBean(input, typeFactory.constructCollectionType(List.class, typeFactory.constructMapType(Map.class, keyType, valueType)));
     }
 
     public static Map<String, Object> toMap(Object input) {
@@ -86,8 +92,17 @@ public abstract class JacksonUtils {
         });
     }
 
+    public static Map<String, List<Map<String, Object>>> toMapList(Object input) {
+        TypeFactory typeFactory = getTypeFactory();
+        return toBean(input, typeFactory.constructMapType(Map.class, typeFactory.constructType(String.class), typeFactory.constructCollectionType(List.class, Map.class)));
+    }
+
     public static <K, V> Map<K, V> toMap(Object input, Class<K> keyClass, Class<V> valueClass) {
         return toBean(input, getTypeFactory().constructMapType(Map.class, keyClass, valueClass));
+    }
+
+    public static <K, V> Map<K, V> toMap(Object input, JavaType keyType, JavaType valueType) {
+        return toBean(input, getTypeFactory().constructMapType(Map.class, keyType, valueType));
     }
 
     public static String toJson(Object input) {
