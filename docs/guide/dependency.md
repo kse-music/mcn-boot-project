@@ -17,7 +17,7 @@
 | mapstruct                            | mapstruct.version            |   1.5.5.Final    |
 | mybatis-spring-boot-starter          | mybatis-spring-boot.version  |      3.0.4       |
 | minio                                | minio.version                |      8.5.17      |
-| spring-boot-dependencies             | spring-boot.version          |      3.5.3       |
+| spring-boot-dependencies             | spring-boot.version          |      3.5.4       |
 | spring-cloud-dependencies            | spring-cloud.version         |     2025.0.0     |
 | spring-cloud-alibaba-dependencies    | spring-cloud-alibaba.version |    2023.0.3.3    |
 | spring-cloud-huawei-bom              | spring-cloud-huawei.version  | 1.11.11-2024.0.x |
