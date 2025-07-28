@@ -1,5 +1,6 @@
 package cn.hiboot.mcn.autoconfigure.jpa;
 
+import cn.hiboot.mcn.core.model.CrudService;
 import cn.hiboot.mcn.core.model.base.FieldSort;
 import cn.hiboot.mcn.core.model.base.PageSort;
 import cn.hiboot.mcn.core.model.result.RestResp;
@@ -17,17 +18,19 @@ import java.util.List;
  * @author DingHao
  * @since 2021/10/11 13:39
  */
-public interface BaseService<T,PK,R extends BaseRepository<T,PK>> {
+public interface BaseService<T,PK,R extends BaseRepository<T,PK>> extends CrudService<T, PK> {
 
     default R getRepository() {
         return JpaUtils.getRepository(this.getClass());
     }
 
+    @Override
     default T save(T data){
         beforeSave(data);
         return getRepository().save( data );
     }
 
+    @Override
     default List<T> saveAll(List<T> data){
         return getRepository().saveAll( data );
     }
@@ -36,6 +39,7 @@ public interface BaseService<T,PK,R extends BaseRepository<T,PK>> {
 
     }
 
+    @Override
     default void deleteById(PK id){
         try {
             getRepository().deleteById(id);
@@ -44,6 +48,7 @@ public interface BaseService<T,PK,R extends BaseRepository<T,PK>> {
         }
     }
 
+    @Override
     default void deleteByIds(Collection<PK> ids){
         try {
             getRepository().deleteAllById(ids);
@@ -52,10 +57,12 @@ public interface BaseService<T,PK,R extends BaseRepository<T,PK>> {
         }
     }
 
+    @Override
     default T getById(PK id){
         return getRepository().findById(id).orElse(null);
     }
 
+    @Override
     default List<T> getByIds(Collection<PK> ids){
         return getRepository().findAllById(ids);
     }
@@ -64,10 +71,12 @@ public interface BaseService<T,PK,R extends BaseRepository<T,PK>> {
         return getRepository().findOne(Example.of(t)).orElse(null);
     }
 
+    @Override
     default List<T> list(T t){
         return getRepository().findAll(Example.of(t));
     }
 
+    @Override
     default List<T> list(T t,List<FieldSort> sort){
         return getRepository().findAll(Example.of(t),JpaUtils.jpaSort(sort));
     }
@@ -101,6 +110,7 @@ public interface BaseService<T,PK,R extends BaseRepository<T,PK>> {
         return RestResp.ok(page.getContent(),page.getTotalElements());
     }
 
+    @Override
     default void updateById(PK id,T data){
         getRepository().findById(id).ifPresent(d -> {
             beforeUpdate(d,data);
@@ -113,6 +123,7 @@ public interface BaseService<T,PK,R extends BaseRepository<T,PK>> {
 
     }
 
+    @Override
     default long count(T t) {
         return getRepository().count(Example.of(t));
     }
