@@ -7,7 +7,7 @@
 | bcpkix-jdk18on                       | bcprov-jdk18on.version       |      1.78.1      |
 | spring-boot-admin-starter-client     | boot-admin.version           |      3.5.0       |
 | spring-boot-admin-starter-server     | boot-admin.version           |      3.5.0       |
-| commons-io                           | commons-io.version           |      2.19.0      |
+| commons-io                           | commons-io.version           |      2.20.0      |
 | fastjson                             | fastjson.version             |      1.2.83      |
 | fastjson2                            | fastjson2.version            |      2.0.50      |
 | guava                                | guava.version                |    33.4.8-jre    |
