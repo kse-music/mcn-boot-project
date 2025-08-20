@@ -258,18 +258,19 @@ public final class RestClient {
             uriVariables = Collections.emptyMap();
         }
         HttpHeaders headers = new HttpHeaders();
-        this.builder.defaultHeaders.accept(headers);
+        Consumer<HttpHeaders> consumer = this.builder.defaultHeaders;
         if (headersConsumer != null) {
-            headersConsumer.accept(headers);
+            consumer = consumer.andThen(headersConsumer);
         }
+        consumer.accept(headers);
         long startTime = System.currentTimeMillis();
         ResponseEntity<W> response;
         try {
-            response = this.builder.restTemplate.exchange(url, method, new HttpEntity<>(requestBody, headers),
-                    ParameterizedTypeReference.forType(resultClass(resultType).getType()), uriVariables);
             if (log.isDebugEnabled()) {
                 log.debug("url={}, cost time={}ms, inputParam={}", url, System.currentTimeMillis() - startTime, requestBody);
             }
+            response = this.builder.restTemplate.exchange(url, method, new HttpEntity<>(requestBody, headers),
+                    ParameterizedTypeReference.forType(resultClass(resultType).getType()), uriVariables);
         } catch (Exception ex) {
             log.error("url={}, cost time={}ms, inputParam={}, errorInfo={}", url, System.currentTimeMillis() - startTime, requestBody, ex.getMessage());
             throw ex;
@@ -330,7 +331,7 @@ public final class RestClient {
         private Class<?> bodyWrapperClass;
         private Function<Object, Object> bodyConverter;
         private RestTemplate restTemplate;
-        private Consumer<HttpHeaders> defaultHeaders;
+        private Consumer<HttpHeaders> defaultHeaders = headers -> {};
         private boolean failFast = true;
 
         private Builder() {
@@ -352,7 +353,7 @@ public final class RestClient {
         }
 
         public Builder defaultHeaders(Consumer<HttpHeaders> defaultHeaders) {
-            this.defaultHeaders = defaultHeaders;
+            this.defaultHeaders = this.defaultHeaders.andThen(defaultHeaders);
             return this;
         }
 
@@ -362,9 +363,6 @@ public final class RestClient {
         }
 
         public RestClient build() {
-            if (this.defaultHeaders == null) {
-                this.defaultHeaders = headers -> {};
-            }
             if (this.restTemplate == null) {
                 this.restTemplate = new RestTemplate();
                 for (HttpMessageConverter<?> messageConverter : this.restTemplate.getMessageConverters()) {
