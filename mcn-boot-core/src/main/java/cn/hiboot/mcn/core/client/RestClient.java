@@ -1,4 +1,4 @@
-package cn.hiboot.mcn.cloud.client;
+package cn.hiboot.mcn.core.client;
 
 import cn.hiboot.mcn.core.exception.ExceptionKeys;
 import cn.hiboot.mcn.core.exception.ServiceException;
@@ -267,16 +267,20 @@ public final class RestClient {
         ResponseEntity<W> response;
         try {
             if (log.isDebugEnabled()) {
-                log.debug("url={}, cost time={}ms, inputParam={}", url, System.currentTimeMillis() - startTime, requestBody);
+                log.debug("inputParam={}", JacksonUtils.toJson(requestBody));
             }
             response = this.builder.restTemplate.exchange(url, method, new HttpEntity<>(requestBody, headers),
                     ParameterizedTypeReference.forType(resultClass(resultType).getType()), uriVariables);
+            if (log.isDebugEnabled()) {
+                log.debug("url={}, cost time={}ms", url, System.currentTimeMillis() - startTime);
+            }
         } catch (Exception ex) {
-            log.error("url={}, cost time={}ms, inputParam={}, errorInfo={}", url, System.currentTimeMillis() - startTime, requestBody, ex.getMessage());
+            log.error("url={}, cost time={}ms, inputParam={}, errorInfo={}", url, System.currentTimeMillis() - startTime, JacksonUtils.toJson(requestBody), ex.getMessage());
             throw ex;
         }
         if (!response.getStatusCode().is2xxSuccessful()) {
-            log.error("url={}, cost time={}ms, inputParam={}, statusCode={}", url, System.currentTimeMillis() - startTime, requestBody, response.getStatusCode());
+            log.error("url={}, cost time={}ms, inputParam={}, statusCode={}", url, System.currentTimeMillis() - startTime,
+                    JacksonUtils.toJson(requestBody), response.getStatusCode());
             throw ServiceException.newInstance(ExceptionKeys.REMOTE_SERVICE_ERROR);
         }
         return processResponse(response, url, requestBody);
