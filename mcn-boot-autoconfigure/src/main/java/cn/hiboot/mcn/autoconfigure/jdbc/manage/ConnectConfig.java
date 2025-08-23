@@ -1,5 +1,6 @@
 package cn.hiboot.mcn.autoconfigure.jdbc.manage;
 
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -21,6 +22,8 @@ public class ConnectConfig {
      * mysql is null, dm is db
      */
     private String schema;
+
+    private Map<String, Object> connectParameter;
 
     public String getIp() {
         return ip;
@@ -80,6 +83,15 @@ public class ConnectConfig {
 
     public DbType dbType() {
         return DbType.valueOf(getDbType());
+    }
+
+    public Map<String, Object> getConnectParameter() {
+        return connectParameter;
+    }
+
+    public ConnectConfig setConnectParameter(Map<String, Object> connectParameter) {
+        this.connectParameter = connectParameter;
+        return this;
     }
 
     @Override

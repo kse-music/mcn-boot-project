@@ -1,5 +1,10 @@
 package cn.hiboot.mcn.autoconfigure.jdbc.manage;
 
+import cn.hiboot.mcn.core.util.McnUtils;
+
+import java.util.Map;
+import java.util.StringJoiner;
+
 /**
  * DbType
  *
@@ -36,6 +41,14 @@ public enum DbType {
             url += connectConfig.getSchema();
         }else {
             url += connectConfig.getCatalog();
+        }
+        Map<String, Object> connectParameter = connectConfig.getConnectParameter();
+        if (McnUtils.isNotNullAndEmpty(connectParameter)) {
+            StringJoiner joiner = new StringJoiner("&", url + "?", "");
+            for (Map.Entry<String, Object> entry : connectParameter.entrySet()) {
+                joiner.add(entry.getKey() + "=" + entry.getValue());
+            }
+            url = joiner.toString();
         }
         return url;
     }
