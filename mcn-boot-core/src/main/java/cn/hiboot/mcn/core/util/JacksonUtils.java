@@ -15,6 +15,11 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 
+import java.io.DataInput;
+import java.io.File;
+import java.io.InputStream;
+import java.io.Reader;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
@@ -61,6 +66,16 @@ public abstract class JacksonUtils {
                 return mapper.readValue(str, javaType);
             } else if (input instanceof byte[] bytes) {
                 return mapper.readValue(bytes, javaType);
+            } else if (input instanceof InputStream inputStream) {
+                return mapper.readValue(inputStream, javaType);
+            } else if (input instanceof File file) {
+                return mapper.readValue(file, javaType);
+            } else if (input instanceof URL url) {
+                return mapper.readValue(url, javaType);
+            } else if (input instanceof Reader reader) {
+                return mapper.readValue(reader, javaType);
+            } else if (input instanceof DataInput dataInput) {
+                return mapper.readValue(dataInput, javaType);
             } else {
                 return mapper.convertValue(input, javaType);
             }
