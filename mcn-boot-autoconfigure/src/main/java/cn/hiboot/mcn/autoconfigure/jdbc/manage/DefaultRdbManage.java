@@ -52,9 +52,10 @@ class DefaultRdbManage implements RdbManage {
         return rdbMetaDataManage(connectConfig).withConnection(connection -> {
             List<SchemaInfo> result = new ArrayList<>();
             DbQuery dq = buildDbQuery(connectConfig, dbQuery);
-            ResultSet rs = connection.getMetaData().getSchemas(dq.getCatalog(), dq.getTableSchema());
-            while (rs.next()) {
-                result.add(new SchemaInfo(rs));
+            try (ResultSet rs = connection.getMetaData().getSchemas(dq.getCatalog(), dq.getTableSchema())) {
+                while (rs.next()) {
+                    result.add(new SchemaInfo(rs));
+                }
             }
             return result;
         });
@@ -65,9 +66,10 @@ class DefaultRdbManage implements RdbManage {
         return rdbMetaDataManage(connectConfig).withConnection(connection -> {
             List<TableInfo> result = new ArrayList<>();
             DbQuery dq = buildDbQuery(connectConfig, dbQuery);
-            ResultSet rs = connection.getMetaData().getTables(dq.getCatalog(), dq.getTableSchema(), dq.getTableName(), dq.types());
-            while (rs.next()) {
-                result.add(new TableInfo(rs));
+            try (ResultSet rs = connection.getMetaData().getTables(dq.getCatalog(), dq.getTableSchema(), dq.getTableName(), dq.types())) {
+                while (rs.next()) {
+                    result.add(new TableInfo(rs));
+                }
             }
             return result;
         });
@@ -110,9 +112,10 @@ class DefaultRdbManage implements RdbManage {
     private List<FieldInfo> fieldInfo(DatabaseMetaData metaData,String catalog, String schemaPattern,
                                       String tableNamePattern, String columnNamePattern) throws SQLException {
         List<FieldInfo> result = new ArrayList<>();
-        ResultSet resultSet = metaData.getColumns(catalog, schemaPattern, tableNamePattern, columnNamePattern);
-        while (resultSet.next()) {
-            result.add(new FieldInfo(resultSet));
+        try (ResultSet resultSet = metaData.getColumns(catalog, schemaPattern, tableNamePattern, columnNamePattern)) {
+            while (resultSet.next()) {
+                result.add(new FieldInfo(resultSet));
+            }
         }
         return result;
     }
@@ -121,9 +124,10 @@ class DefaultRdbManage implements RdbManage {
     public List<ImportedKeyInfo> findImportedKeys(ConnectConfig connectConfig, DbQuery dbQuery) {
         return rdbMetaDataManage(connectConfig).withConnection(connection -> {
             List<ImportedKeyInfo> result = new ArrayList<>();
-            ResultSet rs = connection.getMetaData().getImportedKeys(connection.getCatalog(), dbQuery.getTableSchema(), dbQuery.getTableName());
-            while (rs.next()) {
-                result.add(new ImportedKeyInfo(rs));
+            try (ResultSet rs = connection.getMetaData().getImportedKeys(connection.getCatalog(), dbQuery.getTableSchema(), dbQuery.getTableName())) {
+                while (rs.next()) {
+                    result.add(new ImportedKeyInfo(rs));
+                }
             }
             return result;
         });
