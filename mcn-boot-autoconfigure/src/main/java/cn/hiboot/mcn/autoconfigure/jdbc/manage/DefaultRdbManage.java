@@ -135,8 +135,6 @@ class DefaultRdbManage implements RdbManage {
 
     @Override
     public List<Map<String, Object>> listData(ConnectConfig connectConfig, DataQuery dataQuery) {
-        dataQuery.setSkip(null);
-        dataQuery.setLimit(null);
         return queryData(connectConfig, dataQuery, true, false).getData();
     }
 
@@ -195,6 +193,53 @@ class DefaultRdbManage implements RdbManage {
             return dbType.sqlQuote(schema) + "." + tableName;
         }
         return dbType.sqlQuote(dq.getCatalog()) + "." + tableName;
+    }
+
+    @Override
+    public int insert(ConnectConfig connectConfig, String tableName, Map<String, Object> data) {
+        DataSourceManage dataSourceManage = rdbMetaDataManage(connectConfig);
+        NamedParameterJdbcTemplate jdbcTemplate = dataSourceManage.namedParameterJdbcTemplate();
+
+        String columns = data.keySet().stream()
+                .map(k -> connectConfig.dbType().sqlQuote(k)).collect(Collectors.joining(", "));
+        String values = data.keySet().stream().map(k -> ":" + k).collect(Collectors.joining(", "));
+
+        String sql = "INSERT INTO " + connectConfig.dbType().sqlQuote(tableName) +
+                " (" + columns + ") VALUES (" + values + ")";
+        return jdbcTemplate.update(sql, data);
+    }
+
+    @Override
+    public int update(ConnectConfig connectConfig, String tableName, Map<String, Object> data,
+                      String condition, Map<String, Object> params) {
+        DataSourceManage dataSourceManage = rdbMetaDataManage(connectConfig);
+        NamedParameterJdbcTemplate jdbcTemplate = dataSourceManage.namedParameterJdbcTemplate();
+
+        String setClause = data.keySet().stream()
+                .map(k -> connectConfig.dbType().sqlQuote(k) + " = :" + k)
+                .collect(Collectors.joining(", "));
+
+        String sql = "UPDATE " + connectConfig.dbType().sqlQuote(tableName) +
+                " SET " + setClause +
+                (condition != null && !condition.isEmpty() ? " WHERE " + condition : "");
+
+        Map<String, Object> allParams = new HashMap<>(data);
+        if (params != null) {
+            allParams.putAll(params);
+        }
+
+        return jdbcTemplate.update(sql, allParams);
+    }
+
+    @Override
+    public int delete(ConnectConfig connectConfig, String tableName, String condition, Map<String, Object> params) {
+        DataSourceManage dataSourceManage = rdbMetaDataManage(connectConfig);
+        NamedParameterJdbcTemplate jdbcTemplate = dataSourceManage.namedParameterJdbcTemplate();
+
+        String sql = "DELETE FROM " + connectConfig.dbType().sqlQuote(tableName) +
+                (condition != null && !condition.isEmpty() ? " WHERE " + condition : "");
+
+        return jdbcTemplate.update(sql, params);
     }
 
 }
