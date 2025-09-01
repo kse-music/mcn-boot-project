@@ -52,6 +52,37 @@ public interface RdbManage {
 
     RestResp<List<Map<String, Object>>> pageData(ConnectConfig connectConfig, DataQuery dataQuery);
 
+    /**
+     * 新增数据
+     * @param connectConfig 连接配置
+     * @param tableName 表名
+     * @param data 要插入的数据
+     * @return 影响行数
+     */
+    int insert(ConnectConfig connectConfig, String tableName, Map<String, Object> data);
+
+    /**
+     * 修改数据
+     * @param connectConfig 连接配置
+     * @param tableName 表名
+     * @param data 要修改的字段
+     * @param condition where条件
+     * @param params 条件参数
+     * @return 影响行数
+     */
+    int update(ConnectConfig connectConfig, String tableName, Map<String, Object> data,
+               String condition, Map<String, Object> params);
+
+    /**
+     * 删除数据
+     * @param connectConfig 连接配置
+     * @param tableName 表名
+     * @param condition where条件
+     * @param params 条件参数
+     * @return 影响行数
+     */
+    int delete(ConnectConfig connectConfig, String tableName, String condition, Map<String, Object> params);
+
     static RdbManage defaults() {
         return new DefaultRdbManage();
     }
