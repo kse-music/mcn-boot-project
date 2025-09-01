@@ -38,9 +38,13 @@ public enum DbType {
         String colon = this == oracle ? "" : ":";
         String url = "jdbc:" + platform + colon + "//" + connectConfig.getIp() + ":" + connectConfig.getPort() + "/";
         if (this == dm) {
-            url += connectConfig.getSchema();
-        }else {
-            url += connectConfig.getCatalog();
+            if (McnUtils.isNotNullAndEmpty(connectConfig.getSchema())) {
+                url += connectConfig.getSchema();
+            }
+        } else {
+            if (McnUtils.isNotNullAndEmpty(connectConfig.getCatalog())) {
+                url += connectConfig.getCatalog();
+            }
         }
         Map<String, Object> connectParameter = connectConfig.getConnectParameter();
         if (McnUtils.isNotNullAndEmpty(connectParameter)) {
