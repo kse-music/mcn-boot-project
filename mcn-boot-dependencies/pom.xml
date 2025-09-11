@@ -12,9 +12,9 @@
 
     <artifactId>mcn-boot-dependencies</artifactId>
     <packaging>pom</packaging>
+
     <name>MCN Boot Dependencies</name>
     <description>MCN Boot Dependencies</description>
-
     <url>${web.url}</url>
 
     <licenses>
@@ -23,6 +23,14 @@
             <url>https://www.apache.org/licenses/LICENSE-2.0</url>
         </license>
     </licenses>
+
+    <developers>
+        <developer>
+            <name>DingHao</name>
+            <email>dinghao_1989@163.com</email>
+            <url>http://www.hiboot.cn/</url>
+        </developer>
+    </developers>
 
     <scm>
         <url>https://github.com/kse-music/mcn-boot-project</url>
@@ -232,14 +240,6 @@
 
     </dependencyManagement>
 
-    <developers>
-        <developer>
-            <name>DingHao</name>
-            <email>dinghao_1989@163.com</email>
-            <url>http://www.hiboot.cn/</url>
-        </developer>
-    </developers>
-
     <build>
 
         <pluginManagement>
@@ -395,16 +395,17 @@
                      </execution>
                  </executions>
              </plugin>
-             <plugin>
-                 <groupId>org.sonatype.plugins</groupId>
-                 <artifactId>nexus-staging-maven-plugin</artifactId>
-                 <extensions>true</extensions>
-                 <configuration>
-                     <serverId>ossrh</serverId>
-                     <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                     <autoReleaseAfterClose>true</autoReleaseAfterClose>
-                 </configuration>
-             </plugin>
+            <plugin>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+                <version>0.8.0</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <publishingServerId>central</publishingServerId>
+                    <autoPublish>true</autoPublish>
+                    <waitUntil>published</waitUntil>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>flatten-maven-plugin</artifactId>

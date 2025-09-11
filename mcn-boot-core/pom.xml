@@ -12,8 +12,8 @@
 
     <artifactId>mcn-boot-core</artifactId>
 
+    <name>MCN Boot Core</name>
     <description>MCN Boot Core</description>
-
     <url>${web.url}</url>
 
     <scm>

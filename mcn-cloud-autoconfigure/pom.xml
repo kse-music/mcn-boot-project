@@ -12,9 +12,10 @@
 
     <artifactId>mcn-cloud-autoconfigure</artifactId>
 
+    <name>MCN Cloud Autoconfigure</name>
     <description>MCN Cloud Autoconfigure</description>
-
     <url>${web.url}</url>
+
     <scm>
         <url>${git.url}</url>
         <connection>${git.connection}</connection>

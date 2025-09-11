@@ -12,9 +12,16 @@
 
     <artifactId>mcn-boot-parent</artifactId>
     <packaging>pom</packaging>
+
     <name>MCN Boot Parent</name>
     <description>MCN Boot Parent</description>
     <url>${web.url}</url>
+
+    <scm>
+        <url>${git.url}</url>
+        <connection>${git.connection}</connection>
+        <developerConnection>${git.developerConnection}</developerConnection>
+    </scm>
 
     <properties>
         <java.version>17</java.version>
@@ -26,11 +33,7 @@
         <git.connection>scm:git:git://github.com/kse-music/mcn-boot-project.git</git.connection>
         <git.developerConnection>scm:git:ssh://git@github.com/kse-music/mcn-boot-project.git</git.developerConnection>
     </properties>
-    <scm>
-        <url>${git.url}</url>
-        <connection>${git.connection}</connection>
-        <developerConnection>${git.developerConnection}</developerConnection>
-    </scm>
+
     <build>
         <resources>
             <resource>

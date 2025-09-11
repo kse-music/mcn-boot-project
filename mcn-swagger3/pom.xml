@@ -12,14 +12,16 @@
 
     <artifactId>mcn-swagger3</artifactId>
 
+    <name>MCN Swagger3</name>
     <description>MCN Swagger3</description>
-
     <url>${web.url}</url>
+
     <scm>
         <url>${git.url}</url>
         <connection>${git.connection}</connection>
         <developerConnection>${git.developerConnection}</developerConnection>
     </scm>
+
     <dependencies>
 
         <dependency>

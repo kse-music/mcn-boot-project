@@ -12,19 +12,22 @@
 
     <artifactId>mcn-boot-autoconfigure</artifactId>
 
+    <name>MCN Boot Autoconfigure</name>
     <description>MCN Boot Autoconfigure</description>
-
     <url>${web.url}</url>
+
     <scm>
         <url>${git.url}</url>
         <connection>${git.connection}</connection>
         <developerConnection>${git.developerConnection}</developerConnection>
     </scm>
+
     <dependencies>
         <dependency>
             <groupId>cn.hiboot.mcn</groupId>
             <artifactId>mcn-boot-core</artifactId>
         </dependency>
+
         <dependency>
             <groupId>cn.hiboot.mcn</groupId>
             <artifactId>mcn-swagger3</artifactId>

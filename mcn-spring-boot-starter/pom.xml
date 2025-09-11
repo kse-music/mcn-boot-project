@@ -12,14 +12,16 @@
 
     <artifactId>mcn-spring-boot-starter</artifactId>
 
-    <description>MCN Boot Starter</description>
-
+    <name>MCN Spring Boot Starter</name>
+    <description>MCN Spring Boot Starter</description>
     <url>${web.url}</url>
+
     <scm>
         <url>${git.url}</url>
         <connection>${git.connection}</connection>
         <developerConnection>${git.developerConnection}</developerConnection>
     </scm>
+
     <dependencies>
         <dependency>
             <groupId>cn.hiboot.mcn</groupId>
