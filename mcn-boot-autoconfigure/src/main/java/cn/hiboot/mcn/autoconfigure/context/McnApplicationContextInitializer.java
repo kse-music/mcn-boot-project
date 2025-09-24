@@ -17,16 +17,16 @@ import org.springframework.core.env.MapPropertySource;
  * @since 2021/1/16 16:41
  */
 @Order(McnApplicationListener.DEFAULT_ORDER)
-public class McnApplicationContextInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext>{
+public class McnApplicationContextInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
     @Override
     public void initialize(ConfigurableApplicationContext context) {
         context.addBeanFactoryPostProcessor(new McnBeanFactoryRegistryPostProcessor(context));
         ConfigurableEnvironment environment = context.getEnvironment();
-        Boolean swaggerEnabled = environment.getProperty("swagger.enabled", Boolean.class,false);
-        if(Boolean.FALSE.equals(swaggerEnabled)){//since 3.0.0 for compatible swagger.enabled key
+        Boolean swaggerEnabled = environment.getProperty("swagger.enabled", Boolean.class, false);
+        if (!swaggerEnabled) {//since 3.0.0 for compatible swagger.enabled key
             environment.getPropertySources().addLast(new MapPropertySource("springDocPropertySource"
-                    ,McnUtils.put("springdoc.api-docs.enabled",false,"springdoc.swagger-ui.enabled",false)));
+                    , McnUtils.put("springdoc.api-docs.enabled", false, "springdoc.swagger-ui.enabled", false)));
         }
     }
 

@@ -31,7 +31,7 @@ import java.util.Objects;
  * @since 2021/1/16 16:46
  */
 public class McnEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
-    private static final boolean PRESENT = ClassUtils.isPresent("ch.qos.logback.classic.LoggerContext",McnEnvironmentPostProcessor.class.getClassLoader());
+    private static final boolean PRESENT = ClassUtils.isPresent("ch.qos.logback.classic.LoggerContext", McnEnvironmentPostProcessor.class.getClassLoader());
     private static final MapPropertySource EMPTY_PROPERTY_SOURCE = new MapPropertySource("Empty", Collections.emptyMap());
     private static final String BOOTSTRAP_EAGER_LOAD = "mcn.bootstrap.eagerLoad.enabled";
     private static final String MCN_SOURCE_NAME = "mcn-global-unique";
@@ -79,7 +79,7 @@ public class McnEnvironmentPostProcessor implements EnvironmentPostProcessor, Or
      * <p>1.如果默认配置已加载,则不再加载</p>
      * <p>2.如果是Spring Cloud引导上下文,则不加载,但如果指定参数mcn.bootstrap.eagerLoad.enabled=true,则在引导上下文中也加载</p>
      *
-     * @param environment 环境配置
+     * @param environment          环境配置
      * @param mainApplicationClass 主类可能为null
      */
     private void loadDefaultConfig(ConfigurableEnvironment environment, Class<?> mainApplicationClass) {
@@ -104,12 +104,12 @@ public class McnEnvironmentPostProcessor implements EnvironmentPostProcessor, Or
         addLast(propertySources, new MapPropertySource(ConfigProperties.MCN_MAP_PROPERTY_SOURCE_NAME, mapProp));
 
         MapPropertySource propertySource = loadResourcePropertySource(MCN_DEFAULT_PROPERTY_SOURCE_NAME, ConfigProperties.mcnDefault());
-        if(!PRESENT){
+        if (!PRESENT) {
             propertySource.getSource().remove("logging.pattern.console");
             propertySource.getSource().remove("logging.pattern.file");
         }
 
-        propertySource.getSource().putAll(ConfigProperties.loadConfig(null,"config/config.properties"));
+        propertySource.getSource().putAll(ConfigProperties.loadConfig(null, "config/config.properties"));
 
         addLast(propertySources, propertySource);
 

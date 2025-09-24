@@ -8,7 +8,6 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProce
 import org.springframework.context.ApplicationContext;
 
 /**
- *
  * McnBeanFactoryRegistryPostProcessor
  * 修改IOC容器即添加AutowiredAnnotationBeanPostProcessor以处理McnAutowired注解
  *
