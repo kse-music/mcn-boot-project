@@ -56,12 +56,11 @@ abstract class RdbManageUtil {
     }
 
     static String buildSort(DataQuery dataQuery) {
-        List<FieldQuery> query = dataQuery.getQuery();
-        if (McnUtils.isNullOrEmpty(query)) {
+        List<FieldSort> order = dataQuery.getSort();
+        if (McnUtils.isNullOrEmpty(order)) {
             return "";
         }
         StringBuilder sql = new StringBuilder();
-        List<FieldSort> order = dataQuery.getSort();
         for (int i = 0; i < order.size(); i++) {
             if (i == 0) {
                 sql.append(" ORDER BY ");
