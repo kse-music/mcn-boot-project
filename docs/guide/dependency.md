@@ -16,7 +16,7 @@
 | knife4j-openapi3-ui                  | knife4j.version              |      4.5.0       |
 | mapstruct                            | mapstruct.version            |   1.5.5.Final    |
 | mybatis-spring-boot-starter          | mybatis-spring-boot.version  |      3.0.4       |
-| minio                                | minio.version                |      8.5.17      |
+| minio                                | minio.version                |      8.6.0       |
 | spring-boot-dependencies             | spring-boot.version          |      3.5.4       |
 | spring-cloud-dependencies            | spring-cloud.version         |     2025.0.0     |
 | spring-cloud-alibaba-dependencies    | spring-cloud-alibaba.version |    2023.0.3.3    |
