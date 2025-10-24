@@ -4,7 +4,7 @@
 
 | 库                                    | 版本属性                         |       当前版本       |
 |--------------------------------------|:-----------------------------|:----------------:|
-| bcpkix-jdk18on                       | bcprov-jdk18on.version       |      1.78.1      |
+| bcpkix-jdk18on                       | bcprov-jdk18on.version       |       1.79       |
 | spring-boot-admin-starter-client     | boot-admin.version           |      3.5.0       |
 | spring-boot-admin-starter-server     | boot-admin.version           |      3.5.0       |
 | commons-io                           | commons-io.version           |      2.20.0      |
@@ -17,7 +17,7 @@
 | mapstruct                            | mapstruct.version            |   1.5.5.Final    |
 | mybatis-spring-boot-starter          | mybatis-spring-boot.version  |      3.0.4       |
 | minio                                | minio.version                |      8.6.0       |
-| spring-boot-dependencies             | spring-boot.version          |      3.5.4       |
+| spring-boot-dependencies             | spring-boot.version          |      3.5.7       |
 | spring-cloud-dependencies            | spring-cloud.version         |     2025.0.0     |
 | spring-cloud-alibaba-dependencies    | spring-cloud-alibaba.version |    2023.0.3.3    |
 | spring-cloud-huawei-bom              | spring-cloud-huawei.version  | 1.11.11-2024.0.x |

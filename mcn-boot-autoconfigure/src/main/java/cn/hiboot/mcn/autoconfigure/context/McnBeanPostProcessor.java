@@ -1,7 +1,6 @@
 package cn.hiboot.mcn.autoconfigure.context;
 
 import cn.hiboot.mcn.autoconfigure.config.ConfigProperties;
-import cn.hiboot.mcn.core.eventbus.EventBus;
 import cn.hiboot.mcn.core.util.JacksonUtils;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -36,7 +35,6 @@ public class McnBeanPostProcessor implements BeanPostProcessor {
 
     public McnBeanPostProcessor(ApplicationContext context) {
         this.context = context;
-        context.getBean(EventBus.class);
     }
 
     @Override
