@@ -1,5 +1,7 @@
 package cn.hiboot.mcn.cloud.security.token;
 
+import cn.hiboot.mcn.core.cache.LocalCache;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -11,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class DefaultTokenResolverCache implements TokenResolverCache {
 
-    private static final Map<String, Result> CACHE = new ConcurrentHashMap<>();
+    private static final LocalCache<String, LoginRsp> CACHE = new LocalCache<>();
 
     private final long activity;
 
@@ -21,29 +23,13 @@ public class DefaultTokenResolverCache implements TokenResolverCache {
 
     @Override
     public LoginRsp get(String apk) {
-        Result tokenResult = CACHE.get(apk);
-        if (tokenResult == null || tokenResult.exp < System.currentTimeMillis()) {
-            return null;
-        }
-        return tokenResult.result;
+        return CACHE.get(apk);
     }
 
     @Override
     public LoginRsp put(String apk, LoginRsp result) {
-        CACHE.put(apk, new Result(result, this.activity));
+        CACHE.put(apk, result, this.activity);
         return result;
-    }
-
-    private static class Result {
-
-        private final LoginRsp result;
-        private final long exp;
-
-        public Result(LoginRsp result, Long exp) {
-            this.result = result;
-            this.exp = System.currentTimeMillis() + exp;
-        }
-
     }
 
 }
