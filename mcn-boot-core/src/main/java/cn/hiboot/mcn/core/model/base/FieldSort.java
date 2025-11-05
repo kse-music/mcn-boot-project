@@ -1,6 +1,7 @@
 package cn.hiboot.mcn.core.model.base;
 
 import cn.hiboot.mcn.core.util.McnAssert;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * FieldSort
@@ -13,15 +14,10 @@ public class FieldSort {
     public static final String ASC = "asc";
     public static final String DESC = "desc";
 
-    /**
-     * 排序字段名称
-     */
+    @Schema(description = "排序字段名")
     private String field;
 
-    /**
-     * asc:升序
-     * desc:降序
-     */
+    @Schema(description = "排序方式", allowableValues = {"asc", "desc"})
     private String sort;
 
     public FieldSort() {

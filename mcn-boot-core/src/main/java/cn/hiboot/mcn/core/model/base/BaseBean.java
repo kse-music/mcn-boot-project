@@ -1,5 +1,7 @@
 package cn.hiboot.mcn.core.model.base;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 import java.util.Date;
@@ -13,14 +15,11 @@ import java.util.Date;
 @MappedSuperclass
 public abstract class BaseBean {
 
-    /**
-     * 创建时间
-     */
+    @Schema(description = "创建时间")
     @Column(name = "create_at",insertable = false,updatable = false)
     private Date createAt;
-    /**
-     * 更新时间
-     */
+
+    @Schema(description = "更新时间")
     @Column(name = "update_at",insertable = false,updatable = false)
     private Date updateAt;
 

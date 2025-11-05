@@ -8,6 +8,7 @@ import cn.hiboot.mcn.core.model.HttpTime;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.function.BiFunction;
 
@@ -33,38 +34,26 @@ public class RestResp<T> implements HttpTime {
 
     }
 
-    /**
-     * 接口响应状态:OK/FAIL
-     */
+    @Schema(description = "响应状态", defaultValue = "OK")
     @JsonProperty("ActionStatus")
     private ActionStatusMethod ActionStatus = ActionStatusMethod.OK;
 
-    /**
-     * 接口返回错误码
-     */
+    @Schema(description = "错误码", defaultValue = "0")
     @JsonProperty("ErrorCode")
     private Integer ErrorCode = 0;
 
-    /**
-     * 接口返回错误信息
-     */
+    @Schema(description = "错误信息")
     @JsonProperty("ErrorInfo")
     private String ErrorInfo = "";
 
-    /**
-     * 接口执行时间
-     */
+    @Schema(description = "执行时间", hidden = true)
     @JsonProperty("Duration")
     private Long duration;
 
-    /**
-     * 接口返回数据
-     */
+    @Schema(description = "数据")
     private T data;
 
-    /**
-     * 接口返回数据的总数
-     */
+    @Schema(description = "数据总数")
     private Long count;
 
     public RestResp() {

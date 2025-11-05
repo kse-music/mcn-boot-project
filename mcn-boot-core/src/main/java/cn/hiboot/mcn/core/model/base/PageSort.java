@@ -2,6 +2,7 @@ package cn.hiboot.mcn.core.model.base;
 
 import cn.hiboot.mcn.core.util.McnAssert;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,21 +13,17 @@ import java.util.List;
  * @author DingHao
  * @since 2021/2/8 17:45
  */
+@Schema(description = "分页排序参数")
 @JsonIgnoreProperties({"offset", "pageIndex", "skip"})
 public class PageSort {
 
-    /**
-     * 当前页，默认1
-     */
+    @Schema(description = "当前页码", defaultValue = "1")
     private int pageNo = 1;
-    /**
-     * 每页数，默认10
-     */
+
+    @Schema(description = "每页大小", defaultValue = "10")
     private int pageSize = 10;
 
-    /**
-     * 字多排序,支持多字段排序
-     */
+    @Schema(description = "排序字段集合")
     private List<FieldSort> sort = new ArrayList<>(1);
 
     public PageSort(){}
