@@ -25,6 +25,8 @@ class DefaultRdbManage implements RdbManage {
 
     private static final Map<ConnectConfig, DataSourceManage> rdbManageMap = new ConcurrentHashMap<>();
 
+    static final RdbManage rdbManage = new DefaultRdbManage();
+
     private DataSourceManage rdbMetaDataManage(ConnectConfig config) {
         if (rdbManageMap.containsKey(config)) {
             return rdbManageMap.get(config);
