@@ -3,6 +3,7 @@ package cn.hiboot.mcn.autoconfigure.jdbc.manage;
 import cn.hiboot.mcn.core.util.McnUtils;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.StringJoiner;
 
 /**
@@ -11,33 +12,35 @@ import java.util.StringJoiner;
  * @author DingHao
  * @since 2025/5/15 14:11
  */
-public enum DbType {
+public interface DbType {
 
-    mysql("com.mysql.cj.jdbc.Driver"),
-    oracle("oracle:thin:@", "oracle.jdbc.OracleDriver"),
-    postgresql("org.postgresql.Driver"),
-    sqlserver("com.microsoft.sqlserver.jdbc.SQLServerDriver"),
-    mariadb("org.mariadb.jdbc.Driver"),
-    dm("dm.jdbc.driver.DmDriver"),
-    kingbase("kingbase8","com.kingbase8.Driver");
+    String name();
 
-    private final String platform;
-    private final String driverClassName;
+    String driverClassName();
 
-    DbType(String driverClassName) {
-        this(null, driverClassName);
+    String platform();
+
+    static DbType valueOf(String dbType) {
+        return DbTypeManager.get(dbType);
     }
 
-    DbType(String platform, String driverClassName) {
-        this.platform = platform;
-        this.driverClassName = driverClassName;
+    default boolean isOracle() {
+        return Objects.equals(this.name(), "oracle");
     }
 
-    public String url(ConnectConfig connectConfig) {
-        String platform = this.platform == null ? this.name() : this.platform;
-        String colon = this == oracle ? "" : ":";
+    default boolean isDm() {
+        return Objects.equals(this.name(), "dm");
+    }
+
+    default boolean isMysql() {
+        return Objects.equals(this.name(), "mysql") || Objects.equals(this.name(), "mariadb");
+    }
+
+    default String url(ConnectConfig connectConfig) {
+        String platform = this.platform() == null ? this.name() : this.platform();
+        String colon = isOracle() ? "" : ":";
         String url = "jdbc:" + platform + colon + "//" + connectConfig.getIp() + ":" + connectConfig.getPort() + "/";
-        if (this == dm) {
+        if (isDm()) {
             if (McnUtils.isNotNullAndEmpty(connectConfig.getSchema())) {
                 url += connectConfig.getSchema();
             }
@@ -57,13 +60,9 @@ public enum DbType {
         return url;
     }
 
-    public String getDriverClassName() {
-        return driverClassName;
-    }
-
-    public String pageSql(String sql, Integer skip, Integer limit) {
+    default String pageSql(String sql, Integer skip, Integer limit) {
         String pageSql;
-        if (this == oracle) {
+        if (isOracle()) {
             pageSql = "select * from ( select rownum rn , t.* from (" + sql + ") t where rownum <= " + (limit + skip) + ") tt where tt.rn > " + skip;
         } else {
             pageSql = sql + " limit :skip,:pageSize";
@@ -71,9 +70,9 @@ public enum DbType {
         return pageSql;
     }
 
-    public String sqlQuote(String str) {
+    default String sqlQuote(String str) {
         String sqlQuote = "\"";
-        if (this == mysql || this == mariadb) {
+        if (isMysql()) {
             sqlQuote = "`";
         }
         return sqlQuote + str + sqlQuote;

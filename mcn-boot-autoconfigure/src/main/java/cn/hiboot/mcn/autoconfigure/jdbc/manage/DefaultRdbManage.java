@@ -160,7 +160,7 @@ class DefaultRdbManage implements RdbManage {
             String sql = "SELECT * FROM " + tableName + condition + RdbManageUtil.buildSort(dataQuery);
             Integer skip = dataQuery.getSkip();
             Integer limit = dataQuery.getLimit();
-            boolean isOracle = connectConfig.dbType() == DbType.oracle;
+            boolean isOracle = connectConfig.dbType().isOracle();
             if (skip != null || limit != null) {
                 if (skip == null || skip < 0) {
                     skip = 0;

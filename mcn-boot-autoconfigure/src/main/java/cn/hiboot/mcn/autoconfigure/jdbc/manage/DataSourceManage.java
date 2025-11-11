@@ -24,7 +24,7 @@ class DataSourceManage {
         DbType dbType = connectConfig.dbType();
         this.dataSource = DataSourceBuilder.create()
                 .type(HikariDataSource.class)
-                .driverClassName(dbType.getDriverClassName())
+                .driverClassName(dbType.driverClassName())
                 .url(dbType.url(connectConfig))
                 .username(connectConfig.getUserName())
                 .password(connectConfig.getPassword()).build();
