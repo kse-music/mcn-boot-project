@@ -20,10 +20,6 @@ public interface DbType {
 
     String platform();
 
-    static DbType valueOf(String dbType) {
-        return DbTypeManager.get(dbType);
-    }
-
     default boolean isOracle() {
         return Objects.equals(this.name(), "oracle");
     }

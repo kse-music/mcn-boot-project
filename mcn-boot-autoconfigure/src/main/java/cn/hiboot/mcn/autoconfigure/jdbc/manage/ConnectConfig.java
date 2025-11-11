@@ -82,7 +82,7 @@ public class ConnectConfig {
     }
 
     public DbType dbType() {
-        return DbType.valueOf(getDbType());
+        return DbTypeManager.get(getDbType());
     }
 
     public Map<String, Object> getConnectParameter() {

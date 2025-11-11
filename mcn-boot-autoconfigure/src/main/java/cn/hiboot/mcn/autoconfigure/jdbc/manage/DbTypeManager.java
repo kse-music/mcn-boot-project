@@ -7,7 +7,7 @@ import java.util.ServiceLoader;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * DbTypeManager
+ * DefaultDbTypeManager
  *
  * @author DingHao
  * @since 2025/11/11 9:44
@@ -19,10 +19,6 @@ public abstract class DbTypeManager {
     static {
         registerDefault();
         ServiceLoader.load(DbTypeProvider.class).forEach(DbTypeManager::register);
-    }
-
-    private DbTypeManager() {
-
     }
 
     private static void registerDefault() {
@@ -41,8 +37,9 @@ public abstract class DbTypeManager {
         }
     }
 
-    public static DbTypeProvider get(String name) {
-        return REGISTRY.get(name.toLowerCase());
+    @SuppressWarnings("unchecked")
+    public static <T extends DbTypeProvider> T get(String name) {
+        return (T) REGISTRY.get(name.toLowerCase());
     }
 
     public static Collection<DbTypeProvider> all() {
