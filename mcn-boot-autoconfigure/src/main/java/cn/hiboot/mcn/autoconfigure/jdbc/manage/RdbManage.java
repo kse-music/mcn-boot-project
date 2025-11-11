@@ -84,7 +84,7 @@ public interface RdbManage {
     int delete(ConnectConfig connectConfig, String tableName, String condition, Map<String, Object> params);
 
     static RdbManage defaults() {
-        return new DefaultRdbManage();
+        return DefaultRdbManage.rdbManage;
     }
 
 }
