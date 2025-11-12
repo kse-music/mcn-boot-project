@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -162,7 +163,7 @@ class DefaultRdbManage implements RdbManage {
             String sql = "SELECT * FROM " + tableName + condition + RdbManageUtil.buildSort(dataQuery);
             Integer skip = dataQuery.getSkip();
             Integer limit = dataQuery.getLimit();
-            boolean isOracle = connectConfig.dbType().isOracle();
+            boolean isOracle = Objects.equals(connectConfig.dbType().name(), "oracle");
             if (skip != null || limit != null) {
                 if (skip == null || skip < 0) {
                     skip = 0;
