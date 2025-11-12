@@ -12,4 +12,4 @@ public interface DbTypeProvider extends DbType {
         return null;
     }
 
-}
+ }
