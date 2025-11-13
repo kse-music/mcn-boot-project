@@ -1,7 +1,10 @@
 package cn.hiboot.mcn.autoconfigure.sql;
 
 import cn.hiboot.mcn.autoconfigure.minio.FileUploadInfoCache;
+import cn.hiboot.mcn.core.tuples.Pair;
 import cn.hiboot.mcn.core.util.SpringBeanUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.jdbc.init.DataSourceScriptDatabaseInitializer;
 import org.springframework.boot.sql.init.DatabaseInitializationMode;
@@ -31,12 +34,14 @@ import java.util.List;
  */
 class CustomSqlDataSourceScriptDatabaseInitializer extends DataSourceScriptDatabaseInitializer {
 
+    private static final Logger log = LoggerFactory.getLogger(CustomSqlDataSourceScriptDatabaseInitializer.class);
+    private static final String DEFAULT_START_SEPARATOR = "://";
     private static final String OPTIONAL_LOCATION_PREFIX = "optional:";
 
     private final CustomDatabaseInitializationSettings settings;
 
     public CustomSqlDataSourceScriptDatabaseInitializer(DataSource dataSource, CustomDatabaseInitializationSettings settings) {
-        super(dataSource,settings);
+        super(dataSource, settings);
         this.settings = settings;
     }
 
@@ -56,44 +61,80 @@ class CustomSqlDataSourceScriptDatabaseInitializer extends DataSourceScriptDatab
         return applyDataScripts(locationResolver) || other || initialized;
     }
 
-    private void createDatabase(DataSourceProperties properties){
+    private void createDatabase(DataSourceProperties properties) {
         String initDdName = settings.getInitDdName();
-        if(ObjectUtils.isEmpty(initDdName)){
+        if (ObjectUtils.isEmpty(initDdName)) {
             return;
         }
-        try{
-            String url = properties.getUrl();
-            int qPos = url.indexOf(63);
-            String urlServer = url;
-            if (qPos != -1) {
-                urlServer = url.substring(0, qPos);
-            }
-            int slash = urlServer.lastIndexOf(47);
-            String dbName = urlServer.substring(slash + 1);
-            url = urlServer.substring(0, slash + 1) + initDdName;
-            try(Connection con = DriverManager.getConnection(url,properties.getUsername(),properties.getPassword())){
-                con.prepareStatement(DatabaseDriver.createDatabase(settings.getPlatform(),dbName)).executeUpdate();
-            }
-        }catch (SQLException ignored){
+        Pair<String, String> pair = replaceDatabaseName(properties.getUrl(), initDdName);
+        String dbName = pair.getValue0();
+        if (dbName == null) {
+            return;
         }
+        try {
+            try (Connection con = DriverManager.getConnection(pair.getValue1(), properties.getUsername(), properties.getPassword())) {
+                con.prepareStatement(DatabaseDriver.createDatabase(settings.getPlatform(), dbName)).executeUpdate();
+            }
+        } catch (SQLException e) {
+            log.error("create database failed, {}", e.getMessage());
+        }
+    }
+
+    private Pair<String, String> replaceDatabaseName(String jdbcUrl, String newDbName) {
+        if (jdbcUrl.startsWith("jdbc:sqlserver:")) {
+            int index = jdbcUrl.indexOf("databaseName=");
+            if (index < 0) {
+                return Pair.with(null, jdbcUrl);
+            }
+            int start = index + "databaseName=".length();
+            int end = jdbcUrl.indexOf(";", start);
+            if (end < 0) {
+                end = jdbcUrl.length();
+            }
+            String oldDbName = jdbcUrl.substring(start, end);
+            String newUrl = jdbcUrl.substring(0, start) + newDbName + jdbcUrl.substring(end);
+            return Pair.with(oldDbName, newUrl);
+        }
+
+        String separator = DEFAULT_START_SEPARATOR;
+        if (jdbcUrl.startsWith("jdbc:oracle:thin:@")) {
+            separator = ":@//";
+        }
+        int start = jdbcUrl.indexOf(separator);
+        if (start >= 0) {
+            start = jdbcUrl.indexOf("/", start + separator.length());
+            if (start >= 0) {
+                int end = jdbcUrl.indexOf("?", start);
+                if (end < 0) {
+                    end = jdbcUrl.indexOf(";", start);
+                }
+                if (end < 0) {
+                    end = jdbcUrl.length();
+                }
+                String oldDbName = jdbcUrl.substring(start + 1, end);
+                String newUrl = jdbcUrl.substring(0, start + 1) + newDbName + jdbcUrl.substring(end);
+                return Pair.with(oldDbName, newUrl);
+            }
+        }
+        return Pair.with(null, jdbcUrl);
     }
 
     private boolean applySchemaScripts(ScriptLocationResolver locationResolver) {
-        return applyScripts(this.settings.getSchemaLocations(), "schema", locationResolver,null);
+        return applyScripts(this.settings.getSchemaLocations(), "schema", locationResolver, null);
     }
 
     private boolean applyOtherScripts(ScriptLocationResolver locationResolver) {
-        return applyScripts(this.settings.getScriptLocations(), "other", locationResolver,this.settings.getOtherSeparator());
+        return applyScripts(this.settings.getScriptLocations(), "other", locationResolver, this.settings.getOtherSeparator());
     }
 
     private boolean applyDataScripts(ScriptLocationResolver locationResolver) {
-        return applyScripts(this.settings.getDataLocations(), "data", locationResolver,null);
+        return applyScripts(this.settings.getDataLocations(), "data", locationResolver, null);
     }
 
     private boolean applyScripts(List<String> locations, String type, ScriptLocationResolver locationResolver, String separator) {
         List<Resource> scripts = getScripts(locations, type, locationResolver);
         if (!scripts.isEmpty() && isEnabled()) {
-            runScripts(scripts,separator);
+            runScripts(scripts, separator);
             return true;
         }
         return false;
@@ -119,8 +160,7 @@ class CustomSqlDataSourceScriptDatabaseInitializer extends DataSourceScriptDatab
             for (Resource resource : doGetResources(location, locationResolver)) {
                 if (resource.exists()) {
                     resources.add(resource);
-                }
-                else if (!optional) {
+                } else if (!optional) {
                     throw new IllegalStateException("No " + type + " scripts found at location '" + location + "'");
                 }
             }
@@ -131,12 +171,12 @@ class CustomSqlDataSourceScriptDatabaseInitializer extends DataSourceScriptDatab
     private List<Resource> doGetResources(String location, ScriptLocationResolver locationResolver) {
         try {
             return locationResolver.resolve(location);
-        }catch (Exception ex) {
+        } catch (Exception ex) {
             throw new IllegalStateException("Unable to load resources from " + location, ex);
         }
     }
 
-    private void runScripts(List<Resource> resources,String separator) {
+    private void runScripts(List<Resource> resources, String separator) {
         runScripts(new Scripts(resources).continueOnError(this.settings.isContinueOnError())
                 .separator(separator == null ? this.settings.getSeparator() : separator)
                 .encoding(this.settings.getEncoding()));
@@ -155,8 +195,7 @@ class CustomSqlDataSourceScriptDatabaseInitializer extends DataSourceScriptDatab
             resources.sort((r1, r2) -> {
                 try {
                     return r1.getURL().toString().compareTo(r2.getURL().toString());
-                }
-                catch (IOException ex) {
+                } catch (IOException ex) {
                     return 0;
                 }
             });

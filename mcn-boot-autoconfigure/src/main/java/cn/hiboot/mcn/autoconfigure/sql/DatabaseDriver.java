@@ -16,11 +16,11 @@ enum DatabaseDriver {
         this.dbSql = dbSql;
     }
 
-    public static String createDatabase(String platform,String db){
+    public static String createDatabase(String platform, String db) {
         String prefix = "CREATE";
         String dbSql = "DATABASE";
         for (DatabaseDriver value : DatabaseDriver.values()) {
-            if(value.name().equals(platform)){
+            if (value.name().equals(platform)) {
                 dbSql = value.dbSql;
                 break;
             }
