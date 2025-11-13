@@ -57,7 +57,11 @@ public class DefaultDbTypeProvider implements DbTypeProvider {
     @Override
     public String url(ConnectConfig connectConfig) {
         String platform = this.platform() == null ? this.name() : this.platform();
-        String url = "jdbc:" + platform + this.colon + "//" + connectConfig.getIp() + ":" + connectConfig.getPort();
+        String url = "jdbc:" + platform + this.colon + "//" + connectConfig.getIp();
+        Integer port = connectConfig.getPort();
+        if (port != null) {
+            url += ":" + port;
+        }
         url = postProcessJdbcUrl(connectConfig, url);
         Map<String, Object> connectParameter = connectConfig.getConnectParameter();
         if (McnUtils.isNotNullAndEmpty(connectParameter)) {
