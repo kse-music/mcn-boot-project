@@ -27,7 +27,12 @@ public abstract class DbTypeManager {
     private static void registerDefault() {
         register(
                 new DefaultDbTypeProvider("mysql", "com.mysql.cj.jdbc.Driver").quote("`"),
-                new DefaultDbTypeProvider("postgresql", "org.postgresql.Driver"),
+                new DefaultDbTypeProvider("postgresql", "org.postgresql.Driver") {
+                    @Override
+                    public String pageSql(String sql, Integer skip, Integer limit) {
+                        return sql + " limit :pageSize offset :skip";
+                    }
+                },
                 new DefaultDbTypeProvider("sqlserver", "com.microsoft.sqlserver.jdbc.SQLServerDriver") {
 
                     @Override
@@ -45,6 +50,11 @@ public abstract class DbTypeManager {
                             joiner.add(entry.getKey() + "=" + entry.getValue());
                         }
                         return joiner.toString();
+                    }
+
+                    @Override
+                    public String pageSql(String sql, Integer skip, Integer limit) {
+                        return sql + " ORDER BY (SELECT NULL)  OFFSET " + skip + " ROWS FETCH NEXT " + limit + " ROWS ONLY";
                     }
 
                 },
