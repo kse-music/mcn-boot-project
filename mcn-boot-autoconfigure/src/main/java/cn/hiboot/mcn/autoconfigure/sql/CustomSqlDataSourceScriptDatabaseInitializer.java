@@ -35,7 +35,6 @@ import java.util.List;
 class CustomSqlDataSourceScriptDatabaseInitializer extends DataSourceScriptDatabaseInitializer {
 
     private static final Logger log = LoggerFactory.getLogger(CustomSqlDataSourceScriptDatabaseInitializer.class);
-    private static final String DEFAULT_START_SEPARATOR = "://";
     private static final String OPTIONAL_LOCATION_PREFIX = "optional:";
 
     private final CustomDatabaseInitializationSettings settings;
@@ -71,52 +70,62 @@ class CustomSqlDataSourceScriptDatabaseInitializer extends DataSourceScriptDatab
         if (dbName == null) {
             return;
         }
-        try {
-            try (Connection con = DriverManager.getConnection(pair.getValue1(), properties.getUsername(), properties.getPassword())) {
-                con.prepareStatement(DatabaseDriver.createDatabase(settings.getPlatform(), dbName)).executeUpdate();
-            }
+        try (Connection con = DriverManager.getConnection(pair.getValue1(), properties.getUsername(), properties.getPassword())) {
+            con.prepareStatement(DatabaseDriver.createDatabase(settings.getPlatform(), dbName)).executeUpdate();
         } catch (SQLException e) {
             log.error("create database failed, {}", e.getMessage());
         }
     }
 
     private Pair<String, String> replaceDatabaseName(String jdbcUrl, String newDbName) {
+        int start = -1;
+        int end = -1;
         if (jdbcUrl.startsWith("jdbc:sqlserver:")) {
-            int index = jdbcUrl.indexOf("databaseName=");
-            if (index < 0) {
-                return Pair.with(null, jdbcUrl);
+            Pair<Integer, Integer> result = findStartEnd(jdbcUrl, "databaseName=", ";");
+            start = result.getValue0();
+            end = result.getValue1();
+        } else if (jdbcUrl.startsWith("jdbc:dm:")) {
+            Pair<Integer, Integer> result = findStartEnd(jdbcUrl, "schema=", "&");
+            start = result.getValue0();
+            end = result.getValue1();
+        }
+        if (start == -1 || end == -1) {
+            String separator = jdbcUrl.startsWith("jdbc:oracle:thin:@") ? ":@//" : "://";
+            start = jdbcUrl.indexOf(separator);
+            if (start >= 0) {
+                int question = jdbcUrl.indexOf("?", start);
+                start = jdbcUrl.indexOf("/", start + separator.length());
+                if (start >= 0 && (question < 0 || start < question)) {
+                    start = start + 1;
+                    end = jdbcUrl.indexOf("?", start);
+                    if (end < 0) {
+                        end = jdbcUrl.indexOf(";", start);
+                    }
+                    if (end < 0) {
+                        end = jdbcUrl.length();
+                    }
+                }
             }
-            int start = index + "databaseName=".length();
-            int end = jdbcUrl.indexOf(";", start);
+        }
+        if (start == -1 || end == -1) {
+            return Pair.with(null, jdbcUrl);
+        }
+        String newUrl = jdbcUrl.substring(0, start) + newDbName + jdbcUrl.substring(end);
+        return Pair.with(jdbcUrl.substring(start, end), newUrl);
+    }
+
+    private Pair<Integer, Integer> findStartEnd(String jdbcUrl, String key, String delimiter) {
+        int start = -1;
+        int end = -1;
+        int index = jdbcUrl.indexOf(key);
+        if (index >= 0) {
+            start = index + key.length();
+            end = jdbcUrl.indexOf(delimiter, start);
             if (end < 0) {
                 end = jdbcUrl.length();
             }
-            String oldDbName = jdbcUrl.substring(start, end);
-            String newUrl = jdbcUrl.substring(0, start) + newDbName + jdbcUrl.substring(end);
-            return Pair.with(oldDbName, newUrl);
         }
-
-        String separator = DEFAULT_START_SEPARATOR;
-        if (jdbcUrl.startsWith("jdbc:oracle:thin:@")) {
-            separator = ":@//";
-        }
-        int start = jdbcUrl.indexOf(separator);
-        if (start >= 0) {
-            start = jdbcUrl.indexOf("/", start + separator.length());
-            if (start >= 0) {
-                int end = jdbcUrl.indexOf("?", start);
-                if (end < 0) {
-                    end = jdbcUrl.indexOf(";", start);
-                }
-                if (end < 0) {
-                    end = jdbcUrl.length();
-                }
-                String oldDbName = jdbcUrl.substring(start + 1, end);
-                String newUrl = jdbcUrl.substring(0, start + 1) + newDbName + jdbcUrl.substring(end);
-                return Pair.with(oldDbName, newUrl);
-            }
-        }
-        return Pair.with(null, jdbcUrl);
+        return Pair.with(start, end);
     }
 
     private boolean applySchemaScripts(ScriptLocationResolver locationResolver) {
