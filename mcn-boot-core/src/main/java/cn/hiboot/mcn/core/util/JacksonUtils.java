@@ -6,20 +6,20 @@ import cn.hiboot.mcn.core.exception.ServiceException;
 import cn.hiboot.mcn.core.model.JsonArray;
 import cn.hiboot.mcn.core.model.JsonObject;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.type.TypeFactory;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.JavaType;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.type.TypeFactory;
 
 import java.io.DataInput;
 import java.io.File;
 import java.io.InputStream;
 import java.io.Reader;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
@@ -40,9 +40,10 @@ public abstract class JacksonUtils {
 
     public static ObjectMapper getObjectMapper() {
         if (objectMapper == null) {
-            objectMapper = new ObjectMapper();
-            objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-            objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+            objectMapper =  JsonMapper.builder()
+                    .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                    .changeDefaultPropertyInclusion((handler) -> handler.withValueInclusion(JsonInclude.Include.NON_NULL))
+                    .build();
         }
         return objectMapper;
     }
@@ -70,8 +71,6 @@ public abstract class JacksonUtils {
                 return mapper.readValue(inputStream, javaType);
             } else if (input instanceof File file) {
                 return mapper.readValue(file, javaType);
-            } else if (input instanceof URL url) {
-                return mapper.readValue(url, javaType);
             } else if (input instanceof Reader reader) {
                 return mapper.readValue(reader, javaType);
             } else if (input instanceof DataInput dataInput) {
@@ -123,7 +122,7 @@ public abstract class JacksonUtils {
     public static String toJson(Object input) {
         try {
             return getObjectMapper().writeValueAsString(input);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw newInstance(e);
         }
     }
@@ -131,7 +130,7 @@ public abstract class JacksonUtils {
     public static byte[] toBytes(Object input) {
         try {
             return getObjectMapper().writeValueAsBytes(input);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw newInstance(e);
         }
     }
@@ -139,7 +138,7 @@ public abstract class JacksonUtils {
     public static JsonObject toJsonObject(Object input) {
         try {
             return new JsonObject((ObjectNode) getObjectMapper().readTree(valueString(input)));
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw newInstance(e);
         }
     }
@@ -147,7 +146,7 @@ public abstract class JacksonUtils {
     public static JsonArray toJsonArray(Object input) {
         try {
             return new JsonArray((ArrayNode) getObjectMapper().readTree(valueString(input)));
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw newInstance(e);
         }
     }

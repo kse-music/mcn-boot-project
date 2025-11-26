@@ -1,14 +1,14 @@
 package cn.hiboot.mcn.core.model;
 
 import cn.hiboot.mcn.core.util.JacksonUtils;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.deser.std.StdDeserializer;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.JsonNodeFactory;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -27,7 +27,7 @@ public class JsonArray extends ArrayNode {
     }
 
     public JsonArray(ArrayNode arrayNode) {
-        super(new JsonNodeFactory(false), jsonNodes(arrayNode));
+        super(new JsonNodeFactory(), jsonNodes(arrayNode));
     }
 
     static JsonArray of(JsonNode jsonNode){
@@ -124,10 +124,14 @@ public class JsonArray extends ArrayNode {
         return new JsonArray(JacksonUtils.getObjectMapper().valueToTree(list));
     }
 
-    public static class JsonArrayDeserializer extends JsonDeserializer<JsonArray> {
+    public static class JsonArrayDeserializer extends StdDeserializer<JsonArray> {
+
+        public JsonArrayDeserializer() {
+            super(JsonArray.class);
+        }
 
         @Override
-        public JsonArray deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+        public JsonArray deserialize(JsonParser p, DeserializationContext ctxt) throws JacksonException {
             return new JsonArray(p.readValueAsTree());
         }
 

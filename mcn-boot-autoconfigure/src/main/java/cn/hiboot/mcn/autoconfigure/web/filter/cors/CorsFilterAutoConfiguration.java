@@ -49,7 +49,7 @@ public class CorsFilterAutoConfiguration {
 
     private static CorsConfiguration newCorsConfiguration(CorsProperties corsProperties){
         CorsConfiguration corsConfiguration = new CorsConfiguration();
-        PropertyMapper propertyMapper = PropertyMapper.get().alwaysApplyingWhenNonNull();
+        PropertyMapper propertyMapper = PropertyMapper.get();
         propertyMapper.from(corsProperties.getAllowCredentials()).to(corsConfiguration::setAllowCredentials);
         if (corsProperties.getAllowedOriginPattern() != null || corsProperties.getAllowedOriginPatterns() != null){
             propertyMapper.from(corsProperties.getAllowedOriginPattern()).to(corsConfiguration::addAllowedOriginPattern);

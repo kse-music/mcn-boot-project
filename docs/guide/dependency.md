@@ -16,8 +16,8 @@
 | mapstruct                            | mapstruct.version            |   1.5.5.Final    |
 | mybatis-spring-boot-starter          | mybatis-spring-boot.version  |      3.0.5       |
 | minio                                | minio.version                |      8.6.0       |
-| spring-boot-dependencies             | spring-boot.version          |      3.5.8       |
-| spring-cloud-dependencies            | spring-cloud.version         |     2025.0.0     |
+| spring-boot-dependencies             | spring-boot.version          |      4.0.0       |
+| spring-cloud-dependencies            | spring-cloud.version         |     2025.1.0     |
 | spring-cloud-alibaba-dependencies    | spring-cloud-alibaba.version |    2025.0.0.0    |
 | spring-cloud-huawei-bom              | spring-cloud-huawei.version  | 1.11.11-2024.0.x |
 | springdoc-openapi-starter-webmvc-ui  | springdoc.version            |      2.8.14      |

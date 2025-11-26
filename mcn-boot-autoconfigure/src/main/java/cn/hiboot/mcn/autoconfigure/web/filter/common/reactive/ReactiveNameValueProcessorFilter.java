@@ -3,7 +3,7 @@ package cn.hiboot.mcn.autoconfigure.web.filter.common.reactive;
 import cn.hiboot.mcn.autoconfigure.web.filter.common.NameValueProcessor;
 import cn.hiboot.mcn.autoconfigure.web.filter.common.NameValueProcessorProperties;
 import cn.hiboot.mcn.autoconfigure.web.filter.common.RequestMatcher;
-import org.springframework.boot.web.reactive.filter.OrderedWebFilter;
+import org.springframework.boot.webflux.filter.OrderedWebFilter;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.server.ServerWebExchange;

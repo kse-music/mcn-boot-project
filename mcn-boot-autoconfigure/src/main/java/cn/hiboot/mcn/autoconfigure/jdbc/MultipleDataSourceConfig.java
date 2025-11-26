@@ -2,7 +2,7 @@ package cn.hiboot.mcn.autoconfigure.jdbc;
 
 import cn.hiboot.mcn.autoconfigure.config.ConfigProperties;
 import cn.hiboot.mcn.core.util.McnUtils;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
+import org.springframework.boot.jdbc.autoconfigure.DataSourceProperties;
 import org.springframework.core.env.Environment;
 
 import java.util.Map;

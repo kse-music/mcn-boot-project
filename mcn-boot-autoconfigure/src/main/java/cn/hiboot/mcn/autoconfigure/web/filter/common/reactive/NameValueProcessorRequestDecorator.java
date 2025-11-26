@@ -16,6 +16,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * NameValueProcessorRequestDecorator
@@ -62,28 +63,27 @@ class NameValueProcessorRequestDecorator extends ServerHttpRequestDecorator {
     }
 
     MultiValueMap<String, String> process(MultiValueMap<String, String> data) {
-        MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
-        if (McnUtils.isNotNullAndEmpty(data)) {
-            for (String key : data.keySet()) {
-                String currentKey = key;
-                key = cleanParameterName(currentKey);
-                List<String> values = data.get(currentKey);
-                if(isExcludeParameter(currentKey)){
-                    map.put(currentKey, values);
-                    continue;
-                }
-                List<String> rs = new ArrayList<>();
-                for (String value : values) {
-                    if (McnUtils.isNotNullAndEmpty(value)) {
-                        value = cleanParameterValue(currentKey,value);
-                    }
-                    rs.add(value);
-                }
-                map.put(key, Collections.unmodifiableList(rs));
-            }
+        if (McnUtils.isNullOrEmpty(data)) {
+            return new LinkedMultiValueMap<>();
         }
-        return map;
+
+        return process(
+                data.keySet(),
+                data::get
+        );
     }
+
+    private MultiValueMap<String, String> process(HttpHeaders headers) {
+        if (McnUtils.isNullOrEmpty(headers)) {
+            return new LinkedMultiValueMap<>();
+        }
+
+        return process(
+                headers.headerNames(),
+                headers::get
+        );
+    }
+
 
     @Override
     public HttpHeaders getHeaders() {
@@ -126,4 +126,31 @@ class NameValueProcessorRequestDecorator extends ServerHttpRequestDecorator {
     private String clean(String name,String text){
         return valueProcessor.process(name,text);
     }
+
+    private MultiValueMap<String, String> process(Iterable<String> keys, Function<String, List<String>> valueGetter) {
+        MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
+        for (String k : keys) {
+            String currentKey = k;
+            String cleanedKey = cleanParameterName(currentKey);
+            List<String> values = valueGetter.apply(currentKey);
+
+            if (isExcludeParameter(currentKey)) {
+                map.put(currentKey, values);
+                continue;
+            }
+
+            List<String> cleanedValues = new ArrayList<>();
+            for (String value : values) {
+                if (McnUtils.isNotNullAndEmpty(value)) {
+                    value = cleanParameterValue(currentKey, value);
+                }
+                cleanedValues.add(value);
+            }
+
+            map.put(cleanedKey, Collections.unmodifiableList(cleanedValues));
+        }
+
+        return map;
+    }
+
 }

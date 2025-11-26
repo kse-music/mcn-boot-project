@@ -7,10 +7,10 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
-import org.springframework.boot.autoconfigure.web.client.RestTemplateAutoConfiguration;
-import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.boot.restclient.RestTemplateBuilder;
+import org.springframework.boot.restclient.autoconfigure.RestTemplateAutoConfiguration;
+import org.springframework.boot.webclient.autoconfigure.WebClientAutoConfiguration;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.cloud.client.loadbalancer.reactive.DeferringLoadBalancerExchangeFilterFunction;
 import org.springframework.context.annotation.Bean;
@@ -26,11 +26,12 @@ import reactor.netty.http.client.HttpClient;
  * @author DingHao
  * @since 2023/1/3 14:58
  */
-@AutoConfiguration(after = {WebClientAutoConfiguration.class, RestTemplateAutoConfiguration.class}, afterName = "org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerBeanPostProcessorAutoConfiguration")
+@AutoConfiguration(afterName = {"org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerBeanPostProcessorAutoConfiguration",
+    "org.springframework.boot.restclient.autoconfigure.RestTemplateAutoConfiguration", "org.springframework.boot.webclient.autoconfigure.WebClientAutoConfiguration"})
 @EnableConfigurationProperties(RestClientProperties.class)
 public class RestClientAutoConfiguration {
 
-    @ConditionalOnClass(RestTemplate.class)
+    @ConditionalOnClass(RestTemplateAutoConfiguration.class)
     @ConditionalOnBean(RestTemplateBuilder.class)
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
     static class ServletClientConfiguration {
@@ -66,7 +67,7 @@ public class RestClientAutoConfiguration {
 
     }
 
-    @ConditionalOnClass(WebClient.class)
+    @ConditionalOnClass(WebClientAutoConfiguration.class)
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
     @Import(ReactiveClientConfiguration.LoadBalancedClientConfiguration.class)
     static class ReactiveClientConfiguration {

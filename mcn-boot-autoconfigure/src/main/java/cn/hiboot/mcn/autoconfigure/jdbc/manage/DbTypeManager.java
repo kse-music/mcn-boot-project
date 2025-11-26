@@ -54,7 +54,11 @@ public abstract class DbTypeManager {
 
                     @Override
                     public String pageSql(String sql, Integer skip, Integer limit) {
-                        return sql + " ORDER BY (SELECT NULL)  OFFSET " + skip + " ROWS FETCH NEXT " + limit + " ROWS ONLY";
+                        String orderBy = " ORDER BY (SELECT NULL)";
+                        if (sql.toLowerCase().contains("order by")) {
+                            orderBy = "";
+                        }
+                        return sql + orderBy + " OFFSET " + skip + " ROWS FETCH NEXT " + limit + " ROWS ONLY";
                     }
 
                 },

@@ -1,12 +1,11 @@
 package cn.hiboot.mcn.core.jackson;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.type.TypeFactory;
-
-import java.io.IOException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.JavaType;
+import tools.jackson.databind.deser.std.StdDeserializer;
+import tools.jackson.databind.type.TypeFactory;
 
 /**
  * EmptyStringDeserializer
@@ -14,25 +13,35 @@ import java.io.IOException;
  * @author DingHao
  * @since 2025/8/12 13:45
  */
-public abstract class EmptyStringDeserializer<T> extends JsonDeserializer<T> {
+public abstract class EmptyStringDeserializer<T> extends StdDeserializer<T> {
 
-    private final JavaType javaType;
+    private static final TypeFactory typeFactory = TypeFactory.createDefaultInstance();
 
     protected EmptyStringDeserializer(Class<T> clazz) {
-        this(TypeFactory.defaultInstance().constructType(clazz));
+        super(clazz);
     }
 
     protected EmptyStringDeserializer(JavaType javaType) {
-        this.javaType = javaType;
+        super(javaType);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public T getNullValue(DeserializationContext ctxt) {
+        return (T) super.getNullValue(ctxt);
     }
 
     @Override
-    public T deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-        String text = p.getText();
+    public T deserialize(JsonParser p, DeserializationContext ctxt) throws JacksonException {
+        String text = p.getString();
         if (text == null || text.trim().isEmpty()) {
             return getNullValue(ctxt);
         }
-        return p.getCodec().readValue(p, javaType);
+        return p.readValueAs(getValueType());
+    }
+
+    protected static TypeFactory defaultInstance() {
+        return typeFactory;
     }
 
 }

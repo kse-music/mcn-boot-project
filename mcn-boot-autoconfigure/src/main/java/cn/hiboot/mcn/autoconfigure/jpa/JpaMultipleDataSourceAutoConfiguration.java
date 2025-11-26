@@ -12,9 +12,9 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration;
-import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.boot.data.jpa.autoconfigure.DataJpaRepositoriesAutoConfiguration;
+import org.springframework.boot.jpa.autoconfigure.JpaProperties;
 import org.springframework.context.annotation.FullyQualifiedAnnotationBeanNameGenerator;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
@@ -23,7 +23,11 @@ import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.data.jpa.repository.config.JpaRepositoryConfigExtension;
-import org.springframework.data.repository.config.*;
+import org.springframework.data.repository.config.AnnotationRepositoryConfigurationSource;
+import org.springframework.data.repository.config.RepositoryBeanDefinitionRegistrarSupport;
+import org.springframework.data.repository.config.RepositoryConfigurationDelegate;
+import org.springframework.data.repository.config.RepositoryConfigurationExtension;
+import org.springframework.data.repository.config.RepositoryConfigurationUtils;
 import org.springframework.data.util.Streamable;
 
 import java.lang.annotation.Annotation;
@@ -37,7 +41,7 @@ import java.util.Optional;
  * @author DingHao
  * @since 2022/7/26 14:45
  */
-@AutoConfiguration(after = {MultipleDataSourceAutoConfiguration.class, JpaRepositoriesAutoConfiguration.class})
+@AutoConfiguration(after = {MultipleDataSourceAutoConfiguration.class, DataJpaRepositoriesAutoConfiguration.class})
 @ConditionalOnProperty(prefix = ConfigProperties.JPA_MULTIPLE_DATASOURCE_PREFIX, name = "enabled", havingValue = "true")
 @ConditionalOnClass(JpaRepository.class)
 @ConditionalOnBean(MultipleDataSourceConfig.class)

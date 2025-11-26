@@ -7,7 +7,7 @@ org.springframework.context.ApplicationListener=\
 org.springframework.boot.BootstrapRegistryInitializer=\
   cn.hiboot.mcn.autoconfigure.bootstrap.McnBootstrapRegistryInitializer
 
-org.springframework.boot.env.EnvironmentPostProcessor=\
+org.springframework.boot.EnvironmentPostProcessor=\
   cn.hiboot.mcn.autoconfigure.context.McnEnvironmentPostProcessor
 
 org.springframework.boot.autoconfigure.AutoConfigurationImportFilter=\

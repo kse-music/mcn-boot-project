@@ -1,11 +1,9 @@
 package cn.hiboot.mcn.core.jackson;
 
-import com.fasterxml.jackson.databind.BeanProperty;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.deser.ContextualDeserializer;
-import com.fasterxml.jackson.databind.type.TypeFactory;
+
+import tools.jackson.databind.BeanProperty;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.ValueDeserializer;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -17,7 +15,7 @@ import java.util.Map;
  * @author DingHao
  * @since 2025/8/12 14:06
  */
-public final class EmptyStringMapDeserializer<K,V> extends EmptyStringDeserializer<Map<K, V>> implements ContextualDeserializer {
+public final class EmptyStringMapDeserializer<K,V> extends EmptyStringDeserializer<Map<K, V>> {
 
     private final boolean emptyMap;
 
@@ -26,7 +24,7 @@ public final class EmptyStringMapDeserializer<K,V> extends EmptyStringDeserializ
     }
 
     private EmptyStringMapDeserializer(Class<?> keyClass, Class<?> valueClass, boolean emptyMap) {
-        super(TypeFactory.defaultInstance().constructMapType(Map.class, keyClass, valueClass));
+        super(defaultInstance().constructMapType(Map.class, keyClass, valueClass));
         this.emptyMap = emptyMap;
     }
 
@@ -36,7 +34,7 @@ public final class EmptyStringMapDeserializer<K,V> extends EmptyStringDeserializ
     }
 
     @Override
-    public JsonDeserializer<?> createContextual(DeserializationContext deserializationContext, BeanProperty beanProperty) throws JsonMappingException {
+    public ValueDeserializer<?> createContextual(DeserializationContext deserializationContext, BeanProperty beanProperty) {
         if (beanProperty != null) {
             MapTypeDeserialize ann = beanProperty.getAnnotation(MapTypeDeserialize.class);
             if (ann == null) {

@@ -4,12 +4,11 @@ import cn.hiboot.mcn.autoconfigure.minio.MinioAutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.sql.init.SqlDataSourceScriptDatabaseInitializer;
-import org.springframework.boot.autoconfigure.sql.init.SqlInitializationAutoConfiguration;
-import org.springframework.boot.autoconfigure.sql.init.SqlInitializationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.context.properties.PropertyMapper;
+import org.springframework.boot.jdbc.autoconfigure.DataSourceInitializationAutoConfiguration;
 import org.springframework.boot.jdbc.init.DataSourceScriptDatabaseInitializer;
+import org.springframework.boot.sql.autoconfigure.init.SqlInitializationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.util.StringUtils;
 
@@ -23,10 +22,10 @@ import java.util.List;
  * @author DingHao
  * @since 2022/10/10 14:17
  */
-@AutoConfiguration(after = {SqlInitializationAutoConfiguration.class, MinioAutoConfiguration.class})
+@AutoConfiguration(after = {DataSourceInitializationAutoConfiguration.class, MinioAutoConfiguration.class})
 @EnableConfigurationProperties(SqlInitProperties.class)
 @ConditionalOnProperty(prefix = "spring.sql.init.additional", name = "enabled", matchIfMissing = true)
-@ConditionalOnBean(SqlDataSourceScriptDatabaseInitializer.class)
+@ConditionalOnBean(DataSourceScriptDatabaseInitializer.class)
 public class SqlInitAutoConfiguration {
 
     private final SqlInitProperties sqlInitProperties;
@@ -38,7 +37,7 @@ public class SqlInitAutoConfiguration {
     @Bean
     DataSourceScriptDatabaseInitializer mcnDataSourceScriptDatabaseInitializer(DataSource dataSource, SqlInitializationProperties properties) {
         CustomDatabaseInitializationSettings settings = new CustomDatabaseInitializationSettings();
-        PropertyMapper propertyMapper = PropertyMapper.get().alwaysApplyingWhenNonNull();
+        PropertyMapper propertyMapper = PropertyMapper.get();
         propertyMapper.from(scriptLocations("schema", properties.getPlatform())).to(settings::setSchemaLocations);
         propertyMapper.from(scriptLocations("other", properties.getPlatform())).to(settings::setScriptLocations);
         propertyMapper.from(scriptLocations("data", properties.getPlatform())).to(settings::setDataLocations);

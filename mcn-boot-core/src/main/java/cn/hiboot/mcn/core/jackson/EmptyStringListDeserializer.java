@@ -1,11 +1,9 @@
 package cn.hiboot.mcn.core.jackson;
 
-import com.fasterxml.jackson.databind.BeanProperty;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.deser.ContextualDeserializer;
-import com.fasterxml.jackson.databind.type.TypeFactory;
+
+import tools.jackson.databind.BeanProperty;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.ValueDeserializer;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,7 +15,7 @@ import java.util.List;
  * @author DingHao
  * @since 2025/8/12 13:45
  */
-public final class EmptyStringListDeserializer<T> extends EmptyStringDeserializer<List<T>> implements ContextualDeserializer {
+public final class EmptyStringListDeserializer<T> extends EmptyStringDeserializer<List<T>> {
 
     private final boolean emptyList;
 
@@ -26,7 +24,7 @@ public final class EmptyStringListDeserializer<T> extends EmptyStringDeserialize
     }
 
     private EmptyStringListDeserializer(Class<?> clazz, boolean emptyList) {
-        super(TypeFactory.defaultInstance().constructCollectionType(List.class, clazz));
+        super(defaultInstance().constructCollectionType(List.class, clazz));
         this.emptyList = emptyList;
     }
 
@@ -36,7 +34,7 @@ public final class EmptyStringListDeserializer<T> extends EmptyStringDeserialize
     }
 
     @Override
-    public JsonDeserializer<?> createContextual(DeserializationContext deserializationContext, BeanProperty beanProperty) throws JsonMappingException {
+    public ValueDeserializer<?> createContextual(DeserializationContext deserializationContext, BeanProperty beanProperty) {
         if (beanProperty != null) {
             ListTypeDeserialize ann = beanProperty.getAnnotation(ListTypeDeserialize.class);
             if (ann == null) {

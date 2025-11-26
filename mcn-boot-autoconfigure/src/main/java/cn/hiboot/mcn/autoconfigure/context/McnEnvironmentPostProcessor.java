@@ -2,9 +2,9 @@ package cn.hiboot.mcn.autoconfigure.context;
 
 import cn.hiboot.mcn.autoconfigure.config.ConfigProperties;
 import cn.hiboot.mcn.core.util.McnUtils;
+import org.springframework.boot.EnvironmentPostProcessor;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.context.config.ConfigDataEnvironmentPostProcessor;
-import org.springframework.boot.env.EnvironmentPostProcessor;
 import org.springframework.core.Ordered;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
@@ -31,6 +31,7 @@ import java.util.Objects;
  * @since 2021/1/16 16:46
  */
 public class McnEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
+
     private static final boolean PRESENT = ClassUtils.isPresent("ch.qos.logback.classic.LoggerContext", McnEnvironmentPostProcessor.class.getClassLoader());
     private static final MapPropertySource EMPTY_PROPERTY_SOURCE = new MapPropertySource("Empty", Collections.emptyMap());
     private static final String BOOTSTRAP_EAGER_LOAD = "mcn.bootstrap.eagerLoad.enabled";
