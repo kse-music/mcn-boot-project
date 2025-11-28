@@ -17,9 +17,9 @@ public interface RdbManage {
 
     void connect(ConnectConfig connectConfig, Consumer<Connection> consumer);
 
-    default String testConnect(ConnectConfig connectConfig) {
-        String[] result = new String[1];
-        connect(connectConfig, connection -> result[0] = connection == null ? "fail" : "success");
+    default boolean testConnect(ConnectConfig connectConfig) {
+        boolean[] result = {true};
+        connect(connectConfig, connection -> result[0] = true);
         return result[0];
     }
 
@@ -84,7 +84,7 @@ public interface RdbManage {
     int delete(ConnectConfig connectConfig, String tableName, String condition, Map<String, Object> params);
 
     static RdbManage defaults() {
-        return DefaultRdbManage.rdbManage;
+        return RdbManageImpl.defaultRdbManage;
     }
 
 }
