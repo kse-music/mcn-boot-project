@@ -1,9 +1,5 @@
 package cn.hiboot.mcn.core.jackson;
 
-import cn.hiboot.mcn.core.util.JacksonUtils;
-import com.fasterxml.jackson.databind.JavaType;
-
-import javax.persistence.AttributeConverter;
 import java.util.List;
 import java.util.Map;
 

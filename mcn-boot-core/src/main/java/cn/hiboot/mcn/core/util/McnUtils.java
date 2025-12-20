@@ -19,7 +19,9 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Proxy;
+import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -45,6 +47,7 @@ import java.time.temporal.Temporal;
 import java.time.temporal.TemporalAccessor;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -58,9 +61,11 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
@@ -79,7 +84,38 @@ public abstract class McnUtils {
 
     private static final DateTimeFormatter PATTERN_1 = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private static final DateTimeFormatter PATTERN_2 = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    private static final SecureRandom random = new SecureRandom();
+    private static final Map<Class<?>, Object> CACHE = new ConcurrentHashMap<>();
+    private static final Map<Class<?>, Class<?>> CLASS_UNWRAP_CACHE = new ConcurrentHashMap<>();
+
+    @SuppressWarnings("unchecked")
+    public static <T> T getRepository(Class<?> clazz, Predicate<Class<?>> filter) {
+        return (T) CACHE.computeIfAbsent(resolveServiceClass(clazz), serviceClass -> {
+            Class<?> serviceInterface = Arrays.stream(serviceClass.getInterfaces())
+                    .filter(filter)
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalStateException("No match interface found in " + serviceClass.getName()));
+            ParameterizedType parameterized = Arrays.stream(serviceInterface.getGenericInterfaces())
+                    .filter(t -> t instanceof ParameterizedType)
+                    .map(t -> (ParameterizedType) t)
+                    .filter(pt -> filter.test((Class<?>) pt.getRawType()))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalStateException("No parameterized BaseService found in " + serviceInterface.getName()));
+            Type[] typeArgs = parameterized.getActualTypeArguments();
+            if (typeArgs.length != 3 || !(typeArgs[2] instanceof Class<?>)) {
+                throw new IllegalStateException("Cannot resolve repository type in " + serviceInterface.getName());
+            }
+            return SpringBeanUtils.getBean((Class<?>) typeArgs[2]);
+        });
+    }
+
+    private static Class<?> resolveServiceClass(Class<?> clazz) {
+        return CLASS_UNWRAP_CACHE.computeIfAbsent(clazz, c -> {
+            while (c != null && c.getName().contains("$$")) {
+                c = c.getSuperclass();
+            }
+            return c;
+        });
+    }
 
     public static String formatNowDate() {
         return localDateToString(LocalDate.now());
