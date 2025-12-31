@@ -4,62 +4,28 @@ import cn.hiboot.mcn.core.exception.ServiceException;
 import cn.hiboot.mcn.core.model.JsonArray;
 import cn.hiboot.mcn.core.tuples.Pair;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.Closeable;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Array;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Proxy;
+import java.lang.reflect.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.security.SecureRandom;
-import java.time.DayOfWeek;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.Temporal;
 import java.time.temporal.TemporalAccessor;
 import java.time.temporal.TemporalAdjusters;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Properties;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
@@ -79,7 +45,39 @@ public abstract class McnUtils {
 
     private static final DateTimeFormatter PATTERN_1 = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private static final DateTimeFormatter PATTERN_2 = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    private static final SecureRandom random = new SecureRandom();
+
+    private static final Map<Class<?>, Object> CACHE = new ConcurrentHashMap<>();
+    private static final Map<Class<?>, Class<?>> CLASS_UNWRAP_CACHE = new ConcurrentHashMap<>();
+
+    @SuppressWarnings("unchecked")
+    public static <T> T getRepository(Class<?> clazz, Predicate<Class<?>> filter) {
+        return (T) CACHE.computeIfAbsent(resolveServiceClass(clazz), serviceClass -> {
+            Class<?> serviceInterface = Arrays.stream(serviceClass.getInterfaces())
+                    .filter(filter)
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalStateException("No match interface found in " + serviceClass.getName()));
+            ParameterizedType parameterized = Arrays.stream(serviceInterface.getGenericInterfaces())
+                    .filter(t -> t instanceof ParameterizedType)
+                    .map(t -> (ParameterizedType) t)
+                    .filter(pt -> filter.test((Class<?>) pt.getRawType()))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalStateException("No parameterized BaseService found in " + serviceInterface.getName()));
+            Type[] typeArgs = parameterized.getActualTypeArguments();
+            if (typeArgs.length != 3 || !(typeArgs[2] instanceof Class<?>)) {
+                throw new IllegalStateException("Cannot resolve repository type in " + serviceInterface.getName());
+            }
+            return SpringBeanUtils.getBean((Class<?>) typeArgs[2]);
+        });
+    }
+
+    private static Class<?> resolveServiceClass(Class<?> clazz) {
+        return CLASS_UNWRAP_CACHE.computeIfAbsent(clazz, c -> {
+            while (c != null && c.getName().contains("$$")) {
+                c = c.getSuperclass();
+            }
+            return c;
+        });
+    }
 
     public static String formatNowDate() {
         return localDateToString(LocalDate.now());

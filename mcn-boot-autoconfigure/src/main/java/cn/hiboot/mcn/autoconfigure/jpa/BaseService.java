@@ -3,6 +3,7 @@ package cn.hiboot.mcn.autoconfigure.jpa;
 import cn.hiboot.mcn.core.model.base.FieldSort;
 import cn.hiboot.mcn.core.model.base.PageSort;
 import cn.hiboot.mcn.core.model.result.RestResp;
+import cn.hiboot.mcn.core.util.McnUtils;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -20,7 +21,7 @@ import java.util.List;
 public interface BaseService<T, PK, R extends BaseRepository<T, PK>> {
 
     default R getRepository() {
-        return JpaUtils.getRepository(this.getClass());
+        return McnUtils.getRepository(this.getClass(), BaseService.class::isAssignableFrom);
     }
 
     default T save(T data){

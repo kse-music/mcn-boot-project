@@ -20,4 +20,8 @@ public interface DbType {
 
     String sqlQuote(String str);
 
+    default RdbManage rdbManage(RdbManage rdbManage) {
+        return rdbManage;
+    }
+
 }
