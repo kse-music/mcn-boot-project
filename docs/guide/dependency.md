@@ -1,4 +1,4 @@
-# 依赖管理
+# 依赖管理8
 
 下表提供了可用于覆盖 MCN 管理的版本的所有属性。应用可自定义这些版本。
 
@@ -16,8 +16,8 @@
 | mapstruct                            | mapstruct.version            |   1.5.5.Final    |
 | mybatis-spring-boot-starter          | mybatis-spring-boot.version  |      3.0.5       |
 | minio                                | minio.version                |      8.6.0       |
-| spring-boot-dependencies             | spring-boot.version          |      3.5.8       |
-| spring-cloud-dependencies            | spring-cloud.version         |     2025.0.0     |
+| spring-boot-dependencies             | spring-boot.version          |      3.5.10      |
+| spring-cloud-dependencies            | spring-cloud.version         |     2025.0.1     |
 | spring-cloud-alibaba-dependencies    | spring-cloud-alibaba.version |    2025.0.0.0    |
 | spring-cloud-huawei-bom              | spring-cloud-huawei.version  | 1.11.11-2024.0.x |
 | springdoc-openapi-starter-webmvc-ui  | springdoc.version            |      2.8.14      |
