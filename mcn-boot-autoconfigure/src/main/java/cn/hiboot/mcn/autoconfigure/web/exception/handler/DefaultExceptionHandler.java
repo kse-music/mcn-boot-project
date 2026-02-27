@@ -34,6 +34,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -234,6 +235,9 @@ public class DefaultExceptionHandler implements ExceptionHandler, ApplicationCon
                 for (Throwable throwable : suppressed) {
                     dealCurrentStackTraceElement(throwable);
                 }
+            }
+            if (t instanceof NoResourceFoundException && !properties.isLogNoResource()) {
+                return;
             }
             log.error("The exception information is as follows", t);
         }

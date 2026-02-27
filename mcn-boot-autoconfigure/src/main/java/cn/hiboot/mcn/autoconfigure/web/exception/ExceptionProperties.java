@@ -46,7 +46,10 @@ public class ExceptionProperties {
      * 是否打印异常栈信息
      */
     private boolean logExMsg = true;
-
+    /**
+     * 是否打印404异常栈信息
+     */
+    private boolean logNoResource = false;
 
     private Map<Integer,String> errorCodeMsg;
 
@@ -114,6 +117,14 @@ public class ExceptionProperties {
 
     public void setLogExMsg(boolean logExMsg) {
         this.logExMsg = logExMsg;
+    }
+
+    public boolean isLogNoResource() {
+        return logNoResource;
+    }
+
+    public void setLogNoResource(boolean logNoResource) {
+        this.logNoResource = logNoResource;
     }
 
     public Map<Integer, String> getErrorCodeMsg() {
