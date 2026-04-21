@@ -128,6 +128,14 @@ public abstract class JacksonUtils {
         }
     }
 
+    public static String toPrettyJson(Object input) {
+        try {
+            return getObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(input);
+        } catch (JsonProcessingException e) {
+            throw newInstance(e);
+        }
+    }
+
     public static byte[] toBytes(Object input) {
         try {
             return getObjectMapper().writeValueAsBytes(input);
