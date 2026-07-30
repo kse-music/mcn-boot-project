@@ -1,11 +1,10 @@
 package cn.hiboot.mcn.core.jackson;
 
 import cn.hiboot.mcn.core.util.JacksonUtils;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.type.TypeFactory;
-
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
+import tools.jackson.databind.JavaType;
+import tools.jackson.databind.type.TypeFactory;
 
 /**
  * JsonAttributeConverter

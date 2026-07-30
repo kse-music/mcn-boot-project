@@ -23,7 +23,7 @@ import java.util.Map;
 public class ReloadAuthenticationConfigurer extends AbstractHttpConfigurer<ReloadAuthenticationConfigurer, HttpSecurity> {
 
     @Override
-    public void init(HttpSecurity http) throws Exception {
+    public void init(HttpSecurity http) {
         ApplicationContext applicationContext = http.getSharedObject(ApplicationContext.class);
         String[] beanNames = applicationContext.getBeanNamesForType(AuthenticationReload.class);
         if (beanNames.length == 1) {
@@ -33,7 +33,7 @@ public class ReloadAuthenticationConfigurer extends AbstractHttpConfigurer<Reloa
     }
 
     @Override
-    public void configure(HttpSecurity http) throws Exception {
+    public void configure(HttpSecurity http) {
         AuthenticationReload authenticationReload = http.getSharedObject(AuthenticationReload.class);
         if (authenticationReload == null) {
             return;

@@ -1,34 +1,33 @@
 package cn.hiboot.mcn.autoconfigure.web.filter.special;
 
 
-import cn.hiboot.mcn.autoconfigure.common.RefreshPostProcessor;
 import cn.hiboot.mcn.autoconfigure.web.filter.special.reactive.ReactiveParamProcessorConfiguration;
 import cn.hiboot.mcn.autoconfigure.web.filter.special.servlet.ServletParamProcessorConfiguration;
 import cn.hiboot.mcn.autoconfigure.web.security.WebSecurityProperties;
 import cn.hiboot.mcn.core.exception.ExceptionKeys;
 import cn.hiboot.mcn.core.exception.ServiceException;
-import com.fasterxml.jackson.core.JacksonException;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.AnnotationIntrospector;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
-import com.fasterxml.jackson.databind.introspect.Annotated;
-import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
-import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair;
-import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.MethodParameter;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.AnnotationIntrospector;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.cfg.MapperConfig;
+import tools.jackson.databind.deser.std.StdDeserializer;
+import tools.jackson.databind.introspect.Annotated;
+import tools.jackson.databind.introspect.AnnotatedMethod;
+import tools.jackson.databind.introspect.AnnotationIntrospectorPair;
+import tools.jackson.databind.introspect.JacksonAnnotationIntrospector;
 
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
@@ -123,12 +122,12 @@ public class ParamProcessorAutoConfiguration {
     }
 
     @Bean
-    static RefreshPostProcessor jacksonParamProcessorConfig() {
-        return () -> RefreshPostProcessor.uniqueExecute(ObjectMapper.class, ParamProcessor.class, (mapper, paramProcessor) -> {
-            AnnotationIntrospector primary = mapper.getDeserializationConfig().getAnnotationIntrospector();
+    static JsonMapperBuilderCustomizer jacksonParamProcessorConfig(ParamProcessor paramProcessor) {
+        return builder -> {
+            AnnotationIntrospector primary = builder.annotationIntrospector();
             AnnotationIntrospector pair = AnnotationIntrospectorPair.pair(primary, new ParamProcessorAnnotationIntrospector(paramProcessor));
-            mapper.setAnnotationIntrospector(pair);
-        });
+            builder.annotationIntrospector(pair);
+        };
     }
 
     static class ParamProcessorAnnotationIntrospector extends JacksonAnnotationIntrospector {
@@ -139,7 +138,7 @@ public class ParamProcessorAutoConfiguration {
         }
 
         @Override
-        public Object findDeserializer(Annotated am) {
+        public Object findDeserializer(MapperConfig<?> config, Annotated am) {
             if (am instanceof AnnotatedMethod annotatedMethod) {
                 if (String.class.isAssignableFrom(annotatedMethod.getParameterType(0).getRawClass())) {
                     CheckParam annotation = am.getAnnotation(CheckParam.class);
@@ -151,8 +150,8 @@ public class ParamProcessorAutoConfiguration {
                         String rule = getRule(classAnnotation, annotation);
                         return new StdDeserializer<>(String.class) {
                             @Override
-                            public String deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JacksonException {
-                                return paramProcessor.process(rule, p.currentName(), p.getText());
+                            public String deserialize(JsonParser p, DeserializationContext ctxt) throws JacksonException {
+                                return paramProcessor.process(rule, p.currentName(), p.getString());
                             }
                         };
                     }

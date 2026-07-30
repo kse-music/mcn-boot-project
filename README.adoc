@@ -1,1 +1,246 @@
-MCN is a tool for quickly building JavaWeb systems based on SpringBoot and SpringCloud. MCN provides more default configurations and auto config on the basis of SpringBoot, such as multi-data source configuration, cross-domain, global exception handler etc.Support Servlet and Reactive and non-Web development mode at the same time.
+= MCN Boot
+:project-version: 4.1.0
+:toc: macro
+:toc-title: Table of Contents
+:toclevels: 2
+:sectanchors:
+:source-highlighter: highlight.js
+
+image:https://img.shields.io/badge/Java-17%2B-007396[Java 17+]
+image:https://img.shields.io/badge/Spring%20Boot-4.1.0-6DB33F[Spring Boot 4.1.0]
+image:https://img.shields.io/badge/Spring%20Cloud-2025.1.2-6DB33F[Spring Cloud 2025.1.2]
+image:https://img.shields.io/badge/license-Apache%202.0-blue[Apache License 2.0]
+
+MCN Boot is a Java application development toolkit built on Spring Boot and Spring Cloud.
+It provides reusable infrastructure and convention-based auto-configuration for Servlet,
+Reactive, and non-web applications.
+
+toc::[]
+
+== Technology Baseline
+
+[cols="1,1",options="header"]
+|===
+|Component |Version
+
+|MCN Boot
+|{project-version}
+
+|Java
+|17+
+
+|Spring Boot
+|4.1.0
+
+|Spring Cloud
+|2025.1.2
+
+|Spring Cloud Alibaba
+|2025.1.0.0
+|===
+
+== Features
+
+* Conditional Spring Boot auto-configuration based on the classpath and application properties
+* Support for Servlet, WebFlux, and non-web applications
+* Shared JSON handling, response models, exception handling, and request parameter processing
+* Extensions for JDBC, JPA, MyBatis, MongoDB, Redis, MinIO, and other common components
+* Web infrastructure for CORS, validation, data integrity, and health checks
+* Extensions for RestTemplate, WebClient, OpenFeign, Spring Security, and OAuth2 Resource Server
+* OpenAPI documentation based on springdoc-openapi and Knife4j
+
+Optional features are activated only when their corresponding dependencies are present.
+Applications should include only the components they actually use.
+
+== Modules
+
+[cols="1,2",options="header"]
+|===
+|Module |Purpose
+
+|`mcn-boot-dependencies`
+|Manages Spring Boot, Spring Cloud, and third-party dependency versions
+
+|`mcn-boot-parent`
+|Provides shared Maven build configuration for MCN modules
+
+|`mcn-boot-starter-parent`
+|Provides dependency and plugin management for Maven applications
+
+|`mcn-boot-core`
+|Contains shared models, Jackson support, utilities, and client abstractions
+
+|`mcn-boot-autoconfigure`
+|Provides general Spring Boot auto-configuration
+
+|`mcn-cloud-autoconfigure`
+|Provides Spring Cloud, client, and security auto-configuration
+
+|`mcn-spring-boot-starter`
+|Provides the primary entry point for adding MCN Boot to an application
+
+|`mcn-swagger3`
+|Integrates springdoc-openapi and Knife4j
+|===
+
+== Getting Started
+
+=== Requirements
+
+* JDK 17 or later
+* Maven 3.6.3 or later
+
+=== Use the Parent POM
+
+Create a Maven project that inherits from `mcn-boot-starter-parent`:
+
+[source,xml,subs="attributes+"]
+----
+<parent>
+    <groupId>cn.hiboot.mcn</groupId>
+    <artifactId>mcn-boot-starter-parent</artifactId>
+    <version>{project-version}</version>
+</parent>
+----
+
+Add the MCN Boot starter and the Spring Boot starters required by your application:
+
+[source,xml]
+----
+<dependencies>
+    <dependency>
+        <groupId>cn.hiboot.mcn</groupId>
+        <artifactId>mcn-spring-boot-starter</artifactId>
+    </dependency>
+
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-webmvc</artifactId>
+    </dependency>
+</dependencies>
+----
+
+=== Use the BOM
+
+If the application cannot inherit from the MCN parent POM, import `mcn-boot-dependencies` instead:
+
+[source,xml,subs="attributes+"]
+----
+<dependencyManagement>
+    <dependencies>
+        <dependency>
+            <groupId>cn.hiboot.mcn</groupId>
+            <artifactId>mcn-boot-dependencies</artifactId>
+            <version>{project-version}</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+    </dependencies>
+</dependencyManagement>
+
+<dependencies>
+    <dependency>
+        <groupId>cn.hiboot.mcn</groupId>
+        <artifactId>mcn-spring-boot-starter</artifactId>
+    </dependency>
+
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-webmvc</artifactId>
+    </dependency>
+</dependencies>
+----
+
+=== Create an Application
+
+[source,java]
+----
+package com.example.demo;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class DemoApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(DemoApplication.class, args);
+    }
+}
+----
+
+Set the application name in `src/main/resources/application.yml`:
+
+[source,yaml]
+----
+spring:
+  application:
+    name: demo
+----
+
+Run the application:
+
+[source,shell]
+----
+mvn spring-boot:run
+----
+
+If the current source version has not been published to a Maven repository, run `mvn install`
+from the root of this project first.
+
+== OpenAPI Documentation
+
+Add `mcn-swagger3` when the application requires API documentation:
+
+[source,xml]
+----
+<dependency>
+    <groupId>cn.hiboot.mcn</groupId>
+    <artifactId>mcn-swagger3</artifactId>
+</dependency>
+----
+
+Enable Swagger configuration:
+
+[source,yaml]
+----
+swagger:
+  enabled: true
+  title: ${spring.application.name} API
+  version: 1.0.0
+----
+
+After starting the application, open `http://localhost:8080/doc.html`.
+
+== Building from Source
+
+[source,shell]
+----
+git clone https://github.com/kse-music/mcn-boot-project.git
+cd mcn-boot-project
+mvn clean package
+----
+
+To build without running tests:
+
+[source,shell]
+----
+mvn -DskipTests package
+----
+
+== Documentation
+
+* link:docs/guide/quick-start.md[Quick start]
+* link:docs/guide/dependency.md[Managed dependency versions]
+* link:docs/function/autoconfig.md[Auto-configuration]
+* link:docs/changelog.md[Changelog]
+
+== Contributing
+
+Run `mvn clean package` before submitting a change. Report bugs and request features through
+https://github.com/kse-music/mcn-boot-project/issues[GitHub Issues].
+
+== License
+
+The Maven project metadata declares the project under the
+https://www.apache.org/licenses/LICENSE-2.0[Apache License 2.0].

@@ -9,7 +9,7 @@ import cn.hiboot.mcn.autoconfigure.web.reactor.WebUtils;
 import cn.hutool.core.util.StrUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.web.reactive.filter.OrderedWebFilter;
+import org.springframework.boot.webflux.filter.OrderedWebFilter;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;

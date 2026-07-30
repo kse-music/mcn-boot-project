@@ -7,10 +7,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
-import org.springframework.boot.autoconfigure.web.client.RestTemplateAutoConfiguration;
-import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.boot.restclient.RestTemplateBuilder;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.cloud.client.loadbalancer.reactive.DeferringLoadBalancerExchangeFilterFunction;
 import org.springframework.context.annotation.Bean;
@@ -26,7 +24,7 @@ import reactor.netty.http.client.HttpClient;
  * @author DingHao
  * @since 2023/1/3 14:58
  */
-@AutoConfiguration(after = {WebClientAutoConfiguration.class, RestTemplateAutoConfiguration.class}, afterName = "org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerBeanPostProcessorAutoConfiguration")
+@AutoConfiguration(afterName = {"org.springframework.boot.restclient.autoconfigure.RestTemplateAutoConfiguration", "org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerBeanPostProcessorAutoConfiguration"})
 @EnableConfigurationProperties(RestClientProperties.class)
 public class RestClientAutoConfiguration {
 
@@ -50,10 +48,11 @@ public class RestClientAutoConfiguration {
         }
 
         private RestTemplate restTemplate0(RestTemplateBuilder builder) {
-            builder.readTimeout(properties.getReadTimeout());
-            builder.connectTimeout(properties.getConnectTimeout());
-            restTemplateBuilderCustomizers.orderedStream().forEach(b -> b.custom(builder));
-            return builder.build();
+            RestTemplateBuilder configuredBuilder = builder
+                    .readTimeout(properties.getReadTimeout())
+                    .connectTimeout(properties.getConnectTimeout());
+            restTemplateBuilderCustomizers.orderedStream().forEach(b -> b.custom(configuredBuilder));
+            return configuredBuilder.build();
         }
 
         @Bean
@@ -70,6 +69,12 @@ public class RestClientAutoConfiguration {
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
     @Import(ReactiveClientConfiguration.LoadBalancedClientConfiguration.class)
     static class ReactiveClientConfiguration {
+
+        @Bean
+        @ConditionalOnMissingBean
+        WebClient.Builder webClientBuilder() {
+            return WebClient.builder();
+        }
 
         @Bean
         @ConditionalOnMissingBean(name = "webClient")

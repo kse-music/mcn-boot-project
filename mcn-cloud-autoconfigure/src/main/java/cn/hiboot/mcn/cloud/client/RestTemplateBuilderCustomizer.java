@@ -1,6 +1,6 @@
 package cn.hiboot.mcn.cloud.client;
 
-import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.boot.restclient.RestTemplateBuilder;
 
 /**
  * RestTemplateBuilderCustomizer

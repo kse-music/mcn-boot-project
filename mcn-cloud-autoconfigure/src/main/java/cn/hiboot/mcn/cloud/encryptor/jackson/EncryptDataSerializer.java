@@ -2,13 +2,13 @@ package cn.hiboot.mcn.cloud.encryptor.jackson;
 
 import cn.hiboot.mcn.cloud.encryptor.sm2.TextEncryptor;
 import cn.hiboot.mcn.core.util.SpringBeanUtils;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializerProvider;
 import org.springframework.beans.BeanUtils;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueSerializer;
+import tools.jackson.databind.json.JsonMapper;
 
-import java.io.IOException;
 import java.util.Objects;
 
 /**
@@ -17,17 +17,17 @@ import java.util.Objects;
  * @author DingHao
  * @since 2022/2/17 14:49
  */
-public class EncryptDataSerializer extends JsonSerializer<Object> {
+public class EncryptDataSerializer extends ValueSerializer<Object> {
 
     private final TextEncryptor textEncryptor;
-    private final static ObjectMapper objectMapper = new ObjectMapper();
+    private final static ObjectMapper objectMapper = JsonMapper.shared();
 
     public EncryptDataSerializer() {
         this.textEncryptor = SpringBeanUtils.getBean(TextEncryptor.class);
     }
 
     @Override
-    public void serialize(Object value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+    public void serialize(Object value, JsonGenerator gen, SerializationContext context) throws tools.jackson.core.JacksonException {
         if (Objects.isNull(value)) {
             return;
         }

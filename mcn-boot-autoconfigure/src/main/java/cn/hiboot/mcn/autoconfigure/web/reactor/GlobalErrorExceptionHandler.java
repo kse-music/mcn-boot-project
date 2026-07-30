@@ -1,19 +1,18 @@
 package cn.hiboot.mcn.autoconfigure.web.reactor;
 
-import cn.hiboot.mcn.autoconfigure.config.ConfigProperties;
 import cn.hiboot.mcn.autoconfigure.web.exception.HttpStatusCodeResolver;
+import cn.hiboot.mcn.autoconfigure.web.exception.error.ErrorViewReader;
 import cn.hiboot.mcn.autoconfigure.web.exception.handler.DefaultExceptionHandler;
 import cn.hiboot.mcn.autoconfigure.web.exception.handler.ExceptionHandler;
 import cn.hiboot.mcn.core.model.result.RestResp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.SearchStrategy;
-import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.autoconfigure.web.WebProperties;
-import org.springframework.boot.autoconfigure.web.reactive.WebFluxProperties;
-import org.springframework.boot.autoconfigure.web.reactive.error.DefaultErrorWebExceptionHandler;
-import org.springframework.boot.web.reactive.error.ErrorAttributes;
-import org.springframework.boot.web.reactive.error.ErrorWebExceptionHandler;
+import org.springframework.boot.webflux.autoconfigure.WebFluxProperties;
+import org.springframework.boot.webflux.autoconfigure.error.DefaultErrorWebExceptionHandler;
+import org.springframework.boot.webflux.error.ErrorAttributes;
+import org.springframework.boot.webflux.error.ErrorWebExceptionHandler;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.Ordered;
@@ -44,8 +43,8 @@ public class GlobalErrorExceptionHandler extends DefaultErrorWebExceptionHandler
     private int order;
     private ExceptionHandler exceptionHandler;
 
-    public GlobalErrorExceptionHandler(ErrorAttributes errorAttributes, WebProperties webProperties, ServerProperties serverProperties, ApplicationContext applicationContext) {
-        super(errorAttributes, webProperties.getResources(), serverProperties.getError(), applicationContext);
+    public GlobalErrorExceptionHandler(ErrorAttributes errorAttributes, WebProperties webProperties, ApplicationContext applicationContext) {
+        super(errorAttributes, webProperties.getResources(), webProperties.getError(), applicationContext);
     }
 
     @Autowired
@@ -58,7 +57,7 @@ public class GlobalErrorExceptionHandler extends DefaultErrorWebExceptionHandler
 
     @Override
     protected Mono<ServerResponse> renderDefaultErrorView(ServerResponse.BodyBuilder responseBody, Map<String, Object> error) {
-        return responseBody.bodyValue(ConfigProperties.errorView(error, webFluxProperties.getBasePath()));
+        return responseBody.bodyValue(ErrorViewReader.errorView(error, webFluxProperties.getBasePath()));
     }
 
     @Override

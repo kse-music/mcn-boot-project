@@ -88,7 +88,9 @@ class NameValueProcessorRequestDecorator extends ServerHttpRequestDecorator {
     @Override
     public HttpHeaders getHeaders() {
         if(filterHeaderValue){
-            return new HttpHeaders(process(super.getHeaders()));
+            MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+            super.getHeaders().forEach(headers::put);
+            return new HttpHeaders(process(headers));
         }
         return super.getHeaders();
     }

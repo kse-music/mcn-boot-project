@@ -1,14 +1,9 @@
 package cn.hiboot.mcn.autoconfigure.config;
 
-import cn.hiboot.mcn.autoconfigure.web.exception.error.ErrorPageController;
-import cn.hiboot.mcn.core.util.McnUtils;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
-import org.springframework.util.StreamUtils;
-import org.springframework.web.util.HtmlUtils;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Properties;
 
@@ -31,16 +26,6 @@ public abstract class ConfigProperties {
     public static final String DAO_PACKAGE_NAME = "dao.package.name";
     public static final String BASE_PACKAGE_NAME = "base.package.name";
 
-
-    private static String error_view;
-
-    static {
-        try {
-            error_view = StreamUtils.copyToString(createResource("defaultErrorView.html", ErrorPageController.class).getInputStream(), StandardCharsets.UTF_8);
-        } catch (IOException ignored) {
-        }
-    }
-
     @SuppressWarnings({"rawtypes", "unchecked"})
     public static Map<String, Object> loadConfig(ClassLoader classLoader,String location) {
         if (classLoader == null) {
@@ -60,20 +45,6 @@ public abstract class ConfigProperties {
 
     public static ClassPathResource createResource(String file,Class<?> clazz) {
         return new ClassPathResource(file, clazz);
-    }
-
-    public static String errorView(Map<String, ?> error, String basePath) {
-        String status = error.get("status").toString();
-        Object message = error.get("message");
-        if(McnUtils.isNullOrEmpty(message)){
-            message = error.get("error");
-        }
-        String msg = message == null ? "" : message.toString();
-        return error_view.replace("{status}",htmlEscape(status)).replace("{msg}",htmlEscape(msg));
-    }
-
-    private static String htmlEscape(Object input) {
-        return (input != null) ? HtmlUtils.htmlEscape(input.toString()) : null;
     }
 
     public static String getDataSourceBeanName(String dsName){

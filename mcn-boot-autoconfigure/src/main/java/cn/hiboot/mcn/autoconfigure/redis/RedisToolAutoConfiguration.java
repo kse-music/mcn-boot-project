@@ -7,7 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.*;
-import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
+import org.springframework.boot.data.redis.autoconfigure.DataRedisAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -25,7 +25,7 @@ import java.io.IOException;
  * @author DingHao
  * @since 2021/10/21 22:53
  */
-@AutoConfiguration(after = RedisAutoConfiguration.class)
+@AutoConfiguration(after = DataRedisAutoConfiguration.class)
 @ConditionalOnClass(RedisOperations.class)
 @ConditionalOnBean(StringRedisTemplate.class)
 public class RedisToolAutoConfiguration {

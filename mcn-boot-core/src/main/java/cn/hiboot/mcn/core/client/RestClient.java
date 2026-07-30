@@ -6,7 +6,6 @@ import cn.hiboot.mcn.core.model.JsonArray;
 import cn.hiboot.mcn.core.model.JsonObject;
 import cn.hiboot.mcn.core.model.result.RestResp;
 import cn.hiboot.mcn.core.util.JacksonUtils;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
@@ -16,8 +15,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
+import tools.jackson.databind.module.SimpleModule;
 
 import java.util.Collections;
 import java.util.List;
@@ -369,12 +369,17 @@ public final class RestClient {
         public RestClient build() {
             if (this.restTemplate == null) {
                 this.restTemplate = new RestTemplate();
-                for (HttpMessageConverter<?> messageConverter : this.restTemplate.getMessageConverters()) {
-                    if (messageConverter instanceof MappingJackson2HttpMessageConverter jackson) {
+                List<HttpMessageConverter<?>> messageConverters = this.restTemplate.getMessageConverters();
+                for (int i = 0; i < messageConverters.size(); i++) {
+                    HttpMessageConverter<?> messageConverter = messageConverters.get(i);
+                    if (messageConverter instanceof JacksonJsonHttpMessageConverter jackson) {
                         SimpleModule module = new SimpleModule();
                         module.addDeserializer(JsonObject.class, new JsonObject.JsonObjectDeserializer());
                         module.addDeserializer(JsonArray.class, new JsonArray.JsonArrayDeserializer());
-                        jackson.getObjectMapper().registerModule(module);
+                        JacksonJsonHttpMessageConverter replacement = new JacksonJsonHttpMessageConverter(
+                                jackson.getMapper().rebuild().addModule(module).build());
+                        replacement.setSupportedMediaTypes(jackson.getSupportedMediaTypes());
+                        messageConverters.set(i, replacement);
                         break;
                     }
                 }

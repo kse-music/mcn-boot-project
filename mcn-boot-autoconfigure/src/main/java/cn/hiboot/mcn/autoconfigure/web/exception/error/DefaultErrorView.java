@@ -1,11 +1,10 @@
 package cn.hiboot.mcn.autoconfigure.web.exception.error;
 
-import cn.hiboot.mcn.autoconfigure.config.ConfigProperties;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.web.ServerProperties;
+import org.springframework.boot.web.server.autoconfigure.ServerProperties;
 import org.springframework.http.MediaType;
 import org.springframework.web.servlet.View;
 
@@ -39,7 +38,7 @@ public class DefaultErrorView implements View {
         }
         response.setContentType(TEXT_HTML_UTF8.toString());
         String basePath = serverProperties.getServlet().getContextPath();
-        response.getWriter().append(ConfigProperties.errorView(model,basePath));
+        response.getWriter().append(ErrorViewReader.errorView(model,basePath));
     }
 
     private String getMessage(Map<String, ?> model) {

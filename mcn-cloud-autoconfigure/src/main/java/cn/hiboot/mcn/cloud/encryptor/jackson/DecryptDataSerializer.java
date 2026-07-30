@@ -4,13 +4,13 @@ import cn.hiboot.mcn.cloud.encryptor.DecryptDataConverter;
 import cn.hiboot.mcn.cloud.encryptor.sm2.TextEncryptor;
 import cn.hiboot.mcn.core.exception.ServiceException;
 import cn.hiboot.mcn.core.util.SpringBeanUtils;
-import com.fasterxml.jackson.core.JacksonException;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.deser.std.StdDeserializer;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -35,7 +35,7 @@ public class DecryptDataSerializer extends StdDeserializer<Object> {
     }
 
     @Override
-    public Object deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JacksonException {
+    public Object deserialize(JsonParser p, DeserializationContext ctxt) throws JacksonException {
         if (converter != DecryptDataConverter.class) {
             try {
                 DecryptDataConverter decryptDataConverter = ReflectionUtils.accessibleConstructor(converter).newInstance();
@@ -49,7 +49,7 @@ public class DecryptDataSerializer extends StdDeserializer<Object> {
                 throw ServiceException.newInstance("DecryptData Converter Failed", e);
             }
         }
-        String currentValue = p.getText();
+        String currentValue = p.getString();
         if (ObjectUtils.isEmpty(currentValue)) {
             return currentValue;
         }

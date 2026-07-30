@@ -1,17 +1,16 @@
 package cn.hiboot.mcn.autoconfigure.web.filter.common;
 
-import com.fasterxml.jackson.core.JacksonException;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
-
-import java.io.IOException;
+import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.deser.std.StdDeserializer;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.module.SimpleModule;
+import tools.jackson.databind.ser.std.StdSerializer;
 
 
 /**
@@ -20,7 +19,7 @@ import java.io.IOException;
  * @author DingHao
  * @since 2022/6/9 10:47
  */
-public class NameValueProcessorJacksonConfig implements Jackson2ObjectMapperBuilderCustomizer {
+public class NameValueProcessorJacksonConfig implements JsonMapperBuilderCustomizer {
 
     private static final ThreadLocal<Boolean> feignRequest = ThreadLocal.withInitial(() -> false);
 
@@ -46,19 +45,21 @@ public class NameValueProcessorJacksonConfig implements Jackson2ObjectMapperBuil
     }
 
     @Override
-    public void customize(Jackson2ObjectMapperBuilder jacksonObjectMapperBuilder) {
-        jacksonObjectMapperBuilder.serializers(new StdSerializer<>(String.class) {
+    public void customize(JsonMapper.Builder builder) {
+        SimpleModule module = new SimpleModule();
+        module.addSerializer(String.class, new StdSerializer<>(String.class) {
             @Override
-            public void serialize(String value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+            public void serialize(String value, JsonGenerator gen, SerializationContext context) throws JacksonException {
                 gen.writeString(clean(null, value));
             }
         });
-        jacksonObjectMapperBuilder.deserializers(new StdDeserializer<>(String.class) {
+        module.addDeserializer(String.class, new StdDeserializer<>(String.class) {
             @Override
-            public String deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JacksonException {
-                return clean(p.currentName(), p.getText());
+            public String deserialize(JsonParser p, DeserializationContext ctxt) throws JacksonException {
+                return clean(p.currentName(), p.getString());
             }
         });
+        builder.addModule(module);
     }
 
 }

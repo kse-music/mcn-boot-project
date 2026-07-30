@@ -195,7 +195,7 @@
                                 <metadataRepository>
                                     <enabled>true</enabled>
                                 </metadataRepository>
-                                <requiredVersion>22.3</requiredVersion>
+                                <requiredVersion>25</requiredVersion>
                             </configuration>
                             <executions>
                                 <execution>
@@ -241,7 +241,7 @@
                             <metadataRepository>
                                 <enabled>true</enabled>
                             </metadataRepository>
-                            <requiredVersion>22.3</requiredVersion>
+                            <requiredVersion>25</requiredVersion>
                         </configuration>
                         <executions>
                             <execution>

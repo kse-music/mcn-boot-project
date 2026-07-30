@@ -2,9 +2,10 @@ package cn.hiboot.mcn.cloud.encryptor.jackson;
 
 import cn.hiboot.mcn.cloud.encryptor.Decrypt;
 import cn.hiboot.mcn.cloud.encryptor.Encrypt;
-import com.fasterxml.jackson.databind.introspect.Annotated;
-import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
-import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
+import tools.jackson.databind.cfg.MapperConfig;
+import tools.jackson.databind.introspect.Annotated;
+import tools.jackson.databind.introspect.AnnotatedMethod;
+import tools.jackson.databind.introspect.JacksonAnnotationIntrospector;
 
 /**
  * 在json序列化和反序列化时加解密被注解修饰的数据
@@ -15,7 +16,7 @@ import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 public class EncryptDecryptAnnotationIntrospector extends JacksonAnnotationIntrospector {
 
     @Override
-    public Object findSerializer(Annotated am) {
+    public Object findSerializer(MapperConfig<?> config, Annotated am) {
         Encrypt annotation = am.getAnnotation(Encrypt.class);
         if (annotation != null) {
             return EncryptDataSerializer.class;
@@ -24,7 +25,7 @@ public class EncryptDecryptAnnotationIntrospector extends JacksonAnnotationIntro
     }
 
     @Override
-    public Object findDeserializer(Annotated am) {
+    public Object findDeserializer(MapperConfig<?> config, Annotated am) {
         Decrypt annotation = am.getAnnotation(Decrypt.class);
         if (annotation != null) {
             if (am instanceof AnnotatedMethod annotatedMethod) {

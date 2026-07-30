@@ -1,12 +1,11 @@
 package cn.hiboot.mcn.core.jackson;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.type.TypeFactory;
-
-import java.io.IOException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.JavaType;
+import tools.jackson.databind.ValueDeserializer;
+import tools.jackson.databind.type.TypeFactory;
 
 /**
  * EmptyStringDeserializer
@@ -14,12 +13,12 @@ import java.io.IOException;
  * @author DingHao
  * @since 2025/8/12 13:45
  */
-public abstract class EmptyStringDeserializer<T> extends JsonDeserializer<T> {
+public abstract class EmptyStringDeserializer<T> extends ValueDeserializer<T> {
 
     private final JavaType javaType;
 
     protected EmptyStringDeserializer(Class<T> clazz) {
-        this(TypeFactory.defaultInstance().constructType(clazz));
+        this(TypeFactory.createDefaultInstance().constructType(clazz));
     }
 
     protected EmptyStringDeserializer(JavaType javaType) {
@@ -27,12 +26,14 @@ public abstract class EmptyStringDeserializer<T> extends JsonDeserializer<T> {
     }
 
     @Override
-    public T deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-        String text = p.getText();
+    public T deserialize(JsonParser p, DeserializationContext ctxt) throws JacksonException {
+        String text = p.getString();
         if (text == null || text.trim().isEmpty()) {
-            return getNullValue(ctxt);
+            @SuppressWarnings("unchecked")
+            T nullValue = (T) getNullValue(ctxt);
+            return nullValue;
         }
-        return p.getCodec().readValue(p, javaType);
+        return ctxt.readValue(p, javaType);
     }
 
 }
