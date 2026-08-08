@@ -43,7 +43,7 @@
         <commons-io.version>2.21.0</commons-io.version>
         <guava.version>33.5.0-jre</guava.version>
         <hutool.version>5.8.41</hutool.version>
-        <jsoup.version>1.21.2</jsoup.version>
+        <jsoup.version>1.23.1</jsoup.version>
         <knife4j.version>4.5.0</knife4j.version>
         <mapstruct.version>1.5.5.Final</mapstruct.version>
         <mybatis-spring-boot.version>4.0.1</mybatis-spring-boot.version>
