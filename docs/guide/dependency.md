@@ -11,7 +11,6 @@
 | commons-io                           | commons-io.version           |      2.21.0      |
 | guava                                | guava.version                |    33.5.0-jre    |
 | hutool-bom                           | hutool.version               |      5.8.41      |
-| jsoup                                | jsoup.version                |      1.21.2      |
 | knife4j-openapi3-ui                  | knife4j.version              |      4.5.0       |
 | mapstruct                            | mapstruct.version            |   1.5.5.Final    |
 | mybatis-spring-boot-starter          | mybatis-spring-boot.version  |      4.0.1       |
