@@ -49,11 +49,11 @@ ConfigDataLocationResolver与ConfigDataLoader的实现都是从spring.factories�
 
 1. 文件目录下，优先级从低到高
 
-<img :src="$withBase('/images/app-prop1.png')">
+![应用属性示例一](/images/app-prop1.png)
 
 2. classpath下，优先级从低到高
 
-<img :src="$withBase('/images/app-prop2.png')">
+![应用属性示例二](/images/app-prop2.png)
 
 :::
 
@@ -63,7 +63,7 @@ ConfigDataLocationResolver与ConfigDataLoader的实现都是从spring.factories�
 
 最终Environment中属性源顺序如下图所示：
 
-<img :src="$withBase('/images/env.png')" alt="env">
+![环境变量示例](/images/env.png)
 
 ## 日志系统
 

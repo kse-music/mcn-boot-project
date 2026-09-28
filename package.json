@@ -17,13 +17,11 @@
   },
   "license": "MIT",
   "scripts": {
-    "docs:dev": "vuepress dev docs",
-    "docs:build": "vuepress build docs"
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
   },
   "devDependencies": {
-    "@vuepress/plugin-back-to-top": "^1.7.1",
-    "vuepress": "^1.7.1",
-    "vuepress-plugin-qrcode": "^1.0.7",
-    "watchpack": "^1.6.1"
+    "vitepress": "^1.6.4"
   }
 }
