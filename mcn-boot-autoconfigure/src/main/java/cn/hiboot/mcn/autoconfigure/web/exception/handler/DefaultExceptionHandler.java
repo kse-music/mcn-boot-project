@@ -47,15 +47,15 @@ import java.util.stream.Collectors;
  * @since 2023/5/24 13:25
  */
 public class DefaultExceptionHandler implements ExceptionHandler, ApplicationContextAware, SmartInitializingSingleton {
-    private final Logger log = LoggerFactory.getLogger(DefaultExceptionHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(DefaultExceptionHandler.class);
 
     /**
      * 非BaseException的默认code码
      */
     private static final int DEFAULT_ERROR_CODE = 999998;
 
-    private static final Map<Class<?>, List<ExceptionResolver<Throwable>>> exceptionResolverCache = new ConcurrentHashMap<>();
-    private static final Map<Class<?>, ResolvableType> exceptionResolverTypeCache = new ConcurrentReferenceHashMap<>();
+    private static final Map<Class<?>, List<ExceptionResolver<Throwable>>> EXCEPTION_RESOLVER_CACHE = new ConcurrentHashMap<>();
+    private static final Map<Class<?>, ResolvableType> EXCEPTION_RESOLVER_TYPE_CACHE = new ConcurrentReferenceHashMap<>();
 
     private boolean validationExceptionPresent;
     private String basePackage;
@@ -75,25 +75,36 @@ public class DefaultExceptionHandler implements ExceptionHandler, ApplicationCon
 
     @Override
     public RestResp<Throwable> handleException(Throwable exception) {
-        RestResp<Throwable> resp = null;
-        List<ExceptionResolver<Throwable>> exceptionResolvers = exceptionResolverCache.computeIfAbsent(exception.getClass(), exClass -> this.exceptionResolvers.stream().filter(s -> supportsExceptionType(s, ResolvableType.forClass(exClass))).collect(Collectors.toList()));
-        for (ExceptionResolver<Throwable> exceptionResolver : exceptionResolvers) {
-            resp = exceptionResolver.resolve(exception);
-            if (resp != null) {
-                break;
-            }
-        }
+        RestResp<Throwable> resp = resolveException(exception);
         if (Objects.isNull(resp)) {
             resp = doHandleException(exception);
         }
+        overrideErrorMessage(resp);
+        logError(exception);
+        return resp;
+    }
+
+    private RestResp<Throwable> resolveException(Throwable exception) {
+        List<ExceptionResolver<Throwable>> resolvers = EXCEPTION_RESOLVER_CACHE.computeIfAbsent(
+                exception.getClass(), exceptionClass -> this.exceptionResolvers.stream()
+                        .filter(resolver -> supportsExceptionType(resolver, ResolvableType.forClass(exceptionClass)))
+                        .collect(Collectors.toList()));
+        for (ExceptionResolver<Throwable> resolver : resolvers) {
+            RestResp<Throwable> resp = resolver.resolve(exception);
+            if (resp != null) {
+                return resp;
+            }
+        }
+        return null;
+    }
+
+    private void overrideErrorMessage(RestResp<Throwable> resp) {
         if (properties.isOverrideExMsg()) {
             String message = properties.getErrorCodeMsg().get(resp.getErrorCode());
             if (Objects.nonNull(message)) {
                 resp.setErrorInfo(message);
             }
         }
-        logError(exception);
-        return resp;
     }
 
     private RestResp<Throwable> doHandleException(Throwable exception) {
@@ -202,7 +213,9 @@ public class DefaultExceptionHandler implements ExceptionHandler, ApplicationCon
     }
 
     private ResolvableType resolveDeclaredExceptionType(Class<?> exceptionResolverType) {
-        ResolvableType exceptionType = exceptionResolverTypeCache.computeIfAbsent(exceptionResolverType, e -> ResolvableType.forClass(exceptionResolverType).as(ExceptionResolver.class).getGeneric());
+        ResolvableType exceptionType = EXCEPTION_RESOLVER_TYPE_CACHE.computeIfAbsent(
+                exceptionResolverType,
+                type -> ResolvableType.forClass(type).as(ExceptionResolver.class).getGeneric());
         return exceptionType != ResolvableType.NONE ? exceptionType : null;
     }
 

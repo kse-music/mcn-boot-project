@@ -24,25 +24,25 @@ import java.util.stream.Collectors;
  */
 class DefaultRdbManage implements RdbManage {
 
-    private static final Map<ConnectConfig, DataSourceManage> rdbManageMap = new ConcurrentHashMap<>();
+    private static final Map<ConnectConfig, DataSourceManage> RDB_MANAGE_MAP = new ConcurrentHashMap<>();
 
-    private DataSourceManage rdbMetaDataManage(ConnectConfig config) {
-        if (rdbManageMap.containsKey(config)) {
-            return rdbManageMap.get(config);
-        }
+    private DataSourceManage getDataSourceManage(ConnectConfig config) {
+        return RDB_MANAGE_MAP.computeIfAbsent(config, this::createDataSourceManage);
+    }
+
+    private DataSourceManage createDataSourceManage(ConnectConfig config) {
         DataSourceManage dataSourceManage = new DataSourceManage(config);
         try {
             dataSourceManage.withConnection(connection -> null);
         } catch (Exception e) {
             throw new RuntimeException("connect error", e);
         }
-        rdbManageMap.put(config, dataSourceManage);
         return dataSourceManage;
     }
 
     @Override
     public void connect(ConnectConfig connectConfig, Consumer<Connection> consumer) {
-        rdbMetaDataManage(connectConfig).withConnection(connection -> {
+        getDataSourceManage(connectConfig).withConnection(connection -> {
             consumer.accept(connection);
             return null;
         });
@@ -50,7 +50,7 @@ class DefaultRdbManage implements RdbManage {
 
     @Override
     public List<SchemaInfo> schemaInfo(ConnectConfig connectConfig, DbQuery dbQuery) {
-        return rdbMetaDataManage(connectConfig).withConnection(connection -> {
+        return getDataSourceManage(connectConfig).withConnection(connection -> {
             List<SchemaInfo> result = new ArrayList<>();
             DbQuery dq = buildDbQuery(connectConfig, dbQuery);
             try (ResultSet rs = connection.getMetaData().getSchemas(dq.getCatalog(), dq.getTableSchema())) {
@@ -64,7 +64,7 @@ class DefaultRdbManage implements RdbManage {
 
     @Override
     public List<TableInfo> tableInfo(ConnectConfig connectConfig, DbQuery dbQuery) {
-        return rdbMetaDataManage(connectConfig).withConnection(connection -> {
+        return getDataSourceManage(connectConfig).withConnection(connection -> {
             List<TableInfo> result = new ArrayList<>();
             DbQuery dq = buildDbQuery(connectConfig, dbQuery);
             try (ResultSet rs = connection.getMetaData().getTables(dq.getCatalog(), dq.getTableSchema(), dq.getTableName(), dq.types())) {
@@ -104,13 +104,13 @@ class DefaultRdbManage implements RdbManage {
 
     @Override
     public List<FieldInfo> findFieldInfo(ConnectConfig connectConfig, DbQuery dbQuery) {
-        return rdbMetaDataManage(connectConfig).withConnection(connection -> {
+        return getDataSourceManage(connectConfig).withConnection(connection -> {
             DbQuery dq = buildDbQuery(connectConfig, dbQuery);
             return fieldInfo(connection.getMetaData(), dq.getCatalog(), dq.getTableSchema(), dq.getTableName(), dq.getColumnNamePattern());
         });
     }
 
-    private List<FieldInfo> fieldInfo(DatabaseMetaData metaData,String catalog, String schemaPattern,
+    private List<FieldInfo> fieldInfo(DatabaseMetaData metaData, String catalog, String schemaPattern,
                                       String tableNamePattern, String columnNamePattern) throws SQLException {
         List<FieldInfo> result = new ArrayList<>();
         try (ResultSet resultSet = metaData.getColumns(catalog, schemaPattern, tableNamePattern, columnNamePattern)) {
@@ -123,7 +123,7 @@ class DefaultRdbManage implements RdbManage {
 
     @Override
     public List<ImportedKeyInfo> findImportedKeys(ConnectConfig connectConfig, DbQuery dbQuery) {
-        return rdbMetaDataManage(connectConfig).withConnection(connection -> {
+        return getDataSourceManage(connectConfig).withConnection(connection -> {
             List<ImportedKeyInfo> result = new ArrayList<>();
             try (ResultSet rs = connection.getMetaData().getImportedKeys(connection.getCatalog(), dbQuery.getTableSchema(), dbQuery.getTableName())) {
                 while (rs.next()) {
@@ -150,7 +150,7 @@ class DefaultRdbManage implements RdbManage {
     }
 
     private RestResp<List<Map<String, Object>>> queryData(ConnectConfig connectConfig, DataQuery dataQuery, boolean data, boolean count) {
-        DataSourceManage dataSourceManage = rdbMetaDataManage(connectConfig);
+        DataSourceManage dataSourceManage = getDataSourceManage(connectConfig);
         Map<String, Object> paramMap = new HashMap<>();
         DbQuery dq = buildDbQuery(connectConfig, dataQuery);
         String condition = RdbManageUtil.buildCondition(connectConfig, dataQuery, paramMap);
@@ -158,33 +158,48 @@ class DefaultRdbManage implements RdbManage {
         NamedParameterJdbcTemplate namedParameterJdbcTemplate = dataSourceManage.namedParameterJdbcTemplate();
         RestResp<List<Map<String, Object>>> result = RestResp.ok();
         if (data) {
-            String sql = "SELECT * FROM " + tableName + condition + RdbManageUtil.buildSort(dataQuery);
-            Integer skip = dataQuery.getSkip();
-            Integer limit = dataQuery.getLimit();
-            boolean isOracle = Objects.equals(connectConfig.dbType().name(), "oracle");
-            if (skip != null || limit != null) {
-                if (skip == null || skip < 0) {
-                    skip = 0;
-                }
-                if (limit == null || limit < 0) {
-                    limit = 10;
-                }
-                paramMap.put("skip", skip);
-                paramMap.put("pageSize", limit);
-                sql = connectConfig.dbType().pageSql(sql, skip, limit);
-            }
-            result.setData(namedParameterJdbcTemplate.queryForList(sql, paramMap).stream().map(d -> {
-                if (isOracle) {
-                    d.remove("RN");
-                }
-                return RdbManageUtil.tranMap(d);
-            }).collect(Collectors.toList()));
+            result.setData(queryRows(connectConfig, dataQuery, tableName, condition, paramMap, namedParameterJdbcTemplate));
         }
         if (count) {
-            String sqlCount = "SELECT count(*) FROM " + tableName + condition;
-            result.setCount(namedParameterJdbcTemplate.queryForObject(sqlCount, paramMap, Long.class));
+            result.setCount(queryCount(tableName, condition, paramMap, namedParameterJdbcTemplate));
         }
         return result;
+    }
+
+    private List<Map<String, Object>> queryRows(ConnectConfig connectConfig, DataQuery dataQuery, String tableName,
+                                                 String condition, Map<String, Object> paramMap,
+                                                 NamedParameterJdbcTemplate jdbcTemplate) {
+        String sql = "SELECT * FROM " + tableName + condition + RdbManageUtil.buildSort(dataQuery);
+        Integer skip = dataQuery.getSkip();
+        Integer limit = dataQuery.getLimit();
+        if (skip != null || limit != null) {
+            if (skip == null || skip < 0) {
+                skip = 0;
+            }
+            if (limit == null || limit < 0) {
+                limit = 10;
+            }
+            paramMap.put("skip", skip);
+            paramMap.put("pageSize", limit);
+            sql = connectConfig.dbType().pageSql(sql, skip, limit);
+        }
+
+        boolean isOracle = Objects.equals(connectConfig.dbType().name(), "oracle");
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, paramMap);
+        List<Map<String, Object>> result = new ArrayList<>(rows.size());
+        for (Map<String, Object> row : rows) {
+            if (isOracle) {
+                row.remove("RN");
+            }
+            result.add(RdbManageUtil.tranMap(row));
+        }
+        return result;
+    }
+
+    private Long queryCount(String tableName, String condition, Map<String, Object> paramMap,
+                            NamedParameterJdbcTemplate jdbcTemplate) {
+        String sql = "SELECT count(*) FROM " + tableName + condition;
+        return jdbcTemplate.queryForObject(sql, paramMap, Long.class);
     }
 
     private String fromTable(DbType dbType, DbQuery dq, String tableName) {
@@ -198,7 +213,7 @@ class DefaultRdbManage implements RdbManage {
 
     @Override
     public int insert(ConnectConfig connectConfig, String tableName, Map<String, Object> data) {
-        DataSourceManage dataSourceManage = rdbMetaDataManage(connectConfig);
+        DataSourceManage dataSourceManage = getDataSourceManage(connectConfig);
         NamedParameterJdbcTemplate jdbcTemplate = dataSourceManage.namedParameterJdbcTemplate();
 
         String columns = data.keySet().stream()
@@ -213,7 +228,7 @@ class DefaultRdbManage implements RdbManage {
     @Override
     public int update(ConnectConfig connectConfig, String tableName, Map<String, Object> data,
                       String condition, Map<String, Object> params) {
-        DataSourceManage dataSourceManage = rdbMetaDataManage(connectConfig);
+        DataSourceManage dataSourceManage = getDataSourceManage(connectConfig);
         NamedParameterJdbcTemplate jdbcTemplate = dataSourceManage.namedParameterJdbcTemplate();
 
         String setClause = data.keySet().stream()
@@ -234,7 +249,7 @@ class DefaultRdbManage implements RdbManage {
 
     @Override
     public int delete(ConnectConfig connectConfig, String tableName, String condition, Map<String, Object> params) {
-        DataSourceManage dataSourceManage = rdbMetaDataManage(connectConfig);
+        DataSourceManage dataSourceManage = getDataSourceManage(connectConfig);
         NamedParameterJdbcTemplate jdbcTemplate = dataSourceManage.namedParameterJdbcTemplate();
 
         String sql = "DELETE FROM " + connectConfig.dbType().sqlQuote(tableName) +

@@ -24,16 +24,16 @@ public abstract class WebUtils {
     private static final String UNKNOWN = "unknown";
 
     public static String getRemoteAddr(ServerHttpRequest request) {
-        String ipAddress = getHeader(request,"X-Forwarded-For");
+        String ipAddress = getHeader(request, "X-Forwarded-For");
         if (ObjectUtils.isEmpty(ipAddress) || UNKNOWN.equalsIgnoreCase(ipAddress)) {
-            ipAddress = getHeader(request,"Proxy-Client-IP");
+            ipAddress = getHeader(request, "Proxy-Client-IP");
         }
         if (ObjectUtils.isEmpty(ipAddress) || UNKNOWN.equalsIgnoreCase(ipAddress)) {
-            ipAddress = getHeader(request,"WL-Proxy-Client-IP");
+            ipAddress = getHeader(request, "WL-Proxy-Client-IP");
         }
         if (ObjectUtils.isEmpty(ipAddress) || UNKNOWN.equalsIgnoreCase(ipAddress)) {
             InetSocketAddress remoteAddress = request.getRemoteAddress();
-            if(remoteAddress != null){
+            if (remoteAddress != null) {
                 ipAddress = remoteAddress.getAddress().getHostAddress();
             }
         }
@@ -48,32 +48,32 @@ public abstract class WebUtils {
     }
 
     public static Mono<Void> success(ServerHttpResponse response) {
-        return write(new RestResp<>(),response);
+        return write(new RestResp<>(), response);
     }
 
     public static Mono<Void> success(Object data, ServerHttpResponse response) {
-        return write(RestResp.ok(data),response);
+        return write(RestResp.ok(data), response);
     }
 
     public static Mono<Void> failed(Throwable e, ServerHttpResponse response) {
-        return failed(e.getMessage(),response);
+        return failed(e.getMessage(), response);
     }
 
     public static Mono<Void> failed(String msg, ServerHttpResponse response) {
-        return write(RestResp.error(msg),response);
+        return write(RestResp.error(msg), response);
     }
 
     public static Mono<Void> failed(Integer code, ServerHttpResponse response) {
-        return write(RestResp.error(code),response);
+        return write(RestResp.error(code), response);
     }
 
-    public static Mono<Void> write(RestResp<?> resp,ServerHttpResponse response) {
+    public static Mono<Void> write(RestResp<?> resp, ServerHttpResponse response) {
         response.setStatusCode(HttpStatus.OK);
-        return write(JacksonUtils.toJson(resp),response);
+        return write(JacksonUtils.toJson(resp), response);
     }
 
-    public static Mono<Void> write(String msg,ServerHttpResponse response) {
-        if(msg == null){
+    public static Mono<Void> write(String msg, ServerHttpResponse response) {
+        if (msg == null) {
             msg = "";
         }
         response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
