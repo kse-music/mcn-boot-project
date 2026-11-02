@@ -41,7 +41,7 @@
         <bcprov-jdk18on.version>1.85</bcprov-jdk18on.version>
         <boot-admin.version>4.1.2</boot-admin.version>
         <commons-io.version>2.21.0</commons-io.version>
-        <guava.version>33.5.0-jre</guava.version>
+        <guava.version>33.7.1-jre</guava.version>
         <hutool.version>5.8.41</hutool.version>
         <knife4j.version>4.5.0</knife4j.version>
         <mapstruct.version>1.5.5.Final</mapstruct.version>
