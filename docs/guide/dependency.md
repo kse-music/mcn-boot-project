@@ -9,7 +9,7 @@
 | spring-boot-admin-starter-client     | boot-admin.version           |      4.1.2       |
 | spring-boot-admin-starter-server     | boot-admin.version           |      4.1.2       |
 | commons-io                           | commons-io.version           |      2.21.0      |
-| guava                                | guava.version                |    33.5.0-jre    |
+| guava                                | guava.version                |    33.7.2-jre    |
 | hutool-bom                           | hutool.version               |      5.8.41      |
 | knife4j-openapi3-ui                  | knife4j.version              |      4.5.0       |
 | mapstruct                            | mapstruct.version            |   1.5.5.Final    |
