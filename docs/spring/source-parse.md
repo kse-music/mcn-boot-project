@@ -1,139 +1,93 @@
+---
+description: 以当前依赖源码理解配置解析、日志初始化和自动配置导入。
+---
+
 # 源码解读
+
+这里解释当前 Spring Boot 4.1.0 与 MCN 的相关调用链。自动配置数量、元数据条数和最终 Bean 数量取决于应用依赖和配置，不应使用某次调试结果作为固定规则。
 
 ## 配置解析
 
-从生命周期章节我们知道配置文件的解析是发生在EnvironmentPostProcessorApplicationListener执行环境后置处理器的过程中，通过从spring.factories中获取所有实现了EnvironmentPostProcessor接口的配置类，如下：
+主要调用链如下：
 
-1. org.springframework.boot.cloud.CloudFoundryVcapEnvironmentPostProcessor
-2. org.springframework.boot.context.config.ConfigDataEnvironmentPostProcessor
-3. org.springframework.boot.env.RandomValuePropertySourceEnvironmentPostProcessor
-4. org.springframework.boot.env.SpringApplicationJsonEnvironmentPostProcessor
-5. org.springframework.boot.env.SystemEnvironmentPropertySourceEnvironmentPostProcessor
-6. org.springframework.boot.reactor.DebugAgentEnvironmentPostProcessor
-7. org.springframework.boot.autoconfigure.integration.IntegrationPropertiesEnvironmentPostProcessor
+```text
+SpringApplication.run
+  → prepareEnvironment
+  → 发布 ApplicationEnvironmentPreparedEvent
+  → EnvironmentPostProcessorApplicationListener
+  → 按顺序执行 EnvironmentPostProcessor
+      → ConfigDataEnvironmentPostProcessor
+      → McnEnvironmentPostProcessor
+```
 
-实例化并排序后顺序如下：
+Boot 的后处理器除 Config Data 外，还可能处理系统环境、随机值、`SPRING_APPLICATION_JSON` 等。具体参与者由当前 classpath 中的 `spring.factories` 决定；Spring Boot 4.1 的部分实现已迁移到 `org.springframework.boot.support` 包，旧版本的类名列表不能直接当作当前清单。
 
-1. **org.springframework.boot.env.RandomValuePropertySourceEnvironmentPostProcessor**
-* 添加一个名为random的属性源到Environment中
-* 通过诸如abc=${random.int(11,22)}配置，表示随机一个整数在11至22之间
-* 底层直接使用Random类实现
+### Config Data
 
-2. **org.springframework.boot.env.SystemEnvironmentPropertySourceEnvironmentPostProcessor**
-* 将SystemEnvironmentPropertySource替换为OriginAwareSystemEnvironmentPropertySource
-* 用于追踪不同系统的环境属性
+`ConfigDataLocationResolver` 将配置位置解析为资源，`ConfigDataLoader` 负责加载配置数据。两类扩展通过对应的启动扩展注册机制参与流程，可用于远程配置或自定义资源协议。
 
-3. **org.springframework.boot.env.SpringApplicationJsonEnvironmentPostProcessor**
-* 解析属性名为spring.application.json或SPRING_APPLICATION_JSON的json字符串为Map<String,Object>
-* 解析json的工具顺序是：Jackson > Gson > Yaml，以上都没有则使用内置的BasicJsonParser
-* 如果系统存在StandardServletEnvironment则将json属性源放在Servlet属性源前面
-* 如果系统不存在StandardServletEnvironment则将json属性源放在Environment中第一个位置即优先级最高
+常规配置数据位置的优先级，从低到高，可概括为：
 
-4. org.springframework.boot.cloud.CloudFoundryVcapEnvironmentPostProcessor
+1. jar 内的 `application.properties` / `application.yml`。
+2. jar 内对应 profile 的配置。
+3. jar 外的常规配置。
+4. jar 外对应 profile 的配置。
 
-5. **org.springframework.boot.context.config.ConfigDataEnvironmentPostProcessor**
-* ConfigDataLocationResolver：将location解析成ConfigDataResource
-* ConfigDataLoader：通过给定的ConfigDataResource去加载ConfigData
-* ConfigDataProperties：记录配置解析过程中额外导入的配置和激活的云平台以及激活的profile
-* processInitial：初始处理文件（无activationContext）
-* processWithoutProfiles：处理配置数据环境（初始的activationContext）
-* processWithProfiles：最后处理配置数据环境（已激活的activationContext）
+这只是 Config Data 这一部分的顺序。`spring.config.location` 会替换默认搜索位置，`spring.config.additional-location` 用于补充位置，`spring.config.import` 还会影响导入关系；命令行、系统属性等属于更完整的属性源优先级体系。
 
-6. org.springframework.boot.reactor.DebugAgentEnvironmentPostProcessor
-7. org.springframework.boot.autoconfigure.integration.IntegrationPropertiesEnvironmentPostProcessor
+### JSON 与随机属性
 
-::: tip 重要
-ConfigDataLocationResolver与ConfigDataLoader的实现都是从spring.factories中获取，言外之意就是我们也可以自己定制自己的外部配置数据，只需要有对应的ConfigDataLoader。如springc-cloud-config中的ConfigServerConfigDataLocationResolver与ConfigServerConfigDataLoader。
+`spring.application.json` 或 `SPRING_APPLICATION_JSON` 中的 JSON 会转换成属性源。当前 `JsonParserFactory` 按 Jackson 3、Gson、内置 Basic 解析器的顺序选择实现，没有旧文档所写的 YAML JSON 解析器分支。
 
-配置文件一般存放在两个位置：
+JSON 属性源插入位置与环境中已有的属性源有关，不能一概写成优先级最高；例如命令行属性可以覆盖它。
 
-1. 文件目录下，优先级从低到高
+`${random.int(11,22)}` 表示下界包含、上界不包含的随机整数；这些随机属性不适合作为需要跨进程稳定的业务配置。
 
-![应用属性示例一](/images/app-prop1.png)
+### MCN 补充配置
 
-2. classpath下，优先级从低到高
+`McnEnvironmentPostProcessor` 运行在标准 Config Data 之后，通过 `addLast` 追加 `mcn-global-unique`、`mcn-map` 和 `mcn-default`。这与 Spring Boot 自身的外部配置优先级是两层机制，具体文件与 profile 顺序见[扩展模块](../function/extension.md)。
 
-![应用属性示例二](/images/app-prop2.png)
-
-:::
-
-::: warning 注意
-1. **相同配置项文件目录中的优先级比classpath高**
-:::
-
-最终Environment中属性源顺序如下图所示：
-
-![环境变量示例](/images/env.png)
+完整规则参见 [Spring Boot 外部化配置](https://docs.spring.io/spring-boot/reference/features/external-config.html)。
 
 ## 日志系统
 
-SpringBoot内置三种日志系统：
+`LoggingApplicationListener` 在多个阶段参与日志初始化和清理。当前实际使用的日志系统由依赖和配置决定，常见实现包括 Logback、Log4j2 与 Java Logging。
 
-1. LogbackLoggingSystem
-2. Log4J2LoggingSystem
-3. JavaLoggingSystem
+| 阶段 | 主要职责 |
+| --- | --- |
+| `ApplicationStartingEvent` | 获取日志系统并执行早期初始化准备 |
+| `ApplicationEnvironmentPreparedEvent` | 读取日志属性、配置文件和日志级别，初始化日志系统 |
+| `ApplicationPreparedEvent` | 将日志系统、日志文件或日志组等相关对象加入可用的容器 |
+| `ContextClosedEvent` | 按上下文归属清理相关日志资源 |
+| `ApplicationFailedEvent` | 执行失败阶段清理 |
 
-日志系统的初始化由LoggingApplicationListener完成，有以下5个过程：
+`logging.config` 可以指定日志配置文件。需要 Spring 扩展时使用对应的 `logback-spring.xml` 或 `log4j2-spring.xml`，不要套用旧文档中一个固定的 Groovy / XML 文件扫描序列。
 
-1. ApplicationStartingEvent：应用刚启动时主要为初始化日志系统做准备
-* 可以通过配置系统属性org.springframework.boot.logging.LoggingSystem=none关闭日志系统
-* 如果org.springframework.boot.logging.LoggingSystem对应的值是继承了抽象类LoggingSystem的className则会使用自实现的日志系统
-* 前两种情况一般使用不到，所以系统默认就会从内置的三种日志系统选择一个，这里我们得到的是LogbackLoggingSystem
-* 执行beforeInitialize，如果存在SLF4JBridge等依赖，就会把对应的日志全部桥接到统一的日志输出，如：jul-to-slf4j
-
-2. ApplicationEnvironmentPreparedEvent：开始初始化日志系统
-* 将指定存在于Environment中的配置项(如：编码、样式、级别等)设置到系统属性中
-* 通过配置项logging.file.name或logging.file.path获取日志文件(注意：**同时设置可不是两者的组合**)
-* 如果通过logging.config指定了日志的配置文件(如：logback.xml)则会使用指定的配置文件初始化，默认未指定
-* 接下来会默认从classpath下查找是否存在logback-test.groovy、logback-test.xml、logback.groovy、logback.xml文件，如果还没有则会将前面四类文件后拼接-spring后继续在classpath下查找即查找logback-test-spring.groovy、logback-test-spring.xml、logback-spring.groovy、logback-spring.xml是否存在
-* 由于我们什么都没配置最后SpringBoot通过编程方式执行默认日志配置初始化(DefaultLogbackConfiguration)完成后并标记已初始化
-
-3. ApplicationPreparedEvent：将日志系统相关对象注册到IOC容器中
-* 如果不存在名为springBootLoggingSystem的Bean则把loggingSystem注册到容器中
-* 如果配置了日志文件且容器中不存在名为springBootLogFile的Bean则把logFile注册到容器中
-* 如果配置了日志组且容器中不存在名为springBootLoggerGroups的Bean则把loggerGroups注册到容器中
-
-4. ContextClosedEvent：发生上下文关闭事件，执行清理流程
-* 应用上下文关闭则会清理日志系统，如标记日志系统未初始化等操作
-
-5. ApplicationFailedEvent：应用启动失败，执行清理流程
-* SpringBoot应用启动失败也会清理日志系统
+同时设置 `logging.file.name` 和 `logging.file.path` 不会自动拼接成路径；`name` 优先。MCN 的默认文件名与滚动配置见[默认属性源](../function/extension.md#mcn-default)。
 
 ## 加载Starters
 
-主要过程：
+starter 首先是一个 Maven 依赖入口，不是由类名数量决定是否生效的运行时插件。启用 `@SpringBootApplication` / `@EnableAutoConfiguration` 后，自动配置导入大致经过：
 
-1. 加载
-* 读取META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports文件所有自动配置类,默认有144个
-* 通过注解SpringBootApplication中定义的exclude和excludeName以及配置文件中spring.autoconfigure.exclude配置项获取需要排除的自动配置类
-* 根据前面核心组件中的[三个条件接口](core.md#AutoConfigurationImportFilter)生成ConfigurationClassFilter(同时加载自动配置元数据[845项])用于过滤自动配置类，最终只剩下24项
+1. 从各依赖的 `AutoConfiguration.imports` 收集候选类并去重。
+2. 应用注解的 `exclude` / `excludeName` 与 `spring.autoconfigure.exclude` 排除项。
+3. 由 [AutoConfigurationImportFilter](./core.md#autoconfigurationimportfilter) 等机制初步过滤。
+4. 按自动配置顺序和前后依赖排序。
+5. 解析配置类，并继续依据属性、Bean 定义和应用类型等条件决定是否注册 Bean。
 
-2. 排序
-* 首选将自动配置类的before和after注解相关的 **可用类**（存在classpath中）添加到结果集（34项）上
-* 接着先按字母顺序自然排序
-* 再按指定的自动配置顺序（AutoConfigureOrder,默认0）排
-* 最后再根据before和after指定依赖排序
+配置顺序可用 `@AutoConfiguration(before / after / beforeName / afterName)`、`@AutoConfigureBefore`、`@AutoConfigureAfter` 和 `@AutoConfigureOrder`。普通 `@Order` / `Ordered` 不是自动配置类排序的替代方式；配置类顺序也不等于最终 Bean 的实例化顺序。
 
-::: tip 重要
+### MCN 的数据源过滤
 
-1. **在过滤自动配置类时如果前期没有生成自动配置元数据则不能在此时过滤**
-2. **要指定自动配置类的配置顺序必须用AutoConfigureOrder不能使用Ordered或者Order注解**
-3. OnClassCondition处理ConditionalOnClass注解
-4. OnWebApplicationCondition处理ConditionalOnWebApplication注解
-5. OnBeanCondition处理ConditionalOnBean和ConditionalOnSingleCandidate注解且只是简单判断bean的类型是否存在即class是否存在
+`OnMissingPrimaryDataSource` 在缺少 `spring.datasource.url` 时过滤 Boot 的三个数据源 / JPA 自动配置类。配置了 MCN 多数据源时，还需要对应模式的依赖与包结构；详见[多数据源配置](../function/autoconfig.md#多数据源配置)。
 
-元数据生成插件：
+### 两种元数据处理器
 
-1. spring-boot-autoconfigure-processor：处理自动配类的注解（8个）输出记录在META-INF下spring-autoconfigure-metadata.properties包括条件注解、配置顺序及前后依赖等注解方便后续那来即用不需要实时解析
-* org.springframework.boot.autoconfigure.condition.ConditionalOnClass
-* org.springframework.boot.autoconfigure.condition.ConditionalOnBean
-* org.springframework.boot.autoconfigure.condition.ConditionalOnSingleCandidate
-* org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication
-* org.springframework.boot.autoconfigure.AutoConfigureBefore
-* org.springframework.boot.autoconfigure.AutoConfigureAfter
-* org.springframework.boot.autoconfigure.AutoConfigureOrder
-* org.springframework.boot.autoconfigure.AutoConfiguration
+| 处理器 | 主要产物与用途 |
+| --- | --- |
+| `spring-boot-autoconfigure-processor` | `spring-autoconfigure-metadata.properties`，为自动配置的快速条件判断提供元数据 |
+| `spring-boot-configuration-processor` | `spring-configuration-metadata.json`，为 IDE 等工具提供属性名、类型、说明和默认值信息 |
 
-2. spring-boot-configuration-processor：处理自动配置类所依赖的配置属性并输出记录在META-INF下spring-configuration-metadata.json文件中，后续开发时在IDE中就可以提示配置项的类型和默认值（如果有）
+IDE 能补全某个属性，不代表对应自动配置已经启用。反过来，配置类字段的初始值也不总等于开关缺省时的行为，还要检查 `@ConditionalOnProperty(matchIfMissing=...)`。
 
-:::
+参考：[Spring Boot 自动配置说明](https://docs.spring.io/spring-boot/reference/using/auto-configuration.html)。

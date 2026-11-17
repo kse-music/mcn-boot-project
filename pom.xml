@@ -27,6 +27,15 @@
         <module>mcn-cloud-autoconfigure</module>
     </modules>
 
+    <profiles>
+        <profile>
+            <id>docs-check</id>
+            <modules>
+                <module>docs/examples</module>
+            </modules>
+        </profile>
+    </profiles>
+
     <build>
         <plugins>
             <plugin>

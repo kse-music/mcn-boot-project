@@ -1,21 +1,39 @@
+---
+description: 从一份 Maven 配置开始，构建并运行第一个 MCN Boot 应用。
+---
+
 # 快速开始
+
+从一份 Maven 配置开始，构建你的第一个 MCN Boot 应用。
+
+::: tip 开始之前
+准备 Java 17+ 和 Maven 3.6.3+。还没有准备好？先查看[环境准备](../intro/ready.md)。
+:::
 
 ## 新建Maven项目
 
-1. 引入父模块
+### 引入父模块
+
+在项目的 `pom.xml` 中继承 `mcn-boot-starter-parent`，复用统一的依赖与插件管理。
 
 ```xml
 <parent>
-    <artifactId>mcn-boot-starter-parent</artifactId>
     <groupId>cn.hiboot.mcn</groupId>
-    <version>${最新稳定版}</version>
+    <artifactId>mcn-boot-starter-parent</artifactId>
+    <version>4.1.0</version>
 </parent>
 ```
-2. 添加依赖
+
+::: tip 已有父 POM？
+如果项目需要保留现有父 POM，可以通过[导入 BOM](./dependency.md#导入-bom)管理依赖版本。
+:::
+
+### 添加应用依赖
+
+添加 MCN Boot starter，再选择应用所需的 Spring Boot starter。下面以 Servlet 应用为例。
 
 ```xml
 <dependencies>
-
     <dependency>
         <groupId>cn.hiboot.mcn</groupId>
         <artifactId>mcn-spring-boot-starter</artifactId>
@@ -23,140 +41,94 @@
 
     <dependency>
         <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-web</artifactId>
+        <artifactId>spring-boot-starter-webmvc</artifactId>
     </dependency>
-
-    <dependency>
-        <groupId>cn.hiboot.mcn</groupId>
-        <artifactId>mvc-swagger2</artifactId>
-    </dependency>
-
-    <dependency>
-        <groupId>org.projectlombok</groupId>
-        <artifactId>lombok</artifactId>
-        <scope>provided</scope>
-    </dependency>
-
 </dependencies>
 ```
 
-3. 添加maven插件
-
-```xml
-<build>
-    <finalName>${project.artifactId}</finalName>
-    <plugins>
-        <plugin>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-maven-plugin</artifactId>
-        </plugin>
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-surefire-plugin</artifactId>
-            <configuration>
-                <skipTests>true</skipTests>
-            </configuration>
-        </plugin>
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-jar-plugin</artifactId>
-            <configuration>
-                <archive>
-                    <manifestEntries>
-                        <!--suppress UnresolvedMavenProperty -->
-                        <Build-Timestamp>${timestamp}</Build-Timestamp>
-                        <Implementation-Version>${project.version}</Implementation-Version>
-                    </manifestEntries>
-                </archive>
-            </configuration>
-        </plugin>
-        <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>buildnumber-maven-plugin</artifactId>
-            <configuration>
-                <timestampFormat>yyyy-MM-dd HH:mm:ss</timestampFormat>
-            </configuration>
-            <executions>
-                <execution>
-                    <goals>
-                        <goal>create-timestamp</goal>
-                    </goals>
-                </execution>
-            </executions>
-        </plugin>
-    </plugins>
-</build>
-```
+可选能力在对应依赖存在时按条件启用，只引入应用实际需要的组件。
 
 ## 组织包结构
 
-1. 创建base package，如cn.hiboot.demo，并创建一个SpringBoot应用启动类，如：DemoApplication
+在 `src/main/java/com/example/demo/` 下创建应用入口。控制器放在同一包或其子包中，便于 Spring Boot 扫描。
+
+### 创建启动类
+
 ```java
-package cn.hiboot.demo;
+package com.example.demo;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-/**
- * 应用启动类
- *
- * @author DingHao
- * @since 2020/5/27 10:19
- */
 @SpringBootApplication
 public class DemoApplication {
+
     public static void main(String[] args) {
         SpringApplication.run(DemoApplication.class, args);
     }
 }
 ```
-2. 创建rest包，如cn.hiboot.demo.rest，并创建DemoRestApi,内容如下
+
+### 添加一个接口
+
 ```java
-package cn.hiboot.demo.rest;
+package com.example.demo;
 
-import cn.hiboot.demo.bean.DemoBean;
-import cn.hiboot.mcn.core.model.result.RestResp;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-/**
- * rest接口
- *
- * @author DingHao
- * @since 2020/5/27 10:20
- */
-@RequestMapping("demo")
 @RestController
-@Validated
-@Api(tags = "demo接口")
-public class DemoRestApi {
+public class HelloController {
 
-    @GetMapping("list")
-    @ApiOperation("列表")
-    public RestResp<String> list(String query) {
-        return new RestResp(query);
-    }
-
-    @PostMapping("json")
-    @ApiOperation("post json")
-    public RestResp<DemoBean> postJson(@Validated @RequestBody DemoBean userBean) {
-        return new RestResp(userBean);
+    @GetMapping("/hello")
+    public String hello() {
+        return "Hello, MCN Boot!";
     }
 }
 ```
 
-3. 在src/java/resources下新建config文件夹，再在里面新建一个application.properties并写入以下内容
+在 `src/main/resources/application.yml` 中设置应用名称：
 
-```properties
-#一般与项目模块对应
-spring.application.name=demo
-#开启swagger
-swagger.enabled=true
+```yaml
+spring:
+  application:
+    name: demo
 ```
 
 ## 运行&访问
 
-1. 运行DemoApplication
-2. 访问[SwaggerUI](http://127.0.0.1:8080/doc.html)
+在应用根目录运行：
+
+```sh
+mvn spring-boot:run
+```
+
+也可以在 IDE 中运行 `DemoApplication`。启动后访问 `http://localhost:8080/hello`，确认接口返回 `Hello, MCN Boot!`。
+
+::: tip 本地安装
+如果当前源码版本尚未发布到 Maven 仓库，先在 MCN Boot 项目根目录执行 `mvn install`，然后启动你的应用。
+:::
+
+## 添加 API 文档
+
+需要接口文档时，按需添加 `mcn-swagger3`：
+
+```xml
+<dependency>
+    <groupId>cn.hiboot.mcn</groupId>
+    <artifactId>mcn-swagger3</artifactId>
+</dependency>
+```
+
+在应用配置中开启 Swagger：
+
+```yaml
+swagger:
+  enabled: true
+  title: ${spring.application.name} API
+  version: 1.0.0
+```
+
+重新启动应用后，访问 `http://localhost:8080/doc.html`。
+
+接下来可以阅读[依赖管理](./dependency.md)和[自动配置](../function/autoconfig.md)，按业务需要继续组合组件。

@@ -235,6 +235,52 @@ mvn -DskipTests package
 * link:docs/function/autoconfig.md[Auto-configuration]
 * link:docs/changelog.md[Changelog]
 
+== Website Development
+
+The product home page and documentation use VitePress 1.6.4 with a shared custom theme.
+Install the website dependencies and start the local development server from the repository root:
+
+[source,shell]
+----
+npm install
+npm run docs:dev
+----
+
+The site retains its `/mcn/` base path. Follow the URL printed by the development server.
+Build and preview the production output with:
+
+[source,shell]
+----
+npm run docs:build
+npm run docs:preview
+----
+
+The build also runs `docs:check`, which checks the pre-rendered headings, internal links,
+section anchors, static resources and `/mcn/` deployment path. It does not check external sites.
+The deployable output is `docs/.vitepress/dist/`; serve its contents under `/mcn/`.
+
+`docs/.vitepress/theme/HomePage.vue` contains the product page,
+`Layout.vue` adds shared reading and navigation context, and `styles.css` defines the
+warm paper and terracotta appearance in light and dark modes. Documentation remains in
+`docs/` as Markdown. Search, code copying, mobile navigation and the page outline use
+VitePress's built-in features. The theme does not load external fonts or a search service.
+
+The advanced tutorials import their Java and properties examples directly from `docs/examples/`.
+Compile the examples and run their contract tests against the current reactor modules with:
+
+[source,shell]
+----
+mvn -Pdocs-check test
+----
+
+The `docs-check` profile adds the example module only when explicitly selected; the normal
+reactor excludes it. Use the `test` goal above for verification. Tests cover response
+serialization, documented property binding and activation defaults, Jackson string processing,
+parameter rejection rules, datasource scope cleanup, lock cleanup,
+SM2 round trips and request digest construction. They do not connect to a real database,
+Redis, configuration center or external servlet container. Validate those integrations in
+the application's own environment before relying on their behavior.
+
 == Contributing
 
 Run `mvn clean package` before submitting a change. Report bugs and request features through

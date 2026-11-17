@@ -1,14 +1,35 @@
 import { defineConfig } from 'vitepress'
 
+const base = '/mcn/'
+
 export default defineConfig({
-  base: '/mcn/',
+  base,
   lang: 'zh-CN',
-  title: 'Mcn文档',
-  description: '一个基于SpringBoot&Cloud的快速开发工具包',
-  head: [['link', { rel: 'icon', href: '/favicon.ico' }]],
+  title: 'MCN Boot',
+  description: '基于 Spring Boot 与 Spring Cloud 的 Java 开发工具包。把通用配置留给工具，把创造留给开发者。',
+  head: [
+    ['link', { rel: 'icon', type: 'image/svg+xml', href: `${base}images/mcn-mark.svg` }],
+    ['meta', { name: 'theme-color', content: '#f7f5ef' }],
+  ],
+  appearance: true,
   lastUpdated: true,
+  markdown: { codeCopyButtonTitle: '复制代码' },
   themeConfig: {
-    logo: '/images/logo.png',
+    logo: { src: '/images/mcn-mark.svg', alt: '' },
+    siteTitle: 'MCN <span class="mcn-brand-weight">Boot</span>',
+    outline: { level: [2, 3], label: '本页内容' },
+    docFooter: { prev: '上一篇', next: '下一篇' },
+    sidebarMenuLabel: '文档导航',
+    returnToTopLabel: '回到顶部',
+    darkModeSwitchLabel: '阅读外观',
+    lightModeSwitchTitle: '切换到浅色模式',
+    darkModeSwitchTitle: '切换到深色模式',
+    notFound: {
+      title: '这一页，还没有找到。',
+      quote: '回到清晰的起点，继续构建你的下一个好想法。',
+      linkLabel: '返回 MCN Boot 首页',
+      linkText: '回到产品首页',
+    },
     editLink: {
       pattern: 'https://github.com/kse-music/mcn-boot-project/edit/master/docs/:path',
       text: '在 GitHub 上编辑此页',
@@ -17,20 +38,22 @@ export default defineConfig({
       text: '上次更新',
     },
     nav: [
-      { text: '源码', link: 'https://github.com/kse-music/mcn-boot-project' },
-      { text: '更新日志', link: '/changelog' },
+      { text: '概览', link: '/' },
+      { text: '开发文档', link: '/intro/preface', activeMatch: '/(intro|guide|function|spring)/|/refer' },
+      { text: '组件生态', link: '/#ecosystem' },
       {
-        text: '模板',
+        text: '更多',
         items: [
+          { text: '更新日志', link: '/changelog' },
           { text: 'Meta-Boot', link: 'https://github.com/kse-music/meta-boot' },
           { text: 'Meta-Script', link: 'https://github.com/kse-music/meta-script' },
+          { text: 'HiBoot 社区', link: 'http://www.hiboot.cn' },
         ],
       },
-      { text: '社区', link: 'http://www.hiboot.cn' },
     ],
     sidebar: [
       {
-        text: '前言',
+        text: '认识 MCN Boot',
         collapsed: false,
         items: [
           { text: '简介', link: '/intro/preface' },
@@ -38,7 +61,7 @@ export default defineConfig({
         ],
       },
       {
-        text: '使用教程',
+        text: '开始构建',
         collapsed: false,
         items: [
           { text: '快速开始', link: '/guide/quick-start' },
@@ -46,7 +69,7 @@ export default defineConfig({
         ],
       },
       {
-        text: '功能说明',
+        text: '核心能力',
         collapsed: false,
         items: [
           { text: '通用功能', link: '/function/common' },
@@ -55,7 +78,7 @@ export default defineConfig({
         ],
       },
       {
-        text: 'SpringBoot',
+        text: '理解 Spring Boot',
         collapsed: false,
         items: [
           { text: '核心组件', link: '/spring/core' },
@@ -72,10 +95,26 @@ export default defineConfig({
     socialLinks: [{ icon: 'github', link: 'https://github.com/kse-music/mcn-boot-project' }],
     search: {
       provider: 'local',
-    },
-    footer: {
-      message: 'MIT Licensed',
-      copyright: 'Copyright © 2023 HiBoot',
+      options: {
+        translations: {
+          button: { buttonText: '搜索文档', buttonAriaLabel: '搜索文档' },
+          modal: {
+            displayDetails: '显示详细内容',
+            resetButtonTitle: '清空搜索',
+            backButtonTitle: '返回',
+            noResultsText: '没有找到相关内容',
+            footer: {
+              selectText: '选择',
+              selectKeyAriaLabel: '回车选择',
+              navigateText: '切换',
+              navigateUpKeyAriaLabel: '上一项',
+              navigateDownKeyAriaLabel: '下一项',
+              closeText: '关闭',
+              closeKeyAriaLabel: '按 Esc 关闭',
+            },
+          },
+        },
+      },
     },
   },
 })

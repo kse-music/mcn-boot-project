@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="MCN Boot 官网与文档的三套独立设计提案。" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>MCN Boot · 官网与文档设计提案</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%2312241e'/%3E%3Ctext x='20' y='29' text-anchor='middle' fill='%2397e4b9' font-size='28' font-family='Arial'%3Em%3C/text%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="./app.js?v=3" defer></script>
+  </head>
+  <body>
+    <div class="labbar">
+      <a class="lab-brand" href="?concept=forest&view=home"><span class="lab-mark">m.</span><span>MCN Boot <small>设计提案</small></span></a>
+      <div class="concept-tabs" role="group" aria-label="选择设计方案">
+        <button type="button" data-concept="forest"><span class="swatch forest-swatch"></span><span>A <span class="concept-name">深林工作台</span></span></button>
+        <button type="button" data-concept="paper"><span class="swatch paper-swatch"></span><span>B <span class="concept-name">暖白技术刊物</span></span></button>
+        <button type="button" data-concept="orbit"><span class="swatch orbit-swatch"></span><span>C <span class="concept-name">午夜架构图谱</span></span></button>
+      </div>
+      <div class="view-tabs" role="group" aria-label="选择预览页面">
+        <button type="button" data-view="home">官网首页</button>
+        <button type="button" data-view="docs">文档内页</button>
+      </div>
+    </div>
+    <div class="design-note"><span id="concept-description" aria-live="polite"></span><span>独立效果稿 <span aria-hidden="true">·</span> 可点击体验</span></div>
+    <div id="site"></div>
+    <dialog id="search-dialog" aria-labelledby="search-title">
+      <div class="search-heading"><h2 id="search-title">搜索预览文档</h2><button type="button" data-close-search aria-label="关闭搜索">✕</button></div>
+      <label class="search-field"><span aria-hidden="true">⌕</span><input id="search-input" type="search" placeholder="搜索快速开始、依赖、自动配置…" autocomplete="off" /></label>
+      <div id="search-results" aria-live="polite"></div>
+      <p class="search-help">仅检索本效果稿的三篇示例文档 <kbd>Esc</kbd> 关闭</p>
+    </dialog>
+    <div id="announcement" class="sr-only" role="status"></div>
+    <noscript>请启用 JavaScript 查看可切换的设计提案。</noscript>
+  </body>
+</html>

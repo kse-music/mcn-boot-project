@@ -1,19 +1,7 @@
 ---
 layout: home
-hero:
-  name: Mcn文档
-  image:
-    src: /images/logo.png
-    alt: MCN Boot
-  actions:
-    - theme: brand
-      text: 快速上手 →
-      link: /intro/preface
-features:
-  - title: 配置
-    details: 丰富的自动配置
-  - title: 扩展
-    details: 更多的扩展功能
-  - title: 兼容
-    details: 更好的兼容性
+title: MCN Boot — 好工程，从少一点重复开始
+titleTemplate: false
+description: 基于 Spring Boot 与 Spring Cloud 的 Java 开发工具包，以统一约定、条件装配与组件扩展，构建更从容的开发体验。
+markdownStyles: false
 ---

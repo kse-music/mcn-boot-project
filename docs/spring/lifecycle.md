@@ -1,116 +1,62 @@
+---
+description: 当前 Spring Boot 启动事件的时机、监听方式与 MCN 扩展的参与阶段。
+---
+
 # 生命周期
 
-Springboot应用在正常启动过程会触发六个事件，失败则会触发ApplicationFailedEvent事件，可以通过实现监听器来处理感兴趣的事件。
-
+本页依据当前依赖的 Spring Boot 4.1.0 `SpringApplication` 与 `EventPublishingRunListener`。六个主要成功启动事件并不等于 Spring 应用只会发布六个事件；上下文、Web 服务器和应用可用性还有各自的事件。
 
 ## ApplicationStartingEvent
 
-标识SpringApplication正在启动，此时已实例化出一个DefaultBootstrapContext以及早期的事件发布器EventPublishingRunListener，随后发布ApplicationStartingEvent，并携带前面的bootstrapContext实例和正在启动的SpringApplication实例。
+`run` 开始时发布。Boot 的早期引导上下文已经创建，环境和应用上下文尚未完成准备。
 
-::: tip 提示
-
-实现接口BootstrapRegistryInitializer的配置和EventPublishingRunListener都是从spring.factories中获取
-
-:::
+MCN 此时注册日志文件检查器，并在特定依赖存在且没有显式设置时，配置 Spring Security 的上下文持有策略。
 
 ## ApplicationEnvironmentPreparedEvent
 
-Environment实例化过程：
+环境已经创建，并加入命令行等属性源。事件监听器调用环境后处理器，标准配置文件解析以及 MCN 补充属性源加载发生在这一阶段。
 
-1. 通过不同的webApplicationType去实例化对应的Environment
-2. 给Environment添加转换服务
-3. 解析命令行参数并添加到Environment中
-
-随后发布ApplicationEnvironmentPreparedEvent事件同时携带bootstrapContext实例和SpringApplication实例以及刚实例化的Environment。
-
-::: tip 提示
-
-其中核心配置文件application.properties的解析就是在EnvironmentPostProcessorApplicationListener监听器中通过执行EnvironmentPostProcessor即 **ConfigDataEnvironmentPostProcessor** 实现的
-
-:::
+同一个事件中的监听器有执行顺序：不能认为排在配置解析之前的监听器已经能读到所有 `application.yml` 属性。
 
 ## ApplicationContextInitializedEvent
 
-ApplicationContext实例化过程：
+已创建 `ApplicationContext`，设置环境，并调用初始化器；普通应用配置源尚未加载。事件随后，Boot 关闭早期引导上下文。
 
-1. 首选通过ApplicationContextFactory创建出对应的ApplicationContext
-2. 把Environment设置到上下文中
-3. 执行ApplicationContextInitializer
-
-随后发布ApplicationContextInitializedEvent事件同时携带前面的ApplicationContext实例和SpringApplication实例。
-
-::: tip 提示
-
-实现接口ApplicationContextInitializer和ApplicationListener的配置都是从spring.factories中获取，另外由于此时已经有了ApplicationContext了，所以随后就立即关闭了bootstrapContext并发送BootstrapContextClosedEvent事件
-
-:::
+MCN 在这里按开关打印属性源，并可处理额外 classpath 配置。属性源打印没有脱敏，默认应保持关闭。
 
 ## ApplicationPreparedEvent
 
-上下文配置以及主配置加载过程：
+应用的主要配置源已加载成 Bean 定义，上下文还没有刷新。当前版本在刷新之前设置循环引用和 Bean 定义覆盖等选项。
 
-1. **从2.6.0开始默认关闭bean循环引用的支持**
-2. 注册主配置（即示例中的DemoApplication）到IOC容器中中
+MCN 在此将上下文交给 `SpringBeanUtils`。这不代表所有业务 Bean 已实例化，不应在早期监听器中随意触发业务 Bean 的创建。
 
-随后发布ApplicationPreparedEvent事件并将SpringApplication的监听器全部加入ApplicationContext中，并携带ApplicationContext实例和SpringApplication实例。
+下面的源码参与文档示例编译，演示提前注册监听器：
 
-::: tip 提示
-
-主配置有四种形式：
-
-1. Class
-2. Resource：可以是groovy或者xml
-3. Package：包对象
-4. CharSequence：可以是变量（如${...}）
-* 当作Class
-* 当作Resource
-* 当作包路径
-
-:::
+<<< @/examples/src/main/java/cn/hiboot/mcn/docs/LifecycleExample.java
 
 ## ApplicationStartedEvent
 
-1. 注册关闭钩子用于在JVM关闭时优雅的关闭SpringApplication（清理资源、销毁对象等）
-2. **ApplicationContext刷新**（解析BeanDefinition并实例化单例对象）
-3. 打印应用启动时间
+`ApplicationContext.refresh()` 已完成，`afterRefresh` 已执行，runner 尚未执行。默认情况下，非懒加载单例已完成初始化；懒加载 Bean 不在这一保证之内。
 
-随后发布ApplicationStartedEvent事件同时携带ApplicationContext实例和SpringApplication实例以及启动耗时时间。
-
-::: tip 提示
-
-ApplicationContext上下文的刷新意味着所有的单例bean已实例化并存储到IOC容器，注意此时的上下文已经准备完毕，所以ApplicationStartedEvent事件是由ApplicationContext中的事件发布器发布的
-
-:::
+`ContextRefreshedEvent`、Servlet / Reactive 的 Web 服务器初始化事件可能在此前的刷新过程中出现。它们不应被混同为 `ApplicationStartedEvent`。
 
 ## ApplicationReadyEvent
 
-执行实现Runner接口的bean，有两种接口：
+Boot 调用排序后的 `ApplicationRunner` 与 `CommandLineRunner`，全部正常返回后发布 `ApplicationReadyEvent`。`ApplicationRunner` 接收解析后的 `ApplicationArguments`，`CommandLineRunner` 接收原始字符串参数。
 
-1. ApplicationRunner
-2. CommandLineRunner
-
-随后发布ApplicationReadyEvent事件同时携带ApplicationContext实例和SpringApplication实例以及从启动到执行Runner耗时时间。
-
-::: tip 提示
-
-两种接口的区别：
-
-CommandLineRunner使用的原始参数即args，而ApplicationRunner是将args转成内部标准的参数结构即ApplicationArguments
-
-:::
+Boot 还会发布可用性变化事件，如 `LivenessState.CORRECT` 和 `ReadinessState.ACCEPTING_TRAFFIC`。`ApplicationReadyEvent` 表示 Boot 启动流程已就绪，不能代替业务应用自行定义的远程依赖或数据就绪检查。
 
 ## ApplicationFailedEvent
 
-两种情况：
+启动过程或 runner 抛出异常时，Boot 尝试报告失败并关闭上下文。此时上下文可能尚未创建、尚未刷新，也可能已经处于活动状态，监听器应兼容这些阶段。
 
-1. 应用启动过程中失败
-2. 执行发布ApplicationFailedEvent事件异常
+失败事件并不是“成功启动后的固定第七步”。失败监听器本身再次抛出异常，也不会按相同方式递归发布新的失败事件。
 
+## 使用边界
 
-::: tip 提示
+- 早期事件通过 `SpringApplication.addListeners`、构建器或 `spring.factories` 注册监听器。
+- 默认事件发布是同步的，监听器中的耗时操作会拖慢对应启动阶段。
+- 父子应用上下文可能使同一监听器看到多个同类事件，应按事件所属上下文区分。
+- 事件顺序只描述这一启动流程，不保证所有第三方库都在相同阶段完成初始化。
 
-第一种情况会在异常后发布ApplicationFailedEvent事件同时携带ApplicationContext实例和exception对象
-
-第二种情况会则不会发送ApplicationFailedEvent事件
-
-:::
+参考：[Spring Boot 官方事件与监听器说明](https://docs.spring.io/spring-boot/reference/features/spring-application.html#features.spring-application.application-events-and-listeners)。
